@@ -1,0 +1,7 @@
+{
+  "methods": {
+    "accessibility.voiceGuidance": {
+      "result": { "enabled":true, "speed":5 }
+    }
+  }
+}

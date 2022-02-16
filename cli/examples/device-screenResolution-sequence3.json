@@ -1,0 +1,18 @@
+{
+  "methods": {
+    "device.screenResolution": {
+      "policy": "REPEAT-LAST-RESPONSE",
+      "responses": [
+        {
+          "error": {
+            "code": -32888,
+            "message": "One time failure"
+          }
+        },
+        {
+          "result": [ 100, 100 ]
+        }
+      ]
+    }
+  }
+}

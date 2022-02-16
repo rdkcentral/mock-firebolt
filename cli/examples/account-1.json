@@ -1,0 +1,10 @@
+{
+  "methods": {
+    "account.id": {
+      "result": "A-ID-001"
+    },
+    "account.uid": {
+      "result": "A-UID-001"
+    }
+  }
+}

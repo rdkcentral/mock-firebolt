@@ -1,0 +1,135 @@
+/*
+* Copyright 2021 Comcast Cable Communications Management, LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+* SPDX-License-Identifier: Apache-2.0
+*/
+
+body {
+  background-color: #8e8d8a;
+}
+h1 {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+/* --- */
+
+#app {
+  min-height: 20rem;
+  background-color: white;
+  padding: 0;
+}
+
+#header {
+  height: 6rem;
+  background-color: #8e8d8a;
+  color: black;
+  font-weight: bold;
+  border-bottom: 2px solid black;
+  margin-bottom: 0.5rem;
+  padding: 1rem;
+}
+
+  #nav-bar {
+    overflow: hidden;
+  }
+
+    #nav-bar a {
+      float: left;
+      text-align: center;
+      text-decoration: none;
+      background-color: #e98074;
+      color: white;
+      border: 1px solid white;
+      padding: 0.5rem 1.7rem;
+    }
+
+    #nav-bar a:hover {
+      background-color: #e85a4f;
+      color: black;
+    }
+
+#content {
+  min-height: 30rem;
+  padding: 1rem;
+}
+
+#footer {
+  height: 3rem;
+  background-color: #8e8d8a;
+  color: black;
+  border-top: 1px solid black;
+  padding: 1rem;
+}
+
+  #footer p {
+    vertical-align: middle;
+  }
+
+/* --- */
+
+.dyna-form label {
+  font-weight: bold;
+}
+
+.dyna-form fieldset > div {
+  margin-bottom: 1.5rem;
+}
+
+/* --- */
+
+    .label {
+      text-align: right;
+    }
+    .value {
+      text-align: left;
+    }
+
+    #methods {}
+
+      #search {
+        margin-bottom: 1rem;
+      }
+
+        #btnFilter {
+          background-color: #e97084;
+          border-radius: 3px;
+        }
+
+      .method {
+        border: 1px solid gainsboro;
+        width: 99%;
+        margin-bottom: 1.2rem;
+      }
+
+        .method-name {
+          font-weight: bold;
+        }
+
+    #events {}
+
+    #global {}
+
+    #scratch {}
+
+/* --- */
+
+.font-weight-bold {
+  font-weight: bold;
+}
+
+.is-invalid {
+  color: red;
+}

@@ -1,0 +1,10 @@
+{
+  "methods": {
+    "account.id": {
+      "result": "{{+1h|x}}"
+    },
+    "account.uid": {
+      "result": "UID-{{20:00|YYYY-MM-DD HH:mm:ssZ}}"
+    }
+  }
+}

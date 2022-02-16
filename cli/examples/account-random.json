@@ -1,0 +1,10 @@
+{
+  "methods": {
+    "account.id": {
+      "result": "function f(ctx, params) { const min = 1000; const max = 1999; const id = Math.floor(Math.random() * (max - min + 1) + min); ctx.set('id', id); return `A-ID-${id}`}"
+    },
+    "account.uid": {
+      "result": "function f(ctx, params) { const id = ctx.get('id'); return `A-UID-${id}`}"
+    }
+  }
+}

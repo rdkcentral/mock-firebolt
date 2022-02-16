@@ -1,0 +1,9 @@
+{{#if userId }}
+  {{#if isKnownUser }}
+    <p>User <strong>{{ userId }}</strong> removed.</p>
+  {{else}}
+    <p>User <strong>{{ userId }}</strong> was not found.</p>
+  {{/if}}
+{{else}}
+  <p>You must specify a userId query parameter.</p>
+{{/if}}

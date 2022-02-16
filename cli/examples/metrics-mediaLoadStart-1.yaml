@@ -1,0 +1,12 @@
+---
+methods:
+  metrics.mediaLoadStart:
+    response: |
+      function f(ctx, params) {
+        if ( params.entityId === 'partner.com/entity/123' ) {
+          return true;
+        } else if ( params.entityId === 'partner.com/entity/456' ) {
+          return false;
+        }
+        throw new ctx.FireboltError(-32888, "metrics.mediaLoadStart no workie");
+      }

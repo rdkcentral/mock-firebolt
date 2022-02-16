@@ -1,0 +1,13 @@
+{{#if users}}
+  <h1>Users</h1>
+  <ul>
+  {{#each users}}
+    <li>{{this}}</li>
+    {{! Could show time remaining / idle since information if/when track this info }}
+    {{! Could show delete link /user/delete?userId=\{\{this\}\} }}
+    {{! Could show a delete/clear all link }}
+  {{/each}}
+  </ul>
+{{else}}
+  <p>No users</p>
+{{/if}}

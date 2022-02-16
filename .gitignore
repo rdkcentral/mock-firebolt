@@ -1,0 +1,15 @@
+.DS_Store
+
+build/*
+server/build/*
+cli/build/*
+
+dist/*
+server/dist/*
+cli/dist/*
+
+node_modules/*
+server/node_modules/*
+cli/node_modules/*
+
+.mf.config.json

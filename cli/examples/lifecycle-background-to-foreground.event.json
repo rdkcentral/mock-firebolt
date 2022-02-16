@@ -1,0 +1,7 @@
+{
+  "method": "lifecycle.onForeground",
+  "result": {
+    "state": "foreground",
+    "previous": "background"
+  }
+}

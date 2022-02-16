@@ -1,0 +1,68 @@
+{
+  "name": "@firebolt-js/mock-firebolt",
+  "version": "2.0.1",
+  "description": "Controllable mock Firebolt server",
+  "main": "./dist/index.mjs",
+  "scripts": {
+    "clean": "rm -rf build && mkdir -p build",
+    "prepare:setup": "npm run clean",
+
+    "build:core": "cp ./node_modules/@firebolt-js/sdk/dist/firebolt-open-rpc.json ./build/firebolt-core-sdk.json",
+    "build:manage": "cp ./node_modules/@firebolt-js/manage-sdk/dist/firebolt-open-rpc.json ./build/firebolt-manage-sdk.json",
+    "build:discovery": "cp ./node_modules/@firebolt-js/discovery-sdk/dist/firebolt-open-rpc.json ./build/firebolt-discovery-sdk.json",
+
+    "build:openrpc:NOTES": "Only use if you are using all three Firebolt SDKs",
+    "build:openrpc": "npm run build:core && npm run build:manage && npm run build:discovery",
+
+    "build:mf": "cp -r ./src/* ./build && cp ./package.json ./build",
+
+    "build:NOTES": "Only use if you are using all three Firebolt SDKs",
+    "build": "npm run build:openrpc && npm run build:mf",
+
+    "test:@TODO": "jest --config=jest.config.js --detectOpenHandles",
+    "test": "echo TEST",
+
+    "start:NOTES1": "Can do 'npm run start' (core SDK only) or 'npm run start --manage --discovery' (all three SDKs)",
+    "start": "node build/index.mjs",
+    "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
+    "dev:NOTES2": "Can do 'npm run dev' (core SDK only) or 'npm run dev --manage --discovery' (all three SDKs)",
+    "dev": "npm run build:mf && npm run start -- $npm_config_manage $npm_config_discovery"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rdkcentral/mock-firebolt.git"
+  },
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/rdkcentral/mock-firebolt/issues"
+  },
+  "homepage": "https://github.com/rdkcentral/mock-firebolt#readme",
+  "devDependencies": {
+    "@babel/core": "^7.14.6",
+    "@babel/node": "^7.14.5",
+    "@babel/preset-env": "^7.14.5",
+    "jest": "^27.0.4"
+  },
+  "dependencies": {
+    "@firebolt-js/sdk": "^0.6.0-alpha.2",
+    "@formschema/native": "^2.0.0-beta.6",
+    "ajv": "^6.12.6",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-handlebars": "^6.0.2",
+    "lodash-es": "^4.17.21",
+    "moment": "^2.29.1",
+    "nopt": "^5.0.0",
+    "uuid": "^8.3.2",
+    "ws": "^8.2.3"
+  },
+  "optionalDependencies": {
+    "@firebolt-js/manage-sdk": "~0.1.0-alpha.2",
+    "@firebolt-js/discovery-sdk": "0.1.0-alpha.1"
+  },
+  "keywords": [
+    "firebolt",
+    "mock"
+  ],
+  "license": "Apache-2.0"
+}

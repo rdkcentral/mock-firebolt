@@ -1,0 +1,23 @@
+[
+  {
+    "at": 5000,
+    "event": {
+      "method": "device.onDeviceNameChanged",
+      "result": "NEW-DEVICE-NAME-1"
+    }
+  },
+  {
+    "delay": 100,
+    "event": {
+      "method": "device.onDeviceNameChanged",
+      "result": "NEW-DEVICE-NAME-2"
+    }
+  },
+  {
+    "at": 7000,
+    "event": {
+      "method": "device.onDeviceNameChanged",
+      "result": "NEW-DEVICE-NAME-2"
+    }
+  }
+]
