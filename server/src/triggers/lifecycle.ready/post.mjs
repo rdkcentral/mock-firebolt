@@ -18,13 +18,13 @@
 
 function post(ctx, params) {
   ctx.setTimeout(function() {
-    const result = { state: 'inactive', previous: 'initializing' };
+    const result = { state: 'inactive' };
     const msg = 'Post trigger for lifecycle.ready sent inactive lifecycle event';
     ctx.sendEvent('lifecycle.onInactive', result, msg);
   }, 500);
 
   ctx.setTimeout(function() {
-    const result = { state: 'foreground', previous: 'inactive' };
+    const result = { state: 'foreground' };
     const msg = 'Post trigger for lifecycle.ready sent foreground lifecycle event';
     ctx.sendEvent('lifecycle.onForeground', result, msg);
   }, 1000);
