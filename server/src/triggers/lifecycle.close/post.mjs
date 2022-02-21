@@ -16,21 +16,10 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-// SDK management
-
-'use strict';
-
-import * as commandLine from './commandLine.mjs';
-
-function isSdkEnabled(sdkName) {
-  if ( commandLine.enabledSdkNames.includes(sdkName) ) {
-    return true;
-  }
-  return false;
+function post(ctx, params) {
+  ctx.setTimeout(function() {
+    const result = { state: 'inactive', previous: ctx.fireboltCoreSdk.Lifecycle.state() };
+    const msg = 'Post trigger for lifecycle.close sent inactive lifecycle event';
+    ct.sendEvent('lifecycle.onInactive', result, msg);
+  }, 500);
 }
-
-// --- Exports ---
-
-export {
-  isSdkEnabled
-};

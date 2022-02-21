@@ -16,21 +16,16 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-// SDK management
+function post(ctx, params) {
+  ctx.setTimeout(function() {
+    const result = { state: 'inactive', previous: 'initializing' };
+    const msg = 'Post trigger for lifecycle.ready sent inactive lifecycle event';
+    ctx.sendEvent('lifecycle.onInactive', result, msg);
+  }, 500);
 
-'use strict';
-
-import * as commandLine from './commandLine.mjs';
-
-function isSdkEnabled(sdkName) {
-  if ( commandLine.enabledSdkNames.includes(sdkName) ) {
-    return true;
-  }
-  return false;
+  ctx.setTimeout(function() {
+    const result = { state: 'foreground', previous: 'inactive' };
+    const msg = 'Post trigger for lifecycle.ready sent foreground lifecycle event';
+    ctx.sendEvent('lifecycle.onForeground', result, msg);
+  }, 1000);
 }
-
-// --- Exports ---
-
-export {
-  isSdkEnabled
-};

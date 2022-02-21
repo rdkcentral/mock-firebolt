@@ -24,6 +24,20 @@ import * as util from './util.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
+import { triggers } from './messageHandlerTriggers.mjs';
+
+function emit(id, result, msg, ws) {
+  if ( id ) {
+    const oEventMessage = {
+      jsonrpc: '2.0',
+      id: id,
+      result: result
+    };
+    const eventMessage = JSON.stringify(oEventMessage);
+    ws.send(eventMessage);
+    console.log(`${msg}: ${eventMessage}`);
+  }
+}
 
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
@@ -94,7 +108,32 @@ async function handleMessage(message, userId, ws) {
     ws.send(responseMessage);
     console.log(`Sent "invalid params" message: ${responseMessage}`);
   }
-  
+
+  // Fire pre trigger if there is one for this method
+  let shouldContinue;
+  if ( oMsg.method in triggers ) {
+    if ( 'pre' in triggers[oMsg.method] ) {
+      try {
+        const ctx = {
+          setTimeout: setTimeout,
+          setInterval: setInterval,
+          sendEvent: function(onMethod, result, msg) {
+            const id = events.getRegisteredEventListener(onMethod);
+            if ( ! id ) { return; }
+            emit(id, result, msg, ws);
+          }
+        };
+        shouldContinue = triggers[oMsg.method].pre.call(null, ctx, oMsg.params);
+      } catch ( ex ) {
+        console.log(`ERROR: Exception occurred while executing pre-trigger for ${oMsg.method}; not continuing`);
+        shouldContinue = false;
+      }
+      if ( ! shouldContinue ) {
+        return;
+      }
+    }
+  }
+
   // Handle Firebolt Method call using our in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
   const response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params);
   const oResponseMessage = {
@@ -107,6 +146,27 @@ async function handleMessage(message, userId, ws) {
   await util.delay(dly);
   ws.send(responseMessage);
   console.log(`Sent message: ${responseMessage}`);
+
+  // Fire post trigger if there is one for this method
+  if ( oMsg.method in triggers ) {
+    if ( 'post' in triggers[oMsg.method] ) {
+      try {
+        const ctx = {
+          setTimeout: setTimeout,
+          setInterval: setInterval,
+          sendEvent: function(onMethod, result, msg) {
+            const id = events.getRegisteredEventListener(onMethod);
+            if ( ! id ) { return; }
+            emit(id, result, msg, ws);
+          }
+        };
+        triggers[oMsg.method].post.call(null, ctx, oMsg.params);
+      } catch ( ex ) {
+        console.log(`ERROR: Exception occurred while executing post-trigger for ${oMsg.method}`);
+        console.log(ex);
+      }
+    }
+  }
 }
 
 // --- Exports ---
