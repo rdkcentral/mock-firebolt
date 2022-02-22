@@ -23,7 +23,7 @@ Note, too, that since the SDK does not validate parameters on method calls, app 
 
 # Features
 - Controllable Mock Firebolt server (NodeJS websocket + HTTP server)
-- Control mock method responses via control plane RESTful API, CLI, web admin UI (soon), browser extension (some day)
+- Control mock method responses via control plane RESTful API, CLI, web admin UI (soon), browser extension (soon)
 - 100% OpenRPC-driven; no SDK-specific details within the implementation
 - Supports Firebolt SDKs: **core** (always), **manage** (optional), **discovery** (optional)
 - Complete documentation
@@ -44,6 +44,7 @@ Note, too, that since the SDK does not validate parameters on method calls, app 
 - Set response latency per-method or globally
 - Multi-user support (using paths on websocket URLs)
 - Web admin UI to set mock responses (soon)
+- Browser extension to send Firebolt lifecycle events
 - Browser extension to set mock responses (some day)
 
 # Architecture:
@@ -67,7 +68,6 @@ This repo contains these elements:
   - A command-line interface which can be used to affect the behavior of the mock Firebolt server
 - **browser-extensions/**
   - Browser extensions which can be used to affect the behavior of the mock Firebolt server
-    - NOTE: **NO EXTENSIONS HAVE BEEN IMPLEMENTED YET**.
 
 
 # Documentation
@@ -144,10 +144,10 @@ cd src
 node cli.mjs --help
 
 # FUTURE: To use the Chrome browser plugin
-Visit chrome://extensions/ in Chrome
+Visit chrome://extensions in Chrome
 Ensure "Developer mode" is turned on (slider to the right in the top right corner of your browser window)
 Click the "Load Unpacked" button (top left corner of browser window)
-Navigate to the browser-extensions/chrome/ directory and click "Select"
+Navigate to the directory under browser-extensions which contains a manifest.json file and click "Select"
 ```
 
 Now you can add `@firebolt-js/sdk` in your app's `package.json` file, import `@firebolt-js/sdk` in your code, and make calls using the Firebolt core SDK (or use the manage and/or discovery SDKs too). If you pass the appropriate query string parameter(s) (see [docs/UsageWithinApps.md](./docs/UsageWithinApps.md)), these SDK calls will get sent to the Mock Firebolt server and it will reply as you configure it to do so.
