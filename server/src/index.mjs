@@ -20,6 +20,7 @@
 
 'use strict';
 
+import './commandLine.mjs';
 import { config } from './config.mjs';
 import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
