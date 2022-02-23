@@ -1,0 +1,28 @@
+{
+  "name": "Governor",
+  "version": "1.0",
+  "description": "Send Firebolt lifecycle events to a local Firebolt app under development",
+
+  "manifest_version": 2,
+
+  "permissions": [
+    "activeTab",
+    "http://localhost:*/"
+  ],
+
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+
+  "browser_action": {
+    "default_title": "Governor",
+    "default_icon": {
+      "19": "icons/19x19.png",
+      "38": "icons/38x38.png"
+    },
+    "default_popup": "popup.html"
+  },
+  
+  "content_security_policy": "script-src 'self' https://ajax.googleapis.com http://localhost:*; object-src 'self'"
+}
