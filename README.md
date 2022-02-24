@@ -137,6 +137,9 @@ npm run dev
 # Note the extra double dash!
 npm run dev -- --manage --discovery
 
+# If you need to use non-standard ports for any reason:
+npm run dev -- --httpPort 3456 --socketPort 9876
+
 # To use the control CLI (assuming you're in the top-level directory for this repo)
 cd cli
 npm install
