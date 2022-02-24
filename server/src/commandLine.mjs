@@ -21,16 +21,21 @@
 'use strict';
 
 import nopt from 'nopt';
+import { config } from './config.mjs';
 
 // Usage:
 //   node index.mjs                                          (core SDK only, default)
+//   node index.mjs --httpPort 3334 ...                      (Use custom port for RESTful control API (default: 3333))
+//   node index.mjs --socketPort 9876 ...                    (Use custom socket port for Firebolt OpenRPC msgs (default: 9998))
 //   node index.mjs --manage ...                             (core + manage SDKs)
 //   node index.mjs --manage --discovery ...                 (core + manage + discovery SDKs)
 //   node index.mjs --triggers <path1> --triggers <path2>    (Load triggers from files in these paths)
 const knownOpts = {
-  'manage'   : Boolean,
-  'discovery': Boolean,
-  'triggers' : [String, Array]
+  'httpPort'   : Number,
+  'socketPort' : Number,
+  'manage'     : Boolean,
+  'discovery'  : Boolean,
+  'triggers'   : [String, Array]
 };
 
 const shortHands = {
@@ -40,6 +45,11 @@ const shortHands = {
 };
 
 const parsed = nopt(knownOpts, shortHands, process.argv, 2);
+
+// --- Ports
+
+const httpPort = parsed.httpPort || config.app.httpPort;
+const socketPort = parsed.socketPort || config.app.socketPort;
 
 // --- Enabled SDKs specified via --manage/-m, --discovery/-d, and implied core SDK
 
@@ -69,5 +79,5 @@ if ( enabledTriggerPaths.length > 0 ) {
 // --- Exports ---
 
 export {
-  enabledSdkNames, enabledTriggerPaths
+  httpPort, socketPort, enabledSdkNames, enabledTriggerPaths
 };

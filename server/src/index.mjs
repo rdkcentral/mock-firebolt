@@ -20,7 +20,7 @@
 
 'use strict';
 
-import './commandLine.mjs';
+import * as commandLine from './commandLine.mjs';
 import { config } from './config.mjs';
 import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
@@ -62,8 +62,8 @@ console.log('Adding user 123...'); stateManagement.addUser('123'); userManagemen
 console.log('Adding user 456...'); stateManagement.addUser('456'); userManagement.addUser('456');
 console.log('Adding user 789...'); stateManagement.addUser('789'); userManagement.addUser('789');
 
-server.listen(config.app.socketPort);
-console.log(`Listening on socket port ${config.app.socketPort}...`);
+server.listen(commandLine.socketPort);
+console.log(`Listening on socket port ${commandLine.socketPort}...`);
 
 // ----------------------------------------------------- HTTP -----------------------------------------------------
 
@@ -103,5 +103,5 @@ app.get('*', function(req, res) {
   res.status(200).send('You seem lost');
 });
 
-app.listen(config.app.httpPort);
-console.log(`Listening on HTTP port ${config.app.httpPort}...`);
+app.listen(commandLine.httpPort);
+console.log(`Listening on HTTP port ${commandLine.httpPort}...`);
