@@ -60,9 +60,11 @@ console.log(`Enabled Firebolt SDKs: ${enabledSdkNames.join(', ')}`);
 
 // --- Trigger paths specified via --triggers/-t
 
-const enabledTriggerPaths = parsed.triggers;
+const enabledTriggerPaths = parsed.triggers || [];
 
-console.log(`Triggers will be read from these paths: ${enabledTriggerPaths.join(', ')}`);
+if ( enabledTriggerPaths.length > 0 ) {
+  console.log(`Triggers will be read from these paths: ${enabledTriggerPaths.join(', ')}`);
+}
 
 // --- Exports ---
 
