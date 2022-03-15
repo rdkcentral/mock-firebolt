@@ -100,10 +100,12 @@ function validateMethodCall(methodName, params) {
         oSchema = getSchema(schemaName);
       }
 
-      const validate = ajv.compile(oSchema);
-      const valid = validate(params[paramName]);
-      if ( !valid ) {
-        errors.push(validate.errors);
+      if ( oSchema.required || params[paramName] ) {
+        const validate = ajv.compile(oSchema);
+        const valid = validate(params[paramName]);
+        if ( !valid ) {
+          errors.push(validate.errors);
+        }
       }
     }
 
