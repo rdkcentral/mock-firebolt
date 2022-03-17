@@ -21,6 +21,7 @@
 'use strict';
 
 import nopt from 'nopt';
+import { logger } from './logger.mjs';
 import { config } from './config.mjs';
 
 // Usage:
@@ -66,14 +67,14 @@ const enabledSdkNames = sdkNames.filter(function(sdkName) {
   return sdks[sdkName];
 });
 
-console.log(`Enabled Firebolt SDKs: ${enabledSdkNames.join(', ')}`);
+logger.info(`Enabled Firebolt SDKs: ${enabledSdkNames.join(', ')}`);
 
 // --- Trigger paths specified via --triggers/-t
 
 const enabledTriggerPaths = parsed.triggers || [];
 
 if ( enabledTriggerPaths.length > 0 ) {
-  console.log(`Triggers will be read from these paths: ${enabledTriggerPaths.join(', ')}`);
+  logger.info(`Triggers will be read from these paths: ${enabledTriggerPaths.join(', ')}`);
 }
 
 // --- Exports ---
