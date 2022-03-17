@@ -28,9 +28,9 @@ import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 function getMeta(req, res) {
   let meta;
   if ( req.query.dereference !== 'true' ) {
-    meta = fireboltOpenRpc.getMeta();
+    meta = fireboltOpenRpc.getRawMeta();
   } else {
-    meta = fireboltOpenRpc.getDereferencedMeta();
+    meta = fireboltOpenRpc.getMeta();
   }
   res.status(200).send({
     status: 'SUCCESS',

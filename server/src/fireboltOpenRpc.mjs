@@ -44,12 +44,12 @@ function buildMethodMap(sdkOpenrpc) {
   return result;
 }
 
-function getMeta() {
-  return meta;
+function getRawMeta() {
+  return rawMeta;
 }
 
-function getDereferencedMeta() {
-  return dereferenceMeta(meta);
+function getMeta() {
+  return meta;
 }
 
 function getMethod(methodName) {
@@ -100,11 +100,11 @@ function validateMethodCall(methodName, params) {
         oSchema = getSchema(schemaName);
       }
 
-      if ( oSchema.required || params[paramName] ) {
+      if ( oParam.required || ( params && params[paramName] ) ) {
         const validate = ajv.compile(oSchema);
         const valid = validate(params[paramName]);
         if ( !valid ) {
-          errors.push(validate.errors);
+          errors.push(...validate.errors);
         }
       }
     }
@@ -118,7 +118,7 @@ function validateMethodCall(methodName, params) {
     console.log(params);
     console.log('Exception:');
     console.log(ex);
-    errors.push(`ERROR: Could not validate call to method ${methodName} with params ${params}`);
+    errors.push(`ERROR: Could not validate call to method ${methodName} with params ${JSON.stringify(params)}`);
 
     return errors; // Treat as invalid
   }
@@ -197,7 +197,7 @@ async function readSdkJsonFileIfEnabled(sdkName) {
   if ( isSdkEnabled(sdkName) ) {
     try {
       url = new URL(`./firebolt-${sdkName}-sdk.json`, import.meta.url);
-      meta[sdkName] = JSON.parse(
+      rawMeta[sdkName] = JSON.parse(
         await readFile(url)
       );
       console.log(`Loaded ${sdkName} SDK from ${url}`);
@@ -229,7 +229,10 @@ function buildMethodMapsForAllEnabledSdks() {
 
 // Will contain one key for each API enabled (See config.app.supportedSdks; core is always enabled; others are optional)
 // The value for each key will be an object containing keys: openrpc, info, methods, and components (contents of firebolt-xxx-sdk.json file)
-const meta = {};
+const rawMeta = {};
+
+// Same as above, but $refs have been dereferenced; this is the main datastructure used here
+let meta = {};
 
 // Will contain one key for each API enabled (See config.app.supportedSdks; core is always enabled; others are optional)
 // The value for each key will be an object with keys for each method
@@ -237,12 +240,13 @@ const methodMaps = {};
 
 // Load OpenRPC definitions for all enabled SDKs, then build method maps for each
 readAllEnabledSdkJsonFiles()
+.then(() => meta = dereferenceMeta(rawMeta))
 .then(buildMethodMapsForAllEnabledSdks);
 
 // --- Exports ---
 
 export {
-  getMeta, getDereferencedMeta,
+  getRawMeta, getMeta,
   getMethod, isMethodKnown, getSchema,
   getFirstExampleValueForMethod,
   validateMethodCall, validateMethodResult, validateMethodError
