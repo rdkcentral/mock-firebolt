@@ -22,6 +22,7 @@
 
 import { mergeWith } from 'lodash-es';  // Deep merge needed; Object.assign is shallow, sadly
 import { config } from './config.mjs';
+import { logger } from './logger.mjs';
 import * as magicDateTime from './magicDateTime.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
@@ -86,7 +87,7 @@ function getState(userId) {
   if ( userId in state ) {
     return state[''+userId];
   }
-  console.log(`INFO: Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
+  logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
   return state[config.app.defaultUserId];
 }
 
@@ -163,8 +164,8 @@ function getMethodResponse(userId, methodName, params) {
             };
           } else {
             // After the result function was called, we're realizing what it returned isn't valid!
-            console.log(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-            console.log(JSON.stringify(resultErrors, null, 4));
+            logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
+            logger.error(JSON.stringify(resultErrors, null, 4));
             resp = {
               error: {
                 code: -32400,                  // @TODO: Ensure we're returning the right value and message
@@ -182,15 +183,15 @@ function getMethodResponse(userId, methodName, params) {
               error: { code: ex.code, message: ex.message }
             }
           } else {
-            console.log(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
-            console.log(ex);
+            logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
+            logger.error(ex);
             resp = {
               result: undefined  // Something...
             };
           }
         }
       } else {
-        console.log('ERROR: Use a function definition when specifying a result or error via the "response" property');
+        logger.error('ERROR: Use a function definition when specifying a result or error via the "response" property');
         resp = {
           result: undefined  // Something...
         };
@@ -216,8 +217,8 @@ function getMethodResponse(userId, methodName, params) {
             };
           } else {
             // After the result function was called, we're realizing what it returned isn't valid!
-            console.log(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-            console.log(JSON.stringify(resultErrors, null, 4));
+            logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
+            logger.error(JSON.stringify(resultErrors, null, 4));
             resp = {
               error: {
                 code: -32400,                  // @TODO: Ensure we're returning the right value and message
@@ -229,8 +230,8 @@ function getMethodResponse(userId, methodName, params) {
             };
           }
         } catch ( ex ) {
-          console.log(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
-          console.log(ex);
+          logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
+          logger.error(ex);
           resp = {
             result: undefined  // Something...
           };
@@ -264,7 +265,7 @@ function getMethodResponse(userId, methodName, params) {
     let val = fireboltOpenRpc.getFirstExampleValueForMethod(methodName);
     if ( typeof val === 'undefined' ) {
       // No examples for this method in the Open RPC specification
-      console.log(`WARNING: Method ${methodName} called, but there is no example response for the method in the Firebolt API OpenRPC specification`);
+      logger.warning(`WARNING: Method ${methodName} called, but there is no example response for the method in the Firebolt API OpenRPC specification`);
       resp = {
         result: undefined
       };
@@ -283,8 +284,8 @@ function getMethodResponse(userId, methodName, params) {
       const suffix = config.app.magicDateTime.suffix;
       resp = magicDateTime.replaceDynamicDateTimeVariablesObj(resp, prefix, suffix);
     } catch ( ex ) {
-      console.log('ERROR: An error occurred trying to evaluate magic date/time strings');
-      console.log(ex);
+      logger.error('ERROR: An error occurred trying to evaluate magic date/time strings');
+      logger.error(ex);
     }
   }
 
@@ -386,9 +387,9 @@ function updateState(userId, newState) {
 
   if ( userState.isDefaultUserState ) {
     if ( userId === config.app.defaultUserId ) {
-      console.log(`INFO: Updating state for default user ${userId}`);
+      logger.info(`Updating state for default user ${userId}`);
     } else {
-      console.log(`INFO: Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
+      logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
     }
   }
 
@@ -397,11 +398,11 @@ function updateState(userId, newState) {
     resetSequenceStateValues(userState, newState);
     mergeWith(userState, newState, mergeCustomizer);
   } else {
-    console.log('Errors found when attempting to update state:');
+    logger.error('Errors found when attempting to update state:');
     errors.forEach(function(errorMessage) {
-      console.log(`${JSON.stringify(errorMessage, null, 4)}`);
+      logger.error(`${JSON.stringify(errorMessage, null, 4)}`);
     });
-    console.log('WARNING: State not updated');
+    logger.error('State not updated');
     throw new commonErrors.DataValidationError(errors);
   }
 }
@@ -409,7 +410,7 @@ function updateState(userId, newState) {
 function revertState(userId) {
   const userState = getState(userId);
   if ( userState.isDefaultUserState ) {
-    console.log(`INFO: State for default user ${config.app.defaultUserId} is being reverted`);
+    logger.inFunction(`State for default user ${config.app.defaultUserId} is being reverted`);
   }
 
   state[''+userId] = JSON.parse(JSON.stringify(perUserStartState));

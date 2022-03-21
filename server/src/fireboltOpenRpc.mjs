@@ -27,6 +27,7 @@ import Ajv from 'ajv';
 const ajv = new Ajv();
 
 import { config } from './config.mjs';
+import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
 import { isSdkEnabled } from './sdkManagement.mjs';
 
@@ -111,13 +112,13 @@ function validateMethodCall(methodName, params) {
 
     return errors || [];
   } catch ( ex ) {
-    console.log('ERROR: Could not validate method call:');
-    console.log('Method:');
-    console.log(methodName);
-    console.log('Params:');
-    console.log(params);
-    console.log('Exception:');
-    console.log(ex);
+    logger.error('ERROR: Could not validate method call:');
+    logger.error('Method:');
+    logger.error(methodName);
+    logger.error('Params:');
+    logger.error(params);
+    logger.error('Exception:');
+    logger.error(ex);
     errors.push(`ERROR: Could not validate call to method ${methodName} with params ${JSON.stringify(params)}`);
 
     return errors; // Treat as invalid
@@ -150,13 +151,13 @@ function validateMethodResult(val, methodName) {
 
     return errors || [];
   } catch ( ex ) {
-    console.log('ERROR: Could not validate value:');
-    console.log('Value:');
-    console.log(val);
-    console.log('Method:');
-    console.log(methodName);
-    console.log('Exception:');
-    console.log(ex);
+    logger.error('ERROR: Could not validate value:');
+    logger.error('Value:');
+    logger.error(val);
+    logger.error('Method:');
+    logger.error(methodName);
+    logger.error('Exception:');
+    logger.error(ex);
     errors.push(`ERROR: Could not validate value ${val} for method ${methodName}`);
 
     return errors; // Treat as invalid
@@ -200,9 +201,9 @@ async function readSdkJsonFileIfEnabled(sdkName) {
       rawMeta[sdkName] = JSON.parse(
         await readFile(url)
       );
-      console.log(`Loaded ${sdkName} SDK from ${url}`);
+      logger.info(`Loaded ${sdkName} SDK from ${url}`);
     } catch ( ex ) {
-      console.log(`ERROR: Could not load ${sdkName} SDK from ${url}`);
+      logger.error(`ERROR: Could not load ${sdkName} SDK from ${url}`);
     }
   }
 }

@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { logger } from '../../logger.mjs';
 import { getUserIdFromReq } from '../../util.mjs';
 import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 import * as commonErrors from '../../commonErrors.mjs';
@@ -245,8 +246,8 @@ function updateState(req, res) {
           error: ex
         });
       } else {
-        console.log('ERROR: Exception in updateState:');
-        console.log(ex);
+        logger.error('ERROR: Exception in updateState:');
+        logger.error(ex);
         res.status(500).send({
           status: 'ERROR',
           errorCode: 'COULD-NOT-VALIDATE-AND-UPDATE-STATE',
