@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { logger } from './logger.mjs';
 import * as util from './util.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
@@ -35,20 +36,20 @@ function emit(id, result, msg, ws) {
     };
     const eventMessage = JSON.stringify(oEventMessage);
     ws.send(eventMessage);
-    console.log(`${msg}: ${eventMessage}`);
+    logger.info(`${msg}: ${eventMessage}`);
   }
 }
 
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
-  console.log(`Received message: ${message}`);
+  logger.debug(`Received message: ${message}`);
 
   const oMsg = JSON.parse(message);
 
   // Handle JSON-RPC notifications (w/ no id in request)
   // - Don't send reply message over socket back to SDK
   if ( ! 'id' in oMsg) {
-    console.log('Not responding, since that message was a notification with no id');
+    logger.info('Not responding, since that message was a notification with no id');
     return;
   }
 
@@ -68,7 +69,7 @@ async function handleMessage(message, userId, ws) {
   // Handle JSON-RPC message that is somehow for an unknown method
   if ( ! fireboltOpenRpc.isMethodKnown(oMsg.method) ) {
     // Somehow, we got a socket message representing a Firebolt method call for a method name we don't recognize!
-    console.log(`ERROR: Method ${oMsg.method} called, but there is no such method in the Firebolt API OpenRPC specification`);
+    logger.error(`ERROR: Method ${oMsg.method} called, but there is no such method in the Firebolt API OpenRPC specification`);
     const oResponseMessage = {
       jsonrpc: '2.0',
       id: oMsg.id,
@@ -80,7 +81,7 @@ async function handleMessage(message, userId, ws) {
     const responseMessage = JSON.stringify(oResponseMessage);
     // No delay
     ws.send(responseMessage);
-    console.log(`Sent "method not found" message: ${responseMessage}`);
+    logger.info(`Sent "method not found" message: ${responseMessage}`);
     return;
   }
 
@@ -90,8 +91,8 @@ async function handleMessage(message, userId, ws) {
   const callErrors = fireboltOpenRpc.validateMethodCall(oMsg.method, oMsg.params);
   if ( callErrors && callErrors.length > 0 ) {
     // We got a socket message representing an invalid Firebolt method call (bad params)
-    console.log(`ERROR: Method ${oMsg.method} called, but caller's params are invalid`);
-    console.log(JSON.stringify(callErrors, null, 4));
+    logger.error(`ERROR: Method ${oMsg.method} called, but caller's params are invalid`);
+    logger.error(JSON.stringify(callErrors, null, 4));
     const oResponseMessage = {
       jsonrpc: '2.0',
       id: oMsg.id,
@@ -106,7 +107,7 @@ async function handleMessage(message, userId, ws) {
     const responseMessage = JSON.stringify(oResponseMessage);
     // No delay
     ws.send(responseMessage);
-    console.log(`Sent "invalid params" message: ${responseMessage}`);
+    logger.info(`Sent "invalid params" message: ${responseMessage}`);
   }
 
   // Fire pre trigger if there is one for this method
@@ -125,7 +126,7 @@ async function handleMessage(message, userId, ws) {
         };
         shouldContinue = triggers[oMsg.method].pre.call(null, ctx, oMsg.params);
       } catch ( ex ) {
-        console.log(`ERROR: Exception occurred while executing pre-trigger for ${oMsg.method}; not continuing`);
+        logger.error(`ERROR: Exception occurred while executing pre-trigger for ${oMsg.method}; not continuing`);
         shouldContinue = false;
       }
       if ( ! shouldContinue ) {
@@ -145,7 +146,7 @@ async function handleMessage(message, userId, ws) {
   const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
   await util.delay(dly);
   ws.send(responseMessage);
-  console.log(`Sent message: ${responseMessage}`);
+  logger.debug(`Sent message: ${responseMessage}`);
 
   // Fire post trigger if there is one for this method
   if ( oMsg.method in triggers ) {
@@ -162,8 +163,8 @@ async function handleMessage(message, userId, ws) {
         };
         triggers[oMsg.method].post.call(null, ctx, oMsg.params);
       } catch ( ex ) {
-        console.log(`ERROR: Exception occurred while executing post-trigger for ${oMsg.method}`);
-        console.log(ex);
+        logger.error(`ERROR: Exception occurred while executing post-trigger for ${oMsg.method}`);
+        logger.error(ex);
       }
     }
   }

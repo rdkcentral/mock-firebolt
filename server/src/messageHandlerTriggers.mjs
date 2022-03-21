@@ -20,6 +20,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { logger } from './logger.mjs';
 import * as commandLine from './commandLine.mjs';
 
 // Ultimately, this is the "map" we're building up
@@ -29,7 +30,7 @@ const triggers = {};
 // Read the file, create a function out of its source code, and set triggers[methodName][pre|post]
 function processFile(methodName, filePath, fileName, fileExt) {
   if ( ! ['pre', 'post'].includes(fileName) ) {
-    console.log(`Skipping trigger file ${filePath}; not a pre.js or post.js file`);
+    logger.info(`Skipping trigger file ${filePath}; not a pre.js or post.js file`);
     return;
   }
 
@@ -46,10 +47,10 @@ function processFile(methodName, filePath, fileName, fileExt) {
         triggers[methodName] = {};
       }
       triggers[methodName][fileName] = fcn;
-      console.log(`Enabled trigger defined in trigger file ${filePath}`);
+      logger.info(`Enabled trigger defined in trigger file ${filePath}`);
     } catch ( ex ) {
-      console.log(`Skipping trigger file ${filePath}; an error occurred parsing the JavaScript`);
-      console.log(ex);
+      logger.error(`Skipping trigger file ${filePath}; an error occurred parsing the JavaScript`);
+      logger.error(ex);
     }
   });
 }
@@ -104,8 +105,8 @@ enabledTriggerPaths.forEach((dir) => {
   try {
     processTopDir(dir, processMethodDir);
   } catch ( ex ) {
-    console.log(`An error occurred trying to processTopDir on ${dir}`);
-    console.log(ex);
+    logger.error(`An error occurred trying to processTopDir on ${dir}`);
+    logger.error(ex);
   }
 });
 

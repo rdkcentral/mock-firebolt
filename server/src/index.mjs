@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { logger } from './logger.mjs';
 import * as commandLine from './commandLine.mjs';
 import { config } from './config.mjs';
 import { getUserIdFromReq } from './util.mjs';
@@ -32,7 +33,7 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import WebSocket, { WebSocketServer } from 'ws';
 
-console.log(`Welcome to Mock Firebolt`);
+logger.important(`Welcome to Mock Firebolt`);
 
 const server = createServer();
 
@@ -40,10 +41,10 @@ server.on('upgrade', function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
   let userId = pathname.substring(1);
   if ( ! userId ) {
-    console.log('Using default user');
+    logger.info('Using default user');
     userId = config.app.defaultUserId;
   } else if ( ! userManagement.isKnownUser(userId) ) {
-    console.log(`WARNING: Unknown userId: ${userId}; Using default user`);
+    logger.warn(`WARNING: Unknown userId: ${userId}; Using default user`);
     userId = config.app.defaultUserId;
   }
   const wss = userManagement.getWssForUser(userId);
@@ -52,18 +53,18 @@ server.on('upgrade', function upgrade(request, socket, head) {
       wss.emit('connection', ws, request);
     });
   } else {
-    console.log(`ERROR: Unknown userId: ${userId}`);
+    logger.error(`ERROR: Unknown userId: ${userId}`);
     socket.destroy();
   }
 });
 
 // Starter user(s)
-console.log('Adding user 123...'); stateManagement.addUser('123'); userManagement.addUser('123');
-console.log('Adding user 456...'); stateManagement.addUser('456'); userManagement.addUser('456');
-console.log('Adding user 789...'); stateManagement.addUser('789'); userManagement.addUser('789');
+logger.info('Adding user 123...'); stateManagement.addUser('123'); userManagement.addUser('123');
+logger.info('Adding user 456...'); stateManagement.addUser('456'); userManagement.addUser('456');
+logger.info('Adding user 789...'); stateManagement.addUser('789'); userManagement.addUser('789');
 
 server.listen(commandLine.socketPort);
-console.log(`Listening on socket port ${commandLine.socketPort}...`);
+logger.info(`Listening on socket port ${commandLine.socketPort}...`);
 
 // ----------------------------------------------------- HTTP -----------------------------------------------------
 
@@ -104,4 +105,4 @@ app.get('*', function(req, res) {
 });
 
 app.listen(commandLine.httpPort);
-console.log(`Listening on HTTP port ${commandLine.httpPort}...`);
+logger.info(`Listening on HTTP port ${commandLine.httpPort}...`);

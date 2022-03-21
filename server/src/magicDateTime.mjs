@@ -21,6 +21,7 @@
 'use strict';
 
 import moment from 'moment';
+import { logger } from './logger.mjs';
 
 /**
  * Converts any/all "magic date/time" strings into strings, epochs, etc.
@@ -275,8 +276,8 @@ var replaceDynamicDateTimeVariablesStr = function(ss, prefix, suffix) {
     ss = replaceDynamicDateTimeVariables(ss, '"' + prefix, suffix + '"');
     return ss;
   } catch (ex) {
-    console.log('replaceDynamicDateTimeVariablesStr: Exception:');
-    console.log(ex);
+    logger.error('replaceDynamicDateTimeVariablesStr: Exception:');
+    logger.error(ex);
     return ss; // Unchanged (probably)... we'll hope for the best
   }
 };
@@ -298,8 +299,8 @@ var replaceDynamicDateTimeVariablesObj = function(oJson, prefix, suffix) {
     oJson = JSON.parse(ss);
     return oJson;
   } catch (ex) {
-    console.log('replaceDynamicDateTimeVariablesJson: Exception:');
-    console.log(ex);
+    logger.error('replaceDynamicDateTimeVariablesJson: Exception:');
+    logger.error(ex);
     return oJson; // Unchanged... we'll hope for the best
   }
 };

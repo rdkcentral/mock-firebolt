@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { logger } from '../../logger.mjs';
 // import * as stateManagement from '../stateManagement.mjs';
 import * as events from '../../events.mjs';
 
@@ -49,15 +50,15 @@ function sendEvent(req, res) {
       const eventMessage = JSON.stringify(oEventMessage);
       // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
       ws.send(eventMessage);
-      console.log(`Sent event message: ${eventMessage}`);
+      logger.info(`Sent event message: ${eventMessage}`);
 
       res.status(200).send({
         status: 'SUCCESS'
       });
     }
   } catch ( ex ) {
-    console.log('sendEvent: ERROR:');
-    console.log(ex);
+    logger.error('sendEvent: ERROR:');
+    logger.error(ex);
     res.status(500).send({
       status: 'ERROR',
       errorCode: 'COULD-NOT-SEND-EVENT',
