@@ -37,7 +37,7 @@ See [cli/README.md](../cli/README.md) for information about the command-line int
 
 # Browser Extensions
 
-Not yet implemented.
+See [browser-extensions/README.md](../browser-extensions/README.md) for information about browser extensions.
 
 
 # Mock Responses
@@ -50,6 +50,11 @@ To learn about specifying dynamic responses (controlled by a JavaScript function
 # Events
 
 For notes about how Firebolt events work, see [Events.md](./Events.md).
+
+
+# Triggers
+
+Pre- and post- triggers may be defined for any Firebolt method call. See [Triggers.md](./Triggers.md) for more information.
 
 
 # Multi-User Support
