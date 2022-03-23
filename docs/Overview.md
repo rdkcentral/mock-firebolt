@@ -77,9 +77,13 @@ Mock Firebolt: Project Overview / Demo Script
   - Event squences
     - node cli.mjs --sequence ../examples/device-onDeviceNameChanged.sequence.json
 
+- Pre and Post Triggers
+  - See server/src/triggers/lifecycle.ready/post.mjs, etc.
+  - Run Mock Firebolt like: npm run dev -- --triggers ./src/triggers
+
 - Web Admin UI
   - http://localhost:3333
  
 - Browser Extensions
-  - Not yet implemented
+  - Demo Governor browser extension to send lifecycle events
 ```
