@@ -1,7 +1,6 @@
 Mock Firebolt: Project Overview / Demo Script
 =============================================
 
-```
 - Intro
   - Goals:
     - Enable app developers to be productive without needing a real device for as long as possible
@@ -86,4 +85,3 @@ Mock Firebolt: Project Overview / Demo Script
  
 - Browser Extensions
   - Demo Governor browser extension to send lifecycle events
-```
