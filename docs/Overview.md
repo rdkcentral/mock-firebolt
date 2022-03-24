@@ -49,14 +49,14 @@ See: [Architecture Diagram](./images/MockFireboltArchitecture.png)
 
 - Git clone this repo and `npm i`, etc.
 - Start server
-- **NOTE**: All of the code is metadata-driven (based on the OpenRPC specification)
+- **NOTE**: All of the code is metadata-driven (based on [the OpenRPC specification](https://github.com/rdkcentral/firebolt-core-sdk/tree/main/src/modules))
 
 ### App Side of Things
 - Client code imports Firebolt SDK in `package.json`, using npm as usual and makes Firebolt SDK calls
 - URL when launching the app must contain one of the following:
     - `?mf=true`
     - `?mf=9998`
-    - `?mf=ws%3A%2F%2Flocalhost%3A9998]`
+    - `?mf=ws%3A%2F%2Flocalhost%3A9998`
 
 ### Use cURL to control aspects of Mock Firebolt
 
@@ -167,11 +167,15 @@ node cli.mjs --sequence ../examples/device-onDeviceNameChanged.sequence.json
 ```
 
 #### Pre and Post Triggers
-  - See server/src/triggers/lifecycle.ready/post.mjs, etc.
-  - Run Mock Firebolt like: npm run dev -- --triggers ./src/triggers
+
+See `server/src/triggers/lifecycle.ready/post.mjs`, etc.
+
+Run Mock Firebolt like: `npm run dev -- --triggers ./src/triggers`
 
 ### Web Admin UI
-  - http://localhost:3333
+```
+http://localhost:3333
+```
  
 ### Browser Extensions
 
