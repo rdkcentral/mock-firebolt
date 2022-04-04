@@ -16,31 +16,24 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-// Configure UI routes
+// HTTP-based UI routes: API-Related
 
 'use strict';
 
-import * as userUi from './routes/ui/user.mjs';
-import * as apiUi from './routes/ui/api.mjs';
+import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 
-function configureUI(app) {
+// --- Route Handlers ---
 
-	// =============================== User Routes ============================
-
-	// List users page
-	app.get('/users', userUi.listUsers);
-
-	// Add user page
-  	app.get('/users/add', userUi.addUser);
-
-  	// Remove user page
-  	app.get('/users/remove', userUi.removeUser);
-
-	// =============================== User Routes ============================
-
-	// List users page
-	app.get('/api-cheat-sheet', apiUi.apiCheatSheet);
-
+// GET /api-cheat-sheet
+function apiCheatSheet(req, res) {
+  const meta = fireboltOpenRpc.getRawMeta();
+  res.render('api-cheat-sheet', {
+    meta: meta
+  });
 }
 
-export { configureUI };
+// --- Exports ---
+
+export {
+  apiCheatSheet
+};

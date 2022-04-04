@@ -74,6 +74,7 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { engine } from 'express-handlebars';
 
+import { helpers } from './handlebars-helpers.mjs';
 import * as configureAPI from './configureAPI.mjs';
 import * as configureUI from './configureUI.mjs';
 
@@ -84,7 +85,9 @@ app.use(bodyParser.urlencoded({             // to support URL-encoded bodies
   extended: true
 }));
 
-app.engine('handlebars', engine());
+app.engine('handlebars', engine({
+  helpers: helpers
+}));
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 

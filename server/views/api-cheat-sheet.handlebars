@@ -1,0 +1,91 @@
+<h1>Firebolt API Cheat Sheet</h1>
+
+<style>
+  body, p, div, span, th, td {
+    font-family: Verdana;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a.hover {
+    cursor: pointer;
+  }
+
+  table, tr, th, td {
+    border: 1px solid gainsboro;
+    padding: 3px;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  tr {
+    vertical-align: text-top;
+  }
+
+  td.eye {
+  }
+
+  td.methodName span {
+    font-weight: 600;
+  }
+
+  td.methodSummary {
+  }
+</style>
+
+{{#if meta}}
+
+  {{#each meta}}
+  {{#with this as | sdk |}}
+
+    <h1>
+      {{@key}} {{sdk.info.version}}
+    </h1>
+
+    <table>
+      {{#each sdk.methods}}
+      {{#with this as | method |}}
+        <tr>
+
+          {{#ifEq @../key 'core'}}
+            <td class="eye">              
+              <a
+                href="https://developer.comcast.com/firebolt/core/sdk/latest/api/{{#moduleName method.name}}  {{/moduleName}}/#{{#functionName method.name}}{{/functionName}}"
+                target="_blank"
+              >&#x1F441</a>
+            </td>
+          {{/ifEq}}
+
+          <td class="methodName">
+            <span
+              {{#isDeprecated method}}style="text-decoration: line-through;"{{/isDeprecated}}
+            >
+              {{method.name}}
+            </span>
+          </td>
+
+          <td class="methodSummary">
+            <span
+              {{#isDeprecated method}}style="text-decoration: line-through;"{{/isDeprecated}}
+            >
+              {{method.summary}}
+            </span>
+          </td>
+
+        </tr>
+      {{/with}}
+      {{/each}}
+    </table>
+
+  {{/with}}
+  {{/each}}
+
+{{else}}
+
+  <p>INTERNAL ERROR: Something went wrong. Try refreshing the page.</p>
+
+{{/if}}
