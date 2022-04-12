@@ -1,5 +1,10 @@
-Mock Firebolt: Usage Within Apps
+Mock Firebolt: Usage Within Apps <!-- omit in toc -->
 ================================
+
+- [Overview](#overview)
+- [Activating Mock Firebolt](#activating-mock-firebolt)
+- [Webpack Techniques to Activate Mock Firebolt in Development Mode Only](#webpack-techniques-to-activate-mock-firebolt-in-development-mode-only)
+- [Example App Startup Code to Conditionally Activate Mock Firebolt](#example-app-startup-code-to-conditionally-activate-mock-firebolt)
 
 # Overview
 
@@ -9,7 +14,7 @@ With one exception (described below), you should add @firebolt-js/sdk as a depen
 
 In order to get the Firebolt SDK to talk to Mock Firebolt, you must ultimately set the global variable
 
-```
+```js
 window.__firebolt.endpoint
 ```
 
@@ -23,19 +28,18 @@ IMPORTANT NOTE: Ideally, your code should only set this variable's value if/when
 
 Each application may use its own mechanism to set this value. Example approaches (while in development):
 
-- Simply hard-code it to ws://localhost:9998 and assume all developers have Mock Firebolt running locally on that port
+- Simply hard-code it to `ws://localhost:9998` and assume all developers have Mock Firebolt running locally on that port
 - Use one or more query string parameters to control things. Examples:
-  - Use Mock Firebolt, and set this global variable to ws://localhost:9998:
-    - &mf=true
+  - Use Mock Firebolt, and set this global variable to `ws://localhost:9998`:
+    - `&mf=true`
   - Use Mock Firebolt, but use a specific port on localhost
-    - &mf=9993
+    - `&mf=9993`
   - Use Mock Firebolt, and use a specific value for the Firebolt endpoint to use (note the URL encoding used and the path for a specific user)
-    - &mf=ws%3A%2F%2Flocalhost%3A9998%2F123
+    - `&mf=ws%3A%2F%2Flocalhost%3A9998%2F123`
 
 # Webpack Techniques to Activate Mock Firebolt in Development Mode Only
 
-Ideally, you should not set window.\_\_firebolt.endpoint in production. If you are using webpack, there are a number of plugins / techniques you can use, including:
-
+Ideally, you should not set `window.__firebolt.endpoint` in production. If you are using webpack, there are a number of plugins / techniques you can use, including:
 
 - ifdef-loader -- See https://github.com/nippur72/ifdef-loader for more information.
 - DefinePlugin -- See https://webpack.js.org/plugins/define-plugin for more information.
@@ -44,7 +48,7 @@ Ideally, you should not set window.\_\_firebolt.endpoint in production. If you a
 
 # Example App Startup Code to Conditionally Activate Mock Firebolt
 
-```
+```js
 type FireboltObj = {
   endpoint: string;
 };

@@ -1,21 +1,31 @@
-Mock Firebolt: Specifying Mock Responses
+Mock Firebolt: Specifying Mock Responses <!-- omit in toc -->
 ========================================
 
-# Specifying Results, Errors, or Either
+- [Specifying Results, Errors, or Either](#specifying-results-errors-or-either)
+  - [Static Result](#static-result)
+  - [Static Error](#static-error)
+  - [Dynamic Result](#dynamic-result)
+  - [Dynamic Response (Result or Error)](#dynamic-response-result-or-error)
+  - [Sequence of Responses (each a Result or Error)](#sequence-of-responses-each-a-result-or-error)
+- [Magic Date/Time Strings](#magic-datetime-strings)
+  - [Examples](#examples)
+  - [Notes](#notes)
+
+## Specifying Results, Errors, or Either
 
 These are the valid ways to specify the response that Mock Firebolt should return for a given method:
 
-## Static Result
+### Static Result
 
-```
+```json
 {
   "result": xxx
 }
 ```
 
-## Static Error
+### Static Error
 
-```
+```json
 {
   "error": {
     "code": -32xxx,
@@ -24,17 +34,17 @@ These are the valid ways to specify the response that Mock Firebolt should retur
 }
 ```
 
-## Dynamic Result
+### Dynamic Result
 
-```
+```json
 {
   "result": "function(ctx, params) { ... }"
 }
 ```
 
-## Dynamic Response (Result or Error)
+### Dynamic Response (Result or Error)
 
-```
+```json
 {
   "response": "function(ctx, params) { ... }"
 }
@@ -42,9 +52,9 @@ These are the valid ways to specify the response that Mock Firebolt should retur
 
 See [Functions](./Functions.md).
 
-## Sequence of Responses (each a Result or Error)
+### Sequence of Responses (each a Result or Error)
 
-```
+```json
 {
   "policy": "REPEAT-LAST-RESPONSE" (default) | "REVERT-TO-STATIC-RESPONSE",
   "responses": [
@@ -65,26 +75,26 @@ This is useful for, say, returning an error one time, or returning a specific re
 
 
 
-# Magic Date/Time Strings
+## Magic Date/Time Strings
 
 Anywhere within your mock responses (via result, error, response, or responses), you may use
 "magic date/time" strings.
 
-Examples:
+### Examples
 
 | Example                         | Description                                                             |
 | ------------------------------- | ----------------------------------------------------------------------- |
-| {{+15s\|X}}                     | 15 seconds from "now" as a Unix timestamp in seconds (capital X)        |
-| {{+10m\|x}}                     | 10 minutes from "now" as a Unix timestamp in milliseconds (lowercase x) |
-| {{-2h\|YYYY-MM-DD HH:mm:ssZ}}   | 2 hours "ago" as a string like 2015-06-15T14:22:35Z                     |
-| {{20:00\|x}}                    | 8PM today as a Unix timestamp in milliseconds                           |
-| {{19:00+1d\|x}}                 | 7PM tomorrow as a Unix timestamp in milliseconds                        |
+| `{{+15s\|X}}`                     | 15 seconds from "now" as a Unix timestamp in seconds (capital X)        |
+| `{{+10m\|x}}`                     | 10 minutes from "now" as a Unix timestamp in milliseconds (lowercase x) |
+| `{{-2h\|YYYY-MM-DD HH:mm:ssZ}}`   | 2 hours "ago" as a string like 2015-06-15T14:22:35Z                     |
+| `{{20:00\|x}}`                    | 8PM today as a Unix timestamp in milliseconds                           |
+| `{{19:00+1d\|x}}`                | 7PM tomorrow as a Unix timestamp in milliseconds                        |
 
-Notes:
+### Notes
 
 -  The syntax of a magic date/time variable looks like one of these:
-   - {{<relativeDateTime>|<moment-style formatting string>}}
-   - {{timeSpecificRelativeDateTime|<moment-style formatting string>}}
+   - `{{<relativeDateTime>|<moment-style formatting string>}}`
+   - `{{timeSpecificRelativeDateTime|<moment-style formatting string>}}`
 - where:
-   - <relativeDateTime> is of the form {+|-}{n}{<moment-style date add key or shorthand key>}
-   - <timeSpecificRelativeDateTime> is of the form HH:MM[:SS][{+|-}{n}{moment-style date add key or shorthand key>}]
+   - `<relativeDateTime>` is of the form `{+|-}{n}{<moment-style date add key or shorthand key>}`
+   - `<timeSpecificRelativeDateTime>` is of the form `HH:MM[:SS][{+|-}{n}{moment-style date add key or shorthand key>}]`
