@@ -73,6 +73,7 @@ const __dirname = path.resolve();
 import express from 'express';
 import bodyParser from 'body-parser';
 import { engine } from 'express-handlebars';
+import cors from 'cors';
 
 import * as configureAPI from './configureAPI.mjs';
 import * as configureUI from './configureUI.mjs';
@@ -83,6 +84,8 @@ app.use(bodyParser.json({ limit: '1mb' })); // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({             // to support URL-encoded bodies
   extended: true
 }));
+app.use(cors());
+app.options('*',cors());
 
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
