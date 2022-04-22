@@ -410,7 +410,7 @@ function updateState(userId, newState) {
 function revertState(userId) {
   const userState = getState(userId);
   if ( userState.isDefaultUserState ) {
-    logger.inFunction(`State for default user ${config.app.defaultUserId} is being reverted`);
+    logger.info(`State for default user ${config.app.defaultUserId} is being reverted`);
   }
 
   state[''+userId] = JSON.parse(JSON.stringify(perUserStartState));
