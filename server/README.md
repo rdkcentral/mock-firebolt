@@ -102,7 +102,7 @@ curl --location --request GET 'http://localhost:3333/api/v1/meta?dereferenced=tr
 ### cURL Command:
 
 ```
-curl --location --request POST 'http://localhost:3333/api/v1/global/latency' \
+curl --location --request POST 'http://localhost:3333/api/v1/state/global/latency' \
 --header 'Content-type: application/json' \
 --data-raw '{
     "latency": {
@@ -127,7 +127,7 @@ curl --location --request POST 'http://localhost:3333/api/v1/global/latency' \
 ### Example cURL Command:
 
 ```
-curl --location --request POST 'http://localhost:3333/api/v1/global/latency' \
+curl --location --request POST 'http://localhost:3333/api/v1/state/global/latency' \
 --header 'Content-type: application/json' \
 --data-raw '{
     "latency": {
@@ -155,7 +155,7 @@ curl --location --request POST 'http://localhost:3333/api/v1/global/latency' \
 
 ```
 # Use overrides, if present, else use static defaults (from first examples in OpenRPC)
-curl --location --request POST 'http://localhost:3333/api/v1/global/mode' \
+curl --location --request POST 'http://localhost:3333/api/v1/state/global/mode' \
 --header 'content-type: application/json' \
 --data-raw '{
     "mode": "default"
@@ -164,7 +164,7 @@ curl --location --request POST 'http://localhost:3333/api/v1/global/mode' \
 
 ```
 # Only use static defaults (from first examples in OpenRPC)
-curl --location --request POST 'http://localhost:3333/api/v1/global/mode' \
+curl --location --request POST 'http://localhost:3333/api/v1/state/global/mode' \
 --header 'content-type: application/json' \
 --data-raw '{
     "mode": "box"
@@ -186,7 +186,7 @@ curl --location --request POST 'http://localhost:3333/api/v1/global/mode' \
 ### Example cURL Commands:
 
 ```
-curl --location --request POST 'http://localhost:3333/api/v1/method/account.id/result' \
+curl --location --request POST 'http://localhost:3333/api/v1/state/method/account.id/result' \
 --header 'content-type: application/json' \
 --data-raw '{
     "result": "ACCOUNT-ONE"
@@ -194,7 +194,7 @@ curl --location --request POST 'http://localhost:3333/api/v1/method/account.id/r
 ```
 
 ```
-curl --location --request POST 'http://localhost:3333/api/v1/method/accessibility.voiceGuidance/result' \
+curl --location --request POST 'http://localhost:3333/api/v1/state/method/accessibility.voiceGuidance/result' \
 --header 'content-type: application/json' \
 --data-raw '{
     "result": {
@@ -243,7 +243,7 @@ curl --location --request POST 'http://localhost:3333/api/v1/method/accessibilit
 ### Example cURL Command:
 
 ```
-curl --location --request POST 'http://localhost:3333/api/v1/method/discovery.watched/error' \
+curl --location --request POST 'http://localhost:3333/api/v1/state/method/discovery.watched/error' \
 --header 'content-type: application/json' \
 --data-raw '{
     "error": {
