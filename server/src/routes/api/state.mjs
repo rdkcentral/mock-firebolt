@@ -39,7 +39,7 @@ function getState(req, res) {
   });
 }
 
-// POST /api/v1/global/latency
+// POST /api/v1/state/global/latency
 // Expected body: { latency: { min: xxx, max: xxx } }
 function setLatency(req, res) {
   const userId = getUserIdFromReq(req);
@@ -105,7 +105,7 @@ function setLatency(req, res) {
   }
 }
 
-// POST /api/v1/global/mode
+// POST /api/v1/state/global/mode
 // Expected body: { mode: 'xxx' }, where xxx is a valid mode (see stateManagement.mjs)
 function setMode(req, res) {
   const userId = getUserIdFromReq(req);
@@ -133,7 +133,7 @@ function setMode(req, res) {
   }
 }
 
-// POST /api/v1/method/:methodName/result
+// POST /api/v1/state/method/:methodName/result
 // Expected body: { result: xxx }
 function setMethodResult(req, res) {
   const userId = getUserIdFromReq(req);
@@ -172,7 +172,7 @@ function setMethodResult(req, res) {
   }
 }
 
-// POST /api/v1/method/:methodName/error
+// POST /api/v1/state/method/:methodName/error
 // Expected body: { error: { code: xxx, message: xxx } }
 function setMethodError(req, res) {
   const userId = getUserIdFromReq(req);
