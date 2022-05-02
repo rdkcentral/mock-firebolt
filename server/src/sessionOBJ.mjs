@@ -18,7 +18,6 @@ class Session{
 
     exportSession(){
         this.#sessionEnd = Date.now();
-        // Save Session data to JSON file
         const sessionData = {
             sessionStart: this.#sessionStart,
             sessionEnd: this.#sessionEnd,
