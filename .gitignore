@@ -13,3 +13,4 @@ server/node_modules/*
 cli/node_modules/*
 
 .mf.config.json
+.vscode/*
