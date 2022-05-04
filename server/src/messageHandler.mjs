@@ -20,6 +20,7 @@
 
 'use strict';
 
+import * as commonErrors from './commonErrors.mjs';
 import { logger } from './logger.mjs';
 import * as util from './util.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
@@ -35,7 +36,7 @@ function emit(id, result, msg, ws) {
       result: result
     };
     const eventMessage = JSON.stringify(oEventMessage);
-    ws.send(eventMessage);
+    ws.send(eventMessage);    
     logger.info(`${msg}: ${eventMessage}`);
   }
 }
@@ -153,18 +154,42 @@ async function handleMessage(message, userId, ws) {
     if ( 'post' in triggers[oMsg.method] ) {
       try {
         const ctx = {
+          logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
           sendEvent: function(onMethod, result, msg) {
             const id = events.getRegisteredEventListener(onMethod);
             if ( ! id ) { return; }
             emit(id, result, msg, ws);
-          }
+          },
+          ...response  // As returned either by the mock override or via Conduit from a real device
         };
-        triggers[oMsg.method].post.call(null, ctx, oMsg.params);
+        logger.debug(`Calling post trigger for method ${oMsg.method}`);
+        // post trigger can return undefined to leave as-is or can return a new response object
+        let newResponse = triggers[oMsg.method].post.call(null, ctx, oMsg.params);
+        // If there is one, make the real Firebolt response look like our normal response objects (with a result key or error key)
+        if ( newResponse ) {
+          if ( typeof newResponse === 'object' && newResponse.hasOwnProperty('code') && newResponse.hasOwnProperty('message') ) {
+            response = {
+              error: newResponse
+            };
+          } else {
+            newResponse = {
+              result: newResponse
+            };
+          }
+        }
       } catch ( ex ) {
-        logger.error(`ERROR: Exception occurred while executing post-trigger for ${oMsg.method}`);
-        logger.error(ex);
+        if ( ex instanceof commonErrors.FireboltError ) {
+          // Looks like the function threw a FireboltError, which means we want to mock an error, not a result
+          newResponse = {
+            error: { code: ex.code, message: ex.message }
+          }
+        } else {
+          logger.error(`ERROR: Exception occurred while executing post-trigger for ${oMsg.method}`);
+          logger.error(ex);
+          newResponse = undefined;
+        }
       }
     }
   }
