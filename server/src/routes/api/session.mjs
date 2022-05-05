@@ -1,7 +1,7 @@
 'use strict';
 
 import { logger } from '../../logger.mjs';
-import {startRecording, stopRecording} from '../../stateManagement.mjs';
+import {startRecording, stopRecording} from '../../messageHandler.mjs';
 
 // --- Route Handlers ---
 
@@ -13,11 +13,12 @@ function toggleSession(req, res) {
         res.status(200).send({
             status: 'SUCCESS'
         });
-    } else if ( req.query.stop == 'true' ) {
+    } else {
         logger.info('Stopping session');
+        const sessionFile = stopRecording();
         res.status(200).send({
-            status: 'SUCCESS'
-            //do actual stuff here
+            status: 'SUCCESS',
+            sessionFile: sessionFile
         });
     }
 }
@@ -34,8 +35,8 @@ function stopSession(req, res) {
     logger.info('Stopping session');
     const sessionFile = stopRecording();
     res.status(200).send({
-        status: 'SUCCESS'
-        //do actual stuff here
+        status: 'SUCCESS',
+        sessionFile: sessionFile
     });
 }
 

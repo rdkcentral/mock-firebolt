@@ -26,6 +26,12 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { triggers } from './messageHandlerTriggers.mjs';
+import { Session, FireboltCall } from './sessionOBJ.mjs';
+
+let sessionRecording = {
+  recording : false,
+  recordedSession : null
+};
 
 function emit(id, result, msg, ws) {
   if ( id ) {
@@ -170,8 +176,22 @@ async function handleMessage(message, userId, ws) {
   }
 }
 
+// --- Session Functions ---
+
+function startRecording(){
+  logger.info('Starting recording');
+  sessionRecording.recording = true;
+  sessionRecording.recordedSession = new Session.Session();
+}
+
+function stopRecording(){
+  logger.info('Stopping recording');
+  sessionRecording.recording = false;
+  return sessionRecording.session.exportSession();
+}
+
 // --- Exports ---
 
 export {
-  handleMessage
+  handleMessage, startRecording, stopRecording
 };

@@ -27,16 +27,10 @@ import * as magicDateTime from './magicDateTime.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
-import { Session, FireboltCall } from './sessionOBJ.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
   DEFAULT: 'DEFAULT'     // Log settrs, return current mock value for each gettr (as controlled by CLI, browser extension, admin UI)
-};
-
-let sessionRecording = {
-  recording : false,
-  recordedSession : new Session.Session()
 };
 
 let perUserStartState = {
@@ -499,19 +493,7 @@ function getScratch(userId, key) {
   return undefined;
 }
 
-// --- Session Functions ---
 
-function startRecording(){
-  logger.info('Starting recording');
-  sessionRecording.recording = true;
-  sessionRecording.recordedSession = new Session.Session();
-}
-
-function stopRecording(){
-  logger.info('Stopping recording');
-  sessionRecording.recording = false;
-  return sessionRecording.session.exportSession();
-}
 
 // --- Exports ---
 
@@ -523,6 +505,5 @@ export {
   updateState, revertState,
   setLatency, setLatencies,
   isLegalMode, setMode,
-  setMethodResult, setMethodError,
-  startRecording, stopRecording
+  setMethodResult, setMethodError
 };
