@@ -36,7 +36,7 @@ function emit(id, result, msg, ws) {
       result: result
     };
     const eventMessage = JSON.stringify(oEventMessage);
-    ws.send(eventMessage);    
+    ws.send(eventMessage);
     logger.info(`${msg}: ${eventMessage}`);
   }
 }
