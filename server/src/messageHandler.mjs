@@ -52,6 +52,12 @@ async function handleMessage(message, userId, ws) {
 
   const oMsg = JSON.parse(message);
 
+  // record the message if we are recording
+  if ( sessionRecording.recording ) {
+    const call = new FireboltCall(oMsg.message, oMsg.params);
+    sessionRecording.recordedSession.calls.add(call);
+  }
+
   // Handle JSON-RPC notifications (w/ no id in request)
   // - Don't send reply message over socket back to SDK
   if ( ! 'id' in oMsg) {
