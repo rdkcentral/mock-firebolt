@@ -1,4 +1,7 @@
 
+import { logger } from './logger.mjs';
+import fs from 'fs';
+
 class FireboltCall {
     constructor(methodCall, params) {
         this.methodCall = methodCall;
@@ -17,15 +20,22 @@ class Session{
     }
 
     exportSession(){
-        this.#sessionEnd = Date.now();
-        const sessionData = {
-            sessionStart: this.#sessionStart,
-            sessionEnd: this.#sessionEnd,
-            calls: this.calls
-        };
-        const sessionDataJson = JSON.stringify(sessionData);
-        const sessionDataFile = `FireboltCalls_${this.#sessionStart}.json`;
-        fs.writeFileSync(sessionDataFile, sessionDataJson);
+        try {
+            this.#sessionEnd = Date.now();
+            const sessionData = {
+                sessionStart: this.#sessionStart,
+                sessionEnd: this.#sessionEnd,
+                calls: this.calls
+            };
+            const sessionDataJson = JSON.stringify(sessionData);
+            const sessionDataFile = `./public/session-recordings/FireboltCalls_${this.#sessionStart}.json`;
+            fs.writeFileSync(sessionDataFile, sessionDataJson);
+            return sessionDataFile;
+        } catch (error) {
+            logger.error("Error exporting session: " + error);
+            return null;
+        }
+        
     }
 }
 

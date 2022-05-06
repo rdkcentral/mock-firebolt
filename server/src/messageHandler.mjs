@@ -31,7 +31,7 @@ import { Session, FireboltCall } from './sessionOBJ.mjs';
 
 let sessionRecording = {
   recording : false,
-  recordedSession : null
+  recordedSession : new Session()
 };
 
 function emit(id, result, msg, ws) {
@@ -56,7 +56,7 @@ async function handleMessage(message, userId, ws) {
   // record the message if we are recording
   if ( sessionRecording.recording ) {
     const call = new FireboltCall(oMsg.message, oMsg.params);
-    sessionRecording.recordedSession.calls.add(call);
+    sessionRecording.recordedSession.calls.push(call);
   }
 
   // Handle JSON-RPC notifications (w/ no id in request)
@@ -212,13 +212,13 @@ async function handleMessage(message, userId, ws) {
 function startRecording(){
   logger.info('Starting recording');
   sessionRecording.recording = true;
-  sessionRecording.recordedSession = new Session.Session();
+  sessionRecording.recordedSession = new Session();
 }
 
 function stopRecording(){
   logger.info('Stopping recording');
   sessionRecording.recording = false;
-  return sessionRecording.session.exportSession();
+  return sessionRecording.recordedSession.exportSession();
 }
 
 // --- Exports ---
