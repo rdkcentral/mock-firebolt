@@ -28,18 +28,21 @@ import { config } from './config.mjs';
 //   node index.mjs                                          (core SDK only, default)
 //   node index.mjs --httpPort 3334 ...                      (Use custom port for RESTful control API (default: 3333))
 //   node index.mjs --socketPort 9876 ...                    (Use custom socket port for Firebolt OpenRPC msgs (default: 9998))
+//   node index.mjs --moneybadger ...                        (core + moneybadger SDKs)
 //   node index.mjs --manage ...                             (core + manage SDKs)
 //   node index.mjs --manage --discovery ...                 (core + manage + discovery SDKs)
 //   node index.mjs --triggers <path1> --triggers <path2>    (Load triggers from files in these paths)
 const knownOpts = {
   'httpPort'   : Number,
   'socketPort' : Number,
+  'moneybadger': Boolean,
   'manage'     : Boolean,
   'discovery'  : Boolean,
   'triggers'   : [String, Array]
 };
 
 const shortHands = {
+  'b' : [ '--moneybadger' ],
   'm' : [ '--manage' ],
   'd' : [ '--discovery' ],
   't' : [ '--triggers' ]
@@ -52,13 +55,14 @@ const parsed = nopt(knownOpts, shortHands, process.argv, 2);
 const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
 
-// --- Enabled SDKs specified via --manage/-m, --discovery/-d, and implied core SDK
+// --- Enabled SDKs specified via --moneybadger/-b, --manage/-m, --discovery/-d, and implied core SDK
 
-// Convert boolean flags for manage and discovery + implied true for core into a simple map/dist/obj
+// Convert boolean flags for moneybadger, manage and discovery + implied true for core into a simple map/dist/obj
 const sdks = {
-  core      : true,
-  manage    : parsed.manage,
-  discovery : parsed.discovery
+  core        : true,
+  moneybadger : parsed.moneybadger,
+  manage      : parsed.manage,
+  discovery   : parsed.discovery
 };
 
 // Create array of enabled SDK names

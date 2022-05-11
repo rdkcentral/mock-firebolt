@@ -75,7 +75,7 @@ This repo contains these elements:
 See [Documentation](./docs/Documentation.md).
 
 
-# SDK Support
+# Firebolt SDK Support
 
 Mock Firebolt supports these Firebolt SDKs: **core**, **manage**, **discovery**.
 
@@ -84,6 +84,13 @@ By default, only the core SDK is enabled, meaning if you try to make calls to me
 This default mode is appropriate for app developers developing third-party content apps that don't need (nor get) the permissions necessary to use the other SDKs.
 
 For developers building "operator apps" / "search and discover apps" which need one or more of these SDKs, when running the Mock Firebolt server, you can pass flags like `--manage` and/or `--discovery` to enable the specific SDK(s) desired. Note of course that ultimately, when running on a real device, your app will only have whatever permissions it has been given.
+
+
+# $badger Support
+
+Mock Firebolt also supports the $badger SDK for application developers migrating from $badger to Firebolt.
+
+Developers wishing to activate this functionality must pass the `--moneybadger` command-line flag when starting Mock Firebolt. As well, you must use the `activateMockFireboltForBadger.js` script within your app and have it execute *before* your app bundle (which includes $badger) executes.
 
 
 # Important Dependency/Version Notes
@@ -123,6 +130,8 @@ npm run clean             # Cleans/creates build/ subdirectory
 npm run build:core        # MANDATORY: If you're only using the Firebolt Core SDK (typical for most 3rd party app devs)
 npm run build:manage      # OPTIONAL: If you're using the Firebolt Manage SDK (not typical)
 npm run build:discovery   # OPTIONAL: If you're using the Firebolt Discovery SDK (not typical)
+
+npm run build:moneybadger # OPTIONAL: If you're migrating from $badger to Firebolt
 
 npm run build:mf          # Builds source code within this project
 

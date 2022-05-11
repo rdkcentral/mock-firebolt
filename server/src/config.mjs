@@ -34,7 +34,12 @@ const config = {
       prefix: '{{',
       suffix: '}}'
     },
-    supportedSdks: [ 'core', 'manage', 'discovery' ]
+    supportedSdks: {
+      core:        'firebolt-open-rpc.json',
+      moneybadger: 'money-badger-open-rpc.json',
+      manage:      'firebolt-manage-open-rpc.json',
+      discovery:   'firebolt-discovery-open-rpc.json'
+    }
   }
 };
 
