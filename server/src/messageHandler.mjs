@@ -55,7 +55,7 @@ async function handleMessage(message, userId, ws) {
 
   // record the message if we are recording
   if ( sessionRecording.recording ) {
-    const call = new FireboltCall(oMsg.message, oMsg.params);
+    const call = new FireboltCall(oMsg.method, oMsg.params);
     sessionRecording.recordedSession.calls.push(call);
   }
 
@@ -213,6 +213,8 @@ function startRecording(){
   logger.info('Starting recording');
   sessionRecording.recording = true;
   sessionRecording.recordedSession = new Session();
+  const call = new FireboltCall("Test Method", "Test Parameters");
+  sessionRecording.recordedSession.calls.push(call);
 }
 
 function stopRecording(){

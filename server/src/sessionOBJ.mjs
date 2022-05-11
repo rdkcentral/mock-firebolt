@@ -27,8 +27,9 @@ class Session{
                 sessionEnd: this.#sessionEnd,
                 calls: this.calls
             };
-            const sessionDataJson = JSON.stringify(sessionData);
-            const sessionDataFile = `./public/session-recordings/FireboltCalls_${this.#sessionStart}.json`;
+            const sessionDataJson = JSON.stringify(sessionData, null, 4);
+            // Make ts Human readible
+            const sessionDataFile = `./sessions/FireboltCalls_${this.#sessionStart}.json`;
             fs.writeFileSync(sessionDataFile, sessionDataJson);
             return sessionDataFile;
         } catch (error) {
