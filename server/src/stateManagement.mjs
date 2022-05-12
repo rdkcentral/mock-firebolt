@@ -244,7 +244,8 @@ function handleStaticAndDynamicError(resp){
 // specifying result or error by function (see examples/discovery-watched-1.json for an example)
 function getMethodResponse(userId, methodName, params) {
   let resp;
-  const userState = getState(userId);        
+  const userState = getState(userId);
+  
   if ( userState.global.mode === Mode.DEFAULT ) {
     // Use mock override values, if present, else use first example value from the OpenRPC specification
     // This includes both "normal" result and error values and also results and errors specified as functions
@@ -429,7 +430,7 @@ function updateState(userId, newState) {
 function revertState(userId) {
   const userState = getState(userId);
   if ( userState.isDefaultUserState ) {
-    logger.inFunction(`State for default user ${config.app.defaultUserId} is being reverted`);
+    logger.info(`State for default user ${config.app.defaultUserId} is being reverted`);
   }
 
   state[''+userId] = JSON.parse(JSON.stringify(perUserStartState));
