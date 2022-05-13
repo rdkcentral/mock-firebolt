@@ -36,6 +36,7 @@ function isRegisteredEventListener(method) {
 }
 
 function getRegisteredEventListener(method) {
+  console.log(eventListenerMap);
   return eventListenerMap[method];
 }
 

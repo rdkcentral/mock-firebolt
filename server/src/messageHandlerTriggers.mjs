@@ -24,7 +24,8 @@ import { logger } from './logger.mjs';
 import * as commandLine from './commandLine.mjs';
 
 // Ultimately, this is the "map" we're building up
-const triggers = {};
+const methodTriggers = {};
+const eventTriggers = {};
 
 // Process a single file found in enabledTriggerPathN/pre.js and/or enabledTriggerPathN/post.js files
 // Read the file, create a function out of its source code, and set triggers[methodName][pre|post]
@@ -33,26 +34,52 @@ function processFile(methodName, filePath, fileName, fileExt) {
     logger.info(`Skipping trigger file ${filePath}; not a pre.js or post.js file`);
     return;
   }
-
-  fs.readFile(filePath, 'utf8', function(error, sTriggerFunctionDefinition) {
-    if ( error ) { throw error; }
-
-    let fcn;
-    try {
-      // Next line assumes sTriggerFunctionDefinition defines a method named <fileName> (e.g., pre or post)
-      const sFcnBody = `${sTriggerFunctionDefinition}; return ${fileName}(ctx, params);`;
-      const fcn = new Function('ctx', 'params', sFcnBody);
-
-      if ( ! (methodName in triggers) ) {
-        triggers[methodName] = {};
+  
+  if( methodName.includes('.on') ){
+    fs.readFile(filePath, 'utf8', function(error, sTriggerFunctionDefinition) {
+      if ( error ) { throw error; }
+  
+      let fcn;
+      try {
+        // Next line assumes sTriggerFunctionDefinition defines a method named <fileName> (e.g., pre or post)
+        const sFcnBody = `${sTriggerFunctionDefinition}; return ${fileName}(ctx, params);`;
+        const fcn = new Function('ctx', 'params', sFcnBody);
+  
+        if ( ! (methodName in eventTriggers) ) {
+          eventTriggers[methodName] = {};
+        }
+        eventTriggers[methodName][fileName] = fcn;
+        logger.info(`Enabled event trigger defined in trigger file ${filePath}`);
+        console.log('inside event:',eventTriggers);
+      } catch ( ex ) {
+        logger.error(`Skipping event trigger file ${filePath}; an error occurred parsing the JavaScript`);
+        logger.error(ex);
       }
-      triggers[methodName][fileName] = fcn;
-      logger.info(`Enabled trigger defined in trigger file ${filePath}`);
-    } catch ( ex ) {
-      logger.error(`Skipping trigger file ${filePath}; an error occurred parsing the JavaScript`);
-      logger.error(ex);
-    }
-  });
+    });
+  }  
+  else{
+    fs.readFile(filePath, 'utf8', function(error, sTriggerFunctionDefinition) {
+      if ( error ) { throw error; }
+  
+      let fcn;
+      try {
+        // Next line assumes sTriggerFunctionDefinition defines a method named <fileName> (e.g., pre or post)
+        const sFcnBody = `${sTriggerFunctionDefinition}; return ${fileName}(ctx, params);`;
+        const fcn = new Function('ctx', 'params', sFcnBody);
+  
+        if ( ! (methodName in methodTriggers) ) {
+          methodTriggers[methodName] = {};
+        }
+        methodTriggers[methodName][fileName] = fcn;
+        logger.info(`Enabled method trigger defined in trigger file ${filePath}`);
+        console.log('inside method:',methodTriggers);
+      } catch ( ex ) {
+        logger.error(`Skipping method trigger file ${filePath}; an error occurred parsing the JavaScript`);
+        logger.error(ex);
+      }
+    });
+  }
+  
 }
 
 // dir is expected to be a directory whose name is a valid Firebolt method (e.g., lifecycle.ready)
@@ -113,5 +140,5 @@ enabledTriggerPaths.forEach((dir) => {
 // --- Exports ---
 
 export {
-  triggers
+  methodTriggers, eventTriggers
 };
