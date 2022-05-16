@@ -76,7 +76,8 @@ const knownOpts = {
   'errMsg'       : String,
   'upload'       : String,
   'event'        : String,
-  'sequence'     : String
+  'sequence'     : String,
+  'session'      : String
 };
 
 const shortHands = {
@@ -94,7 +95,8 @@ const shortHands = {
   'em'  : [ '--errMsg' ],
   'u'   : [ '--upload' ],
   'e'   : [ '--event' ],
-  'seq' : [ '--sequence' ]
+  'seq' : [ '--sequence' ],
+  'se'  : [ '--session' ]
 };
 
 const parsed = nopt(knownOpts, shortHands, process.argv, 2);
@@ -311,6 +313,31 @@ if ( parsed.help ) {
 
 } else if ( parsed.sequence ) {
   // @TODO
+
+} else if ( parsed.session ) {
+  const record = parsed.session;
+  if ( record === 'start' ) {
+    msg(`Starting session...`);
+    axios.post(url(host, port, '/api/v1/session/start'), undefined)
+    .then(function (response) {
+      console.log(response.data);
+    }
+    ).catch(function (error) {
+      logError(error);
+    }
+    );
+  }
+  else if ( record === 'stop' ) {
+    msg(`Stopping session...`);
+    axios.post(url(host, port, '/api/v1/session/stop'), undefined)
+    .then(function (response) {
+      console.log(response.data);
+    }
+    ).catch(function (error) {
+      logError(error);
+    }
+    );
+  }
 
 } else {
 
