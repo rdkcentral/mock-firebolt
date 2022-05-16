@@ -142,8 +142,6 @@ npm run build:core        # MANDATORY: If you're only using the Firebolt Core SD
 npm run build:manage      # OPTIONAL: If you're using the Firebolt Manage SDK (not typical)
 npm run build:discovery   # OPTIONAL: If you're using the Firebolt Discovery SDK (not typical)
 
-npm run build:moneybadger # OPTIONAL: If you're migrating from $badger to Firebolt
-
 npm run build:mf          # Builds source code within this project
 
 # Ongoing stuff
