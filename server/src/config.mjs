@@ -20,11 +20,14 @@
 
 'use strict';
 
+import { dotConfig } from './dotConfig.mjs';
+
 // IMPORTANT NOTES:
 // - app.defaultUserId here should match app.defaultUserId in the config.mjs file in the
 //   cli directory/sub-repo and the value in the .mf-SAMPLE.config.json file also in
 //   the cli directory/sub-repo.
 
+// Static configuration (some of which can be overridden by command-line arguments)
 const config = {
   app: {
     socketPort: 9998,
@@ -34,14 +37,12 @@ const config = {
       prefix: '{{',
       suffix: '}}'
     },
-    supportedSdks: {
-      core:        'firebolt-open-rpc.json',
-      moneybadger: 'money-badger-open-rpc.json',
-      manage:      'firebolt-manage-open-rpc.json',
-      discovery:   'firebolt-discovery-open-rpc.json'
-    }
+    developerNotesTagName: 'developerNotes'
   }
 };
+
+// Layer in configuration specified via .mf.config.json file
+config.dotConfig = dotConfig;
 
 // --- Exports ---
 

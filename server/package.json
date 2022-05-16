@@ -7,13 +7,11 @@
     "clean": "rm -rf build && mkdir -p build",
     "prepare:setup": "npm run clean",
     "build:core": "cp ./node_modules/@firebolt-js/sdk/dist/firebolt-open-rpc.json ./build/firebolt-open-rpc.json",
-    "build:moneybadger": "cp ./node_modules/money-badger-openrpc/dist/money-badger-open-rpc.json ./build/money-badger-open-rpc.json",
     "build:manage": "cp ./node_modules/@firebolt-js/manage-sdk/dist/firebolt-manage-open-rpc.json ./build/firebolt-manage-open-rpc.json",
     "build:discovery": "cp ./node_modules/@firebolt-js/discovery-sdk/dist/firebolt-discovery-open-rpc.json ./build/firebolt-discovery-open-rpc.json",
-    "build:openrpc:NOTES1": "Only use if you are using all three Firebolt SDKs",
-    "build:openrpc:NOTES2": "Does not include $badger support",
+    "build:openrpc:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build:openrpc": "npm run build:core && npm run build:manage && npm run build:discovery",
-    "build:mf": "cp -r ./src/* ./build && cp ./package.json ./build",
+    "build:mf": "cp -r ./src/* ./build && cp ./src/.mf.config.json ./build 2>/dev/null || : && cp ./package.json ./build",
     "build:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build": "npm run build:openrpc && npm run build:mf",
     "test:@TODO": "jest --config=jest.config.js --detectOpenHandles",
@@ -22,7 +20,7 @@
     "start": "node build/index.mjs",
     "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
     "dev:NOTES2": "Can do 'npm run dev' (core SDK only) or 'npm run dev --manage --discovery' (all three SDKs)",
-    "dev": "npm run build:mf && npm run start -- $npm_config_badger $npm_config_manage $npm_config_discovery"
+    "dev": "npm run build:mf && npm run start --"
   },
   "repository": {
     "type": "git",
@@ -50,13 +48,13 @@
     "lodash-es": "^4.17.21",
     "moment": "^2.29.1",
     "nopt": "^5.0.0",
+    "tmp": "^0.2.1",
     "uuid": "^8.3.2",
     "ws": "^8.2.3"
   },
   "optionalDependencies": {
     "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git",
-    "@firebolt-js/manage-sdk": "git+https://github.com/rdkcentral/firebolt-manage-sdk.git",
-    "money-badger-openrpc": "git+https://github.comcast.com/mfine200/money-badger-openrpc.git"
+    "@firebolt-js/manage-sdk": "git+https://github.com/rdkcentral/firebolt-manage-sdk.git"
   },
   "keywords": [
     "firebolt",

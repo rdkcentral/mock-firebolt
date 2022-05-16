@@ -75,6 +75,15 @@ This repo contains these elements:
 See [Documentation](./docs/Documentation.md).
 
 
+# SDK Support and the server/src/.mf.config.json File
+
+Mock Firebolt is a very generic mocking service for almost *any* OpenRPC-based service. The list of particular SDKs the server supports when you run it is controlled by the contents of the `server/src/.mf.config.json` file and any associated command-line flags you provide when you start the server.
+
+The repo contains a `server/src/.mf.config.SAMPLE.json` file and you'll need to copy this file to `server/src/.mf.config.json` in order for the server to start. Once you've done this, you're free to edit your `server/src/.mf.config.json` file and add other SDKs if you'd like. If the OpenRPC JSON file for your API is somewhere in the cloud or otherwise available via HTTP, you should use the `url` property for the SDK in this file rather than the `fileName` property (which is only used for SDKs for which there is a "hard dependency" in the `server/package.json` file).
+
+The next two sections presume you are using the out-of-the-box `.mf.config.json` file.
+
+
 # Firebolt SDK Support
 
 Mock Firebolt supports these Firebolt SDKs: **core**, **manage**, **discovery**.
@@ -123,6 +132,8 @@ cd mock-firebolt
 cd server
 
 # One-time stuff
+
+cp src/.mf.config.SAMPLE.json src/.mf.config.json
 
 npm install
 npm run clean             # Cleans/creates build/ subdirectory

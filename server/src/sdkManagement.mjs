@@ -20,12 +20,22 @@
 
 'use strict';
 
+import { config } from './config.mjs';
 import * as commandLine from './commandLine.mjs';
 
 function isSdkEnabled(sdkName) {
+  // Check if sdk with given name is enabled in the .mf.config.json file
+  const oSdk = config.dotConfig.supportedSdks.find((oSdk) => { return ( oSdk.name === sdkName ); });
+  if ( oSdk && oSdk.enabled ) {
+    return true;
+  }
+
+  // Check if sdk with given name is enabled via a command-line flag
   if ( commandLine.enabledSdkNames.includes(sdkName) ) {
     return true;
   }
+
+  // Must not be enabled
   return false;
 }
 

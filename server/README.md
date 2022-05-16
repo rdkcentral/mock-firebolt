@@ -22,7 +22,7 @@ curl --location --request GET 'http://localhost:3333/api/v1/healthcheck'
     "status": "OK",
     "versionInfo": {
         "mockFirebolt": "<mockFireboltServerVersionNumber>",
-        "fireboltSdk"
+        "sdk"
             "core": "<coreSdkVersionNumber>",
             "manage": "<manageSdkVersionNumber>",
             "discovery": "<discoverySdkVersionNumber>",
@@ -30,6 +30,8 @@ curl --location --request GET 'http://localhost:3333/api/v1/healthcheck'
     }
 }
 ```
+
+NOTE: You'll see one key under `sdk` for each SDK enabled either via the .mf.config.json file or a command-line flag.
 
 
 

@@ -28,25 +28,39 @@ import { config } from './config.mjs';
 //   node index.mjs                                          (core SDK only, default)
 //   node index.mjs --httpPort 3334 ...                      (Use custom port for RESTful control API (default: 3333))
 //   node index.mjs --socketPort 9876 ...                    (Use custom socket port for Firebolt OpenRPC msgs (default: 9998))
-//   node index.mjs --moneybadger ...                        (core + moneybadger SDKs)
 //   node index.mjs --manage ...                             (core + manage SDKs)
 //   node index.mjs --manage --discovery ...                 (core + manage + discovery SDKs)
 //   node index.mjs --triggers <path1> --triggers <path2>    (Load triggers from files in these paths)
+
 const knownOpts = {
   'httpPort'   : Number,
   'socketPort' : Number,
-  'moneybadger': Boolean,
-  'manage'     : Boolean,
-  'discovery'  : Boolean,
   'triggers'   : [String, Array]
 };
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
+  if ( oSdk.cliFlag ) {
+    if ( ! knownOpts.hasOwnProperty(oSdk.cliFlag) ) {
+      knownOpts[oSdk.cliFlag] = Boolean;
+    } else {
+      logger.error(`ERROR: ${oSdk.cliFlag} is already used as a command-line flag`);
+      process.exit(1);
+    }
+  }
+}
 
 const shortHands = {
-  'b' : [ '--moneybadger' ],
-  'm' : [ '--manage' ],
-  'd' : [ '--discovery' ],
   't' : [ '--triggers' ]
 };
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
+  if ( oSdk.cliShortFlag ) {
+    if ( ! shortHands.hasOwnProperty(oSdk.cliShortFlag) ) {
+      shortHands[oSdk.cliShortFlag] = [ `--${oSdk.cliFlag}` ];
+    } else {
+      logger.error(`ERROR: ${oSdk.cliShortFlag} is already used as a command-line shorthand flag`);
+      process.exit(1);
+    }
+  }
+}
 
 const parsed = nopt(knownOpts, shortHands, process.argv, 2);
 
@@ -55,15 +69,15 @@ const parsed = nopt(knownOpts, shortHands, process.argv, 2);
 const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
 
-// --- Enabled SDKs specified via --moneybadger/-b, --manage/-m, --discovery/-d, and implied core SDK
+// --- Enabled SDKs specified via any SDK command-line flags OR via .mf.config.json file
 
-// Convert boolean flags for moneybadger, manage and discovery + implied true for core into a simple map/dist/obj
-const sdks = {
-  core        : true,
-  moneybadger : parsed.moneybadger,
-  manage      : parsed.manage,
-  discovery   : parsed.discovery
-};
+// Convert boolean flags for any SDKs into a simple map/dict/obj
+const sdks = {};
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
+  if ( parsed[oSdk.name] || oSdk.enabled ) {
+    sdks[oSdk.name] = true;
+  }
+}
 
 // Create array of enabled SDK names
 const sdkNames = Object.keys(sdks);

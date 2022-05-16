@@ -149,6 +149,21 @@ async function handleMessage(message, userId, ws) {
   ws.send(responseMessage);
   logger.debug(`Sent message: ${responseMessage}`);
 
+  // Emit developerNotes for the method, if any
+  const developerNotes = fireboltOpenRpc.getDeveloperNotesForMethod(oMsg.method);
+  if ( developerNotes ) {
+    //logger.warning('\n');
+    logger.warning(`Developer notes for function ${oMsg.method}:`);
+    if ( developerNotes.notes ) {
+      logger.warning(developerNotes.notes);
+    }
+    if ( developerNotes.docUrl ) {
+      logger.warning(`Documentation links:`);
+      logger.warning(developerNotes.docUrl);
+    }
+    //logger.warning('\n');
+  }
+
   // Fire post trigger if there is one for this method
   if ( oMsg.method in triggers ) {
     if ( 'post' in triggers[oMsg.method] ) {
