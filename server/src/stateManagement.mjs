@@ -493,8 +493,6 @@ function getScratch(userId, key) {
   return undefined;
 }
 
-
-
 // --- Exports ---
 
 export {
