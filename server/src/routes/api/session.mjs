@@ -1,5 +1,6 @@
 'use strict';
 
+import fs from 'fs';
 import { logger } from '../../logger.mjs';
 import {startRecording, stopRecording} from '../../messageHandler.mjs';
 
@@ -34,12 +35,12 @@ function startSession(req, res) {
 function stopSession(req, res) {
     logger.info('Stopping session');
     const sessionFile = stopRecording();
-    // Make this actually return a file
-    res.download(sessionFile);
-    // res.status(200).send({
-    //     status: 'SUCCESS',
-    //     sessionFile: sessionFile
-    // });
+    let messages = JSON.parse(fs.readFileSync(sessionFile, 'utf8'));
+    res.status(200).send({
+        status: 'SUCCESS',
+        sessionFile: sessionFile,
+        sessionMessages: messages
+    });
 }
 
 // --- Exports ---
