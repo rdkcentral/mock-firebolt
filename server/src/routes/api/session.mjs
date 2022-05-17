@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import { logger } from '../../logger.mjs';
-import {startRecording, stopRecording} from '../../messageHandler.mjs';
+import {startRecording, stopRecording} from '../../sessionManagement.mjs';
 
 // --- Route Handlers ---
 

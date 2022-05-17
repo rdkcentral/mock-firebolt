@@ -27,12 +27,9 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { triggers } from './messageHandlerTriggers.mjs';
-import { Session, FireboltCall } from './sessionOBJ.mjs';
+import { addCall } from './sessionManagement.mjs';
 
-let sessionRecording = {
-  recording : false,
-  recordedSession : new Session()
-};
+
 
 function emit(id, result, msg, ws) {
   if ( id ) {
@@ -54,10 +51,7 @@ async function handleMessage(message, userId, ws) {
   const oMsg = JSON.parse(message);
 
   // record the message if we are recording
-  if ( sessionRecording.recording ) {
-    const call = new FireboltCall(oMsg.method, oMsg.params);
-    sessionRecording.recordedSession.calls.push(call);
-  }
+  addCall(oMsg.method, oMsg.params);
 
   // Handle JSON-RPC notifications (w/ no id in request)
   // - Don't send reply message over socket back to SDK
@@ -207,24 +201,8 @@ async function handleMessage(message, userId, ws) {
   }
 }
 
-// --- Session Functions ---
-
-function startRecording(){
-  logger.info('Starting recording');
-  sessionRecording.recording = true;
-  sessionRecording.recordedSession = new Session();
-  const call = new FireboltCall("Test Method", "Test Parameters");
-  sessionRecording.recordedSession.calls.push(call);
-}
-
-function stopRecording(){
-  logger.info('Stopping recording');
-  sessionRecording.recording = false;
-  return sessionRecording.recordedSession.exportSession();
-}
-
 // --- Exports ---
 
 export {
-  handleMessage, startRecording, stopRecording
+  handleMessage
 };
