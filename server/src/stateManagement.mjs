@@ -115,144 +115,165 @@ async function getAppropriateDelay(userId, methodName) {
   return dly;
 }
 
+// Handle sequence-of-responses values, which are arrays of either result, error, or response objects
+function handleSequenceOfResponseValues(resp){
+  const nextIndex = userState.sequenceState[methodName] || 0;
+  if ( nextIndex < resp.responses.length ) {
+    resp = resp.responses[nextIndex];
+  } else if ( resp.policy && resp.policy.toUpperCase() === 'REPEAT-LAST-RESPONSE') {
+    resp = resp.responses[resp.responses.length - 1];
+  } else {
+    resp = undefined; // Will cause code below to use the static default from the OpenRPC specification
+  }
+  state[''+userId].sequenceState[methodName] = nextIndex + 1;
+}
+
+// Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
+function handleDynamicResponseValues(resp){
+  if ( typeof resp.response === 'string' && resp.response.trimStart().startsWith('function') ) {
+    // Looks like resp.response is specified as a function; evaluate it
+    try {
+      const ctx = {
+        set: setScratch,
+        get: getScratch,
+        FireboltError: commonErrors.FireboltError
+      };
+      const sFcnBody = resp.response + ';' + 'return f(ctx, params);'
+      const fcn = new Function('ctx', 'params', sFcnBody);
+      const result = fcn(ctx, params);
+      const resultErrors = fireboltOpenRpc.validateMethodResult(result, methodName);
+      if ( ! resultErrors || resultErrors.length === 0 ) {
+        resp = {
+          result: result
+        };
+      } else {
+        // After the result function was called, we're realizing what it returned isn't valid!
+        logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
+        logger.error(JSON.stringify(resultErrors, null, 4));
+        resp = {
+          error: {
+            code: -32400,                  // @TODO: Ensure we're returning the right value and message
+            message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
+            data: {
+              errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
+            }
+          }
+        };
+      }
+    } catch ( ex ) {
+      if ( ex instanceof commonErrors.FireboltError ) {
+        // Looks like the function threw a FireboltError, which means we want to mock an error, not a result
+        resp = {
+          error: { code: ex.code, message: ex.message }
+        }
+      } else {
+        logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
+        logger.error(ex);
+        resp = {
+          result: undefined  // Something...
+        };
+      }
+    }
+  } else {
+    logger.error('ERROR: Use a function definition when specifying a result or error via the "response" property');
+    resp = {
+      result: undefined  // Something...
+    };
+  }
+}
+
+// Handle result values, which are either specified as static values or
+// as functions which return values
+function handleStaticAndDynamicResult(resp){
+  if ( typeof resp.result === 'string' && resp.result.trimStart().startsWith('function') ) {
+    // Looks like resp.result is specified as a function; evaluate it
+    try {
+      const ctx = {
+        set: setScratch,
+        get: getScratch
+      };
+      const sFcnBody = resp.result + ';' + 'return f(ctx, params);'
+      const fcn = new Function('ctx', 'params', sFcnBody);
+      const result = fcn(ctx, params);
+      const resultErrors = fireboltOpenRpc.validateMethodResult(result, methodName);
+      if ( ! resultErrors || resultErrors.length === 0 ) {
+        resp = {
+          result: result
+        };
+      } else {
+        // After the result function was called, we're realizing what it returned isn't valid!
+        logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
+        logger.error(JSON.stringify(resultErrors, null, 4));
+        resp = {
+          error: {
+            code: -32400,                  // @TODO: Ensure we're returning the right value and message
+            message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
+            data: {
+              errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
+            }
+          }
+        };
+      }
+    } catch ( ex ) {
+      logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
+      logger.error(ex);
+      resp = {
+        result: undefined  // Something...
+      };
+    }
+  } else {
+    // Assume resp.result is a "normal" value; leave resp alone
+  }
+}
+
+// Handle error values, which are either specified as static objects with code & message props or
+// as a function which returns such an object
+function handleStaticAndDynamicError(resp){
+  if ( typeof resp.error === 'string' && resp.error.startsWith('function') ) {
+    // @TODO
+    resp = {
+      result: 'NOT-IMPLEMENTED-YET'  // @TODO
+    };
+  } else {
+    // Assume resp.error is a "normal" error value (object with code and message keys); leave resp alone
+  }
+}
+
 // Returns either { result: xxx } or { error: { code: xxx, message: 'xxx' } }
 // The params parameter isn't used for static mock responses, but is useful when
 // specifying result or error by function (see examples/discovery-watched-1.json for an example)
 function getMethodResponse(userId, methodName, params) {
   let resp;
-
   const userState = getState(userId);
-            
+  
   if ( userState.global.mode === Mode.DEFAULT ) {
     // Use mock override values, if present, else use first example value from the OpenRPC specification
     // This includes both "normal" result and error values and also results and errors specified as functions
-
     // Normally, an object with either a result key, an error key, or a response key
     // But see code directly below that handles sequence-of-responses (responses array values)
     resp = userState.methods[methodName];
 
     // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
     if ( resp && resp.responses ) {
-      const nextIndex = userState.sequenceState[methodName] || 0;
-      if ( nextIndex < resp.responses.length ) {
-        resp = resp.responses[nextIndex];
-      } else if ( resp.policy && resp.policy.toUpperCase() === 'REPEAT-LAST-RESPONSE') {
-        resp = resp.responses[resp.responses.length - 1];
-      } else {
-        resp = undefined; // Will cause code below to use the static default from the OpenRPC specification
-      }
-      state[''+userId].sequenceState[methodName] = nextIndex + 1;
+      handleSequenceOfResponseValues(resp);  
     }
 
     // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
     if ( resp && resp.response ) {
-      if ( typeof resp.response === 'string' && resp.response.trimStart().startsWith('function') ) {
-        // Looks like resp.response is specified as a function; evaluate it
-        try {
-          const ctx = {
-            set: setScratch,
-            get: getScratch,
-            FireboltError: commonErrors.FireboltError
-          };
-          const sFcnBody = resp.response + ';' + 'return f(ctx, params);'
-          const fcn = new Function('ctx', 'params', sFcnBody);
-          const result = fcn(ctx, params);
-          const resultErrors = fireboltOpenRpc.validateMethodResult(result, methodName);
-          if ( ! resultErrors || resultErrors.length === 0 ) {
-            resp = {
-              result: result
-            };
-          } else {
-            // After the result function was called, we're realizing what it returned isn't valid!
-            logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-            logger.error(JSON.stringify(resultErrors, null, 4));
-            resp = {
-              error: {
-                code: -32400,                  // @TODO: Ensure we're returning the right value and message
-                message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
-                data: {
-                  errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
-                }
-              }
-            };
-          }
-        } catch ( ex ) {
-          if ( ex instanceof commonErrors.FireboltError ) {
-            // Looks like the function threw a FireboltError, which means we want to mock an error, not a result
-            resp = {
-              error: { code: ex.code, message: ex.message }
-            }
-          } else {
-            logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
-            logger.error(ex);
-            resp = {
-              result: undefined  // Something...
-            };
-          }
-        }
-      } else {
-        logger.error('ERROR: Use a function definition when specifying a result or error via the "response" property');
-        resp = {
-          result: undefined  // Something...
-        };
-      }
-
+      handleDynamicResponseValues(resp);
+    }
+    
     // Handle result values, which are either specified as static values or
     // as functions which return values
-    } else if ( resp && resp.result ) {
-      if ( typeof resp.result === 'string' && resp.result.trimStart().startsWith('function') ) {
-        // Looks like resp.result is specified as a function; evaluate it
-        try {
-          const ctx = {
-            set: setScratch,
-            get: getScratch
-          };
-          const sFcnBody = resp.result + ';' + 'return f(ctx, params);'
-          const fcn = new Function('ctx', 'params', sFcnBody);
-          const result = fcn(ctx, params);
-          const resultErrors = fireboltOpenRpc.validateMethodResult(result, methodName);
-          if ( ! resultErrors || resultErrors.length === 0 ) {
-            resp = {
-              result: result
-            };
-          } else {
-            // After the result function was called, we're realizing what it returned isn't valid!
-            logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-            logger.error(JSON.stringify(resultErrors, null, 4));
-            resp = {
-              error: {
-                code: -32400,                  // @TODO: Ensure we're returning the right value and message
-                message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
-                data: {
-                  errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
-                }
-              }
-            };
-          }
-        } catch ( ex ) {
-          logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
-          logger.error(ex);
-          resp = {
-            result: undefined  // Something...
-          };
-        }
-      } else {
-        // Assume resp.result is a "normal" value; leave resp alone
-      }
+    else if ( resp && resp.result ) {
+      handleStaticAndDynamicResult(resp);
+    }
 
     // Handle error values, which are either specified as static objects with code & message props or
     // as a function which returns such an object
-    } else if ( resp && resp.error ) {
-      if ( typeof resp.error === 'string' && resp.error.startsWith('function') ) {
-        // @TODO
-        resp = {
-          result: 'NOT-IMPLEMENTED-YET'  // @TODO
-        };
-      } else {
-        // Assume resp.error is a "normal" error value (object with code and message keys); leave resp alone
-      }
+    else if ( resp && resp.error ) {
+      handleStaticAndDynamicError(resp);
     }
-
   } else /* if ( userState.global.mode === Mode.BOX ) */ {
     // Only use first example value from the OpenRPC specification; Force 'if' below to be
     // false by setting resp to undefined
@@ -288,7 +309,6 @@ function getMethodResponse(userId, methodName, params) {
       logger.error(ex);
     }
   }
-
   return resp;
 }
 

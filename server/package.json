@@ -53,8 +53,8 @@
     "ws": "^8.2.3"
   },
   "optionalDependencies": {
-    "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git",
-    "@firebolt-js/manage-sdk": "git+https://github.com/rdkcentral/firebolt-manage-sdk.git"
+    "@firebolt-js/manage-sdk": "git+https://github.com/rdkcentral/firebolt-manage-sdk.git",
+    "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git"
   },
   "keywords": [
     "firebolt",
