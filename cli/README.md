@@ -35,6 +35,11 @@ To import state previously exported:
 node cli.mjs --upload mystate.json
 ```
 
+## Session Start/Stop
+
+To start/stop recording of firebolt calls being passed through Mock Firebolt:
+run `node cli.mjs --session start` or `node cli.mjs --session stop`
+
 # Developer Notes
 
 If/as you add support for new commands or alter how existing commands work, be sure to update the array of command data in `src/usage.mjs`, which is the basis for this usage/help output.

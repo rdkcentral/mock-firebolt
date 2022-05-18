@@ -27,6 +27,9 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { triggers } from './messageHandlerTriggers.mjs';
+import { addCall } from './sessionManagement.mjs';
+
+
 
 function emit(id, result, msg, ws) {
   if ( id ) {
@@ -46,6 +49,9 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Received message: ${message}`);
 
   const oMsg = JSON.parse(message);
+
+  // record the message if we are recording
+  addCall(oMsg.method, oMsg.params);
 
   // Handle JSON-RPC notifications (w/ no id in request)
   // - Don't send reply message over socket back to SDK

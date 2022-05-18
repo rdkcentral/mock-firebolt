@@ -39,6 +39,7 @@ const lines = [
   { cmdInfo: "--upload ../examples/slow.json  ",                                 comment: "See examples/ directory for, uh, examples" },
   { cmdInfo: "--event ../examples/device-onDeviceNameChanged1.event.json",       comment: "Send event (method, result keys expected)" },
   { cmdInfo: "--sequence ../examples/events1.sequence.json  ",                   comment: "See examples/events1.json" },
+  { cmdInfo: "--session start/stop  ",                                           comment: "Start/Stop Firebolt session recording" },
 ];
 
 function usage() {
