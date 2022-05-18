@@ -21,7 +21,9 @@
 'use strict';
 
 import { readFile } from 'fs/promises';
+import { config } from '../../config.mjs';
 import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
+import * as sdkManagement from '../../sdkManagement.mjs';
 
 // Load the package.json file
 const packageJson = JSON.parse(
@@ -30,23 +32,36 @@ const packageJson = JSON.parse(
   )
 );
 
-const meta = fireboltOpenRpc.getMeta();
+let meta;
 
 // --- Route Handlers ---
 
 // GET /api/v1/healthcheck
 function healthcheck(req, res) {
-  res.status(200).send({
+  const response = {
     status: 'OK',
     versionInfo: {
       mockFirebolt: packageJson.version,
-      fireboltSdk: {
-        core: meta.core.info.version,
-        manage: meta.manage.info.version,
-        discovery: meta.discovery.info.version,
+      sdk: {}
+    }
+  };
+
+  if ( ! meta ) {
+    meta = fireboltOpenRpc.getMeta();
+  }
+
+  config.dotConfig.supportedSdks.forEach(function(oSdk) {
+    const sdkName = oSdk.name;
+    if ( sdkManagement.isSdkEnabled(sdkName) ) {
+      if ( meta[sdkName] && meta[sdkName].info ) {
+        response.versionInfo.sdk[sdkName] = meta[sdkName].info.version;
+      } else {
+        response.versionInfo.sdk[sdkName] = '**UNAVAILABLE**';
       }
     }
   });
+
+  res.status(200).send(response);
 }
 
 // --- Exports ---
