@@ -20,6 +20,8 @@
 
 'use strict';
 
+import * as tmp from 'tmp';
+
 import { config } from './config.mjs';
 
 // Use: await delay(2000);
@@ -38,6 +40,11 @@ function getUserIdFromReq(req) {
   return userId;
 }
 
+function createTmpFile(prefix, postfix) {
+  const tmpObj = tmp.fileSync({ mode: 0o644, prefix: prefix, postfix: postfix });
+  return tmpObj;
+}
+
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile };

@@ -1,0 +1,29 @@
+{
+    "supportedSdks": [
+
+        {
+            "name": "core",
+            "cliFlag": null,
+            "cliShortFlag": null,
+            "fileName": "firebolt-open-rpc.json",
+            "enabled": true
+        },
+
+        {
+            "name": "manage",
+            "cliFlag": "manage",
+            "cliShortFlag": "m",
+            "fileName": "firebolt-manage-open-rpc.json",
+            "enabled": false
+        },
+
+        {
+            "name": "discovery",
+            "cliFlag": "discovery",
+            "cliShortFlag": "d",
+            "fileName": "firebolt-discovery-open-rpc.json",
+            "enabled": false
+        }
+
+    ]
+}
