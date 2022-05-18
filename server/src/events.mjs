@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
 
 // Maps event listener request method name (e.g., lifecycle.onInactive) to message id (e.g., 17)
@@ -36,7 +37,7 @@ function isRegisteredEventListener(method) {
 }
 
 function getRegisteredEventListener(method) {
-  console.log(eventListenerMap);
+  // console.log(eventListenerMap);
   return eventListenerMap[method];
 }
 
@@ -93,10 +94,89 @@ function sendEventListenerAck(ws, oMsg) {
   logger.debug(`Sent event listener ack message: ${ackMessage}`);
 }
 
+// sendEvent function to handle pre- post- method/event triggers
+function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
+  try {
+    if ( !isRegisteredEventListener(method) ) {
+      fErr.call(null, method);
+
+    } else {
+       // Fire pre trigger if there is one for this method
+       if ( method in eventTriggers ) {
+        if ( 'pre' in eventTriggers[method] ) {
+          try {
+            const ctx = {
+              logger: logger,
+              setTimeout: setTimeout,
+              setInterval: setInterval
+            };
+            logger.debug(`Calling pre trigger for event ${method}`);
+            eventTriggers[method].pre.call(ctx);
+          } catch ( ex ) {
+            logger.error(`ERROR: Exception occurred while executing pre-trigger for ${method}; continuing`);
+          }
+        }
+      }
+
+      const id = getRegisteredEventListener(method);
+      let postResult;
+
+      // const oEventMessage = {
+      //   jsonrpc: '2.0',
+      //   id: id,
+      //   result: result
+      // };
+      // const eventMessage = JSON.stringify(oEventMessage);
+      // // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
+      // ws.send(eventMessage);
+      // logger.info(`${msg}: Sent event message: ${eventMessage}`);
+      
+      // Fire post trigger if there is one for this method
+      if ( method in eventTriggers ) {
+        if ( 'post' in eventTriggers[method] ) {
+          try {
+            const ctx = {
+              logger: logger,
+              setTimeout: setTimeout,
+              setInterval: setInterval,
+              result : result
+            };
+            logger.debug(`Calling post trigger for event ${method}`);
+            // post trigger can return undefined to leave as-is or can return a new result object
+            postResult = eventTriggers[method].post.call(null, ctx);
+          } catch ( ex ) {
+            {
+              logger.error(`ERROR: Exception occurred while executing post-trigger for ${method}`);
+              logger.error(ex);
+            }
+          }
+        }
+      }
+
+      const finalResult = ( postResult ? postResult : result );
+      const oEventMessage = {
+        jsonrpc: '2.0',
+        id: id,
+        result: finalResult
+      };
+      const eventMessage = JSON.stringify(oEventMessage);
+      // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
+      ws.send(eventMessage);
+      logger.info(`${msg}: Sent event message: ${eventMessage}`);
+
+      fSuccess.call(null);
+    }
+  } catch ( ex ) {
+    logger.error('sendEvent: ERROR:');
+    logger.error(ex);
+    fFatalErr.call(null, ex);
+  }
+}
+
 // --- Exports ---
 
 export {
   registerEventListener, isRegisteredEventListener, getRegisteredEventListener, deregisterEventListener,
-  isEventListenerOnMessage, isEventListenerOffMessage,
-  sendEventListenerAck
+  isEventListenerOnMessage, isEventListenerOffMessage,sendEventListenerAck,
+  sendEvent
 };

@@ -50,7 +50,7 @@ function processFile(methodName, filePath, fileName, fileExt) {
         }
         eventTriggers[methodName][fileName] = fcn;
         logger.info(`Enabled event trigger defined in trigger file ${filePath}`);
-        console.log('inside event:',eventTriggers);
+        // console.log('inside event:',eventTriggers);
       } catch ( ex ) {
         logger.error(`Skipping event trigger file ${filePath}; an error occurred parsing the JavaScript`);
         logger.error(ex);
@@ -72,7 +72,7 @@ function processFile(methodName, filePath, fileName, fileExt) {
         }
         methodTriggers[methodName][fileName] = fcn;
         logger.info(`Enabled method trigger defined in trigger file ${filePath}`);
-        console.log('inside method:',methodTriggers);
+        // console.log('inside method:',methodTriggers);
       } catch ( ex ) {
         logger.error(`Skipping method trigger file ${filePath}; an error occurred parsing the JavaScript`);
         logger.error(ex);
@@ -105,16 +105,20 @@ function processMethodDir(dir, methodName, processFile) {
   });
 }
 
-// dir is expected to be a directory that contains subdirectories for any/all methods for which triggers are defined
+///foo/bar/method-triggers
+//fs.readdir(path.join(dir, 'method-triggers'), (error, fileNames) => {
+//fs.readdir(path.join(dir, 'event-triggers'), (error, fileNames) => {
+
+// dir is expected to be a method/event directory that contains subdirectories for any/all methods/events for which triggers are defined
 // E.g., dir/lifecycle.ready/post.js
-function processTopDir(dir, processMethodDir) {
-  fs.readdir(dir, (error, fileNames) => {
+function processTopDir(subDir, processMethodDir) {
+  fs.readdir(subDir, (error, fileNames) => {
     if ( error ) { throw error; }
 
     fileNames.forEach(filename => {
       const fileName = path.parse(filename).name;
       const fileExt = path.parse(filename).ext;
-      const filePath = path.resolve(dir, filename);
+      const filePath = path.resolve(subDir, filename);
       fs.stat(filePath, function(error, stat) {
         if ( error ) { throw error; }
         const isFile = stat.isFile();
@@ -126,11 +130,32 @@ function processTopDir(dir, processMethodDir) {
   });
 }
 
+// subDir is expected to be a root trigger directory that contains subdirectories methods/events
+//  E.g., subDir/methodTrigger/..  subDir/eventTrigger/..
+function processSubDir(dir , processTopDir){
+  fs.readdir(dir, (error, fileNames) => {
+    if ( error ) { throw error; }
+
+    fileNames.forEach(filename => {
+      const subDir = path.resolve(dir, filename);
+      const fileExt = path.parse(filename).ext;
+      if( !fileExt ) {
+        try {
+        processTopDir(subDir, processMethodDir);
+      } catch ( ex ) {
+        logger.error(`An error occurred trying to processSubDir on ${dir}`);
+        logger.error(ex);
+      }};
+      logger.info(subDir);      
+    });
+  });
+}
+
 // Load any/all trigger files from requested triggers paths (via --triggers command-line argument(s))
 const enabledTriggerPaths = commandLine.enabledTriggerPaths;
 enabledTriggerPaths.forEach((dir) => {
   try {
-    processTopDir(dir, processMethodDir);
+    processSubDir(dir, processTopDir);
   } catch ( ex ) {
     logger.error(`An error occurred trying to processTopDir on ${dir}`);
     logger.error(ex);

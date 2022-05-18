@@ -202,6 +202,17 @@ async function readSdkJsonFileIfEnabled(sdkName) {
         await readFile(url)
       );
       logger.info(`Loaded ${sdkName} SDK from ${url}`);
+      // shortlisting .on events
+      const methodName = [];
+      let items = rawMeta["core"]["methods"];
+      items.forEach( item => {
+        if(item.tags){
+          if( item.tags[0].name == "event" ){
+            methodName.push(item.name);
+          }
+        }
+      })
+      logger.info(methodName);
     } catch ( ex ) {
       logger.error(`ERROR: Could not load ${sdkName} SDK from ${url}`);
     }
