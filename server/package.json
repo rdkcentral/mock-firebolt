@@ -6,27 +6,21 @@
   "scripts": {
     "clean": "rm -rf build && mkdir -p build",
     "prepare:setup": "npm run clean",
-
-    "build:core": "cp ./node_modules/@firebolt-js/sdk/dist/firebolt-open-rpc.json ./build/firebolt-core-sdk.json",
-    "build:manage": "cp ./node_modules/@firebolt-js/manage-sdk/dist/firebolt-open-rpc.json ./build/firebolt-manage-sdk.json",
-    "build:discovery": "cp ./node_modules/@firebolt-js/discovery-sdk/dist/firebolt-open-rpc.json ./build/firebolt-discovery-sdk.json",
-
+    "build:core": "cp ./node_modules/@firebolt-js/sdk/dist/firebolt-open-rpc.json ./build/firebolt-open-rpc.json",
+    "build:manage": "cp ./node_modules/@firebolt-js/manage-sdk/dist/firebolt-manage-open-rpc.json ./build/firebolt-manage-open-rpc.json",
+    "build:discovery": "cp ./node_modules/@firebolt-js/discovery-sdk/dist/firebolt-discovery-open-rpc.json ./build/firebolt-discovery-open-rpc.json",
     "build:openrpc:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build:openrpc": "npm run build:core && npm run build:manage && npm run build:discovery",
-
-    "build:mf": "cp -r ./src/* ./build && cp ./package.json ./build",
-
+    "build:mf": "cp -r ./src/* ./build && cp ./src/.mf.config.json ./build 2>/dev/null || : && cp ./package.json ./build",
     "build:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build": "npm run build:openrpc && npm run build:mf",
-
     "test:@TODO": "jest --config=jest.config.js --detectOpenHandles",
     "test": "echo TEST",
-
     "start:NOTES1": "Can do 'npm run start' (core SDK only) or 'npm run start --manage --discovery' (all three SDKs)",
     "start": "node build/index.mjs",
     "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
     "dev:NOTES2": "Can do 'npm run dev' (core SDK only) or 'npm run dev --manage --discovery' (all three SDKs)",
-    "dev": "npm run build:mf && npm run start -- $npm_config_manage $npm_config_discovery"
+    "dev": "npm run build:mf && npm run start --"
   },
   "repository": {
     "type": "git",
@@ -54,6 +48,7 @@
     "lodash-es": "^4.17.21",
     "moment": "^2.29.1",
     "nopt": "^5.0.0",
+    "tmp": "^0.2.1",
     "uuid": "^8.3.2",
     "ws": "^8.2.3"
   },

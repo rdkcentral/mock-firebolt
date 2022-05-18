@@ -22,10 +22,13 @@
 'use strict';
 
 import { readFile } from 'fs/promises';
+import * as fs from 'fs';
+import * as https from 'https';
 
 import Ajv from 'ajv';
 const ajv = new Ajv();
 
+import { createTmpFile } from './util.mjs';
 import { config } from './config.mjs';
 import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
@@ -54,9 +57,11 @@ function getMeta() {
 }
 
 function getMethod(methodName) {
-  for ( let ii = 0; ii < config.app.supportedSdks.length; ii += 1 ) {
-    const sdkName = config.app.supportedSdks[ii];
-    if ( methodName in methodMaps[sdkName] ) { return methodMaps[sdkName][methodName]; }
+  for ( let ii = 0; ii < config.dotConfig.supportedSdks.length; ii += 1 ) {
+    const sdkName = config.dotConfig.supportedSdks[ii].name;
+    if ( methodMaps[sdkName] ) {
+      if ( methodName in methodMaps[sdkName] ) { return methodMaps[sdkName][methodName]; }
+    }
   }
   return undefined;
 }
@@ -67,8 +72,8 @@ function isMethodKnown(methodName) {
 }
 
 function getSchema(schemaName) {
-  for ( const ii = 0; ii < config.app.supportedSdks.length; ii += 1 ) {
-    const sdkName = config.app.supportedSdks[ii];
+  for ( const ii = 0; ii < config.dotConfig.supportedSdks.length; ii += 1 ) {
+    const sdkName = config.dotConfig.supportedSdks[ii].name;
     if ( schemaName in meta[sdkName].components.schemas ) { return meta[sdkName].components.schemas[schemaName]; }
   }
   return undefined;
@@ -81,6 +86,22 @@ function getFirstExampleValueForMethod(methodName) {
   if ( oMethod.examples.length <= 0 ) { return undefined; }
   if ( ! oMethod.examples[0].result ) { return undefined; }
   return oMethod.examples[0].result.value;
+}
+
+// Returns undefined if/when no notes or an object like { alternative: "xxx", notes: "xxx", docUrl: "xxx" }
+function getDeveloperNotesForMethod(methodName) {
+  const oMethod = getMethod(methodName);
+  if ( ! oMethod ) { return undefined; }
+  if ( ! oMethod.tags ) { return undefined; }
+  if ( oMethod.tags.length <= 0 ) { return undefined; }
+  const developerNotesTagName = config.app.developerNotesTagName;
+  const developerNotesTag = oMethod.tags.find(oTag => oTag.name.toLowerCase() === developerNotesTagName.toLowerCase());
+  if ( ! developerNotesTag ) { return undefined; }
+  const developerNotes = {
+    notes       : developerNotesTag['x-notes'],
+    docUrl      : developerNotesTag['x-doc-url']
+  };
+  return developerNotes;
 }
 
 // Are the given params valid for thegiven method, based on the OpenRPC metadata?
@@ -192,34 +213,71 @@ function validateMethodError(val) {
   return errors;
 }
 
+async function downloadOpenRpcJsonFile(url) {
+  const tmpObj = createTmpFile('mf-openrpc-', '.json');
+  return new Promise(function(resolve, reject) {
+    try {
+      https.get(url, (res) => {
+        const filePath = tmpObj.name;
+        const outStream = fs.createWriteStream(filePath);
+        res.pipe(outStream);
+        outStream.on('finish',() => {
+            outStream.close();
+            resolve(tmpObj.name);
+        });
+      });
+    } catch ( ex ) {
+      reject(ex);
+    }
+  });
+}
+
 // Load the firebolt-xxx-sdk.json file for the given SDK, if that SDK is enabled
 async function readSdkJsonFileIfEnabled(sdkName) {
-  let url;
+  let url, fileUrl;
   if ( isSdkEnabled(sdkName) ) {
     try {
-      url = new URL(`./firebolt-${sdkName}-sdk.json`, import.meta.url);
-      rawMeta[sdkName] = JSON.parse(
-        await readFile(url)
-      );
-      logger.info(`Loaded ${sdkName} SDK from ${url}`);
+      const oSdk = config.dotConfig.supportedSdks.find((oSdk) => { return ( oSdk.name === sdkName ); });
+      if ( oSdk.fileName ) {
+        const openRpcFileName = oSdk.fileName;
+        fileUrl = new URL(`./${openRpcFileName}`, import.meta.url);
+        rawMeta[sdkName] = JSON.parse(
+          await readFile(fileUrl)
+        );
+        logger.info(`Loaded ${sdkName} SDK from ${fileUrl}`);
+      } else if ( oSdk.url ) {
+        url = new URL(oSdk.url);
+        const fileUrl = await downloadOpenRpcJsonFile(url);
+        rawMeta[sdkName] = JSON.parse(
+          await readFile(fileUrl)
+        );
+        logger.info(`Loaded ${sdkName} SDK from URL ${url}`);
+      } else {
+        logger.error(`ERROR: Either 'url' or 'fileName' must be specified for SDK ${sdkName}; Skipping`);
+        return;
+      }
+      
     } catch ( ex ) {
       logger.error(`ERROR: Could not load ${sdkName} SDK from ${url}`);
+      console.log(ex);
     }
   }
 }
 
-// Load the firebolt-xxx-sdk.json files for any/all SDKs that are enabled ('core' always; others optionally)
+// Load the OpenRPC files for any/all SDKs that are enabled
 // NOTE: Assumes the build process has put the firebolt-xxx-sdk.json files in the same directory
 //       as the source code from the src/ directory
 async function readAllEnabledSdkJsonFiles() {
-  await Promise.all(config.app.supportedSdks.map(async (sdkName) => {
+  await Promise.all(config.dotConfig.supportedSdks.map(async (oSdk) => {
+    const sdkName = oSdk.name;
     await readSdkJsonFileIfEnabled(sdkName);
   }));
 }
 
 function buildMethodMapsForAllEnabledSdks() {
   // Build faster-performing maps for methods (vs. openrpc.methods array)
-  config.app.supportedSdks.forEach(function(sdkName) {
+  config.dotConfig.supportedSdks.forEach(function(oSdk) {
+    const sdkName = oSdk.name;
     if ( isSdkEnabled(sdkName) ) {
       methodMaps[sdkName] = buildMethodMap(meta[sdkName]);
     }
@@ -228,14 +286,14 @@ function buildMethodMapsForAllEnabledSdks() {
 
 // --- Module-level Code ---
 
-// Will contain one key for each API enabled (See config.app.supportedSdks; core is always enabled; others are optional)
+// Will contain one key for each API enabled (See .mf.config.json::supportedSdks)
 // The value for each key will be an object containing keys: openrpc, info, methods, and components (contents of firebolt-xxx-sdk.json file)
 const rawMeta = {};
 
 // Same as above, but $refs have been dereferenced; this is the main datastructure used here
 let meta = {};
 
-// Will contain one key for each API enabled (See config.app.supportedSdks; core is always enabled; others are optional)
+// Will contain one key for each API enabled (See .mf.config.json::supportedSdks)
 // The value for each key will be an object with keys for each method
 const methodMaps = {};
 
@@ -249,6 +307,6 @@ readAllEnabledSdkJsonFiles()
 export {
   getRawMeta, getMeta,
   getMethod, isMethodKnown, getSchema,
-  getFirstExampleValueForMethod,
+  getFirstExampleValueForMethod, getDeveloperNotesForMethod,
   validateMethodCall, validateMethodResult, validateMethodError
 };
