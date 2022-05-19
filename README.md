@@ -75,7 +75,16 @@ This repo contains these elements:
 See [Documentation](./docs/Documentation.md).
 
 
-# SDK Support
+# SDK Support and the server/src/.mf.config.json File
+
+Mock Firebolt is a very generic mocking service for almost *any* OpenRPC-based service. The list of particular SDKs the server supports when you run it is controlled by the contents of the `server/src/.mf.config.json` file and any associated command-line flags you provide when you start the server.
+
+The repo contains a `server/src/.mf.config.SAMPLE.json` file and you'll need to copy this file to `server/src/.mf.config.json` in order for the server to start. Once you've done this, you're free to edit your `server/src/.mf.config.json` file and add other SDKs if you'd like. If the OpenRPC JSON file for your API is somewhere in the cloud or otherwise available via HTTP, you should use the `url` property for the SDK in this file rather than the `fileName` property (which is only used for SDKs for which there is a "hard dependency" in the `server/package.json` file).
+
+The next two sections presume you are using the out-of-the-box `.mf.config.json` file.
+
+
+# Firebolt SDK Support
 
 Mock Firebolt supports these Firebolt SDKs: **core**, **manage**, **discovery**.
 
@@ -84,6 +93,13 @@ By default, only the core SDK is enabled, meaning if you try to make calls to me
 This default mode is appropriate for app developers developing third-party content apps that don't need (nor get) the permissions necessary to use the other SDKs.
 
 For developers building "operator apps" / "search and discover apps" which need one or more of these SDKs, when running the Mock Firebolt server, you can pass flags like `--manage` and/or `--discovery` to enable the specific SDK(s) desired. Note of course that ultimately, when running on a real device, your app will only have whatever permissions it has been given.
+
+
+# $badger Support
+
+Mock Firebolt also supports the $badger SDK for application developers migrating from $badger to Firebolt.
+
+Developers wishing to activate this functionality must pass the `--moneybadger` command-line flag when starting Mock Firebolt. As well, you must use the `activateMockFireboltForBadger.js` script within your app and have it execute *before* your app bundle (which includes $badger) executes.
 
 
 # Important Dependency/Version Notes
@@ -116,6 +132,8 @@ cd mock-firebolt
 cd server
 
 # One-time stuff
+
+cp src/.mf.config.SAMPLE.json src/.mf.config.json
 
 npm install
 npm run clean             # Cleans/creates build/ subdirectory

@@ -27,6 +27,7 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
+import { addCall } from './sessionManagement.mjs';
 
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
@@ -35,6 +36,9 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Received message: ${message}`);
 
   const oMsg = JSON.parse(message);
+
+  // record the message if we are recording
+  addCall(oMsg.method, oMsg.params);
 
   // Handle JSON-RPC notifications (w/ no id in request)
   // - Don't send reply message over socket back to SDK
@@ -125,6 +129,21 @@ async function handleMessage(message, userId, ws) {
 
   //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params);  
+
+  // Emit developerNotes for the method, if any
+  const developerNotes = fireboltOpenRpc.getDeveloperNotesForMethod(oMsg.method);
+  if ( developerNotes ) {
+    //logger.warning('\n');
+    logger.warning(`Developer notes for function ${oMsg.method}:`);
+    if ( developerNotes.notes ) {
+      logger.warning(developerNotes.notes);
+    }
+    if ( developerNotes.docUrl ) {
+      logger.warning(`Documentation links:`);
+      logger.warning(developerNotes.docUrl);
+    }
+    //logger.warning('\n');
+  }
 
   // Fire post trigger if there is one for this method
   if ( oMsg.method in methodTriggers ) {

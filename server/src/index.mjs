@@ -21,8 +21,8 @@
 'use strict';
 
 import { logger } from './logger.mjs';
-import * as commandLine from './commandLine.mjs';
 import { config } from './config.mjs';
+import * as commandLine from './commandLine.mjs';
 import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';

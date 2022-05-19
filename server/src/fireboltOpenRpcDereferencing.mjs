@@ -16,7 +16,7 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-// Dereferencing Logic 
+// Dereferencing Logic
 
 'use strict';
 
@@ -81,7 +81,8 @@ function dereferenceSchemas(metaForSdk, methodName) {
 
 function dereferenceMeta(_meta) {
   const meta = JSON.parse(JSON.stringify(_meta)); // Deep copy
-  config.app.supportedSdks.forEach(function(sdkName) {
+  config.dotConfig.supportedSdks.forEach(function(oSdk) {
+    const sdkName = oSdk.name;
     if ( sdkName in meta ) {
       const metaForSdk = meta[sdkName];
       const methods = metaForSdk.methods;

@@ -24,6 +24,7 @@ import * as healthApi from './routes/api/health.mjs';
 import * as metaApi from './routes/api/meta.mjs';
 import * as stateApi from './routes/api/state.mjs';
 import * as eventApi from './routes/api/event.mjs';
+import * as sessionApi from './routes/api/session.mjs';
 
 function configureAPI(app) {
 
@@ -65,6 +66,17 @@ function configureAPI(app) {
 
     // Send an event
     app.post('/api/v1/event',                           eventApi.sendEvent);
+
+    // ======================= Session-Related API Routes =======================
+
+    // Toggle session state
+    app.post('/api/v1/session',                        sessionApi.toggleSession);
+
+    // Start a session
+    app.post('/api/v1/session/start',                  sessionApi.startSession);
+
+    // End a session
+    app.post('/api/v1/session/stop',                   sessionApi.stopSession);
 }
 
 export { configureAPI };
