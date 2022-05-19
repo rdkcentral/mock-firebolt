@@ -54,9 +54,6 @@ function sendEvent(req, res) {
   }
 
   events.sendEvent(ws, method, result, '', fSuccess, fErr, fFatalErr);
-  // if ( rc === 'SUCCESS') { rc.status(200).send('You seem lost')}  //send 200 }
-  // else if ( rc === 'NO-EVENT-LISTENER') { /*send 400 */}
-  // else { /*send 500*/}
 }
 
 // --- Exports ---

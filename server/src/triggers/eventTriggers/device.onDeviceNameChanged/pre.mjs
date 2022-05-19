@@ -16,8 +16,6 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-function pre(ctx) {  
-//  if( ctx.result ){
+function pre(ctx) {
    console.log('inside pre event');
-//  }
 }

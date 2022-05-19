@@ -37,7 +37,6 @@ function isRegisteredEventListener(method) {
 }
 
 function getRegisteredEventListener(method) {
-  // console.log(eventListenerMap);
   return eventListenerMap[method];
 }
 
@@ -120,16 +119,6 @@ function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
 
       const id = getRegisteredEventListener(method);
       let postResult;
-
-      // const oEventMessage = {
-      //   jsonrpc: '2.0',
-      //   id: id,
-      //   result: result
-      // };
-      // const eventMessage = JSON.stringify(oEventMessage);
-      // // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
-      // ws.send(eventMessage);
-      // logger.info(`${msg}: Sent event message: ${eventMessage}`);
       
       // Fire post trigger if there is one for this method
       if ( method in eventTriggers ) {

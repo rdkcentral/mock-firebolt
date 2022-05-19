@@ -17,7 +17,6 @@
 */
 
 function post(ctx, params) {
-  //console.log('ctx:',ctx);
   const result = '1234567';   
   const msg = 'Post trigger for device.id sent device.onDeviceNameChanged event';
   ctx.sendEvent('device.onDeviceNameChanged', result, msg);  

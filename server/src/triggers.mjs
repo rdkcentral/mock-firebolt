@@ -50,7 +50,6 @@ function processFile(methodName, filePath, fileName, fileExt) {
         }
         eventTriggers[methodName][fileName] = fcn;
         logger.info(`Enabled event trigger defined in trigger file ${filePath}`);
-        // console.log('inside event:',eventTriggers);
       } catch ( ex ) {
         logger.error(`Skipping event trigger file ${filePath}; an error occurred parsing the JavaScript`);
         logger.error(ex);
@@ -72,7 +71,6 @@ function processFile(methodName, filePath, fileName, fileExt) {
         }
         methodTriggers[methodName][fileName] = fcn;
         logger.info(`Enabled method trigger defined in trigger file ${filePath}`);
-        // console.log('inside method:',methodTriggers);
       } catch ( ex ) {
         logger.error(`Skipping method trigger file ${filePath}; an error occurred parsing the JavaScript`);
         logger.error(ex);
@@ -104,10 +102,6 @@ function processMethodDir(dir, methodName, processFile) {
     });
   });
 }
-
-///foo/bar/method-triggers
-//fs.readdir(path.join(dir, 'method-triggers'), (error, fileNames) => {
-//fs.readdir(path.join(dir, 'event-triggers'), (error, fileNames) => {
 
 // dir is expected to be a method/event directory that contains subdirectories for any/all methods/events for which triggers are defined
 // E.g., dir/lifecycle.ready/post.js
@@ -146,7 +140,6 @@ function processSubDir(dir , processTopDir){
         logger.error(`An error occurred trying to processSubDir on ${dir}`);
         logger.error(ex);
       }};
-      logger.info(subDir);      
     });
   });
 }

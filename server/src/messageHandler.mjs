@@ -28,19 +28,6 @@ import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
 
-// function emit(id, result, msg, ws) {
-//   if ( id ) {
-//     const oEventMessage = {
-//       jsonrpc: '2.0',
-//       id: id,
-//       result: result
-//     };
-//     const eventMessage = JSON.stringify(oEventMessage);
-//     ws.send(eventMessage);
-//     logger.info(`${msg}: ${eventMessage}`);
-//   }
-// }
-
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
   let response, newResponse;
@@ -127,11 +114,6 @@ async function handleMessage(message, userId, ws) {
             function fFatalErr() {}
             events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           }
-          // sendEvent: function(onMethod, result, msg) {
-          //   const id = events.getRegisteredEventListener(onMethod);
-          //   if ( ! id ) { return; }
-          //   emit(id, result, msg, ws);
-          // }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
         methodTriggers[oMsg.method].pre.call(null, ctx, oMsg.params);
@@ -158,11 +140,6 @@ async function handleMessage(message, userId, ws) {
             function fFatalErr() {}
             events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
-          // sendEvent: function(onMethod, result, msg) {
-          //   const id = events.getRegisteredEventListener(onMethod);       
-          //   if ( ! id ) { return; }
-          //   emit(id, result, msg, ws);
-          // },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };
         logger.debug(`Calling post trigger for method ${oMsg.method}`);
