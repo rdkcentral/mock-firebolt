@@ -93,7 +93,7 @@ function sendEventListenerAck(ws, oMsg) {
   logger.debug(`Sent event listener ack message: ${ackMessage}`);
 }
 
-// sendEvent function to handle pre- post- method/event triggers
+// sendEvent to handle post API event calls, including pre- and post- event trigger processing
 function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
   try {
     if ( !isRegisteredEventListener(method) ) {
@@ -107,7 +107,25 @@ function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
             const ctx = {
               logger: logger,
               setTimeout: setTimeout,
-              setInterval: setInterval
+              setInterval: setInterval,
+              sendEvent: function(method, result, msg) {
+                function fSuccess() {logger.info({status: 'SUCCESS'})}
+                function fErr(method) {
+                  logger.info({status: 'ERROR',
+                    errorCode: 'NO-EVENT-HANDLER-REGISTERED',
+                    message: `Could not send ${method} event because no listener is active`
+                  })
+                }
+                function fFatalErr(ex) {
+                  logger.info({
+                    status: 'ERROR',
+                    errorCode: 'COULD-NOT-SEND-EVENT',
+                    message: 'Internal error',
+                    error: ex.toString()
+                  })
+                }
+                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
+              }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
             eventTriggers[method].pre.call(ctx);
@@ -118,6 +136,7 @@ function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
       }
 
       const id = getRegisteredEventListener(method);
+      const response = {result : result};
       let postResult;
       
       // Fire post trigger if there is one for this method
@@ -128,11 +147,30 @@ function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
               logger: logger,
               setTimeout: setTimeout,
               setInterval: setInterval,
-              result : result
+              sendEvent: function(method, result, msg) {
+                function fSuccess() {logger.info({status: 'SUCCESS'})}
+                function fErr(method) {
+                  logger.info({status: 'ERROR',
+                    errorCode: 'NO-EVENT-HANDLER-REGISTERED',
+                    message: `Could not send ${method} event because no listener is active`
+                  })
+                }
+                function fFatalErr(ex) {
+                  logger.info({
+                    status: 'ERROR',
+                    errorCode: 'COULD-NOT-SEND-EVENT',
+                    message: 'Internal error',
+                    error: ex.toString()
+                  })
+                }
+                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
+              },
+              ...response
             };
             logger.debug(`Calling post trigger for event ${method}`);
             // post trigger can return undefined to leave as-is or can return a new result object
             postResult = eventTriggers[method].post.call(null, ctx);
+            // console.log('result: ',result);
           } catch ( ex ) {
             {
               logger.error(`ERROR: Exception occurred while executing post-trigger for ${method}`);

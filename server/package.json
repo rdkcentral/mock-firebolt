@@ -11,7 +11,7 @@
     "build:discovery": "cp ./node_modules/@firebolt-js/discovery-sdk/dist/firebolt-discovery-open-rpc.json ./build/firebolt-discovery-open-rpc.json",
     "build:openrpc:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build:openrpc": "npm run build:core && npm run build:manage && npm run build:discovery",
-    "build:mf": "cp -r ./src/* ./build && cp ./src/.mf.config.json ./build 2>/dev/null || : && cp ./package.json ./build",
+    "build:mf": "cp -r ./src/* ./build && cp ./src/.mf.config.json ./build && cp ./package.json ./build",
     "build:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build": "npm run build:openrpc && npm run build:mf",
     "test:@TODO": "jest --config=jest.config.js --detectOpenHandles",

@@ -16,8 +16,7 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-function post(ctx) {  
- if( ctx.result ){
-   console.log('inside post event');
- }
+function post(ctx) {
+    ctx.logger.info('Inside device.onDeviceNameChanged event');
+    ctx.logger.info(`ctx.result: ${ctx.result}`);
 }

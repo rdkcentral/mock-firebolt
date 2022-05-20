@@ -113,9 +113,21 @@ async function handleMessage(message, userId, ws) {
           setTimeout: setTimeout,
           setInterval: setInterval,
           sendEvent: function(onMethod, result, msg) {
-            function fSuccess() {}
-            function fErr() {}
-            function fFatalErr() {}
+            function fSuccess() {logger.info({status: 'SUCCESS'})}
+            function fErr(method) {
+              logger.info({status: 'ERROR',
+                errorCode: 'NO-EVENT-HANDLER-REGISTERED',
+                message: `Could not send ${method} event because no listener is active`
+              })
+            }
+            function fFatalErr(ex) {
+              logger.info({
+                status: 'ERROR',
+                errorCode: 'COULD-NOT-SEND-EVENT',
+                message: 'Internal error',
+                error: ex.toString()
+              })
+            }
             events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           }
         };
@@ -154,9 +166,21 @@ async function handleMessage(message, userId, ws) {
           setTimeout: setTimeout,
           setInterval: setInterval,
           sendEvent: function(onMethod, result, msg) {
-            function fSuccess() {}
-            function fErr() {}
-            function fFatalErr() {}
+            function fSuccess() {logger.info({status: 'SUCCESS'})}
+            function fErr(method) {
+              logger.info({status: 'ERROR',
+                errorCode: 'NO-EVENT-HANDLER-REGISTERED',
+                message: `Could not send ${method} event because no listener is active`
+              })
+            }
+            function fFatalErr(ex) {
+              logger.info({
+                status: 'ERROR',
+                errorCode: 'COULD-NOT-SEND-EVENT',
+                message: 'Internal error',
+                error: ex.toString()
+              })
+            }
             events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
