@@ -29,8 +29,6 @@ import * as events from './events.mjs';
 import { triggers } from './messageHandlerTriggers.mjs';
 import { addCall } from './sessionManagement.mjs';
 
-
-
 function emit(id, result, msg, ws) {
   if ( id ) {
     const oEventMessage = {
