@@ -17,5 +17,5 @@
 */
 
 function pre(ctx) {
-   console.log('inside pre event');
+   ctx.logger.info('inside pre event');
 }

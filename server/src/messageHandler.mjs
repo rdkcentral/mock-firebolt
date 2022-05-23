@@ -113,20 +113,14 @@ async function handleMessage(message, userId, ws) {
           setTimeout: setTimeout,
           setInterval: setInterval,
           sendEvent: function(onMethod, result, msg) {
-            function fSuccess() {logger.info({status: 'SUCCESS'})}
-            function fErr(method) {
-              logger.info({status: 'ERROR',
-                errorCode: 'NO-EVENT-HANDLER-REGISTERED',
-                message: `Could not send ${method} event because no listener is active`
-              })
+            function fSuccess() {
+              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
             }
-            function fFatalErr(ex) {
-              logger.info({
-                status: 'ERROR',
-                errorCode: 'COULD-NOT-SEND-EVENT',
-                message: 'Internal error',
-                error: ex.toString()
-              })
+            function fErr() {
+              logger.info(`Could not send ${onMethod} event because no listener is active`)
+            }
+            function fFatalErr() {
+              logger.info(`Internal error`)
             }
             events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           }
@@ -166,20 +160,14 @@ async function handleMessage(message, userId, ws) {
           setTimeout: setTimeout,
           setInterval: setInterval,
           sendEvent: function(onMethod, result, msg) {
-            function fSuccess() {logger.info({status: 'SUCCESS'})}
-            function fErr(method) {
-              logger.info({status: 'ERROR',
-                errorCode: 'NO-EVENT-HANDLER-REGISTERED',
-                message: `Could not send ${method} event because no listener is active`
-              })
+            function fSuccess() {
+              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
             }
-            function fFatalErr(ex) {
-              logger.info({
-                status: 'ERROR',
-                errorCode: 'COULD-NOT-SEND-EVENT',
-                message: 'Internal error',
-                error: ex.toString()
-              })
+            function fErr() {
+              logger.info(`Could not send ${onMethod} event because no listener is active`)
+            }
+            function fFatalErr() {
+              logger.info(`Internal error`)
             }
             events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
