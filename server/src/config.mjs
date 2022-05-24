@@ -30,6 +30,7 @@ import { dotConfig } from './dotConfig.mjs';
 // Static configuration (some of which can be overridden by command-line arguments)
 const config = {
   app: {
+    allowMixedCase: false,
     socketPort: 9998,
     httpPort: 3333,
     defaultUserId: '12345',
