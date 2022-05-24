@@ -22,6 +22,7 @@
 'use strict';
 
 import { readFile } from 'fs/promises';
+import * as path from 'path';
 import * as fs from 'fs';
 import * as https from 'https';
 
@@ -240,7 +241,14 @@ async function readSdkJsonFileIfEnabled(sdkName) {
       const oSdk = config.dotConfig.supportedSdks.find((oSdk) => { return ( oSdk.name === sdkName ); });
       if ( oSdk.fileName ) {
         const openRpcFileName = oSdk.fileName;
-        fileUrl = new URL(`./${openRpcFileName}`, import.meta.url);
+        if ( path.isAbsolute(openRpcFileName) || openRpcFileName.startsWith('~') ) {
+          // Absolute file path given -- read from that file path exactly as-is
+          fileUrl = new URL(openRpcFileName, import.meta.url);
+        } else {
+          // Relative file path given -- read from file with given name from current
+          // directory (build/), assuming file was copied there/here via a build step
+          fileUrl = new URL(`./${openRpcFileName}`, import.meta.url);
+        }
         rawMeta[sdkName] = JSON.parse(
           await readFile(fileUrl)
         );
