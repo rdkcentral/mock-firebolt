@@ -16,7 +16,7 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 function post(ctx, params) {
-    const result = { enabled : 'true' };
+    const result = { "enabled": true };
     const msg = 'Post trigger for accessibilty.voice sent false settings event';
     ctx.sendEvent('accessibility.onVoiceGuidanceSettingsChanged', result, msg);
     return result;
