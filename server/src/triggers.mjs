@@ -24,7 +24,8 @@ import { logger } from './logger.mjs';
 import * as commandLine from './commandLine.mjs';
 
 // Ultimately, this is the "map" we're building up
-const triggers = {};
+const methodTriggers = {};
+const eventTriggers = {};
 
 // Process a single file found in enabledTriggerPathN/pre.js and/or enabledTriggerPathN/post.js files
 // Read the file, create a function out of its source code, and set triggers[methodName][pre|post]
@@ -33,26 +34,50 @@ function processFile(methodName, filePath, fileName, fileExt) {
     logger.info(`Skipping trigger file ${filePath}; not a pre.js or post.js file`);
     return;
   }
-
-  fs.readFile(filePath, 'utf8', function(error, sTriggerFunctionDefinition) {
-    if ( error ) { throw error; }
-
-    let fcn;
-    try {
-      // Next line assumes sTriggerFunctionDefinition defines a method named <fileName> (e.g., pre or post)
-      const sFcnBody = `${sTriggerFunctionDefinition}; return ${fileName}(ctx, params);`;
-      const fcn = new Function('ctx', 'params', sFcnBody);
-
-      if ( ! (methodName in triggers) ) {
-        triggers[methodName] = {};
+  
+  if( methodName.includes('.on') ){
+    fs.readFile(filePath, 'utf8', function(error, sTriggerFunctionDefinition) {
+      if ( error ) { throw error; }
+  
+      let fcn;
+      try {
+        // Next line assumes sTriggerFunctionDefinition defines a method named <fileName> (e.g., pre or post)
+        const sFcnBody = `${sTriggerFunctionDefinition}; return ${fileName}(ctx, params);`;
+        const fcn = new Function('ctx', 'params', sFcnBody);
+  
+        if ( ! (methodName in eventTriggers) ) {
+          eventTriggers[methodName] = {};
+        }
+        eventTriggers[methodName][fileName] = fcn;
+        logger.info(`Enabled event trigger defined in trigger file ${filePath}`);
+      } catch ( ex ) {
+        logger.error(`Skipping event trigger file ${filePath}; an error occurred parsing the JavaScript`);
+        logger.error(ex);
       }
-      triggers[methodName][fileName] = fcn;
-      logger.info(`Enabled trigger defined in trigger file ${filePath}`);
-    } catch ( ex ) {
-      logger.error(`Skipping trigger file ${filePath}; an error occurred parsing the JavaScript`);
-      logger.error(ex);
-    }
-  });
+    });
+  }  
+  else{
+    fs.readFile(filePath, 'utf8', function(error, sTriggerFunctionDefinition) {
+      if ( error ) { throw error; }
+  
+      let fcn;
+      try {
+        // Next line assumes sTriggerFunctionDefinition defines a method named <fileName> (e.g., pre or post)
+        const sFcnBody = `${sTriggerFunctionDefinition}; return ${fileName}(ctx, params);`;
+        const fcn = new Function('ctx', 'params', sFcnBody);
+  
+        if ( ! (methodName in methodTriggers) ) {
+          methodTriggers[methodName] = {};
+        }
+        methodTriggers[methodName][fileName] = fcn;
+        logger.info(`Enabled method trigger defined in trigger file ${filePath}`);
+      } catch ( ex ) {
+        logger.error(`Skipping method trigger file ${filePath}; an error occurred parsing the JavaScript`);
+        logger.error(ex);
+      }
+    });
+  }
+  
 }
 
 // dir is expected to be a directory whose name is a valid Firebolt method (e.g., lifecycle.ready)
@@ -78,16 +103,16 @@ function processMethodDir(dir, methodName, processFile) {
   });
 }
 
-// dir is expected to be a directory that contains subdirectories for any/all methods for which triggers are defined
+// dir is expected to be a method/event directory that contains subdirectories for any/all methods/events for which triggers are defined
 // E.g., dir/lifecycle.ready/post.js
-function processTopDir(dir, processMethodDir) {
-  fs.readdir(dir, (error, fileNames) => {
+function processTopDir(subDir, processMethodDir) {
+  fs.readdir(subDir, (error, fileNames) => {
     if ( error ) { throw error; }
 
     fileNames.forEach(filename => {
       const fileName = path.parse(filename).name;
       const fileExt = path.parse(filename).ext;
-      const filePath = path.resolve(dir, filename);
+      const filePath = path.resolve(subDir, filename);
       fs.stat(filePath, function(error, stat) {
         if ( error ) { throw error; }
         const isFile = stat.isFile();
@@ -99,11 +124,31 @@ function processTopDir(dir, processMethodDir) {
   });
 }
 
+// subDir is expected to be a root trigger directory that contains subdirectories methods/events
+//  E.g., subDir/methodTrigger/..  subDir/eventTrigger/..
+function processSubDir(dir , processTopDir){
+  fs.readdir(dir, (error, fileNames) => {
+    if ( error ) { throw error; }
+
+    fileNames.forEach(filename => {
+      const subDir = path.resolve(dir, filename);
+      const fileExt = path.parse(filename).ext;
+      if( !fileExt ) {
+        try {
+        processTopDir(subDir, processMethodDir);
+      } catch ( ex ) {
+        logger.error(`An error occurred trying to processSubDir on ${dir}`);
+        logger.error(ex);
+      }};
+    });
+  });
+}
+
 // Load any/all trigger files from requested triggers paths (via --triggers command-line argument(s))
 const enabledTriggerPaths = commandLine.enabledTriggerPaths;
 enabledTriggerPaths.forEach((dir) => {
   try {
-    processTopDir(dir, processMethodDir);
+    processSubDir(dir, processTopDir);
   } catch ( ex ) {
     logger.error(`An error occurred trying to processTopDir on ${dir}`);
     logger.error(ex);
@@ -113,5 +158,5 @@ enabledTriggerPaths.forEach((dir) => {
 // --- Exports ---
 
 export {
-  triggers
+  methodTriggers, eventTriggers
 };

@@ -20,8 +20,6 @@
 
 'use strict';
 
-import { logger } from '../../logger.mjs';
-// import * as stateManagement from '../stateManagement.mjs';
 import * as events from '../../events.mjs';
 
 // --- Route Handlers ---
@@ -32,33 +30,21 @@ function sendEvent(req, res) {
   const { ws } = res.locals; // Like magic!
   const { method, result } = req.body;
 
-  try {
-    if ( ! events.isRegisteredEventListener(method) ) {
-      res.status(400).send({
-        status: 'ERROR',
-        errorCode: 'NO-EVENT-HANDLER-REGISTERED',
-        message: `Could not send ${method} event because no listener is active`
-      });
-    } else {
-      const id = events.getRegisteredEventListener(method);
+  function fSuccess() {
+    res.status(200).send({
+      status: 'SUCCESS'
+    });
+  }
 
-      const oEventMessage = {
-        jsonrpc: '2.0',
-        id: id,
-        result: result
-      };
-      const eventMessage = JSON.stringify(oEventMessage);
-      // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
-      ws.send(eventMessage);
-      logger.info(`Sent event message: ${eventMessage}`);
+  function fErr(method) {
+    res.status(400).send({
+      status: 'ERROR',
+      errorCode: 'NO-EVENT-HANDLER-REGISTERED',
+      message: `Could not send ${method} event because no listener is active`
+    });
+  }
 
-      res.status(200).send({
-        status: 'SUCCESS'
-      });
-    }
-  } catch ( ex ) {
-    logger.error('sendEvent: ERROR:');
-    logger.error(ex);
+  function fFatalErr(ex) {
     res.status(500).send({
       status: 'ERROR',
       errorCode: 'COULD-NOT-SEND-EVENT',
@@ -66,6 +52,8 @@ function sendEvent(req, res) {
       error: ex.toString()
     });
   }
+
+  events.sendEvent(ws, method, result, '', fSuccess, fErr, fFatalErr);
 }
 
 // --- Exports ---
