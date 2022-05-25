@@ -35,6 +35,12 @@ import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
 import { isSdkEnabled } from './sdkManagement.mjs';
 
+//coverting module names to lowerCase 
+function toLowerCase(moduleName){
+  moduleName= moduleName.toLowerCase();
+  return moduleName;
+}
+
 // Build a method map for a single SDK (given by an object read from firebolt-xxx-sdk.json file)
 function buildMethodMap(sdkOpenrpc) {
   if ( ! sdkOpenrpc || ! isObject(sdkOpenrpc) ) { return {}; }
@@ -42,6 +48,10 @@ function buildMethodMap(sdkOpenrpc) {
   if ( ! sdkOpenrpc.methods ) { return undefined; }
 
   var result = sdkOpenrpc.methods.reduce(function(map, obj) {
+    //coverting module names to lowerCase
+    if(config.app.allowMixedCase){
+      obj.name = toLowerCase(obj.name);
+    }
     map[obj.name] = obj;
     return map;
   }, {});
@@ -60,6 +70,9 @@ function getMeta() {
 function getMethod(methodName) {
   for ( let ii = 0; ii < config.dotConfig.supportedSdks.length; ii += 1 ) {
     const sdkName = config.dotConfig.supportedSdks[ii].name;
+    if (config.app.allowMixedCase){
+      methodName = toLowerCase(methodName);
+    }
     if ( methodMaps[sdkName] ) {
       if ( methodName in methodMaps[sdkName] ) { return methodMaps[sdkName][methodName]; }
     }
