@@ -12,6 +12,9 @@ node_modules/*
 server/node_modules/*
 cli/node_modules/*
 
+server/src/.mf.config.json
+server/package.json
+
 .mf.config.json
 .vscode/*
 server/sessions/*

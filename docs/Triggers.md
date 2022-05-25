@@ -33,19 +33,25 @@ npm run dev -- --triggers ./src/triggers --triggers /some/other/dir/with/trigger
 
 ## File Organization
 
-Within each directory you pass via `--triggers` command line arguments, you must create subdirectories whose names match Firebolt method names (e.g., `lifecycle.ready`, `device.id`, etc.) and within these subdirectories you must create JavaScript files named `pre.mjs` and/or `post.mjs` depending on which trigger(s) you are defining.
+Within each directory you pass via `--triggers` command line arguments, you must create subdirectories named methodTriggers and eventTriggers which will contain Firebolt method/event directories (e.g., `lifecycle.ready`, `device.id`, etc.) and within these directories you must create JavaScript files named `pre.mjs` and/or `post.mjs` depending on which trigger(s) you are defining.
 
 Your file system might look something like:
 
 ```
 <trigger directory>
-  lifecycle.ready
-    pre.mjs
-    post.mjs
-  device.id
-    post.mjs
-  ...
-
+  <methodTriggers directory>
+    device.id
+	  pre.mjs
+	  post.mjs
+    accessibility.closedCaptionsSettings
+	  pre.mjs
+	  post.mjs
+	...
+  <eventTriggers directory>
+    device.onDeviceNameChanged
+	  pre.mjs
+	  post.mjs
+    ...
 ```
 
 ## Trigger Definitions: JavaScript Function Definitions
@@ -107,5 +113,5 @@ If a post-trigger does not return anything (or returns `undefined` or `null`), M
 ## Examples
 
 See
-  - `server/src/triggers/lifecycle.ready/post.mjs`
-  - `server/src/triggers/lifecycle.close/post.mjs`.
+  - `server/src/triggers/methodTriggers/lifecycle.ready/post.mjs`
+  - `server/src/triggers/eventTriggers/lifecycle.close/post.mjs`.

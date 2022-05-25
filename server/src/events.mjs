@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
 
 // Maps event listener request method name (e.g., lifecycle.onInactive) to message id (e.g., 17)
@@ -92,10 +93,104 @@ function sendEventListenerAck(ws, oMsg) {
   logger.debug(`Sent event listener ack message: ${ackMessage}`);
 }
 
+// sendEvent to handle post API event calls, including pre- and post- event trigger processing
+function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
+  try {
+    if ( !isRegisteredEventListener(method) ) {
+      logger.info(`${method} event not registered`);
+      fErr.call(null, method);
+    } else {
+       // Fire pre trigger if there is one for this method
+       if ( method in eventTriggers ) {
+        if ( 'pre' in eventTriggers[method] ) {
+          try {
+            const ctx = {
+              logger: logger,
+              setTimeout: setTimeout,
+              setInterval: setInterval,
+              sendEvent: function(method, result, msg) {
+                function fSuccess() {
+                  logger.info(`${msg}: Sent event ${method} with result ${JSON.stringify(result)}`)
+                }
+                function fErr() {
+                  logger.info(`Could not send ${method} event because no listener is active`)
+                }
+                function fFatalErr() {
+                  logger.info(`Internal error`)
+                }
+                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
+              }
+            };
+            logger.debug(`Calling pre trigger for event ${method}`);
+            eventTriggers[method].pre.call(null,ctx);
+          } catch ( ex ) {
+            logger.error(`ERROR: Exception occurred while executing pre-trigger for ${method}; continuing`);
+          }
+        }
+      }
+
+      const id = getRegisteredEventListener(method);
+      const response = {result : result};
+      let postResult;
+      
+      // Fire post trigger if there is one for this method
+      if ( method in eventTriggers ) {
+        if ( 'post' in eventTriggers[method] ) {
+          try {
+            const ctx = {
+              logger: logger,
+              setTimeout: setTimeout,
+              setInterval: setInterval,
+              sendEvent: function(method, result, msg) {
+                function fSuccess() {
+                  logger.info(`${msg}: Sent event ${method} with result ${JSON.stringify(result)}`)
+                }
+                function fErr() {
+                  logger.info(`Could not send ${method} event because no listener is active`)
+                }
+                function fFatalErr() {
+                  logger.info(`Internal error`)
+                }
+                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
+              },
+              ...response
+            };
+            logger.debug(`Calling post trigger for event ${method}`);
+            // post trigger can return undefined to leave as-is or can return a new result object
+            postResult = eventTriggers[method].post.call(null, ctx);
+          } catch ( ex ) {
+            {
+              logger.error(`ERROR: Exception occurred while executing post-trigger for ${method}`);
+              logger.error(ex);
+            }
+          }
+        }
+      }
+
+      const finalResult = ( postResult ? postResult : result );
+      const oEventMessage = {
+        jsonrpc: '2.0',
+        id: id,
+        result: finalResult
+      };
+      const eventMessage = JSON.stringify(oEventMessage);
+      // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
+      ws.send(eventMessage);
+      logger.info(`${msg}: Sent event message: ${eventMessage}`);
+
+      fSuccess.call(null);
+    }
+  } catch ( ex ) {
+    logger.error('sendEvent: ERROR:');
+    logger.error(ex);
+    fFatalErr.call(null, ex);
+  }
+}
+
 // --- Exports ---
 
 export {
   registerEventListener, isRegisteredEventListener, getRegisteredEventListener, deregisterEventListener,
-  isEventListenerOnMessage, isEventListenerOffMessage,
-  sendEventListenerAck
+  isEventListenerOnMessage, isEventListenerOffMessage,sendEventListenerAck,
+  sendEvent
 };

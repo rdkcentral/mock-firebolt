@@ -26,26 +26,13 @@ import * as util from './util.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
-import { triggers } from './messageHandlerTriggers.mjs';
+import { methodTriggers } from './triggers.mjs';
 import { addCall } from './sessionManagement.mjs';
-
-
-
-function emit(id, result, msg, ws) {
-  if ( id ) {
-    const oEventMessage = {
-      jsonrpc: '2.0',
-      id: id,
-      result: result
-    };
-    const eventMessage = JSON.stringify(oEventMessage);
-    ws.send(eventMessage);
-    logger.info(`${msg}: ${eventMessage}`);
-  }
-}
 
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
+  let response, newResponse;
+  
   logger.debug(`Received message: ${message}`);
 
   const oMsg = JSON.parse(message);
@@ -117,43 +104,37 @@ async function handleMessage(message, userId, ws) {
     logger.info(`Sent "invalid params" message: ${responseMessage}`);
   }
 
-  // Fire pre trigger if there is one for this method
-  let shouldContinue;
-  if ( oMsg.method in triggers ) {
-    if ( 'pre' in triggers[oMsg.method] ) {
+  // Fire pre trigger if there is one for this method  
+  if ( oMsg.method in methodTriggers ) {
+    if ( 'pre' in methodTriggers[oMsg.method] ) {
       try {
-        const ctx = {
+        const ctx = {          
+          logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
           sendEvent: function(onMethod, result, msg) {
-            const id = events.getRegisteredEventListener(onMethod);
-            if ( ! id ) { return; }
-            emit(id, result, msg, ws);
+            function fSuccess() {
+              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+            }
+            function fErr() {
+              logger.info(`Could not send ${onMethod} event because no listener is active`)
+            }
+            function fFatalErr() {
+              logger.info(`Internal error`)
+            }
+            events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           }
         };
-        shouldContinue = triggers[oMsg.method].pre.call(null, ctx, oMsg.params);
+        logger.debug(`Calling pre trigger for method ${oMsg.method}`);
+        methodTriggers[oMsg.method].pre.call(null, ctx, oMsg.params);
       } catch ( ex ) {
-        logger.error(`ERROR: Exception occurred while executing pre-trigger for ${oMsg.method}; not continuing`);
-        shouldContinue = false;
-      }
-      if ( ! shouldContinue ) {
-        return;
-      }
+        logger.error(`ERROR: Exception occurred while executing pre-trigger for ${oMsg.method}; continuing`);       
+      } 
     }
   }
 
-  // Handle Firebolt Method call using our in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
-  const response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params);
-  const oResponseMessage = {
-    jsonrpc: '2.0',
-    id: oMsg.id,
-    ...response  // layer in either a 'result' key and value or an 'error' key and a value like { code: xxx, message: xxx }
-  };
-  const responseMessage = JSON.stringify(oResponseMessage);
-  const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
-  await util.delay(dly);
-  ws.send(responseMessage);
-  logger.debug(`Sent message: ${responseMessage}`);
+  //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
+   response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params);  
 
   // Emit developerNotes for the method, if any
   const developerNotes = fireboltOpenRpc.getDeveloperNotesForMethod(oMsg.method);
@@ -171,23 +152,30 @@ async function handleMessage(message, userId, ws) {
   }
 
   // Fire post trigger if there is one for this method
-  if ( oMsg.method in triggers ) {
-    if ( 'post' in triggers[oMsg.method] ) {
+  if ( oMsg.method in methodTriggers ) {
+    if ( 'post' in methodTriggers[oMsg.method] ) {
       try {
         const ctx = {
           logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
           sendEvent: function(onMethod, result, msg) {
-            const id = events.getRegisteredEventListener(onMethod);
-            if ( ! id ) { return; }
-            emit(id, result, msg, ws);
+            function fSuccess() {
+              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+            }
+            function fErr() {
+              logger.info(`Could not send ${onMethod} event because no listener is active`)
+            }
+            function fFatalErr() {
+              logger.info(`Internal error`)
+            }
+            events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };
         logger.debug(`Calling post trigger for method ${oMsg.method}`);
         // post trigger can return undefined to leave as-is or can return a new response object
-        let newResponse = triggers[oMsg.method].post.call(null, ctx, oMsg.params);
+        newResponse = methodTriggers[oMsg.method].post.call(null, ctx, oMsg.params);
         // If there is one, make the real Firebolt response look like our normal response objects (with a result key or error key)
         if ( newResponse ) {
           if ( typeof newResponse === 'object' && newResponse.hasOwnProperty('code') && newResponse.hasOwnProperty('message') ) {
@@ -214,6 +202,20 @@ async function handleMessage(message, userId, ws) {
       }
     }
   }
+
+  // Send client app back a message with the response to their Firebolt method call
+  logger.debug(`Sending response for method ${oMsg.method}`);
+  const finalResponse = ( newResponse ? newResponse : response );
+  const oResponseMessage = {
+    jsonrpc: '2.0',
+    id: oMsg.id,
+    ...finalResponse  // layer in either a 'result' key and value or an 'error' key and a value like { code: xxx, message: xxx }
+  };
+  const responseMessage = JSON.stringify(oResponseMessage);
+  const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
+  await util.delay(dly);
+  ws.send(responseMessage);
+  logger.debug(`Sent message: ${responseMessage}`);
 }
 
 // --- Exports ---
