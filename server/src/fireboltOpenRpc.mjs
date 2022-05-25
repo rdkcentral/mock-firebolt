@@ -22,6 +22,7 @@
 'use strict';
 
 import { readFile } from 'fs/promises';
+import * as path from 'path';
 import * as fs from 'fs';
 import * as https from 'https';
 
@@ -34,6 +35,12 @@ import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
 import { isSdkEnabled } from './sdkManagement.mjs';
 
+//coverting module names to lowerCase 
+function toLowerCase(moduleName){
+  moduleName= moduleName.toLowerCase();
+  return moduleName;
+}
+
 // Build a method map for a single SDK (given by an object read from firebolt-xxx-sdk.json file)
 function buildMethodMap(sdkOpenrpc) {
   if ( ! sdkOpenrpc || ! isObject(sdkOpenrpc) ) { return {}; }
@@ -41,6 +48,10 @@ function buildMethodMap(sdkOpenrpc) {
   if ( ! sdkOpenrpc.methods ) { return undefined; }
 
   var result = sdkOpenrpc.methods.reduce(function(map, obj) {
+    //coverting module names to lowerCase
+    if(config.app.allowMixedCase){
+      obj.name = toLowerCase(obj.name);
+    }
     map[obj.name] = obj;
     return map;
   }, {});
@@ -59,6 +70,9 @@ function getMeta() {
 function getMethod(methodName) {
   for ( let ii = 0; ii < config.dotConfig.supportedSdks.length; ii += 1 ) {
     const sdkName = config.dotConfig.supportedSdks[ii].name;
+    if (config.app.allowMixedCase){
+      methodName = toLowerCase(methodName);
+    }
     if ( methodMaps[sdkName] ) {
       if ( methodName in methodMaps[sdkName] ) { return methodMaps[sdkName][methodName]; }
     }
@@ -240,7 +254,14 @@ async function readSdkJsonFileIfEnabled(sdkName) {
       const oSdk = config.dotConfig.supportedSdks.find((oSdk) => { return ( oSdk.name === sdkName ); });
       if ( oSdk.fileName ) {
         const openRpcFileName = oSdk.fileName;
-        fileUrl = new URL(`./${openRpcFileName}`, import.meta.url);
+        if ( path.isAbsolute(openRpcFileName) || openRpcFileName.startsWith('~') ) {
+          // Absolute file path given -- read from that file path exactly as-is
+          fileUrl = new URL(openRpcFileName, import.meta.url);
+        } else {
+          // Relative file path given -- read from file with given name from current
+          // directory (build/), assuming file was copied there/here via a build step
+          fileUrl = new URL(`./${openRpcFileName}`, import.meta.url);
+        }
         rawMeta[sdkName] = JSON.parse(
           await readFile(fileUrl)
         );
