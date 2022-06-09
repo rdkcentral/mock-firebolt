@@ -312,7 +312,46 @@ if ( parsed.help ) {
   }
 
 } else if ( parsed.sequence ) {
-  // @TODO
+  const eventFile = parsed.sequence;
+
+  try {
+    const sEvent = fs.readFileSync(path.resolve(__dirname, eventFile), {encoding:'utf8', flag:'r'});
+    let seqevent;
+    if ( eventFile.endsWith('yaml') || eventFile.endsWith('yml') ) {
+      seqevent = yaml.load(sEvent);
+    } else {
+      seqevent = JSON.parse(sEvent);
+    }
+    msg(`Sending sequence of events based on file ${eventFile}...`);
+    //iterating through sequence of events
+    for(let i=0;i<seqevent.length;i++) {
+      let method_name = seqevent[i].event.method;
+      let result_val = seqevent[i].event.result;
+      let atTime_val;
+      //adding delay to the previous execution time
+      if (seqevent[i].delay){
+        atTime_val = seqevent[i-1].at + seqevent[i].delay
+      }
+      else{
+        atTime_val = seqevent[i].at;
+      }
+
+      axios.post(url(host, port, '/api/v1/sequence'), {
+          method: method_name,
+          result: result_val,
+          at: atTime_val
+      })
+      .then(function (response) {
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        logError(error);
+      });
+    };
+   } catch ( ex ) {
+    console.log(`ERROR: File ${eventFile} is either missing or contains invalid JSON or YAML`);
+    console.log(ex);
+    }
 
 } else if ( parsed.session ) {
   const record = parsed.session;
