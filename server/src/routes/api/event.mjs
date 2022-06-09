@@ -53,7 +53,7 @@ function sendEvent(req, res) {
     });
   }
 
-  events.sendEvent(ws, method, result, '', fSuccess, fErr, fFatalErr);
+  events.sendEvent(ws, method, result, `${method}`, fSuccess, fErr, fFatalErr);
 }
 
 // --- Exports ---
