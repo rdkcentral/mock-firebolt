@@ -26,17 +26,19 @@ import * as events from '../../events.mjs';
 
 // POST /api/v1/event
 // Expected body: { method: 'device.onDeviceNameChanged' result: ... }
-function sendEvent(req, res) {
+function sendEvent(req, res, sendSuccessFlag = true) {
   const { ws } = res.locals; // Like magic!
   const { method, result } = req.body;
 
   function fSuccess() {
+    if (!sendSuccessFlag) return;
     res.status(200).send({
       status: 'SUCCESS'
     });
   }
 
   function fErr(method) {
+    if (!sendSuccessFlag) return;
     res.status(400).send({
       status: 'ERROR',
       errorCode: 'NO-EVENT-HANDLER-REGISTERED',
@@ -45,6 +47,7 @@ function sendEvent(req, res) {
   }
 
   function fFatalErr(ex) {
+    if (!sendSuccessFlag) return;
     res.status(500).send({
       status: 'ERROR',
       errorCode: 'COULD-NOT-SEND-EVENT',
