@@ -116,7 +116,7 @@ async function getAppropriateDelay(userId, methodName) {
 }
 
 // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
-function handleSequenceOfResponseValues(resp){
+function handleSequenceOfResponseValues(userId, methodName, params, resp) {
   const nextIndex = userState.sequenceState[methodName] || 0;
   if ( nextIndex < resp.responses.length ) {
     resp = resp.responses[nextIndex];
@@ -126,16 +126,17 @@ function handleSequenceOfResponseValues(resp){
     resp = undefined; // Will cause code below to use the static default from the OpenRPC specification
   }
   state[''+userId].sequenceState[methodName] = nextIndex + 1;
+  return resp;
 }
 
 // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
-function handleDynamicResponseValues(resp){
+function handleDynamicResponseValues(userId, methodName, params, resp){
   if ( typeof resp.response === 'string' && resp.response.trimStart().startsWith('function') ) {
     // Looks like resp.response is specified as a function; evaluate it
     try {
       const ctx = {
-        set: setScratch,
-        get: getScratch,
+        set: function ss(key, val) { return setScratch(userId, key, val) },
+        get: function gs(key) { return getScratch(userId, key); },
         FireboltError: commonErrors.FireboltError
       };
       const sFcnBody = resp.response + ';' + 'return f(ctx, params);'
@@ -180,17 +181,18 @@ function handleDynamicResponseValues(resp){
       result: undefined  // Something...
     };
   }
+  return resp;
 }
 
 // Handle result values, which are either specified as static values or
 // as functions which return values
-function handleStaticAndDynamicResult(resp){
+function handleStaticAndDynamicResult(userId, methodName, params, resp){
   if ( typeof resp.result === 'string' && resp.result.trimStart().startsWith('function') ) {
     // Looks like resp.result is specified as a function; evaluate it
     try {
       const ctx = {
-        set: setScratch,
-        get: getScratch
+        set: function ss(key, val) { return setScratch(userId, key, val) },
+        get: function gs(key) { return getScratch(userId, key); },
       };
       const sFcnBody = resp.result + ';' + 'return f(ctx, params);'
       const fcn = new Function('ctx', 'params', sFcnBody);
@@ -224,11 +226,12 @@ function handleStaticAndDynamicResult(resp){
   } else {
     // Assume resp.result is a "normal" value; leave resp alone
   }
+  return resp;
 }
 
 // Handle error values, which are either specified as static objects with code & message props or
 // as a function which returns such an object
-function handleStaticAndDynamicError(resp){
+function handleStaticAndDynamicError(userId, methodName, params, resp){
   if ( typeof resp.error === 'string' && resp.error.startsWith('function') ) {
     // @TODO
     resp = {
@@ -237,6 +240,7 @@ function handleStaticAndDynamicError(resp){
   } else {
     // Assume resp.error is a "normal" error value (object with code and message keys); leave resp alone
   }
+  return resp;
 }
 
 // Returns either { result: xxx } or { error: { code: xxx, message: 'xxx' } }
@@ -255,24 +259,24 @@ function getMethodResponse(userId, methodName, params) {
 
     // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
     if ( resp && resp.responses ) {
-      handleSequenceOfResponseValues(resp);  
+      resp = handleSequenceOfResponseValues(userId, methodName, params, resp);  
     }
 
     // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
     if ( resp && resp.response ) {
-      handleDynamicResponseValues(resp);
+      resp = handleDynamicResponseValues(userId, methodName, params, resp);
     }
-    
+
     // Handle result values, which are either specified as static values or
     // as functions which return values
     else if ( resp && resp.result ) {
-      handleStaticAndDynamicResult(resp);
+      resp = handleStaticAndDynamicResult(userId, methodName, params, resp);
     }
 
     // Handle error values, which are either specified as static objects with code & message props or
     // as a function which returns such an object
     else if ( resp && resp.error ) {
-      handleStaticAndDynamicError(resp);
+      resp = handleStaticAndDynamicError(userId, methodName, params, resp);
     }
   } else /* if ( userState.global.mode === Mode.BOX ) */ {
     // Only use first example value from the OpenRPC specification; Force 'if' below to be
@@ -523,5 +527,6 @@ export {
   updateState, revertState,
   setLatency, setLatencies,
   isLegalMode, setMode,
-  setMethodResult, setMethodError
+  setMethodResult, setMethodError,
+  setScratch, getScratch
 };

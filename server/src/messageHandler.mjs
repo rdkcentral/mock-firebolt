@@ -112,6 +112,8 @@ async function handleMessage(message, userId, ws) {
           logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
+          set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
+          get: function gs(key) { return stateManagement.getScratch(userId, key); },
           sendEvent: function(onMethod, result, msg) {
             function fSuccess() {
               logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
@@ -122,7 +124,7 @@ async function handleMessage(message, userId, ws) {
             function fFatalErr() {
               logger.info(`Internal error`)
             }
-            events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
@@ -134,7 +136,7 @@ async function handleMessage(message, userId, ws) {
   }
 
   //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
-   response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params);  
+  response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params);
 
   // Emit developerNotes for the method, if any
   const developerNotes = fireboltOpenRpc.getDeveloperNotesForMethod(oMsg.method);
@@ -159,6 +161,8 @@ async function handleMessage(message, userId, ws) {
           logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
+          set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
+          get: function gs(key) { return stateManagement.getScratch(userId, key); },
           sendEvent: function(onMethod, result, msg) {
             function fSuccess() {
               logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
@@ -169,17 +173,18 @@ async function handleMessage(message, userId, ws) {
             function fFatalErr() {
               logger.info(`Internal error`)
             }
-            events.sendEvent(ws, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };
         logger.debug(`Calling post trigger for method ${oMsg.method}`);
         // post trigger can return undefined to leave as-is or can return a new response object
         newResponse = methodTriggers[oMsg.method].post.call(null, ctx, oMsg.params);
+
         // If there is one, make the real Firebolt response look like our normal response objects (with a result key or error key)
-        if ( newResponse ) {
+        if ( newResponse !== undefined ) {
           if ( typeof newResponse === 'object' && newResponse.hasOwnProperty('code') && newResponse.hasOwnProperty('message') ) {
-            response = {
+            newResponse = {
               error: newResponse
             };
           } else {
@@ -204,6 +209,7 @@ async function handleMessage(message, userId, ws) {
   }
 
   // Send client app back a message with the response to their Firebolt method call
+
   logger.debug(`Sending response for method ${oMsg.method}`);
   const finalResponse = ( newResponse ? newResponse : response );
   const oResponseMessage = {
