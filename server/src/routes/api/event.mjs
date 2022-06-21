@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { getUserIdFromReq } from '../../util.mjs';
 import * as events from '../../events.mjs';
 
 // --- Route Handlers ---
@@ -28,6 +29,7 @@ import * as events from '../../events.mjs';
 // Expected body: { method: 'device.onDeviceNameChanged' result: ... }
 function sendEvent(req, res) {
   const { ws } = res.locals; // Like magic!
+  const userId = getUserIdFromReq(req);
   const { method, result } = req.body;
 
   function fSuccess() {
@@ -53,7 +55,7 @@ function sendEvent(req, res) {
     });
   }
 
-  events.sendEvent(ws, method, result, '', fSuccess, fErr, fFatalErr);
+  events.sendEvent(ws, userId, method, result, '', fSuccess, fErr, fFatalErr);
 }
 
 // --- Exports ---
