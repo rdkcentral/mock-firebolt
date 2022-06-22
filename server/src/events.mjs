@@ -20,6 +20,7 @@
 
 'use strict';
 
+import * as stateManagement from './stateManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
 
@@ -94,7 +95,7 @@ function sendEventListenerAck(ws, oMsg) {
 }
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
-function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
+function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
   try {
     if ( !isRegisteredEventListener(method) ) {
       logger.info(`${method} event not registered`);
@@ -108,6 +109,8 @@ function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
               logger: logger,
               setTimeout: setTimeout,
               setInterval: setInterval,
+              set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
+              get: function gs(key) { return stateManagement.getScratch(userId, key); },
               sendEvent: function(method, result, msg) {
                 function fSuccess() {
                   logger.info(`${msg}: Sent event ${method} with result ${JSON.stringify(result)}`)
@@ -118,7 +121,7 @@ function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -141,6 +144,8 @@ function sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr) {
               logger: logger,
               setTimeout: setTimeout,
               setInterval: setInterval,
+              set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
+              get: function gs(key) { return stateManagement.getScratch(userId, key); },
               sendEvent: function(method, result, msg) {
                 function fSuccess() {
                   logger.info(`${msg}: Sent event ${method} with result ${JSON.stringify(result)}`)
