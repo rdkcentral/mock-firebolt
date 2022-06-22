@@ -395,3 +395,42 @@ curl --location --request POST 'http://localhost:3333/api/v1/event' \
     "status": "OK"
 }
 ```
+
+
+## Send an event sequence
+
+### Example cURL Command:
+
+```
+curl --location --request POST 'http://localhost:3333/api/v1/sequence' \
+--header 'Content-Type: application/json' \
+--data-raw '[{
+    "at": 5000,
+    "event": {
+      "method": "device.onDeviceNameChanged",
+      "result": "NEW-DEVICE-NAME-1"
+    }
+  },
+  {
+    "delay": 100,
+    "event": {
+      "method": "device.onDeviceNameChanged",
+      "result": "NEW-DEVICE-NAME-2"
+    }
+  },
+  {
+    "at": 7000,
+    "event": {
+      "method": "device.onDeviceNameChanged",
+      "result": "NEW-DEVICE-NAME-3"
+    }
+  }]'
+```
+
+### 200 Response:
+
+```
+{
+    "status": "OK"
+}
+```

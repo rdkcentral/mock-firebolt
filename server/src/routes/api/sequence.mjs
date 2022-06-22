@@ -1,15 +1,13 @@
 'use strict';
-
-import { logger } from '../../logger.mjs';
+import { getUserIdFromReq } from '../../util.mjs';
 import {executeSequence} from '../../sequenceManagement.mjs';
-import * as util from '../../util.mjs';
 
+//Execute sequence events with respective delay values
+function sendSequence(req, res) {
+    let seqevent = req.body
+    const { ws } = res.locals; // Like magic!
+    const userId = getUserIdFromReq(req);
 
-async function sendSequence(req, res) {
-    //Execute sequence events with respective delay values
-     //function handling events
-    let json = req;
-    let seqevent = req.body.seqevent
     //iterating through sequence of events
     for(let i = 0; i < seqevent.length; i++) {
         let method_name = seqevent[i].event.method;
@@ -22,16 +20,11 @@ async function sendSequence(req, res) {
         else{
             atTime_val = seqevent[i].at;
         }
-        json.body.method = method_name
-        json.body.result = result_val
-        json.body.atTime_val = atTime_val
-
-        if(i == seqevent.length - 1) {
-            executeSequence(json, res, true);
-        } else {
-            executeSequence(json, res, false);
-        }
+        executeSequence(ws, userId, method_name, result_val,`${method_name}`, atTime_val);
     }
+    res.status(200).send({
+        status: 'SUCCESS'
+    });
 
 }
 

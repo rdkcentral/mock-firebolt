@@ -80,7 +80,7 @@ function configureAPI(app) {
 
     // ======================= Sequence-Related API Routes =======================
 
-    // Send a sequence
+    // Send an event sequence
     app.post('/api/v1/sequence',                       sequenceApi.sendSequence);
 }
 

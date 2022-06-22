@@ -1,12 +1,10 @@
-import { logger } from './logger.mjs';
-import {sendEvent} from './routes/api/event.mjs';
+import {sendEvent} from './events.mjs';
 
-function executeSequence(req,res, sendSuccessFlag) {
-  //function handling events
-  const jsonObject = JSON.parse(JSON.stringify(req.body));
-  setTimeout(function(jsonObject) {
-    sendEvent({body: jsonObject}, res,sendSuccessFlag);
-  }, jsonObject.atTime_val, jsonObject);
+function executeSequence(ws,userId,method_name, result, msg, atTime_val) {
+
+  setTimeout(function() {
+    sendEvent(ws, userId, method_name, result,msg,function(){}, function(){}, function(){});
+  }, atTime_val);
 
 }
 
