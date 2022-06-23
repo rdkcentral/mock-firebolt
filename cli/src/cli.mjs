@@ -325,7 +325,7 @@ if ( parsed.help ) {
     }
     msg(`Sending sequence of events based on file ${eventFile}...`);
 
-      axios.post(url(host, port, '/api/v1/sequence'), seqevent)
+      axios.post(url(host, port, '/api/v1/sequence'), {seqevent : seqevent})
       .then(function (response) {
         console.log(response.data);
       })

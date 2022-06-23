@@ -38,7 +38,7 @@ const lines = [
   { cmdInfo: "--method device.id --errCode -32888 --errMsg \"Sad day for you\"", comment: "Set error code & msg for method" },
   { cmdInfo: "--upload ../examples/slow.json  ",                                 comment: "See examples/ directory for, uh, examples" },
   { cmdInfo: "--event ../examples/device-onDeviceNameChanged1.event.json",       comment: "Send event (method, result keys expected)" },
-  { cmdInfo: "--sequence ../examples/events1.sequence.json  ",                   comment: "Send an event sequence (See examples/events1.json)" },
+  { cmdInfo: "--sequence ../examples/events1.sequence.json  ",                   comment: "Send an event sequence (See examples/device-onDeviceNameChanged.sequence.json)" },
   { cmdInfo: "--session start/stop  ",                                           comment: "Start/Stop Firebolt session recording" },
 ];
 
