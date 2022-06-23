@@ -20,6 +20,7 @@
 
 'use strict';
 
+import './developerTools.mjs';
 import { logger } from './logger.mjs';
 import { config } from './config.mjs';
 import * as commandLine from './commandLine.mjs';
