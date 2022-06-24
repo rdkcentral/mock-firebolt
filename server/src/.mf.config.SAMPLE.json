@@ -6,7 +6,8 @@
             "cliFlag": null,
             "cliShortFlag": null,
             "fileName": "firebolt-open-rpc.json",
-            "enabled": true
+            "enabled": true,
+            "validateFlag": true
         },
 
         {

@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { validateMethodOverrides } from './commandLine.mjs'
 import { mergeWith } from 'lodash-es';  // Deep merge needed; Object.assign is shallow, sadly
 import { config } from './config.mjs';
 import { logger } from './logger.mjs';
@@ -365,7 +366,10 @@ function validateNewState_MethodOverrides(newStateMethods) {
   for ( const [methodName, methodOverrideObject] of Object.entries(newStateMethods) ) {
     errors = errors.concat(validateMethodOverride(methodName, methodOverrideObject));
   }
-
+// returns an empty array in "novalidate mode"
+  if( !validateMethodOverrides ){
+    return [];
+  }
   return errors;
 }
 
