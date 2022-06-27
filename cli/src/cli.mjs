@@ -262,7 +262,6 @@ if ( parsed.help ) {
 
 } else if ( parsed.upload ) {
   const uploadDir = parsed.upload  || [];
-  console.log(uploadDir);
   fs.readdir(uploadDir, (error, fileNames) => {
     if ( error ) { throw error; }
 

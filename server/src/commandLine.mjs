@@ -102,6 +102,7 @@ if ( enabledTriggerPaths.length > 0 ) {
 let validateMethodOverrides = true;
 if( !config.dotConfig.supportedSdks[0].validateFlag && parsed.novalidate ){
   validateMethodOverrides = false;
+  logger.info('Schema validation disabled');
 }
 
 // --- Exports ---
