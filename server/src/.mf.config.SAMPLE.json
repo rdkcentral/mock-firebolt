@@ -1,4 +1,6 @@
 {
+    "validateFlag": false,
+
     "supportedSdks": [
 
         {
@@ -6,8 +8,7 @@
             "cliFlag": null,
             "cliShortFlag": null,
             "fileName": "firebolt-open-rpc.json",
-            "enabled": true,
-            "validateFlag": true
+            "enabled": true
         },
 
         {

@@ -363,12 +363,13 @@ function validateMethodOverride(methodName, methodOverrideObject) {
 function validateNewState_MethodOverrides(newStateMethods) {
   let errors = [];
 
-  for ( const [methodName, methodOverrideObject] of Object.entries(newStateMethods) ) {
-    errors = errors.concat(validateMethodOverride(methodName, methodOverrideObject));
-  }
-// returns an empty array in "novalidate mode"
+  // Returns an empty array in "novalidate mode"
   if( !validateMethodOverrides ){
     return [];
+  }
+
+  for ( const [methodName, methodOverrideObject] of Object.entries(newStateMethods) ) {
+    errors = errors.concat(validateMethodOverride(methodName, methodOverrideObject));
   }
   return errors;
 }

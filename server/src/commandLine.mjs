@@ -72,6 +72,13 @@ const parsed = nopt(knownOpts, shortHands, process.argv, 2);
 const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
 
+// --- novalidate method overrides
+let validateMethodOverrides = true;
+if( !config.dotConfig.validateFlag && parsed.novalidate ){
+  validateMethodOverrides = false;
+  logger.info('Schema validation disabled');
+}
+
 // --- Enabled SDKs specified via any SDK command-line flags OR via .mf.config.json file
 
 // Convert boolean flags for any SDKs into a simple map/dict/obj
@@ -96,13 +103,6 @@ const enabledTriggerPaths = parsed.triggers || [];
 
 if ( enabledTriggerPaths.length > 0 ) {
   logger.info(`Triggers will be read from these paths: ${enabledTriggerPaths.join(', ')}`);
-}
-
-// --- novalidate method overrides
-let validateMethodOverrides = true;
-if( !config.dotConfig.supportedSdks[0].validateFlag && parsed.novalidate ){
-  validateMethodOverrides = false;
-  logger.info('Schema validation disabled');
 }
 
 // --- Exports ---
