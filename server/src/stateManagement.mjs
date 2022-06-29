@@ -367,7 +367,7 @@ function validateNewState_MethodOverrides(newStateMethods) {
   if( !validateMethodOverrides ){
     return [];
   }
-
+  
   for ( const [methodName, methodOverrideObject] of Object.entries(newStateMethods) ) {
     errors = errors.concat(validateMethodOverride(methodName, methodOverrideObject));
   }
