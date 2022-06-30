@@ -261,35 +261,63 @@ if ( parsed.help ) {
     });
 
 } else if ( parsed.upload ) {
-  const uploadDir = parsed.upload  || [];
-  fs.readdir(uploadDir, (error, fileNames) => {
-    if ( error ) { throw error; }
-
-    fileNames.forEach(filename => {
-      try {
-        const sNewState = fs.readFileSync(path.resolve(uploadDir, filename), {encoding:'utf8', flag:'r'});
-        let newState;
-        if ( filename.endsWith('yaml') || filename.endsWith('yml') ) {
-          newState = yaml.load(sNewState);
-        } else {
-          newState = JSON.parse(sNewState);
-        }
-        msg(`Uploading file ${filename}...`);
-        axios.put(url(host, port, '/api/v1/state'), {
-            state: newState
-          })
-          .then(function (response) {
-            console.log(response.data);
-          })
-          .catch(function (error) {
-            logError(error);
-          });
-      } catch ( ex ) {
-        console.log(`ERROR: File ${filename} is either missing or contains invalid JSON or YAML`);
-        console.log(ex);
+  if (fs.lstatSync(parsed.upload).isDirectory() ){
+    const uploadDir = parsed.upload;
+    fs.readdir(uploadDir, (error, fileNames) => {
+      if ( error ) { throw error; }
+      else if( !fileNames.length ) { console.log('Directory appears to be empty'); }
+      else {
+        fileNames.forEach(filename => {
+          try {
+            const sNewState = fs.readFileSync(path.resolve(uploadDir, filename), {encoding:'utf8', flag:'r'});
+            let newState;
+            if ( filename.endsWith('yaml') || filename.endsWith('yml') ) {
+              newState = yaml.load(sNewState);
+            } else {
+              newState = JSON.parse(sNewState);
+            }
+            msg(`Uploading file ${filename}...`);
+            axios.put(url(host, port, '/api/v1/state'), {
+                state: newState
+              })
+              .then(function (response) {
+                console.log(response.data);
+              })
+              .catch(function (error) {
+                logError(error);
+              });
+          } catch ( ex ) {
+            console.log(`ERROR: File ${filename} is either missing or contains invalid JSON or YAML`);
+            console.log(ex);
+          }
+        });
       }
     });
-  });
+  } else {
+    const uploadFile = parsed.upload;
+    try {
+      const sNewState = fs.readFileSync(path.resolve(__dirname, uploadFile), {encoding:'utf8', flag:'r'});
+      let newState;
+      if ( uploadFile.endsWith('yaml') || uploadFile.endsWith('yml') ) {
+        newState = yaml.load(sNewState);
+      } else {
+        newState = JSON.parse(sNewState);
+      }
+      msg(`Uploading file ${uploadFile}...`);
+      axios.put(url(host, port, '/api/v1/state'), {
+          state: newState
+        })
+        .then(function (response) {
+          console.log(response.data);
+        })
+        .catch(function (error) {
+          logError(error);
+        });
+    } catch ( ex ) {
+      console.log(`ERROR: File ${uploadFile} is either missing or contains invalid JSON or YAML`);
+      console.log(ex);
+    }
+  }
 
 } else if ( parsed.event ) {
   const eventFile = parsed.event;

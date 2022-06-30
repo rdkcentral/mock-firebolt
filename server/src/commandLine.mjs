@@ -73,9 +73,8 @@ const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
 
 // --- novalidate method overrides
-let validateMethodOverrides = true;
-if( !config.dotConfig.validateFlag && parsed.novalidate ){
-  validateMethodOverrides = false;
+if(!config.dotConfig.validateFlag || parsed.novalidate ){
+  config.validateMethodOverrides = false;
   logger.info('Schema validation disabled');
 }
 
@@ -108,5 +107,5 @@ if ( enabledTriggerPaths.length > 0 ) {
 // --- Exports ---
 
 export {
-  httpPort, socketPort, enabledSdkNames, enabledTriggerPaths, validateMethodOverrides
+  httpPort, socketPort, enabledSdkNames, enabledTriggerPaths
 };
