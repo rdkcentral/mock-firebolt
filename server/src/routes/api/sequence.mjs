@@ -23,12 +23,22 @@
 import { logger } from '../../logger.mjs';
 import {executeSequence} from '../../sequenceManagement.mjs';
 import * as commonErrors from '../../commonErrors.mjs';
+import { getUserIdFromReq } from '../../util.mjs';
 
 //Execute sequence events with respective delay values
 function sendSequence(req, res) {
-
     try {
-        executeSequence(req,res);
+        let seqevent
+        const { ws } = res.locals; // Like magic!
+        const userId = getUserIdFromReq(req);
+
+        if (req.body.seqevent){
+            seqevent = req.body.seqevent
+        }
+        else{
+            seqevent = req.body
+        }
+        executeSequence(ws,userId,seqevent);
         res.status(200).send({
           status: 'SUCCESS'
         });

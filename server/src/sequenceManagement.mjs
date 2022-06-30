@@ -19,23 +19,9 @@
 // sequence management
 
 'use strict';
-
-
 import {sendEvent} from './events.mjs';
-import { getUserIdFromReq } from './util.mjs';
 
-function executeSequence(req,res) {
-  let seqevent
-  const { ws } = res.locals; // Like magic!
-  const userId = getUserIdFromReq(req);
-
-  if (req.body.seqevent){
-    seqevent = req.body.seqevent
-  }
-  else{
-    seqevent = req.body
-  }
-
+function executeSequence(ws,userId,seqevent) {
   //iterating through sequence of events
   for(let i = 0; i < seqevent.length; i++) {
     let method_name = seqevent[i].event.method;
