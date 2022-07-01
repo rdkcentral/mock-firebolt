@@ -73,7 +73,7 @@ const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
 
 // --- novalidate method overrides
-if(!config.dotConfig.validateFlag || parsed.novalidate ){
+if(!config.dotConfig.validateMethodOverrides || parsed.novalidate ){
   config.validateMethodOverrides = false;
   logger.info('Schema validation disabled');
 }

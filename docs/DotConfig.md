@@ -31,15 +31,15 @@ Mock Firebolt: novalidate
 
 novalidate mode where Mock Firebolt does not validate uploaded method overrides.
 
-When Mock Firebolt starts up,it will check for `validateFlag` value in mf.config.json file and novalidate flag passed via the `--novalidate` command line argument.
+When Mock Firebolt starts up,it will check for `validateMethodOverrides` value in mf.config.json file and novalidate flag passed via the `--novalidate` command line argument.
 
-A validateFlag:true value in the mf.config.json file should take precedence over the --novalidate command-line argument, if given.
+A validateMethodOverrides:true value in the mf.config.json file should take precedence over the --novalidate command-line argument, if given.
 
 Normally users will not want to use this feature/flag
 
 ## Enabling novalidate Flag
 
-To disable validation of uploaded method overrides, you must set validateFlag in mf.config.json to `false` and pass `--novalidate` command line argument when you start Mock Firebolt.
+To disable validation of uploaded method overrides, you must set validateMethodOverrides in mf.config.json to `false` and pass `--novalidate` command line argument when you start Mock Firebolt.
 
 Example:
 ```

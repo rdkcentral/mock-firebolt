@@ -1,5 +1,5 @@
 {
-    "validateFlag": true,
+    "validateMethodOverrides": true,
 
     "supportedSdks": [
 
