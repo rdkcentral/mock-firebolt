@@ -362,10 +362,14 @@ function validateMethodOverride(methodName, methodOverrideObject) {
 function validateNewState_MethodOverrides(newStateMethods) {
   let errors = [];
 
+  // Returns an empty array in "novalidate mode"
+  if( !config.validateMethodOverrides ){
+    return [];
+  }
+  
   for ( const [methodName, methodOverrideObject] of Object.entries(newStateMethods) ) {
     errors = errors.concat(validateMethodOverride(methodName, methodOverrideObject));
   }
-
   return errors;
 }
 
