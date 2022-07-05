@@ -29,6 +29,7 @@ import { dotConfig } from './dotConfig.mjs';
 
 // Static configuration (some of which can be overridden by command-line arguments)
 const config = {
+  validateMethodOverrides: true,
   app: {
     allowMixedCase: false,
     socketPort: 9998,
