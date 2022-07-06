@@ -31,11 +31,13 @@ import { config } from './config.mjs';
 //   node index.mjs --manage ...                             (core + manage SDKs)
 //   node index.mjs --manage --discovery ...                 (core + manage + discovery SDKs)
 //   node index.mjs --triggers <path1> --triggers <path2>    (Load triggers from files in these paths)
+//   node index.mjs --novalidate                             (does not validate uploaded method overrides)
 
 const knownOpts = {
   'httpPort'   : Number,
   'socketPort' : Number,
-  'triggers'   : [String, Array]
+  'triggers'   : [String, Array],
+  'novalidate' : Boolean
 };
 for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
   if ( oSdk.cliFlag ) {
@@ -49,7 +51,8 @@ for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
 }
 
 const shortHands = {
-  't' : [ '--triggers' ]
+  't'     : [ '--triggers' ],
+  'noval' : [ '--novalidate' ]
 };
 for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
   if ( oSdk.cliShortFlag ) {
@@ -68,6 +71,12 @@ const parsed = nopt(knownOpts, shortHands, process.argv, 2);
 
 const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
+
+// --- novalidate method overrides
+if(!config.dotConfig.validateMethodOverrides || parsed.novalidate ){
+  config.validateMethodOverrides = false;
+  logger.info('Schema validation disabled');
+}
 
 // --- Enabled SDKs specified via any SDK command-line flags OR via .mf.config.json file
 
