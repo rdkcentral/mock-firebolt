@@ -55,7 +55,7 @@ function sendEvent(req, res) {
     });
   }
 
-  events.sendEvent(ws, method, result, `${method}`, fSuccess, fErr, fFatalErr);
+  events.sendEvent(ws, userId, method, result, `${method}`, fSuccess, fErr, fFatalErr);
 }
 
 // --- Exports ---
