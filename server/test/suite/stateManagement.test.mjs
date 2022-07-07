@@ -1,13 +1,14 @@
 "use strict";
 import { jest } from "@jest/globals";
-import { result } from "lodash-es";
 import * as stateManagement from "../../src/stateManagement.mjs";
 
 //jest.mock('stateManagement');
 
 test("addUser working properly", () => {
   const userId = 12345;
-  expect(stateManagement.addUser(userId)).toBeUndefined();
+  const spy = jest.spyOn(JSON, "stringify");
+  stateManagement.addUser(userId);
+  expect(spy).toHaveBeenCalled();
 });
 test("getState working properly", () => {
   const result = stateManagement.getState(12345);
@@ -54,7 +55,9 @@ test("stateManagement.updateState working properly", () => {
 
 test("stateManagement.revertState working properly", () => {
   const userId = 12345;
-  expect(stateManagement.revertState(userId)).toBeUndefined();
+  const spy = jest.spyOn(JSON, "stringify");
+  stateManagement.revertState(userId);
+  expect(spy).toHaveBeenCalled();
 });
 
 test("stateManagement.setLatency working properly", () => {
