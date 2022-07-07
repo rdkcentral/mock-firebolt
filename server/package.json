@@ -53,7 +53,9 @@
     "nopt": "^5.0.0",
     "tmp": "^0.2.1",
     "uuid": "^8.3.2",
-    "ws": "^8.2.3"
+    "ws": "^8.2.3",
+    "ip": "^1.1.8",
+    "bonjour": "^3.5.0"
   },
   "optionalDependencies": {
     "@firebolt-js/manage-sdk": "git+https://github.com/rdkcentral/firebolt-manage-sdk.git",

@@ -24,23 +24,46 @@ import './developerTools.mjs';
 import { logger } from './logger.mjs';
 import { config } from './config.mjs';
 import * as commandLine from './commandLine.mjs';
-import { getUserIdFromReq } from './util.mjs';
+import { getUserIdFromReq, validateIPaddress } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
+import * as proxyManagement from './proxyManagement.mjs';
 
 // -------------------------------------------------- Web Socket --------------------------------------------------
 
 import { createServer } from 'http';
 import { parse } from 'url';
-import WebSocket, { WebSocketServer } from 'ws';
 
 logger.important(`Welcome to Mock Firebolt`);
 
 const server = createServer();
 
-server.on('upgrade', function upgrade(request, socket, head) {
+server.on('upgrade', async function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
   let userId = pathname.substring(1);
+
+  if(commandLine.proxy) {
+    if(!validateIPaddress(commandLine.proxy)) {
+      logger.error('ERROR: Invalid IP address');
+      socket.destroy();
+    }
+    process.env.thunderIP = commandLine.proxy
+    logger.info('Using proxy server ' + process.env.thunderIP);
+    process.env.proxy = true
+    userId = config.app.defaultUserId;
+    // If connection parameter doesn't have token, then SSH and retrieve
+    const token = await proxyManagement.getThunderToken(request)
+    if( token ) {
+      if( token.stdout ) {
+        process.env.wsToken = token.stdout
+      } else {
+        logger.error(`ERROR: Unable to get thunder token: ${token.stderr}`);
+        socket.destroy();
+        process.exit(-1)
+      }
+    }
+  }
+
   if ( ! userId ) {
     logger.info('Using default user');
     userId = config.app.defaultUserId;
