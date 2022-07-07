@@ -47,19 +47,6 @@ async function handleMessage(message, userId, ws) {
     return;
   }
 
-  // Handle JSON-RPC messages that are event listener enable requests
-  if ( events.isEventListenerOnMessage(oMsg) ) {
-    events.sendEventListenerAck(ws, oMsg);
-    events.registerEventListener(oMsg);
-    return;
-  }
-  
-  // Handle JSON-RPC messages that are event listener disable requests
-  if ( events.isEventListenerOffMessage(oMsg) ) {
-    events.deregisterEventListener(oMsg);
-    return;
-  }
-
   // Handle JSON-RPC message that is somehow for an unknown method
   if ( ! fireboltOpenRpc.isMethodKnown(oMsg.method) ) {
     // Somehow, we got a socket message representing a Firebolt method call for a method name we don't recognize!
@@ -76,6 +63,19 @@ async function handleMessage(message, userId, ws) {
     // No delay
     ws.send(responseMessage);
     logger.info(`Sent "method not found" message: ${responseMessage}`);
+    return;
+  }
+
+  // Handle JSON-RPC messages that are event listener enable requests
+  if ( events.isEventListenerOnMessage(oMsg) ) {
+    events.sendEventListenerAck(ws, oMsg);
+    events.registerEventListener(oMsg);
+    return;
+  }
+
+  // Handle JSON-RPC messages that are event listener disable requests
+  if ( events.isEventListenerOffMessage(oMsg) ) {
+    events.deregisterEventListener(oMsg);
     return;
   }
 
