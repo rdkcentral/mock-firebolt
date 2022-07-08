@@ -1,4 +1,4 @@
-"use script";
+"use strict";
 import fs from "fs";
 import { jest } from "@jest/globals";
 import { logger } from "../../src/logger.mjs";
