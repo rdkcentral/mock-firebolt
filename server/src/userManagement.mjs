@@ -26,6 +26,7 @@ import * as messageHandler from './messageHandler.mjs';
 
 const user2wss = new Map();
 const user2ws  = new Map();
+const group2user = new Map(); // "<groupName>" -> [ "<userId1>-<groupName>", ... ]
 
 // Add default user, which will be used anytime a userId is not specified
 // in REST calls (calls without an x-mockfirebolt-userid header), regardless of
@@ -55,6 +56,36 @@ function getWsForUser(userId) {
   return undefined;
 }
 
+// Given a userId like "123~A", return all userIds like "<xxx>~A" (including the one passed in)
+function getUserListForUser(userId) {
+  const parts = (''+userId).split('~');
+  if ( parts.length === 1 ) {
+    // UserId does not have an embedded group name
+    return [ ''+userId ];
+  }
+
+  const groupName = parts[1];
+  if ( group2user.has(groupName) ) {
+    return group2user.get(groupName);
+  }
+  return undefined;
+}
+
+function getWsListForUser(userId) {
+  const userList = getUserListForUser(userId);
+  if ( ! userList ) { return undefined }
+
+  // Covert an array of "<userId>-<groupName" values to an array of ws's
+  const wsList = userList.map((userId) => {
+    return getWsForUser(''+userId);
+  });
+
+  // Filter out any undefined values
+  wsList.filter(ws => ws);
+
+  return wsList;
+}
+
 function associateUserWithWss(userId, wss) {
   user2wss.set(''+userId, wss);
 }
@@ -63,11 +94,31 @@ function associateUserWithWs(userId, ws) {
   user2ws.set(''+userId, ws);
 }
 
+function handleGroupMembership(userId) {
+  const parts = (''+userId).split('~');
+  if ( parts.length === 1 ) {
+    // UserId does not have an embedded group name
+    return;
+  }
+
+  const coreUserId = parts[0];
+  const groupName = parts[1];
+  if ( ! group2user.has(groupName) ) {
+    group2user.set(groupName, []);
+  }
+  const userList = group2user.get(groupName);
+  if ( ! userList.includes(''+userId) ) {
+    userList.push(''+userId);
+  }
+  group2user.set(groupName, userList)
+}
+
 function addUser(userId) {
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
   wss.on('connection', function connection(ws) {
     associateUserWithWs(''+userId, ws);
+    handleGroupMembership(''+userId)
     ws.on('message', async message => {
       messageHandler.handleMessage(message, ''+userId, ws);
     });
@@ -87,5 +138,5 @@ function removeUser(userId) {
 // --- Exports ---
 
 export {
-  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser
+  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser
 };
