@@ -1,0 +1,25 @@
+---
+methods:
+  device.name:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('deviceName');
+        console.log("### value of ctx inside device.name of yaml",ctx)
+        console.log("*** value of ccs.enabled in yaml----",ccs.name)
+        return ccs.name;
+      }    
+  device.setName:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('deviceName');
+        ccs.name=params.value
+        console.log("****** calue of params inside deviceName->",params.value)
+        ctx.set('deviceName',ccs)
+        console.log("### value of ctx inside device.setName of yaml",ctx)
+        const result = ctx.get('deviceName');
+        const msg = 'Post trigger for device.setName';
+        console.log("value of result inside yaml---> ",result)
+        console.log("value of msg inside in yaml>>>",msg)
+        ctx.sendEvent('device.onDeviceNameChanged', result, msg);
+        return null;
+      }
