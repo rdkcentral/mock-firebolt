@@ -37,7 +37,8 @@ const knownOpts = {
   'httpPort'   : Number,
   'socketPort' : Number,
   'triggers'   : [String, Array],
-  'novalidate' : Boolean
+  'novalidate' : Boolean,
+  'proxy'      : String
 };
 for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
   if ( oSdk.cliFlag ) {
@@ -71,6 +72,7 @@ const parsed = nopt(knownOpts, shortHands, process.argv, 2);
 
 const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
+const proxy = parsed.proxy;
 
 // --- novalidate method overrides
 if(!config.dotConfig.validateMethodOverrides || parsed.novalidate ){
@@ -107,5 +109,5 @@ if ( enabledTriggerPaths.length > 0 ) {
 // --- Exports ---
 
 export {
-  httpPort, socketPort, enabledSdkNames, enabledTriggerPaths
+  httpPort, socketPort, enabledSdkNames, enabledTriggerPaths, proxy
 };
