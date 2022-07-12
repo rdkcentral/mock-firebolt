@@ -30,12 +30,12 @@ test("getAppropriateDelay is working properly", async () => {
 });
 
 test("getMethodResponse working properly", () => {
-  const dumyParams = [];
+  const dummyParams = [];
   const expectedResult = {};
   const result = stateManagement.getMethodResponse(
     "12345",
     "accessibility.closedCaptions",
-    dumyParams
+    dummyParams
   );
   expect(result).toEqual(expectedResult);
 });
@@ -68,18 +68,18 @@ test("stateManagement.setLatency working properly", () => {
 });
 
 test("stateManagement.setLatencies working properly", () => {
-  const dumyoLatency = {
+  const dummyoLatency = {
     min: 0,
     max: 0,
     device: { type: { min: 3000, max: 3000 } },
   };
   const userId = 12345;
-  expect(stateManagement.setLatencies(userId, dumyoLatency)).toBeUndefined();
+  expect(stateManagement.setLatencies(userId, dummyoLatency)).toBeUndefined();
 });
 
 test("stateManagement.isLegalMode is working properly", () => {
-  const dumyMode = ["default", "box", "xyz"];
-  dumyMode.forEach((modes) => {
+  const dummyMode = ["default", "box", "xyz"];
+  dummyMode.forEach((modes) => {
     const result = stateManagement.isLegalMode(modes);
     if (modes === "xyz") expect(result).toBeFalsy();
     else expect(result).toBeTruthy();
