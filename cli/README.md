@@ -40,6 +40,12 @@ node cli.mjs --upload mystate.json
 To start/stop recording of firebolt calls being passed through Mock Firebolt:
 run `node cli.mjs --session start` or `node cli.mjs --session stop`
 
+## Sequence of Events
+
+To process json file containing sequence of events :
+run `node cli.mjs --sequence "path of sequence.json"`
+example : node cli.mjs --sequence ../examples/device-onDeviceNameChanged.sequence.json
+
 # Developer Notes
 
 If/as you add support for new commands or alter how existing commands work, be sure to update the array of command data in `src/usage.mjs`, which is the basis for this usage/help output.
