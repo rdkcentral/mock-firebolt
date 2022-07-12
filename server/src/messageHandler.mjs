@@ -50,23 +50,18 @@ async function handleMessage(message, userId, ws) {
 
   //bypass JSON-RPC calls and directly target device. 
   if(process.env.proxy) {
-    let params = oMsg.params
-    const payload = {
-      method: oMsg.method,
-      jsonrpc: "2.0",
-      id: oMsg.id
-    }
-    if(params) {
-      payload.params = params
-    }
-    
     let wsProxy = await proxyManagement.getProxyWSConnection()
     if( ! wsProxy ) {
       //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
-      wsProxy = await proxyManagement.initialize(ws)
+      try {
+        wsProxy = await proxyManagement.initialize(ws) 
+      } catch (err) {
+        console.log("Unable to establish proxy connection: ", err)
+        return
+      }
     }
     
-    proxyManagement.sendRequest(JSON.stringify(payload)); 
+    proxyManagement.sendRequest(JSON.stringify(oMsg)); 
     const dly = await stateManagement.getAppropriateDelay(userId, oMsg.method);
     await util.delay(dly);
     

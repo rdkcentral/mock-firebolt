@@ -28,64 +28,65 @@ let websocketConnection = null
 async function initialize(receiverWSClient) {
     const url = await buildWSUrl()
     if (url) {
-      console.log("Establishing websocket connection")
-      let ws = new WebSocket(url)
-      return new Promise((res, rej) => {
-       
-        let websocket = ws
-        let openCallback = function(event) {
-          websocket.removeEventListener('close', openCallback)
-          websocket.removeEventListener('error', openCallback)
-          res(event.data)
-        }
+      console.log("Establishing proxy connection which would forward request to websocket server")
+      try {
+        let ws = new WebSocket(url)
+        return new Promise((res, rej) => {
+          let websocket = ws
+          let openCallback = function(event) {
+            websocket.removeEventListener('close', openCallback)
+            websocket.removeEventListener('error', openCallback)
+            res(event.data)
+          }
 
-        ws.addEventListener('error', function(event) {
-          rej(event.data)
+          ws.addEventListener('error', function(event) {
+            rej(event.data)
+          })
+
+          ws.addEventListener('close', function(event) {
+            rej(event.data)
+          })
+
+          ws.addEventListener('open', openCallback)
+
+          ws.onopen = function () {
+              console.log("Connection to websocket proxy server established") 
+              websocketConnection = ws
+          }
+
+          ws.onclose = function(){
+              // connection closed, discard old websocket and create a new one in 2s
+              console.log("Connection to websocket proxy server is closed.")
+              ws = null
+              websocketConnection = null
+              setTimeout(function() {
+                  console.log("Reinitialize websocket proxy connection")
+                  initialize(receiverWSClient);
+              }, 2000)
+          }
+
+          ws.on('message', function message(data) {
+              var buf = Buffer.from(data);
+              const oResponseMessage = {
+                jsonrpc: '2.0',
+                id: JSON.parse(buf.toString()).id,
+                ...JSON.parse(buf.toString())
+              };
+              const responseMessage = JSON.stringify(oResponseMessage);
+              //Proxy that response to the caller
+              receiverWSClient.send(responseMessage);
+              console.log(`Sent outbound message: ${responseMessage} \n`);
+          });
+
+          receiverWSClient.on('error', (error) => {
+              console.log("receiver error: ", error)
+          })
         })
-
-        ws.addEventListener('close', function(event) {
-          rej(event.data)
-        })
-
-        ws.addEventListener('open', openCallback)
-
-        ws.onopen = function () {
-            console.log("connected to websocket client") 
-            websocketConnection = ws
-        }
-
-        ws.onclose = function(){
-            // connection closed, discard old websocket and create a new one in 5s
-            console.log("connection closed")
-            ws = null
-            websocketConnection = null
-            setTimeout(function() {
-                initialize(receiverWSClient);
-            }, 2000)
-        }
-
-        ws.onerror = function(err) {
-          console.log("connection error: ", err)
-        }
-
-        ws.on('message', function message(data) {
-            var buf = Buffer.from(data);
-            const oResponseMessage = {
-              jsonrpc: '2.0',
-              id: JSON.parse(buf.toString()).id,
-              ...JSON.parse(buf.toString())
-            };
-            const responseMessage = JSON.stringify(oResponseMessage);
-            receiverWSClient.send(responseMessage);
-            console.log(`Sent message to ripple: ${responseMessage} \n`);
-        });
-
-        receiverWSClient.on('error', (error) => {
-            console.log("receiver error: ", error)
-        })
-      })
+      } catch (err) {
+        return err
+      }
     } else {
-      throw new Error("Cannot establish websocket connection. Option \"url\" with ws://host:port or wss://host:port required")
+      throw new Error("Cannot establish proxy connection. \"url\" with ws://host:port or wss://host:port required")
     }
 }
 
@@ -161,13 +162,15 @@ function getThunderToken(request) {
       }
       const { query } = parse(request.url);
       if(query && query.includes("token=") && query.length > 6) {
-        resolve(true)
+        const token = query.split('token=').pop().split('&')[0];
+        output.stdout = token
+        resolve(output)
       } else {
         const thunderIp = process.env.thunderIP
         const port = process.env.port || 10022
         if(!thunderIp || !port) {
-          console.log("No thunderIp or port provided to get thunder token from device");
-          reject(null);
+          output.err("No thunderIp or port provided to get thunder token from device")
+          reject(output);
         }
         const sshCommand = "ssh -o StrictHostKeyChecking=no -p " + port + " root@" + thunderIp + " '/usr/bin/WPEFrameworkSecurityUtility' | cut -d':' -f2 | cut -d'\"' -f2"
         console.log(sshCommand)
