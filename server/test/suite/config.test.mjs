@@ -1,7 +1,7 @@
 "use strict";
 import { config } from "../../src/config.mjs";
 
-test("should first", () => {
+test("config working properly", () => {
   const expectedResult = {
     app: {
       allowMixedCase: false,
@@ -39,6 +39,7 @@ test("should first", () => {
         },
       ],
     },
+    "validateMethodOverrides": true
   };
   expect(config).toEqual(expectedResult);
 });
