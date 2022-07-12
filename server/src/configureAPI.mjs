@@ -25,6 +25,7 @@ import * as metaApi from './routes/api/meta.mjs';
 import * as stateApi from './routes/api/state.mjs';
 import * as eventApi from './routes/api/event.mjs';
 import * as sessionApi from './routes/api/session.mjs';
+import * as sequenceApi from './routes/api/sequence.mjs';
 
 function configureAPI(app) {
 
@@ -40,7 +41,6 @@ function configureAPI(app) {
 
     // ======================= State-Related API Routes =======================
     
-
     // Set latency min and max, either globally or per method
     app.post('/api/v1/state/global/latency',            stateApi.setLatency);
 
@@ -77,6 +77,11 @@ function configureAPI(app) {
 
     // End a session
     app.post('/api/v1/session/stop',                   sessionApi.stopSession);
+
+    // ======================= Sequence-Related API Routes =======================
+
+    // Send an event sequence
+    app.post('/api/v1/sequence',                       sequenceApi.sendSequence);
 }
 
 export { configureAPI };
