@@ -1,0 +1,759 @@
+{
+	"openrpc": "1.2.4",
+	"info": {
+		"title": "SDK",
+		"version": "1.4.1"
+	},
+	"methods": [
+		{
+			"name": "rpc.discover",
+			"summary": "Test SDK OpenRPC schema",
+			"params": [],
+			"result": {
+				"name": "OpenRPC Schema",
+				"schema": {
+					"type": "object"
+				}
+			}
+		},
+		{
+			"name": "simple.method",
+			"summary": "A method.",
+			"description": "A method for testing basic method generation.",
+			"params": [
+				{
+					"name": "parameter",
+					"required": true,
+					"schema": {
+						"type": "boolean"
+					},
+					"summary": "A test parameter."
+				}
+			],
+			"result": {
+				"name": "result",
+				"summary": "A result for testing basic method generation.",
+				"schema": {
+					"type": "object",
+					"required": [
+						"foo"
+					],
+					"properties": {
+						"foo": {
+							"type": "string",
+							"description": "A required field in the result."
+						},
+						"bar": {
+							"type": "number",
+							"description": "An optional field in the result."
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"examples": [
+				{
+					"name": "Default Example",
+					"params": [
+						{
+							"name": "parameter",
+							"value": true
+						}
+					],
+					"result": {
+						"name": "Default Result",
+						"value": {
+							"foo": "here's foo"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "simple.methodWithMarkdownDescription",
+			"summary": "A method that pulls it's description from an external markdown file.",
+			"description": "Method descriptpion.\n\nThis came from an external markdown file.\n\n| Here | is | a | Table |\n|------|----|---|-------|\n| 1 | 2 | 3 | 4 |\n",
+			"params": [
+				{
+					"name": "parameter",
+					"required": true,
+					"schema": {
+						"type": "boolean"
+					},
+					"summary": "A test parameter."
+				}
+			],
+			"result": {
+				"name": "result",
+				"summary": "A result for testing basic method generation.",
+				"schema": {
+					"type": "object",
+					"required": [
+						"foo"
+					],
+					"properties": {
+						"foo": {
+							"type": "string",
+							"description": "A required field in the result."
+						},
+						"bar": {
+							"type": "number",
+							"description": "An optional field in the result."
+						}
+					},
+					"additionalProperties": false
+				}
+			},
+			"examples": [
+				{
+					"name": "Default Example",
+					"params": [
+						{
+							"name": "parameter",
+							"value": true
+						}
+					],
+					"result": {
+						"name": "Default Result",
+						"value": {
+							"foo": "here's foo"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "simple.methodWithSchema",
+			"summary": "A method using a schema.",
+			"description": "A method for testing schema-dependent method generation.",
+			"params": [
+				{
+					"name": "title",
+					"required": true,
+					"schema": {
+						"$ref": "#/components/schemas/LocalizedString"
+					},
+					"summary": "A localized string test parameter."
+				}
+			],
+			"result": {
+				"name": "result",
+				"summary": "A result for testing basic method generation.",
+				"schema": {
+					"$ref": "#/components/schemas/LocalizedString"
+				}
+			},
+			"examples": [
+				{
+					"name": "Default Example",
+					"params": [
+						{
+							"name": "parameter",
+							"value": true
+						}
+					],
+					"result": {
+						"name": "Default Result",
+						"value": {
+							"foo": "here's foo"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.onRequestSimpleMethod",
+			"tags": [
+				{
+					"name": "capabilities",
+					"x-provides": "xrn:firebolt:capability:simple:provider",
+					"x-allow-focus": false,
+					"x-response": {
+						"$ref": "#/components/schemas/SimpleProviderResponse"
+					}
+				},
+				{
+					"name": "event"
+				}
+			],
+			"summary": "Dispatches a request for the simple method to the simple provider.",
+			"params": [
+				{
+					"name": "listen",
+					"summary": "Whether or not to listen for requests to this interface method.",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"oneOf": [
+						{
+							"$ref": "#/components/schemas/ListenResponse"
+						},
+						{
+							"$ref": "#/components/schemas/SimpleProviderRequest"
+						}
+					]
+				}
+			},
+			"examples": [
+				{
+					"name": "Get simple",
+					"params": [],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.onRequestHandshakeMethod",
+			"tags": [
+				{
+					"name": "capabilities",
+					"x-provides": "xrn:firebolt:capability:handshake:provider",
+					"x-allow-focus": true,
+					"x-response": {
+						"$ref": "#/components/schemas/SimpleProviderResponse"
+					}
+				},
+				{
+					"name": "event"
+				}
+			],
+			"summary": "Dispatches a request for the simple method, with a handshake, to the simple provider.",
+			"params": [
+				{
+					"name": "listen",
+					"summary": "Whether or not to listen for requests to this interface method.",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"oneOf": [
+						{
+							"$ref": "#/components/schemas/ListenResponse"
+						},
+						{
+							"$ref": "#/components/schemas/SimpleProviderRequest"
+						}
+					]
+				}
+			},
+			"examples": [
+				{
+					"name": "Get simple",
+					"params": [],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.onRequestMultiMethodOne",
+			"tags": [
+				{
+					"name": "capabilities",
+					"x-provides": "xrn:firebolt:capability:multi:provider",
+					"x-allow-focus": false,
+					"x-response": {
+						"$ref": "#/components/schemas/SimpleProviderResponse"
+					}
+				},
+				{
+					"name": "event"
+				}
+			],
+			"summary": "Dispatches a request for the simple method one to the simple provider.",
+			"params": [
+				{
+					"name": "listen",
+					"summary": "Whether or not to listen for requests to this interface method.",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"oneOf": [
+						{
+							"$ref": "#/components/schemas/ListenResponse"
+						},
+						{
+							"$ref": "#/components/schemas/SimpleProviderRequest"
+						}
+					]
+				}
+			},
+			"examples": [
+				{
+					"name": "Get simple",
+					"params": [],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.onRequestMultiMethodTwo",
+			"tags": [
+				{
+					"name": "capabilities",
+					"x-provides": "xrn:firebolt:capability:multi:provider",
+					"x-allow-focus": false,
+					"x-response": {
+						"$ref": "#/components/schemas/SimpleProviderResponse"
+					}
+				},
+				{
+					"name": "event"
+				}
+			],
+			"summary": "Dispatches a request for the simple method two to the simple provider.",
+			"params": [
+				{
+					"name": "listen",
+					"summary": "Whether or not to listen for requests to this interface method.",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"oneOf": [
+						{
+							"$ref": "#/components/schemas/ListenResponse"
+						},
+						{
+							"$ref": "#/components/schemas/SimpleProviderRequest"
+						}
+					]
+				}
+			},
+			"examples": [
+				{
+					"name": "Get simple",
+					"params": [],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.onRequestNoResponseMethod",
+			"tags": [
+				{
+					"name": "capabilities",
+					"x-provides": "xrn:firebolt:capability:noresponse:provider",
+					"x-allow-focus": false
+				},
+				{
+					"name": "event"
+				}
+			],
+			"summary": "Dispatches a request for the simple method to the simple provider.",
+			"params": [
+				{
+					"name": "listen",
+					"summary": "Whether or not to listen for requests to this interface method.",
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"oneOf": [
+						{
+							"$ref": "#/components/schemas/ListenResponse"
+						},
+						{
+							"$ref": "#/components/schemas/SimpleProviderRequest"
+						}
+					]
+				}
+			},
+			"examples": [
+				{
+					"name": "Get simple",
+					"params": [],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.handshakeMethodFocus",
+			"tags": [
+				{
+					"name": "rpc-only",
+					"x-allow-focus-for": "onRequestHandshakeMethod"
+				}
+			],
+			"summary": "Internal API for HandshakeMethod Provider to request focus for UX purposes.",
+			"params": [],
+			"result": {
+				"name": "result",
+				"schema": {
+					"type": "null"
+				}
+			},
+			"examples": [
+				{
+					"name": "Example",
+					"params": [],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.simpleMethodResponse",
+			"tags": [
+				{
+					"name": "rpc-only",
+					"x-response-for": "onRequestSimpleMethod"
+				}
+			],
+			"summary": "Internal API for SimpleMethod Provider to send back a response.",
+			"params": [
+				{
+					"name": "response",
+					"required": true,
+					"schema": {
+						"$ref": "#/components/schemas/SimpleProviderResponse"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"type": "null"
+				}
+			},
+			"examples": [
+				{
+					"name": "Example #1",
+					"params": [
+						{
+							"name": "response",
+							"value": {
+								"correlationId": "abc",
+								"result": "here's a value!"
+							}
+						}
+					],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.handshakeMethodResponse",
+			"tags": [
+				{
+					"name": "rpc-only",
+					"x-response-for": "onRequestHandshakeMethod"
+				}
+			],
+			"summary": "Internal API for HandshakeMethod Provider to send back a response.",
+			"params": [
+				{
+					"name": "response",
+					"required": true,
+					"schema": {
+						"$ref": "#/components/schemas/SimpleProviderResponse"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"type": "null"
+				}
+			},
+			"examples": [
+				{
+					"name": "Example #1",
+					"params": [
+						{
+							"name": "response",
+							"value": {
+								"correlationId": "abc",
+								"result": "here's a value!"
+							}
+						}
+					],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.multiMethodOneResponse",
+			"tags": [
+				{
+					"name": "rpc-only",
+					"x-response-for": "onRequestMultiMethodOne"
+				}
+			],
+			"summary": "Internal API for MultiMethodOne Provider to send back a response.",
+			"params": [
+				{
+					"name": "response",
+					"required": true,
+					"schema": {
+						"$ref": "#/components/schemas/SimpleProviderResponse"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"type": "null"
+				}
+			},
+			"examples": [
+				{
+					"name": "Example #1",
+					"params": [
+						{
+							"name": "response",
+							"value": {
+								"correlationId": "abc",
+								"result": "here's a value!"
+							}
+						}
+					],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.multiMethodTwoResponse",
+			"tags": [
+				{
+					"name": "rpc-only",
+					"x-response-for": "onRequestMultiMethodTwo"
+				}
+			],
+			"summary": "Internal API for MultiMethodTwo Provider to send back a response.",
+			"params": [
+				{
+					"name": "response",
+					"required": true,
+					"schema": {
+						"$ref": "#/components/schemas/SimpleProviderResponse"
+					}
+				}
+			],
+			"result": {
+				"name": "result",
+				"schema": {
+					"type": "null"
+				}
+			},
+			"examples": [
+				{
+					"name": "Example #1",
+					"params": [
+						{
+							"name": "response",
+							"value": {
+								"correlationId": "abc",
+								"result": "here's a value!"
+							}
+						}
+					],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		},
+		{
+			"name": "provider.noResponseMethodResponse",
+			"tags": [
+				{
+					"name": "rpc-only",
+					"x-response-for": "onRequestNoResponseMethod"
+				}
+			],
+			"summary": "Internal API for NoResponseMethod Provider to send back a response.",
+			"params": [],
+			"result": {
+				"name": "result",
+				"schema": {
+					"type": "null"
+				}
+			},
+			"examples": [
+				{
+					"name": "Example 1",
+					"params": [],
+					"result": {
+						"name": "result",
+						"value": null
+					}
+				}
+			]
+		}
+	],
+	"components": {
+		"schemas": {
+			"LocalizedString": {
+				"title": "LocalizedString",
+				"description": "Localized string supports either a simple `string` or a Map<string, string> of language codes to strings. When using a simple `string`, the current preferred langauge from `Localization.langauge()` is assumed.",
+				"oneOf": [
+					{
+						"type": "string"
+					},
+					{
+						"type": "object",
+						"additionalProperties": {
+							"type": "string"
+						}
+					}
+				],
+				"examples": [
+					"A simple string, with no language code",
+					{
+						"en": "This is english",
+						"es": "esto es español"
+					}
+				]
+			},
+			"SimpleProviderRequest": {
+				"title": "SimpleProviderRequest",
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/ProviderRequest"
+					},
+					{
+						"type": "object",
+						"properties": {
+							"parameters": {
+								"const": null
+							}
+						}
+					}
+				],
+				"examples": [
+					{
+						"correlationId": "abc"
+					}
+				]
+			},
+			"SimpleProviderResponse": {
+				"title": "SimpleProviderResponse",
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/ProviderResponse"
+					},
+					{
+						"type": "object",
+						"required": [
+							"result"
+						],
+						"properties": {
+							"result": {
+								"description": "The result of the provider response, containing nothing.",
+								"type": "string"
+							}
+						}
+					}
+				],
+				"examples": [
+					{
+						"correlationId": "abc",
+						"result": "here's a value!"
+					}
+				]
+			},
+			"ListenResponse": {
+				"title": "ListenResponse",
+				"type": "object",
+				"required": [
+					"event",
+					"listening"
+				],
+				"properties": {
+					"event": {
+						"type": "string",
+						"pattern": "[a-zA-Z]+\\.on[A-Z][a-zA-Z]+"
+					},
+					"listening": {
+						"type": "boolean"
+					}
+				},
+				"additionalProperties": false
+			},
+			"ProviderRequest": {
+				"title": "ProviderRequest",
+				"type": "object",
+				"required": [
+					"correlationId"
+				],
+				"additionalProperties": false,
+				"properties": {
+					"correlationId": {
+						"type": "string",
+						"description": "The id that was passed in to the event that triggered a provider method to be called"
+					},
+					"parameters": {
+						"description": "The result of the provider response.",
+						"type": "object"
+					}
+				}
+			},
+			"ProviderResponse": {
+				"title": "ProviderResponse",
+				"type": "object",
+				"required": [
+					"correlationId"
+				],
+				"additionalProperties": false,
+				"properties": {
+					"correlationId": {
+						"type": "string",
+						"description": "The id that was passed in to the event that triggered a provider method to be called"
+					},
+					"result": {
+						"description": "The result of the provider response."
+					}
+				}
+			}
+		}
+	}
+}
