@@ -28,6 +28,7 @@ import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
 import { addCall } from './sessionManagement.mjs';
+import * as proxyManagement from './proxyManagement.mjs'
 
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
@@ -45,6 +46,31 @@ async function handleMessage(message, userId, ws) {
   if ( ! 'id' in oMsg) {
     logger.info('Not responding, since that message was a notification with no id');
     return;
+  }
+
+  //bypass JSON-RPC calls and directly target device. 
+  if(process.env.proxy) {
+    let params = oMsg.params
+    const payload = {
+      method: oMsg.method,
+      jsonrpc: "2.0",
+      id: oMsg.id
+    }
+    if(params) {
+      payload.params = params
+    }
+    
+    let wsProxy = await proxyManagement.getProxyWSConnection()
+    if( ! wsProxy ) {
+      //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
+      wsProxy = await proxyManagement.initialize(ws)
+    }
+    
+    proxyManagement.sendRequest(JSON.stringify(payload)); 
+    const dly = await stateManagement.getAppropriateDelay(userId, oMsg.method);
+    await util.delay(dly);
+    
+    return
   }
 
   // Handle JSON-RPC message that is somehow for an unknown method
