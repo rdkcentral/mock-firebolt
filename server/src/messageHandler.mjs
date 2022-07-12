@@ -59,13 +59,17 @@ async function handleMessage(message, userId, ws) {
     if(params) {
       payload.params = params
     }
-    console.log("request:: ", payload)
     
-    let wsProxy = proxyManagement.getProxyWSConnection()
+    let wsProxy = await proxyManagement.getProxyWSConnection()
     if( ! wsProxy ) {
+      //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
       wsProxy = await proxyManagement.initialize(ws)
     }
+    
     proxyManagement.sendRequest(JSON.stringify(payload)); 
+    const dly = await stateManagement.getAppropriateDelay(userId, oMsg.method);
+    await util.delay(dly);
+    
     return
   }
 

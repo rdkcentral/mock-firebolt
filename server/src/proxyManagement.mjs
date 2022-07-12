@@ -28,11 +28,10 @@ let websocketConnection = null
 async function initialize(receiverWSClient) {
     const url = await buildWSUrl()
     if (url) {
+      console.log("Establishing websocket connection")
+      let ws = new WebSocket(url)
       return new Promise((res, rej) => {
-        console.log("Establishing websocket connection")
-        //Protocol can be used for other things (For instance an access token)
-        let ws = new WebSocket(url)
-
+       
         let websocket = ws
         let openCallback = function(event) {
           websocket.removeEventListener('close', openCallback)
@@ -51,13 +50,13 @@ async function initialize(receiverWSClient) {
         ws.addEventListener('open', openCallback)
 
         ws.onopen = function () {
-            console.log("connected") 
+            console.log("connected to websocket client") 
             websocketConnection = ws
         }
 
         ws.onclose = function(){
-            console.log("connection closed")
             // connection closed, discard old websocket and create a new one in 5s
+            console.log("connection closed")
             ws = null
             websocketConnection = null
             setTimeout(function() {
@@ -65,8 +64,11 @@ async function initialize(receiverWSClient) {
             }, 2000)
         }
 
+        ws.onerror = function(err) {
+          console.log("connection error: ", err)
+        }
+
         ws.on('message', function message(data) {
-            console.log('received: %s', data);
             var buf = Buffer.from(data);
             const oResponseMessage = {
               jsonrpc: '2.0',
@@ -75,13 +77,12 @@ async function initialize(receiverWSClient) {
             };
             const responseMessage = JSON.stringify(oResponseMessage);
             receiverWSClient.send(responseMessage);
-            console.log(`Sent message: ${responseMessage}`);
+            console.log(`Sent message to ripple: ${responseMessage} \n`);
         });
 
         receiverWSClient.on('error', (error) => {
-            console.log("receiver error:: ", error)
+            console.log("receiver error: ", error)
         })
-        res(ws)
       })
     } else {
       throw new Error("Cannot establish websocket connection. Option \"url\" with ws://host:port or wss://host:port required")
@@ -97,9 +98,10 @@ function sendRequest(payload) {
     if (!ws) {
         throw new Error("websocketConnection not established")
     }
-    waitForSocketConnection(ws, function(socket){
-        console.log("message sent!!!");
-        socket.send(payload);
+    waitForSocketConnection(ws, async function(socket){
+        console.log("Request sent to device: ", payload);
+        await socket.send(payload);
+        await new Promise(r => setTimeout(r, 2000));
     });
 }
 
@@ -115,7 +117,7 @@ function waitForSocketConnection(socket, callback){
                 if(getProxyWSConnection()) {
                     socket = getProxyWSConnection()
                 }
-                console.log("wait for connection...")
+                console.log("Wait for connection...")
                 waitForSocketConnection(socket, callback);
             }
         }, 1000); // wait 1 second for the connection...
@@ -138,6 +140,13 @@ function buildWSUrl() {
     })    
 }
 
+function close() {
+  if(websocketConnection) {
+    websocketConnection.close()
+    websocketConnection = null
+  }
+}
+
 // Return thunder token from actual device for ws connection
 function getThunderToken(request) {
     return new Promise(async (resolve, reject) => {
@@ -151,7 +160,7 @@ function getThunderToken(request) {
         resolve(output)
       }
       const { query } = parse(request.url);
-      if(query && query.includes("token=")) {
+      if(query && query.includes("token=") && query.length > 6) {
         resolve(true)
       } else {
         const thunderIp = process.env.thunderIP
@@ -178,5 +187,5 @@ function getThunderToken(request) {
 }
 
 export {
-    getThunderToken, initialize, getProxyWSConnection, sendRequest
+    getThunderToken, initialize, getProxyWSConnection, sendRequest, close
 };

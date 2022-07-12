@@ -49,6 +49,8 @@ server.on('upgrade', async function upgrade(request, socket, head) {
     }
     process.env.thunderIP = commandLine.proxy
     logger.info('Using proxy server ' + process.env.thunderIP);
+    //close websocket connection if already exists
+    proxyManagement.close()
     process.env.proxy = true
     userId = config.app.defaultUserId;
     // If connection parameter doesn't have token, then SSH and retrieve
