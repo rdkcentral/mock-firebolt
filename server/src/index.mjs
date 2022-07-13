@@ -27,8 +27,6 @@ import * as commandLine from './commandLine.mjs';
 import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
-import shell from 'shelljs'
-
 // -------------------------------------------------- Web Socket --------------------------------------------------
 
 import { createServer } from 'http';
@@ -59,18 +57,6 @@ server.on('upgrade', function upgrade(request, socket, head) {
     socket.destroy();
   }
 });
-
-
-//Fetch the yaml files from MFOS_Call_Flow repo
-const yamlPath = ".././cli/examples";
-shell.cd(yamlPath)
-try{
-  shell.exec('git clone git+ssh://git@github.comcast.com/lightning-automation/MFOS_Call_Flow')
-}
-catch(e){
-  console.log(e)
-  console.log("some error in loading yaml files...")
-}
 
 
 // Starter user(s)
