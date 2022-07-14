@@ -70,8 +70,6 @@ async function handleMessage(message, userId, ws) {
     }).catch(err => { 
       logger.error(`ERROR: Unable to send outbound message due to ${err}`);
     })
-    
-    
     return
   }
 
