@@ -18,14 +18,11 @@
 
 'use strict';
 
-import promisify from 'util';
-import child_process from 'child_process';
-const exec = promisify.promisify(child_process.exec);
 import { parse } from 'url';
 import WebSocket from 'ws';
-let websocketConnection = null 
+let websocketConnection = null;
 
-async function initialize(receiverWSClient) {
+async function initialize() {
     const url = await buildWSUrl()
     if (url) {
       console.log("Establishing proxy connection which would forward request to websocket server")
@@ -64,23 +61,6 @@ async function initialize(receiverWSClient) {
                   initialize(receiverWSClient);
               }, 2000)
           }
-
-          ws.on('message', function message(data) {
-              var buf = Buffer.from(data);
-              const oResponseMessage = {
-                jsonrpc: '2.0',
-                id: JSON.parse(buf.toString()).id,
-                ...JSON.parse(buf.toString())
-              };
-              const responseMessage = JSON.stringify(oResponseMessage);
-              //Proxy that response to the caller
-              receiverWSClient.send(responseMessage);
-              console.log(`Sent outbound message: ${responseMessage} \n`);
-          });
-
-          receiverWSClient.on('error', (error) => {
-              console.log("receiver error: ", error)
-          })
         })
       } catch (err) {
         return err
@@ -95,14 +75,27 @@ function getProxyWSConnection() {
 }
 
 function sendRequest(payload) {
+  return new Promise((res, rej) => {
     const ws = getProxyWSConnection()
     if (!ws) {
         throw new Error("websocketConnection not established")
     }
-    waitForSocketConnection(ws, async function(socket){
-        console.log("Request sent to device: ", payload);
-        await socket.send(payload);
-        await new Promise(r => setTimeout(r, 2000));
+    waitForSocketConnection(ws, function(socket){
+          socket.addEventListener('error', function(event) {
+            rej(event.data)
+          })
+    
+          let websocket = socket
+          let sendCallback = function(event) {
+            websocket.removeEventListener('message', sendCallback)
+            websocket.removeEventListener('error', sendCallback)
+            res(event.data)
+          }
+    
+          socket.addEventListener('message', sendCallback)
+          socket.send(payload)
+          console.log("Request sent to device/server: ", payload);
+      })
     });
 }
 
@@ -150,7 +143,7 @@ function close() {
 
 // Return thunder token from actual device for ws connection
 function getThunderToken(request) {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async (resolve) => {
       let output = {
         stdout: '',
         stderr: '',
@@ -166,25 +159,8 @@ function getThunderToken(request) {
         output.stdout = token
         resolve(output)
       } else {
-        const thunderIp = process.env.thunderIP
-        const port = process.env.port || 10022
-        if(!thunderIp || !port) {
-          output.err("No thunderIp or port provided to get thunder token from device")
-          reject(output);
-        }
-        const sshCommand = "ssh -o StrictHostKeyChecking=no -p " + port + " root@" + thunderIp + " '/usr/bin/WPEFrameworkSecurityUtility' | cut -d':' -f2 | cut -d'\"' -f2"
-        console.log(sshCommand)
-        // SSH to device and get token
-        try {
-          output = await exec(sshCommand, { timeout: 5000 });
-        } catch (error) {
-          output.stderr = error.stderr;
-        }
-        if(output.stdout) {
-          let token = output.stdout.replace("\n", "")
-          output.stdout = token
-        }
-        resolve(output);
+        output.stderr = "Unable to get token from connection param or not present in env"
+        resolve(output)
       }
     })
 }

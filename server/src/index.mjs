@@ -49,19 +49,14 @@ server.on('upgrade', async function upgrade(request, socket, head) {
     }
     process.env.thunderIP = commandLine.proxy
     logger.info('Send proxy request to websocket server: ' + process.env.thunderIP);
-    //close websocket connection if already exists
-    proxyManagement.close()
     process.env.proxy = true
     userId = config.app.defaultUserId;
-    // If connection parameter doesn't have token, then SSH and retrieve
+    // Get token from connection parameter or from env
     const token = await proxyManagement.getThunderToken(request)
     if( token.stdout ) {
       process.env.wsToken = token.stdout
     } else {
-      logger.error(`ERROR: Unable to get thunder token: ${token.stderr}`);
-      socket.destroy();
-      //exit the process. Without thunder token unable to process any request
-      process.exit(1)
+      logger.warn(`WARNING: ${token.stderr}`);
     }
   }
 

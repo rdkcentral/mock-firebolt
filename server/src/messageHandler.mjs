@@ -54,16 +54,23 @@ async function handleMessage(message, userId, ws) {
     if( ! wsProxy ) {
       //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
       try {
-        wsProxy = await proxyManagement.initialize(ws) 
+        wsProxy = await proxyManagement.initialize() 
       } catch (err) {
         console.log("Unable to establish proxy connection: ", err)
         return
       }
     }
     
-    proxyManagement.sendRequest(JSON.stringify(oMsg)); 
-    const dly = await stateManagement.getAppropriateDelay(userId, oMsg.method);
-    await util.delay(dly);
+    proxyManagement.sendRequest(JSON.stringify(oMsg)).then(async (responseMessage) => {
+      const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
+      await util.delay(dly);
+      //Proxy that response to the caller
+      ws.send(responseMessage);
+      logger.info(`Sent outbound message: ${responseMessage}`);
+    }).catch(err => { 
+      logger.error(`ERROR: Unable to send outbound message due to ${err}`);
+    })
+    
     
     return
   }
