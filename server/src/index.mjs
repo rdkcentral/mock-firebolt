@@ -47,12 +47,12 @@ server.on('upgrade', async function upgrade(request, socket, head) {
       logger.error('ERROR: Invalid IP address');
       socket.destroy();
     }
-    process.env.thunderIP = commandLine.proxy
-    logger.info('Send proxy request to websocket server: ' + process.env.thunderIP);
+    process.env.proxyServerIP = commandLine.proxy
+    logger.info('Send proxy request to websocket server: ' + process.env.proxyServerIP);
     process.env.proxy = true
     userId = config.app.defaultUserId;
     // Get token from connection parameter or from env
-    const token = await proxyManagement.getThunderToken(request)
+    const token = await proxyManagement.getToken(request)
     if( token.stdout ) {
       process.env.wsToken = token.stdout
     } else {

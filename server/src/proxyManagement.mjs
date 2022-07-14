@@ -58,7 +58,7 @@ async function initialize() {
               websocketConnection = null
               setTimeout(function() {
                   console.log("Reinitialize websocket proxy connection")
-                  initialize(receiverWSClient);
+                  initialize();
               }, 2000)
           }
         })
@@ -123,13 +123,13 @@ function buildWSUrl() {
         const wsUrlProtocol = 'ws://'
         const port = 9998
         const path = '/jsonrpc'
-        const deviceHost = process.env.thunderIP
+        const deviceHost = process.env.proxyServerIP
         resolve([
             wsUrlProtocol,
             deviceHost,
             ':' + port,
             path,
-            process.env.wsToken ? '?token=' + process.env.wsToken : null,
+            process.env.TOKEN ? '?token=' + process.env.TOKEN : null,
         ].join(''))
     })    
 }
@@ -141,16 +141,16 @@ function close() {
   }
 }
 
-// Return thunder token from actual device for ws connection
-function getThunderToken(request) {
+// Get token from request param or env variable
+function getToken(request) {
     return new Promise(async (resolve) => {
       let output = {
         stdout: '',
         stderr: '',
       };
       // If token already exists, return token
-      if(process.env.wsToken) {
-        output.stdout = process.env.wsToken
+      if(process.env.TOKEN) {
+        output.stdout = process.env.TOKEN
         resolve(output)
       }
       const { query } = parse(request.url);
@@ -166,5 +166,5 @@ function getThunderToken(request) {
 }
 
 export {
-    getThunderToken, initialize, getProxyWSConnection, sendRequest, close
+  getToken, initialize, getProxyWSConnection, sendRequest, close
 };

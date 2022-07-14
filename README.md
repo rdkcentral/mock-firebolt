@@ -160,7 +160,7 @@ npm run dev -- --httpPort 3456 --socketPort 9876
 
 # If you need to use proxy connection for any reason:
 npm run dev -- --proxy ip
-Note: To use token run "export wsToken=<thunder token>" command before running MFOS
+Note: To use token run "export TOKEN=<token>" command before running MFOS
 
 # To use the control CLI (assuming you're in the top-level directory for this repo)
 cd cli

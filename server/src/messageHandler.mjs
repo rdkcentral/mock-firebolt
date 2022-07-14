@@ -56,8 +56,8 @@ async function handleMessage(message, userId, ws) {
       try {
         wsProxy = await proxyManagement.initialize() 
       } catch (err) {
-        console.log("Unable to establish proxy connection: ", err)
-        return
+        logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
+        process.exit(1)
       }
     }
     
