@@ -323,8 +323,12 @@ readAllEnabledSdkJsonFiles()
 .then(() => meta = dereferenceMeta(rawMeta))
 .then(buildMethodMapsForAllEnabledSdks);
 
-// --- Exports ---
 
+
+// --- Exports ---
+export const testExports={
+  rawMeta, meta, methodMaps, buildMethodMapsForAllEnabledSdks
+}
 export {
   getRawMeta, getMeta,
   getMethod, isMethodKnown, getSchema,

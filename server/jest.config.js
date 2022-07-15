@@ -22,8 +22,12 @@ module.exports = {
 
   collectCoverage: true,
   collectCoverageFrom: [
-    '<rootDir>/server/src/**/*.js',
-    '!<rootDir>/server/node_modules/**'
+    './src/**/*.mjs',
+    './src/triggers/',
+    '!**<rootDir>/server/node_modules/**'
+  ],
+  coveragePathIgnorePatterns: [
+    './src/routes/'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: [

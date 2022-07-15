@@ -116,7 +116,7 @@ async function getAppropriateDelay(userId, methodName) {
 }
 
 // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
-function handleSequenceOfResponseValues(userId, methodName, params, resp) {
+function handleSequenceOfResponseValues(userId, methodName, params, resp, userState) {
   const nextIndex = userState.sequenceState[methodName] || 0;
   if ( nextIndex < resp.responses.length ) {
     resp = resp.responses[nextIndex];
@@ -259,7 +259,7 @@ function getMethodResponse(userId, methodName, params) {
 
     // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
     if ( resp && resp.responses ) {
-      resp = handleSequenceOfResponseValues(userId, methodName, params, resp);  
+      resp = handleSequenceOfResponseValues(userId, methodName, params, resp, userState);  
     }
 
     // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
@@ -523,6 +523,9 @@ function getScratch(userId, key) {
 
 // --- Exports ---
 
+export const testExports={
+  handleStaticAndDynamicError, state, validateMethodOverride
+}
 export {
   addUser,
   getState,

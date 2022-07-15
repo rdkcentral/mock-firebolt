@@ -16,12 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-//fireboltOpenRpcDereferencing: test
+//fireboltOpenRpcDereferencing: Tests
 
 "use strict";
+
 import * as fireboltOpenRpcDereferencing from "../../src/fireboltOpenRpcDereferencing.mjs";
 
-test("working properly", () => {
+test(`fireboltOpenRpcDereferencing works properly`, () => {
   const meta = {
     core: {
       openrpc: "1.2.4",

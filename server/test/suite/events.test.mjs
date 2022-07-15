@@ -1,10 +1,30 @@
+/*
+ * Copyright 2021 Comcast Cable Communications Management, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// events: Tests
+
 "use strict";
 
 import { jest } from "@jest/globals";
 import * as events from "../../src/events.mjs";
 import { logger } from "../../src/logger.mjs";
 
-test("events.registerEventListener is working properly", () => {
+test(`events.registerEventListener works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
   const dummyObject = {
     method: "",
@@ -14,7 +34,7 @@ test("events.registerEventListener is working properly", () => {
   expect(spy).toHaveBeenCalled();
 });
 
-test("events.isRegisteredEventListener is working properly", () => {
+test(`events.isRegisteredEventListener works properly`, () => {
   const methodArray = ["lifecycle.onInactive", "ASCDFG"];
   const dummyObject = {
     "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
@@ -27,7 +47,7 @@ test("events.isRegisteredEventListener is working properly", () => {
   });
 });
 
-test("events.getRegisteredEventListener is working properly", () => {
+test(`events.getRegisteredEventListener works properly`, () => {
   const methodName = "lifecycle.onInactive";
   const dummyObject = {
     "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
@@ -38,14 +58,14 @@ test("events.getRegisteredEventListener is working properly", () => {
   expect(result).toEqual(expectedResult);
 });
 
-test("events.deregisterEventListener is working properly", () => {
+test(`events.deregisterEventListener works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
   const oMsgdummy = { method: "lifecycle.onInactive", id: 12 };
   events.deregisterEventListener(oMsgdummy);
   expect(spy).toHaveBeenCalled();
 });
 
-test("events.isEventListenerOnMessage is working properly", () => {
+test(`events.isEventListenerOnMessage works properly`, () => {
   const dummyArray = [
     {
       jsonrpc: "2.0",
@@ -83,7 +103,8 @@ test("events.isEventListenerOnMessage is working properly", () => {
     expect(result).toBe(expectedResult);
   });
 });
-test("events.isEventListenerOffMessage is working properly", () => {
+
+test(`events.isEventListenerOffMessage works properly`, () => {
   const dummyArray = [
     {
       jsonrpc: "2.0",
@@ -122,9 +143,39 @@ test("events.isEventListenerOffMessage is working properly", () => {
   });
 });
 
-test("events.sendEventListenerAck is working properly", () => {
+test(`events.sendEventListenerAck works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
   const oMsgdummy = { method: "lifecycle.onInactive", id: 12 };
   events.sendEventListenerAck({ send: () => {} }, oMsgdummy);
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`events.sendEvent works properly`, () => {
+  const methodName = "xyz",
+    result = {
+      name: "OpenRPC Schema",
+      schema: {
+        type: "object",
+      },
+    },
+    testMsg = "xvbx",
+    fErr = { call: () => {} },
+    fSuccess = { call: () => {} },
+    fFatalErr = { call: () => {} };
+  const spy = jest.spyOn(logger, "info");
+  const dummyObject = {
+    "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
+  };
+  events.registerEventListener(dummyObject);
+  events.sendEvent(
+    { send: () => {} },
+    "12345",
+    methodName,
+    result,
+    testMsg,
+    fSuccess,
+    fErr,
+    fFatalErr
+  );
   expect(spy).toHaveBeenCalled();
 });
