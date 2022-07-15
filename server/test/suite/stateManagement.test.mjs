@@ -1,27 +1,54 @@
+/*
+ * Copyright 2021 Comcast Cable Communications Management, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// stateManagement: Tests
+
 "use strict";
+
 import { jest } from "@jest/globals";
+import { logger } from "../../src/logger.mjs";
 import * as stateManagement from "../../src/stateManagement.mjs";
 
 //jest.mock('stateManagement');
 
-test("addUser working properly", () => {
+test(`stateManagement.addUser works properly`, () => {
   const userId = 12345;
   const spy = jest.spyOn(JSON, "stringify");
   stateManagement.addUser(userId);
   expect(spy).toHaveBeenCalled();
 });
-test("getState working properly", () => {
-  const result = stateManagement.getState(12345);
+
+test(`stateManagement.getState works properly`, () => {
+  const result1 = stateManagement.getState(12345);
   const expectedResult = {
     global: { latency: { max: 0, min: 0 }, mode: "DEFAULT" },
     methods: {},
     scratch: {},
     sequenceState: {},
   };
-  expect(result).toEqual(expectedResult);
+  expect(result1).toEqual(expectedResult);
+
+  const spy = jest.spyOn(logger, "info");
+  const result2 = stateManagement.getState(34567);
+  expect(spy).toHaveBeenCalled();
 });
 
-test("getAppropriateDelay is working properly", async () => {
+test(`stateManagement.getAppropriateDelay works properly`, async () => {
   const result = await stateManagement.getAppropriateDelay(
     12345,
     "accessibility.closedCaptions"
@@ -29,7 +56,7 @@ test("getAppropriateDelay is working properly", async () => {
   expect(result).toBe(0);
 });
 
-test("getMethodResponse working properly", () => {
+test(`getMethodResponse works properly`, () => {
   const dummyParams = [];
   const expectedResult = {};
   const result = stateManagement.getMethodResponse(
@@ -40,8 +67,10 @@ test("getMethodResponse working properly", () => {
   expect(result).toEqual(expectedResult);
 });
 
-test("stateManagement.updateState working properly", () => {
-  const userId = 12345;
+test(`stateManagement.updateState works properly`, () => {
+  stateManagement.testExports.state["12345"] = { isDefaultUserState: true };
+  const userId1 = "12345",
+    userId2 = "56789";
   const newState = {
     global: {
       latency: {
@@ -50,24 +79,34 @@ test("stateManagement.updateState working properly", () => {
       },
     },
   };
-  expect(stateManagement.updateState(userId, newState)).toBeUndefined();
+  const spy1 = jest.spyOn(logger, "info");
+  stateManagement.updateState(userId1, newState);
+  expect(spy1).toHaveBeenCalled();
+
+  const spy2 = jest.spyOn(logger, "info");
+  stateManagement.updateState(userId2, newState);
+  expect(spy2).toHaveBeenCalled();
 });
 
-test("stateManagement.revertState working properly", () => {
+test(`stateManagement.revertState works properly`, () => {
   const userId = 12345;
   const spy = jest.spyOn(JSON, "stringify");
   stateManagement.revertState(userId);
   expect(spy).toHaveBeenCalled();
+
+  const spy1 = jest.spyOn(logger, "info");
+  const result2 = stateManagement.revertState(34567);
+  expect(spy1).toHaveBeenCalled();
 });
 
-test("stateManagement.setLatency working properly", () => {
+test(`stateManagement.setLatency works properly`, () => {
   const userId = 12345,
     min = 3000,
     max = 3000;
   expect(stateManagement.setLatency(userId, min, max)).toBeUndefined();
 });
 
-test("stateManagement.setLatencies working properly", () => {
+test(`stateManagement.setLatencies works properly`, () => {
   const dummyoLatency = {
     min: 0,
     max: 0,
@@ -77,7 +116,7 @@ test("stateManagement.setLatencies working properly", () => {
   expect(stateManagement.setLatencies(userId, dummyoLatency)).toBeUndefined();
 });
 
-test("stateManagement.isLegalMode is working properly", () => {
+test(`stateManagement.isLegalMode works properly`, () => {
   const dummyMode = ["default", "box", "xyz"];
   dummyMode.forEach((modes) => {
     const result = stateManagement.isLegalMode(modes);
@@ -86,13 +125,13 @@ test("stateManagement.isLegalMode is working properly", () => {
   });
 });
 
-test("stateManagement.setMode is working properly", () => {
+test(`stateManagement.setMode works properly`, () => {
   const userId = 12345,
     mode = "box";
   expect(stateManagement.setMode(userId, mode)).toBeUndefined();
 });
 
-test("stateManagement.setMethodError is woring properly ", () => {
+test(`stateManagement.setMethodError is woring properly`, () => {
   const userId = 12345,
     methodName = "accessibility.closedCaptionsSettings";
   const error = {
@@ -109,7 +148,7 @@ test("stateManagement.setMethodError is woring properly ", () => {
   ).toBeUndefined();
 });
 
-test("stateManagement.setScratch is working properly", () => {
+test(`stateManagement.setScratch works properly`, () => {
   const key = "closedCaptionsSettings",
     userId = 12345;
   const value = {
@@ -130,7 +169,7 @@ test("stateManagement.setScratch is working properly", () => {
   expect(stateManagement.setScratch(userId, key, value)).toBeUndefined();
 });
 
-test("stateManagement.getScratch is working properly", () => {
+test(`stateManagement.getScratch works properly`, () => {
   const userId = 12345;
   const keysArray = ["closedCaptionsSettings", "abc"];
   const expectedResult = {
@@ -157,4 +196,231 @@ test("stateManagement.getScratch is working properly", () => {
     }
   });
 });
-//setMethodResult not working
+
+test(`stateManagement.handleStaticAndDynamicError works properly`, () => {
+  const userId = "12345",
+    methodName = "rpc.discover",
+    params = [],
+    resp1 = { error: "function()12345" },
+    resp2 = "test-elsePath";
+  const expectedResult1 = {
+    result: "NOT-IMPLEMENTED-YET",
+  };
+  const result1 = stateManagement.testExports.handleStaticAndDynamicError(
+    userId,
+    methodName,
+    params,
+    resp1
+  );
+  const result2 = stateManagement.testExports.handleStaticAndDynamicError(
+    userId,
+    methodName,
+    params,
+    resp2
+  );
+  expect(result1).toEqual(expectedResult1);
+  expect(result2).toBe(resp2);
+});
+
+test(`stateManagement.validateMethodOverride works properly`, () => {
+  const dummyMethodName = "rpc.discover",
+    dummyMethodOverrideObject = [
+      {
+        result: "result",
+      },
+      {
+        error: "error",
+      },
+      {
+        reponse: "response",
+      },
+      {
+        responses: [
+          {
+            result: "result",
+          },
+        ],
+      },
+      {
+        responses: [
+          {
+            error: "error",
+          },
+        ],
+      },
+      {
+        responses: [
+          {
+            reponse: "response",
+          },
+        ],
+      },
+    ];
+  const expectedResult = [
+    "ERROR: Could not validate value result for method rpc.discover",
+    "ERROR: error is not a valid error value: Object expected",
+    "ERROR: New state data for rpc.discover does not contain 'result' or 'error'; One is required",
+    "ERROR: Could not validate value result for method rpc.discover",
+    "ERROR: error is not a valid error value: Object expected",
+    "ERROR: New state data for rpc.discover has at least one response item that does not contain 'result' or 'error'; One is required",
+  ];
+  dummyMethodOverrideObject.forEach((obj, index) => {
+    const result = stateManagement.testExports.validateMethodOverride(
+      dummyMethodName,
+      obj
+    );
+    expect(result[0]).toEqual(expectedResult[index]);
+  });
+});
+
+test(`stateManagement.getMethodResponse works properly`, () => {
+  //testing for resp=handleSequenceOfResponseValues(userId, methodName, params, resp,userState);
+  const userIdArray = ["12345", "23456", "34567"],
+    methodName = "rpc.discover",
+    params = [];
+  const obj = {
+    12345: {
+      global: {
+        mode: "DEFAULT",
+        latency: {
+          min: 0,
+          max: 0,
+        },
+      },
+      scratch: {},
+      methods: {
+        "rpc.discover": {
+          responses: [{ name: "test" }],
+          policy: "REPEAT-LAST-RESPONSE",
+        },
+      },
+      sequenceState: {},
+    },
+    23456: {
+      global: {
+        mode: "DEFAULT",
+        latency: {
+          min: 0,
+          max: 0,
+        },
+      },
+      scratch: {},
+      methods: {
+        "rpc.discover": {
+          responses: [{ name: "test" }],
+          policy: "REPEAT-LAST-RESPONSE",
+        },
+      },
+      sequenceState: {
+        "rpc.discover": 5,
+      },
+    },
+    34567: {
+      global: {
+        mode: "DEFAULT",
+        latency: {
+          min: 0,
+          max: 0,
+        },
+      },
+      scratch: {},
+      methods: {
+        "rpc.discover": {
+          responses: [{ name: "test" }],
+          policy: "REPEAT-LAST",
+        },
+      },
+      sequenceState: {
+        "rpc.discover": 5,
+      },
+    },
+  };
+  const expectedResult = [{ name: "test" }, { name: "test" }, {}];
+  userIdArray.forEach((userId, index) => {
+    stateManagement.testExports.state[userId] = obj[userId];
+    const result = stateManagement.getMethodResponse(
+      userId,
+      methodName,
+      params
+    );
+    expect(result).toEqual(expectedResult[index]);
+  });
+
+  //testing for  resp = handleDynamicResponseValues(userId, methodName, params, resp);
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        response: "function()test",
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result = stateManagement.getMethodResponse("12345", methodName, params);
+  expect(result).toEqual({});
+
+
+  //testing for  resp = handleStaticAndDynamicResult(userId, methodName, params, resp);
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        result: [{ name: "test" }],
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result1 = stateManagement.getMethodResponse(
+    "12345",
+    methodName,
+    params
+  );
+  expect(result1).toEqual({
+    result: [{ name: "test" }],
+    policy: "REPEAT-LAST-RESPONSE",
+  });
+
+  //testing for  resp = handleStaticAndDynamicError(userId, methodName, params, resp);
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        error: "test-error",
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result2 = stateManagement.getMethodResponse(
+    "12345",
+    methodName,
+    params
+  );
+  expect(result2).toEqual( {
+    error: "test-error",
+    policy: "REPEAT-LAST-RESPONSE",
+  });
+});

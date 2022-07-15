@@ -24,8 +24,8 @@ import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as messageHandler from './messageHandler.mjs';
 
-const user2wss = new Map();
-const user2ws  = new Map();
+ const user2wss = new Map();
+ const user2ws  = new Map();
 
 // Add default user, which will be used anytime a userId is not specified
 // in REST calls (calls without an x-mockfirebolt-userid header), regardless of
@@ -85,6 +85,9 @@ function removeUser(userId) {
 }
 
 // --- Exports ---
+export const testExports={
+  user2wss, user2ws
+}
 
 export {
   getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser
