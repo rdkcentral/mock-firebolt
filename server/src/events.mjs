@@ -194,6 +194,10 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
 
 // --- Exports ---
 
+export const testExports = {
+  eventListenerMap
+}
+
 export {
   registerEventListener, isRegisteredEventListener, getRegisteredEventListener, deregisterEventListener,
   isEventListenerOnMessage, isEventListenerOffMessage,sendEventListenerAck,

@@ -23,6 +23,7 @@
 import { jest } from "@jest/globals";
 import * as events from "../../src/events.mjs";
 import { logger } from "../../src/logger.mjs";
+import { eventTriggers } from "../../src/triggers.mjs"
 
 test(`events.registerEventListener works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
@@ -151,7 +152,7 @@ test(`events.sendEventListenerAck works properly`, () => {
 });
 
 test(`events.sendEvent works properly`, () => {
-  const methodName = "xyz",
+  const methodName = "test",
     result = {
       name: "OpenRPC Schema",
       schema: {
@@ -162,9 +163,17 @@ test(`events.sendEvent works properly`, () => {
     fErr = { call: () => {} },
     fSuccess = { call: () => {} },
     fFatalErr = { call: () => {} };
-  const spy = jest.spyOn(logger, "info");
-  const dummyObject = {
-    "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
+  const debugSpy = jest.spyOn(logger, "debug");
+  const infoSpy = jest.spyOn(logger, "info");
+  const errorSpy = jest.spyOn(logger, "error");
+  const dummyObject = {method: "test", id: 12 };
+  eventTriggers.test = {
+    pre: {
+      call: () => {},
+    },
+    post: {
+      call: () => {},
+    }
   };
   events.registerEventListener(dummyObject);
   events.sendEvent(
@@ -177,5 +186,43 @@ test(`events.sendEvent works properly`, () => {
     fErr,
     fFatalErr
   );
-  expect(spy).toHaveBeenCalled();
+  expect(debugSpy).toHaveBeenCalled();
+  events.sendEvent(
+    { send: () => {} },
+    "12345",
+    'unregisteredMethod',
+    result,
+    testMsg,
+    fSuccess,
+    fErr,
+    fFatalErr
+  );
+  expect(infoSpy).toHaveBeenCalled();
+  eventTriggers.test = {};
+  events.sendEvent(
+    { send: () => {} },
+    "12345",
+    methodName,
+    result,
+    testMsg,
+    {},
+    fErr,
+    fFatalErr
+  );
+  expect(errorSpy).toHaveBeenCalled();
+  eventTriggers.test = {
+    post: {},
+    pre: {}
+  };
+  events.sendEvent(
+    { send: () => {} },
+    "12345",
+    methodName,
+    result,
+    testMsg,
+    {},
+    fErr,
+    fFatalErr
+  );
+  expect(errorSpy).toHaveBeenCalled();
 });
