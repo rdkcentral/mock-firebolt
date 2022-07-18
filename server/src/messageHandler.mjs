@@ -42,7 +42,7 @@ async function handleMessage(message, userId, ws) {
 
   // Handle JSON-RPC notifications (w/ no id in request)
   // - Don't send reply message over socket back to SDK
-  if ( ! 'id' in oMsg) {
+  if ( ! ('id' in oMsg)) {
     logger.info('Not responding, since that message was a notification with no id');
     return;
   }
