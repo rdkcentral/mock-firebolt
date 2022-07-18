@@ -27,6 +27,7 @@ import * as magicDateTime from './magicDateTime.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
+import * as events from './events.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -130,13 +131,28 @@ function handleSequenceOfResponseValues(userId, methodName, params, resp) {
 }
 
 // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
-function handleDynamicResponseValues(userId, methodName, params, resp){
+function handleDynamicResponseValues(userId, methodName, params, ws, resp){
   if ( typeof resp.response === 'string' && resp.response.trimStart().startsWith('function') ) {
     // Looks like resp.response is specified as a function; evaluate it
     try {
       const ctx = {
+        logger: logger,
+        setTimeout: setTimeout,
+        setInterval: setInterval,
         set: function ss(key, val) { return setScratch(userId, key, val) },
         get: function gs(key) { return getScratch(userId, key); },
+        sendEvent: function(onMethod, result, msg) {
+          function fSuccess() {
+            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+          }
+          function fErr() {
+            logger.info(`Could not send ${onMethod} event because no listener is active`)
+          }
+          function fFatalErr() {
+            logger.info(`Internal error`)
+          }
+          events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+        },
         FireboltError: commonErrors.FireboltError
       };
       const sFcnBody = resp.response + ';' + 'return f(ctx, params);'
@@ -246,10 +262,10 @@ function handleStaticAndDynamicError(userId, methodName, params, resp){
 // Returns either { result: xxx } or { error: { code: xxx, message: 'xxx' } }
 // The params parameter isn't used for static mock responses, but is useful when
 // specifying result or error by function (see examples/discovery-watched-1.json for an example)
-function getMethodResponse(userId, methodName, params) {
+function getMethodResponse(userId, methodName, params, ws) {
   let resp;
   const userState = getState(userId);
-  
+
   if ( userState.global.mode === Mode.DEFAULT ) {
     // Use mock override values, if present, else use first example value from the OpenRPC specification
     // This includes both "normal" result and error values and also results and errors specified as functions
@@ -264,7 +280,7 @@ function getMethodResponse(userId, methodName, params) {
 
     // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
     if ( resp && resp.response ) {
-      resp = handleDynamicResponseValues(userId, methodName, params, resp);
+      resp = handleDynamicResponseValues(userId, methodName, params, ws, resp);
     }
 
     // Handle result values, which are either specified as static values or
