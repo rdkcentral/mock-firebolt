@@ -17,7 +17,7 @@
     "at": 7000,
     "event": {
       "method": "device.onDeviceNameChanged",
-      "result": "NEW-DEVICE-NAME-2"
+      "result": "NEW-DEVICE-NAME-3"
     }
   }
 ]
