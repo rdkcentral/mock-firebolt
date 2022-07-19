@@ -41,10 +41,13 @@ const server = createServer();
 server.on('upgrade', function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
   let userId = pathname.substring(1);
-  if ( ! userId ) {
-    logger.info('Using default user');
-    userId = config.app.defaultUserId;
-  } else if ( ! userManagement.isKnownUser(userId) ) {
+  if (!userId) {
+    logger.info("Using ip addresses as userId");
+    let ipAddresses = socket.remoteAddress; //example value of ip addresses would be ::ffff:127.0.0.1
+    userId = ipAddresses.replaceAll(".", "").replaceAll(":", "");
+  }
+
+  if ( ! userManagement.isKnownUser(userId) ) {
     logger.warn(`WARNING: Unknown userId: ${userId}; Using default user`);
     userId = config.app.defaultUserId;
   }

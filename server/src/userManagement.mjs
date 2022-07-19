@@ -67,6 +67,11 @@ function addUser(userId) {
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
   wss.on('connection', function connection(ws) {
+    if (!userId) {
+      logger.info("Using ip addresses as userId");
+      let ipAddresses = ws._socket.remoteAddress; //example value of ip addresses would be ::ffff:127.0.0.1
+      userId = ipAddresses.replaceAll(".", "").replaceAll(":", "");
+    }
     associateUserWithWs(''+userId, ws);
     ws.on('message', async message => {
       messageHandler.handleMessage(message, ''+userId, ws);
