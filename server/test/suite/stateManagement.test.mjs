@@ -49,6 +49,41 @@ test(`stateManagement.getState works properly`, () => {
 });
 
 test(`stateManagement.getAppropriateDelay works properly`, async () => {
+  stateManagement.testExports.state[4567] = {
+    global: {
+      mode: 'Default'
+    },
+  };
+  const undefinedResultOne = await stateManagement.getAppropriateDelay(
+    4567,
+    "accessibility.closedCaptions"
+  );
+  expect(undefinedResultOne).toBeUndefined();
+
+  stateManagement.testExports.state[6789] = {};
+  const undefinedResultTwo = await stateManagement.getAppropriateDelay(
+    6789,
+    "accessibility.closedCaptions"
+  );
+  expect(undefinedResultTwo).toBeUndefined();
+
+  stateManagement.testExports.state[9012] = {
+    global: {
+      mode: 'Default',
+      latency: {
+        'accessibility.closedCaptions': {
+          min: 3,
+          max:3,
+        }
+      }
+    }
+  };
+  const output = await stateManagement.getAppropriateDelay(
+    9012,
+    "accessibility.closedCaptions"
+  );
+  expect(output).toBe(3);
+
   const result = await stateManagement.getAppropriateDelay(
     12345,
     "accessibility.closedCaptions"
