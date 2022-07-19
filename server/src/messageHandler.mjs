@@ -162,7 +162,7 @@ async function handleMessage(message, userId, ws) {
   }
 
   //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
-  response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params);
+  response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws);
 
   // Emit developerNotes for the method, if any
   const developerNotes = fireboltOpenRpc.getDeveloperNotesForMethod(oMsg.method);
