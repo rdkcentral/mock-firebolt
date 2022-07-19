@@ -289,63 +289,62 @@ test(`fireboltOpenRpc.isMethodKnown works properly`, () => {
   });
 });
 
-// test('fireboltOpenRpc.getSchema', () => {
-//   fireboltOpenRpc.testExports.meta['core'] = {
-//     openrpc: "1.2.4",
-//     info: {
-//       title: "Firebolt",
-//       version: "0.6.1",
-//     },
-//     methods: [
-//       {
-//         name: "rpc.discover",
-//         summary: "Firebolt OpenRPC schema",
-//         params: [],
-//         result: {
-//           name: "OpenRPC Schema",
-//           schema: {
-//             type: "object",
-//           },
-//         },
-//       },
-//     ],
-//     components: {
-//       schemas: {
-//         SemanticVersion: {
-//           title: "SemanticVersion",
-//           type: "object",
-//           properties: {
-//             major: {
-//               type: "integer",
-//               minimum: 0,
-//             },
-//             minor: {
-//               type: "integer",
-//               minimum: 0,
-//             },
-//             patch: {
-//               type: "integer",
-//               minimum: 0,
-//             },
-//             readable: {
-//               type: "string",
-//             },
-//           },
-//           required: ["major", "minor", "patch", "readable"],
-//           additionalProperties: false,
-//         },
-//       },
-//     },
-
-// };
-// const expectedInput=['SemanticVersion','qwerty'];
-// const out=fireboltOpenRpc.testExports.meta.core.components.schemas;
-// const expectedOutput=[out['SemanticVersion'],undefined];
-// expectedInput.forEach((schemaName,index)=>{
-//   const result=fireboltOpenRpc.getSchema(schemaName);
-//   expect(result).toEqual(expectedOutput[index]);
-// })
-//  })
+test("fireboltOpenRpc.getSchema", () => {
+  fireboltOpenRpc.testExports.meta["core"] = {
+    openrpc: "1.2.4",
+    info: {
+      title: "Firebolt",
+      version: "0.6.1",
+    },
+    methods: [
+      {
+        name: "rpc.discover",
+        summary: "Firebolt OpenRPC schema",
+        params: [],
+        result: {
+          name: "OpenRPC Schema",
+          schema: {
+            type: "object",
+          },
+        },
+      },
+    ],
+    components: {
+      schemas: {
+        SemanticVersion: {
+          title: "SemanticVersion",
+          type: "object",
+          properties: {
+            major: {
+              type: "integer",
+              minimum: 0,
+            },
+            minor: {
+              type: "integer",
+              minimum: 0,
+            },
+            patch: {
+              type: "integer",
+              minimum: 0,
+            },
+            readable: {
+              type: "string",
+            },
+          },
+          required: ["major", "minor", "patch", "readable"],
+          additionalProperties: false,
+        },
+      },
+    },
+  };
+  const expectedInput = ["SemanticVersion"];
+  const out = fireboltOpenRpc.testExports.meta.core.components.schemas;
+  const expectedOutput = [out["SemanticVersion"], undefined];
+  expectedInput.forEach((schemaName, index) => {
+    const result = fireboltOpenRpc.getSchema(schemaName);
+    expect(result).toEqual(expectedOutput[index]);
+  });
+});
 
 test(`fireboltOpenRpc. getFirstExampleValueForMethod works properly`, () => {
   fireboltOpenRpc.testExports.methodMaps["core"] = {
@@ -683,20 +682,19 @@ test(`fireboltOpenRpc.validateMethodResult works properly`, () => {
     message: "Not supported",
   };
 
-  const expectedInput = [
-    "rpc.discover",
-    "accessibility.voiceGuidanceSettings",
-  ];
+  const expectedInput = ["rpc.discover", "accessibility.voiceGuidanceSettings"];
   const expectedOutput = [[], []];
   expectedInput.forEach((methodName, index) => {
     const result = fireboltOpenRpc.validateMethodResult(methodName, dummyVal);
     expect(result).toEqual(expect.arrayContaining(expectedOutput[index]));
   });
 
-  const dummyVal1="function(){12334}";
-  const result1 = fireboltOpenRpc.validateMethodResult(expectedInput[1], dummyVal1);
-    expect(result1).toEqual(expect.arrayContaining([]));
-
+  const dummyVal1 = "function(){12334}";
+  const result1 = fireboltOpenRpc.validateMethodResult(
+    expectedInput[1],
+    dummyVal1
+  );
+  expect(result1).toEqual(expect.arrayContaining([]));
 
   // catch block testing
   const inputObj = fireboltOpenRpc.testExports.methodMaps.invalidMethod;

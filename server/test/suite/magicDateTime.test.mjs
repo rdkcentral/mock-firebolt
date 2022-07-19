@@ -24,6 +24,7 @@ import {jest} from '@jest/globals';
 import * as fs from 'fs';
 import Setup from '../Setup';
 import * as magicDateTime from '../../src/magicDateTime.mjs';
+import { logger } from "../../src/logger.mjs";
 
 test(`magicDateTime.replaceDynamicDateTimeVariablesStr works properly`, () => {
     let sIn, sOut, sExpectedOut;
@@ -90,7 +91,6 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
     const tests = [
         {
             in:  { "foo": "bar" },
-            hasError: false,
             expectedOut: function() {
                 return { "foo": "bar" };
             }
@@ -98,7 +98,6 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
     
         {
             in:  { "foo": "\"{{+0s|YYYY-MM-DD}}\"" },
-            hasError: false,
             expectedOut: function() {
                 const today = new Date();
                 const dd = String(today.getDate()).padStart(2, '0');
@@ -113,7 +112,6 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
 
         {
             in:  { "foo": "{{+0s|x}}" },
-            hasError: false,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime();
@@ -124,7 +122,6 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         },
         {
             in:  { "foo": "{{-0s|x}}" },
-            hasError: false,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime();
@@ -135,7 +132,6 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         },
         {
             in:  { "foo": "{{19:00+1d|x}}" },
-            hasError: false,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime()+135000000;
@@ -146,7 +142,6 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         },
         {
             in:  { "foo": "{{19:00:00+1d|x}}" },
-            hasError: false,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime()+135000000;
@@ -164,16 +159,15 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
     for ( let ii = 0; ii < tests.length; ii += 1 ) {
         objIn = tests[ii].in;
         objOut = magicDateTime.replaceDynamicDateTimeVariablesObj(objIn, '{{', '}}');
-        if(tests[ii].hasError){
-   /// expect(objOut).toThrowError(new Error(`Invalid relative date/time string (d only)`));
-            
-    expect(objOut).toBe(1);
-        }
-        else
-        {//console.log(`Test case: in: ${JSON.stringify(objIn)}, expectedOut: ${JSON.stringify(objExpectedOut)}`);
-            objExpectedOut = tests[ii].expectedOut.call(null);
-            expect(objOut).toMatchObject(objExpectedOut);}
+        objExpectedOut = tests[ii].expectedOut.call(null);
+        expect(objOut).toMatchObject(objExpectedOut);
     }
 
     jest.useRealTimers();
+});
+
+test(`magicDateTime.replaceDynamicDateTimeVariablesObj error scenario`, () => {
+    const spy = jest.spyOn(logger, 'error');
+    magicDateTime.replaceDynamicDateTimeVariablesObj({ "foo": "{{23*19:00:00+1d|x}}" }, '{{', '}}');
+    expect(spy).toHaveBeenCalled();
 });

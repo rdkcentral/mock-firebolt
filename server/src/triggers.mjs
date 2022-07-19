@@ -157,6 +157,10 @@ enabledTriggerPaths.forEach((dir) => {
 
 // --- Exports ---
 
+export const testExports = {
+  processFile
+};
+
 export {
   methodTriggers, eventTriggers
 };
