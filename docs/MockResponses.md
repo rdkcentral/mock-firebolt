@@ -38,17 +38,25 @@ These are the valid ways to specify the response that Mock Firebolt should retur
 
 ```json
 {
-  "result": "function(ctx, params) { ... }"
+  "result": "function f(ctx, params) { ... }"
 }
 ```
+
+See the "The Context Object" and "Params" sections of [Triggers](./Triggers.md) for information about the ctx and params parameters passed to your function.
+
+In addition to the methods listed there, the ctx object here also includes a `FireboltError` property, which your function can/should use (throw) if/when it wants to return an exception to the client/app. (See the `metrics-mediaLoadStart-1.yaml` example.)
 
 ### Dynamic Response (Result or Error)
 
 ```json
 {
-  "response": "function(ctx, params) { ... }"
+  "response": "function f(ctx, params) { ... }"
 }
 ```
+
+See the "The Context Object" and "Params" sections of [Triggers](./Triggers.md) for information about the ctx and params parameters passed to your function.
+
+In addition to the methods listed there, the ctx object here also includes a `FireboltError` property, which your function can/should use (throw) if/when it wants to return an exception to the client/app. (See the `metrics-mediaLoadStart-1.yaml` example.)
 
 See [Functions](./Functions.md).
 
