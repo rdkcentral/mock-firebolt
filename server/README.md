@@ -434,3 +434,22 @@ curl --location --request POST 'http://localhost:3333/api/v1/sequence' \
     "status": "OK"
 }
 ```
+
+
+
+## Create a user (generates a UUID v4 and registers a user with this User ID)
+
+### Example cURL Command:
+
+```
+curl --location --request POST 'http://localhost:3333/api/v1/user'
+```
+
+### 200 Response:
+
+```
+{
+    "status": "OK",
+    "userId": "<uuid>"
+}
+```

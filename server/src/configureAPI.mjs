@@ -23,6 +23,7 @@
 import * as healthApi from './routes/api/health.mjs';
 import * as metaApi from './routes/api/meta.mjs';
 import * as stateApi from './routes/api/state.mjs';
+import * as userApi from './routes/api/user.mjs';
 import * as eventApi from './routes/api/event.mjs';
 import * as sessionApi from './routes/api/session.mjs';
 import * as sequenceApi from './routes/api/sequence.mjs';
@@ -62,6 +63,10 @@ function configureAPI(app) {
 	// Revert to the way things were when server started up
     app.post('/api/v1/state/revert',                    stateApi.revertState);
 
+    // ======================= State-Related API Routes =======================
+
+    app.post('/api/v1/user',                            userApi.addUser);
+
 	// ======================= Event-Related API Routes =======================
 
     // Send an event
@@ -70,18 +75,18 @@ function configureAPI(app) {
     // ======================= Session-Related API Routes =======================
 
     // Toggle session state
-    app.post('/api/v1/session',                        sessionApi.toggleSession);
+    app.post('/api/v1/session',                         sessionApi.toggleSession);
 
     // Start a session
-    app.post('/api/v1/session/start',                  sessionApi.startSession);
+    app.post('/api/v1/session/start',                   sessionApi.startSession);
 
     // End a session
-    app.post('/api/v1/session/stop',                   sessionApi.stopSession);
+    app.post('/api/v1/session/stop',                    sessionApi.stopSession);
 
     // ======================= Sequence-Related API Routes =======================
 
     // Send an event sequence
-    app.post('/api/v1/sequence',                       sequenceApi.sendSequence);
+    app.post('/api/v1/sequence',                        sequenceApi.sendSequence);
 }
 
 export { configureAPI };
