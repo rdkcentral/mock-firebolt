@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Developer Tools: Tests
+// index: Tests
 
 'use strict';
 
-import * as developerTools from "../../src/developerTools.mjs";
+import * as index from "../../src/index.mjs";
 
-test(`developerTools works properly`, () => {
-  // importing the developerTools.mjs will cover this file
-  // As here we don't have any exported function or variable. 
+test(`index works properly`, () => {
+  // importing the index.mjs will cover this file
+  // As here we don't have any exported functions or variables. 
   // creating dummy test to execute the module.
 
   expect(1).toBe(1);
