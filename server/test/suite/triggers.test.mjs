@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Developer Tools: Tests
+// Triggers: Tests
 
 'use strict';
 
