@@ -158,7 +158,11 @@ enabledTriggerPaths.forEach((dir) => {
 // --- Exports ---
 
 export const testExports = {
-  processFile
+  processFile,
+  processMethodDir,
+  processMethodDir,
+  processTopDir,
+  processSubDir
 };
 
 export {

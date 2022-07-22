@@ -24,6 +24,11 @@ import { jest } from "@jest/globals";
 import { logger } from "../../src/logger.mjs";
 import * as fireboltOpenRpc from "../../src/fireboltOpenRpc.mjs";
 
+test(`fireboltOpenRpc.toLowerCase works properly`, () => {
+  const result = fireboltOpenRpc.testExports.toLowerCase("TEST");
+  expect(result).toBe("test");
+});
+
 test(`fireboltOpenRpc.getRawMeta works properly`, () => {
   const expectedResult = {
     core: {
@@ -494,15 +499,13 @@ test(`fireboltOpenRpc.getDeveloperNotesForMethod works properly`, () => {
     "rpc.discover",
     "accessibility.voiceGuidanceSettings",
     "account.id",
-    "validMethodName",
-    "qwerty",
+    "validMethodName"
   ];
   const expectedOutput = [
     undefined,
     undefined,
     undefined,
-    { docUrl: undefined, notes: undefined },
-    undefined,
+    { docUrl: undefined, notes: undefined }
   ];
   expectedInput.forEach((methodName, index) => {
     const result = fireboltOpenRpc.getDeveloperNotesForMethod(methodName);
@@ -682,11 +685,25 @@ test(`fireboltOpenRpc.validateMethodResult works properly`, () => {
     message: "Not supported",
   };
 
-  const expectedInput = ["rpc.discover", "accessibility.voiceGuidanceSettings"];
-  const expectedOutput = [[], []];
+  const expectedInput = [
+    "rpc.discover",
+    "accessibility.voiceGuidanceSettings",
+    "function() {}",
+  ];
+  const expectedOutput = [
+    ["ERROR: Could not validate value rpc.discover for method [object Object]"],
+    [
+      "ERROR: Could not validate value accessibility.voiceGuidanceSettings for method [object Object]",
+    ],
+    [],
+  ];
   expectedInput.forEach((methodName, index) => {
     const result = fireboltOpenRpc.validateMethodResult(methodName, dummyVal);
-    expect(result).toEqual(expect.arrayContaining(expectedOutput[index]));
+    if (index !== 2) {
+      expect(result[0]).toBe(expectedOutput[index][0]);
+    } else {
+      expect(result).toEqual([]);
+    }
   });
 
   const dummyVal1 = "function(){12334}";

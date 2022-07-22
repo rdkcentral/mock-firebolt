@@ -18,14 +18,99 @@
 
 // Triggers: Tests
 
-'use strict';
+"use strict";
 
-import { jest } from "@jest/globals"
+import path from "path";
+import { jest } from "@jest/globals";
 import * as triggers from "../../src/triggers.mjs";
 import { logger } from "../../src/logger.mjs";
 
-test(`triggers.processFile works properly`, () => {
-  const infoSpy = jest.spyOn(logger, 'info');
-  triggers.testExports.processFile('rpc.discover', 'test-path', 'testName', '.js');
-  expect(infoSpy).toHaveBeenCalled();
+const __dirname = path.resolve();
+const filePath =
+  __dirname +
+  "\\src\\triggers\\eventTriggers\\device.onDeviceNameChanged\\pre.mjs";
+const dirPath =
+  __dirname + "\\src\\triggers\\eventTriggers\\device.onDeviceNameChanged";
+const testPath = __dirname + "\\src\\triggers\\methodTriggers";
+
+jest.setTimeout(30000);
+
+test(`triggers.processFile works properly`, async () => {
+  await new Promise((r) => {
+    triggers.testExports.processFile(
+      "closedcaptions.enabled",
+      filePath,
+      "pre",
+      ".mjs"
+    );
+    setTimeout(r, 1000);
+    expect(JSON.stringify(triggers.eventTriggers)).toBe("{}");
+  });
+});
+
+test(`triggers.processFile works properly`, async () => {
+  await new Promise((r) => {
+    triggers.testExports.processFile(
+      "device.onDeviceNameChanged",
+      filePath,
+      "pre",
+      ".mjs"
+    );
+    setTimeout(r, 2000);
+    expect(JSON.stringify(triggers.eventTriggers)).toBe("{}");
+  });
+});
+
+test(`triggers.processFile works properly`, async () => {
+  await new Promise((r) => {
+    const infoSpy = jest.spyOn(logger, "info");
+    triggers.testExports.processFile(
+      "rpc.discover",
+      filePath,
+      "testName",
+      ".mjs"
+    );
+    setTimeout(r, 1000);
+    expect(infoSpy).toHaveBeenCalled();
+  });
+});
+
+test(`triggers.processMethodDir works properly`, async () => {
+  await new Promise((r) => {
+    triggers.testExports.processMethodDir(
+      dirPath,
+      "rpc.discover",
+      triggers.testExports.processFile
+    );
+    setTimeout(r, 1000);
+    expect(JSON.stringify(triggers.eventTriggers)).toBe(
+      '{"device.onDeviceNameChanged":{}}'
+    );
+  });
+});
+
+test(`triggers.processTopDir works properly`, async () => {
+  await new Promise((r) => {
+    triggers.testExports.processTopDir(
+      dirPath,
+      triggers.testExports.processMethodDir
+    );
+    setTimeout(r, 1000);
+    expect(JSON.stringify(triggers.eventTriggers)).toBe(
+      '{"device.onDeviceNameChanged":{}}'
+    );
+  });
+});
+
+test(`triggers.processSubDir works properly`, async () => {
+  await new Promise((r) => {
+    triggers.testExports.processSubDir(
+      testPath,
+      triggers.testExports.processTopDir
+    );
+    setTimeout(r, 1000);
+    expect(JSON.stringify(triggers.eventTriggers)).toBe(
+      '{"device.onDeviceNameChanged":{}}'
+    );
+  });
 });
