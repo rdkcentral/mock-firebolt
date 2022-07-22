@@ -60,6 +60,7 @@ test(`userManagement.getWsForUser works properly`, () => {
   const result1 = userManagement.getWsForUser(userId1);
   expect(result).toBe("test");
   expect(result1).toBeUndefined();
+  userManagement.testExports.user2ws.delete("12345");
 });
 
 test(`userManagement.addUser works properly`, () => {
@@ -72,4 +73,36 @@ test(`userManagement.removeUser works properly`, () => {
   const spy = jest.spyOn(Map.prototype, "delete");
   userManagement.removeUser(userId);
   expect(spy).toHaveBeenCalled();
+});
+
+test(`userManagement.getWsListForUser works properly`, () => {
+  const inputArray = ["123~A", "123", "12345~B"];
+  const outputArray = [["123"], ["123"], undefined];
+  userManagement.testExports.group2user.set("A", ["123"]);
+  userManagement.testExports.user2ws.set("123", "123");
+  inputArray.forEach((input, index) => {
+    const result = userManagement.getWsListForUser(input);
+    if (typeof result === "object") {
+      expect(result).toEqual(expect.arrayContaining(outputArray[index]));
+    } else {
+      expect(result).toBeUndefined();
+    }
+  });
+  userManagement.testExports.group2user.delete("A");
+  userManagement.testExports.user2ws.delete("123");
+});
+
+test(`userManagement.associateUserWithWs works properly`, () => {
+  userManagement.testExports.associateUserWithWs("123", "Test");
+  const result = userManagement.testExports.user2ws.get("123");
+  expect(result).toBe("Test");
+  userManagement.testExports.user2ws.delete("123");
+});
+
+test(`userManagement.handleGroupMembership works properly`, () => {
+  userManagement.testExports.handleGroupMembership("123~A");
+  const result = userManagement.testExports.group2user.get("A");
+  expect(result[0]).toBe("123~A");
+  userManagement.testExports.group2user.delete("A");
+  userManagement.testExports.user2ws.delete("123");
 });
