@@ -23,7 +23,7 @@
 import { jest } from "@jest/globals";
 import * as events from "../../src/events.mjs";
 import { logger } from "../../src/logger.mjs";
-import { eventTriggers } from "../../src/triggers.mjs"
+import { eventTriggers } from "../../src/triggers.mjs";
 
 test(`events.registerEventListener works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
@@ -31,7 +31,7 @@ test(`events.registerEventListener works properly`, () => {
     method: "",
     id: 12,
   };
-  events.registerEventListener(dummyObject);
+  events.registerEventListener("12345", dummyObject);
   expect(spy).toHaveBeenCalled();
 });
 
@@ -40,9 +40,12 @@ test(`events.isRegisteredEventListener works properly`, () => {
   const dummyObject = {
     "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
   };
-  events.registerEventListener(dummyObject);
+  events.registerEventListener("12345", dummyObject);
   methodArray.forEach((method) => {
-    const result = events.isRegisteredEventListener(method);
+    const result = events.testExports.isRegisteredEventListener(
+      "12345",
+      method
+    );
     if (method in Object.keys(dummyObject)) expect(result).toBeTruthy();
     else expect(result).toBeFalsy();
   });
@@ -53,8 +56,11 @@ test(`events.getRegisteredEventListener works properly`, () => {
   const dummyObject = {
     "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
   };
-  events.registerEventListener(dummyObject);
-  const result = events.getRegisteredEventListener(methodName);
+  events.registerEventListener("12345", dummyObject);
+  const result = events.testExports.getRegisteredEventListener(
+    "12345",
+    methodName
+  );
   const expectedResult = dummyObject.methodName;
   expect(result).toEqual(expectedResult);
 });
@@ -166,16 +172,16 @@ test(`events.sendEvent works properly`, () => {
   const debugSpy = jest.spyOn(logger, "debug");
   const infoSpy = jest.spyOn(logger, "info");
   const errorSpy = jest.spyOn(logger, "error");
-  const dummyObject = {method: "test", id: 12 };
+  const dummyObject = { method: "test", id: 12 };
   eventTriggers.test = {
     pre: {
       call: () => {},
     },
     post: {
       call: () => {},
-    }
+    },
   };
-  events.registerEventListener(dummyObject);
+  events.registerEventListener("12345", dummyObject);
   events.sendEvent(
     { send: () => {} },
     "12345",
@@ -190,7 +196,7 @@ test(`events.sendEvent works properly`, () => {
   events.sendEvent(
     { send: () => {} },
     "12345",
-    'unregisteredMethod',
+    "unregisteredMethod",
     result,
     testMsg,
     fSuccess,
@@ -212,7 +218,7 @@ test(`events.sendEvent works properly`, () => {
   expect(errorSpy).toHaveBeenCalled();
   eventTriggers.test = {
     post: {},
-    pre: {}
+    pre: {},
   };
   events.sendEvent(
     { send: () => {} },

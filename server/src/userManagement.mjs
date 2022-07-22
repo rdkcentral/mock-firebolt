@@ -137,7 +137,7 @@ function removeUser(userId) {
 
 // --- Exports ---
 export const testExports={
-  user2wss, user2ws
+  user2wss, user2ws, group2user, associateUserWithWs, handleGroupMembership
 }
 
 export {
