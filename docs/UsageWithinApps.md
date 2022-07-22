@@ -34,8 +34,21 @@ Each application may use its own mechanism to set this value. Example approaches
     - `&mf=true`
   - Use Mock Firebolt, but use a specific port on localhost
     - `&mf=9993`
+  - Use Mock Firebolt, and use a specific value for the Firebolt endpoint to use (note the URL encoding used)
+    - `&mf=ws%3A%2F%2Flocalhost%3A9998`
   - Use Mock Firebolt, and use a specific value for the Firebolt endpoint to use (note the URL encoding used and the path for a specific user)
     - `&mf=ws%3A%2F%2Flocalhost%3A9998%2F123`
+  - Use Mock Firebolt, and use a specific value for the Firebolt endpoint to use (note the URL encoding used and the path for a specific user (123) within a specific group (A))
+    - `&mf=ws%3A%2F%2Flocalhost%3A9998%2F123~A`
+
+## Users and User Groups
+
+Mock Firebolt is normally used in "single user mode."
+It can also be used to support multiple developers in "multi user mode."
+Detailed documentation for multi-user support can be found in [MultiUser.md](./MultiUser.md).
+
+Although this is not normally needed, Mock Firebolt can be used to support a single user running multiple apps which should share the same Mock Firebolt state, using a feature called "user groups."
+Detailed documentation for user groups can be found in [UserGroups](./UserGroups.md).
 
 # Webpack Techniques to Activate Mock Firebolt in Development Mode Only
 
