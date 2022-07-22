@@ -51,7 +51,7 @@ test(`stateManagement.getState works properly`, () => {
 test(`stateManagement.getAppropriateDelay works properly`, async () => {
   stateManagement.testExports.state[4567] = {
     global: {
-      mode: 'Default'
+      mode: "Default",
     },
   };
   const undefinedResultOne = await stateManagement.getAppropriateDelay(
@@ -69,14 +69,14 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
 
   stateManagement.testExports.state[9012] = {
     global: {
-      mode: 'Default',
+      mode: "Default",
       latency: {
-        'accessibility.closedCaptions': {
+        "accessibility.closedCaptions": {
           min: 3,
-          max:3,
-        }
-      }
-    }
+          max: 3,
+        },
+      },
+    },
   };
   const output = await stateManagement.getAppropriateDelay(
     9012,
@@ -402,6 +402,30 @@ test(`stateManagement.getMethodResponse works properly`, () => {
   const result = stateManagement.getMethodResponse("12345", methodName, params);
   expect(result).toEqual({});
 
+  //testing for  resp = handleStaticAndDynamicResult(userId, methodName, params, resp);
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        result: "function()test",
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result1 = stateManagement.getMethodResponse(
+    "12345",
+    methodName,
+    params
+  );
+  expect(result1).toEqual({});
 
   //testing for  resp = handleStaticAndDynamicResult(userId, methodName, params, resp);
   stateManagement.testExports.state["12345"] = {
@@ -421,12 +445,12 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     },
     sequenceState: {},
   };
-  const result1 = stateManagement.getMethodResponse(
+  const result2 = stateManagement.getMethodResponse(
     "12345",
     methodName,
     params
   );
-  expect(result1).toEqual({
+  expect(result2).toEqual({
     result: [{ name: "test" }],
     policy: "REPEAT-LAST-RESPONSE",
   });
@@ -449,13 +473,39 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     },
     sequenceState: {},
   };
-  const result2 = stateManagement.getMethodResponse(
+  const result3 = stateManagement.getMethodResponse(
     "12345",
     methodName,
     params
   );
-  expect(result2).toEqual( {
+  expect(result3).toEqual({
     error: "test-error",
     policy: "REPEAT-LAST-RESPONSE",
   });
+
+  //testing for  resp = handleDynamicResponseValues(userId, methodName, params, resp);
+  const spy = jest.spyOn(logger, "error");
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        response: { name: "test" },
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result4 = stateManagement.getMethodResponse(
+    "12345",
+    methodName,
+    params
+  );
+  expect(spy).toHaveBeenCalled();
 });
