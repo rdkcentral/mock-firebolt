@@ -83,6 +83,10 @@ logger.info('Adding user 123...'); stateManagement.addUser('123'); userManagemen
 logger.info('Adding user 456...'); stateManagement.addUser('456'); userManagement.addUser('456');
 logger.info('Adding user 789...'); stateManagement.addUser('789'); userManagement.addUser('789');
 
+logger.info('Adding user 123~A...'); stateManagement.addUser('123~A'); userManagement.addUser('123~A');
+logger.info('Adding user 456~A...'); stateManagement.addUser('456~A'); userManagement.addUser('456~A');
+logger.info('Adding user 789~A...'); stateManagement.addUser('789~A'); userManagement.addUser('789~A');
+
 server.listen(commandLine.socketPort);
 logger.info(`Listening on socket port ${commandLine.socketPort}...`);
 
