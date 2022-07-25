@@ -328,7 +328,7 @@ readAllEnabledSdkJsonFiles()
 // --- Exports ---
 export const testExports={
   rawMeta, meta, methodMaps, buildMethodMapsForAllEnabledSdks,
-  toLowerCase
+  toLowerCase, buildMethodMap
 }
 export {
   getRawMeta, getMeta,

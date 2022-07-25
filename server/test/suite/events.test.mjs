@@ -51,6 +51,18 @@ test(`events.isRegisteredEventListener works properly`, () => {
   });
 });
 
+test(`events.isRegisteredEventListener works properly if path`, () => {
+  const dummyObject = {
+    "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
+  };
+  events.registerEventListener("12345", dummyObject);
+  const result = events.testExports.isRegisteredEventListener(
+    "12342",
+    "lifecycle.onInactive"
+  );
+  expect(result).toBeFalsy();
+});
+
 test(`events.getRegisteredEventListener works properly`, () => {
   const methodName = "lifecycle.onInactive";
   const dummyObject = {
@@ -63,6 +75,18 @@ test(`events.getRegisteredEventListener works properly`, () => {
   );
   const expectedResult = dummyObject.methodName;
   expect(result).toEqual(expectedResult);
+});
+
+test(`events.getRegisteredEventListener works properly if path`, () => {
+  const dummyObject = {
+    "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
+  };
+  events.registerEventListener("12345", dummyObject);
+  const result = events.testExports.getRegisteredEventListener(
+    "12342",
+    "lifecycle.onInactive"
+  );
+  expect(result).toBeFalsy();
 });
 
 test(`events.deregisterEventListener works properly`, () => {

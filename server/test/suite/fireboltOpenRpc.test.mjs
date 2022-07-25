@@ -23,6 +23,7 @@
 import { jest } from "@jest/globals";
 import { logger } from "../../src/logger.mjs";
 import * as fireboltOpenRpc from "../../src/fireboltOpenRpc.mjs";
+import { config } from "../../src/config.mjs";
 
 test(`fireboltOpenRpc.toLowerCase works properly`, () => {
   const result = fireboltOpenRpc.testExports.toLowerCase("TEST");
@@ -232,10 +233,15 @@ test(`fireboltOpenRpc.getMethod works properly`, () => {
     out["accessibility.voiceGuidanceSettings"],
     undefined,
   ];
+  const configArray = [false, false, true];
   expectedInput.forEach((methodName, index) => {
+    config.app.allowMixedCase = configArray[index];
     const result = fireboltOpenRpc.getMethod(methodName);
-    expect(result).toEqual(expectedOutput[index]);
+    if (configArray[index]) {
+      expect(result).toBeUndefined();
+    } else expect(result).toEqual(expectedOutput[index]);
   });
+  config.app.allowMixedCase = false;
 });
 
 test(`fireboltOpenRpc.isMethodKnown works properly`, () => {
@@ -499,13 +505,13 @@ test(`fireboltOpenRpc.getDeveloperNotesForMethod works properly`, () => {
     "rpc.discover",
     "accessibility.voiceGuidanceSettings",
     "account.id",
-    "validMethodName"
+    "validMethodName",
   ];
   const expectedOutput = [
     undefined,
     undefined,
     undefined,
-    { docUrl: undefined, notes: undefined }
+    { docUrl: undefined, notes: undefined },
   ];
   expectedInput.forEach((methodName, index) => {
     const result = fireboltOpenRpc.getDeveloperNotesForMethod(methodName);
@@ -747,4 +753,20 @@ test(`fireboltOpenRpc.buildMethodMapsForAllEnabledSdks works properly`, () => {
   };
   fireboltOpenRpc.testExports.buildMethodMapsForAllEnabledSdks();
   expect(fireboltOpenRpc.testExports.methodMaps).toEqual(expectedOutput);
+});
+
+test(`fireboltOpenRpc.buildMethodMap works properly`, () => {
+  const inputs = [{}, { test: "test" }];
+  const outputs = ["undefined", "undefined", "object"];
+  config.app.allowMixedCase = true;
+  outputs.forEach((output, index) => {
+    let result;
+    if(index === 2) {
+      result = fireboltOpenRpc.testExports.buildMethodMap();
+    } else {
+      result = fireboltOpenRpc.testExports.buildMethodMap(inputs[index]);
+    }
+    expect(typeof result).toBe(output);
+  });
+  config.app.allowMixedCase = false;
 });

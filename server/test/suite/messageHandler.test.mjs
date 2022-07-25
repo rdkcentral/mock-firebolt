@@ -34,7 +34,7 @@ test(`messageHandler.handleMessage works properly and return when message doesn'
   expect(spy).toHaveBeenCalled();
 });
 
-test(`messageHandler.handleMessage works properly`, async () => {
+test(`messageHandler.handleMessage works properly message param is true`, async () => {
   fireboltOpenRpc.testExports.methodMaps["core"] = {
     "lifecycle.onInactive": {
       name: "lifecycle.onInactive",
@@ -57,7 +57,50 @@ test(`messageHandler.handleMessage works properly`, async () => {
           type: "object",
         },
       },
-    }
+    },
+  };
+
+  methodTriggers["rpc.discover"] = {
+    pre: {
+      call: () => {},
+    },
+    post: {
+      call: () => {},
+    },
+  };
+
+  const dummyMsgOne =
+    '{"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}';
+  const resultOne = await messageHandler.handleMessage(dummyMsgOne, "12345", {
+    send: () => {},
+  });
+  expect(resultOne).toBeUndefined();
+});
+
+test(`messageHandler.handleMessage works properly for logger.info`, async () => {
+  fireboltOpenRpc.testExports.methodMaps["core"] = {
+    "lifecycle.onInactive": {
+      name: "lifecycle.onInactive",
+      summary: "Firebolt OpenRPC schema",
+      params: [],
+      result: {
+        name: "OpenRPC Schema",
+        schema: {
+          type: "object",
+        },
+      },
+    },
+    "rpc.discover": {
+      name: "rpc.discover",
+      summary: "Firebolt OpenRPC schema",
+      params: [],
+      result: {
+        name: "OpenRPC Schema",
+        schema: {
+          type: "object",
+        },
+      },
+    },
   };
 
   methodTriggers["rpc.discover"] = {
@@ -70,17 +113,46 @@ test(`messageHandler.handleMessage works properly`, async () => {
   };
 
   const infoSpy = jest.spyOn(logger, "info");
-  const dummyMsgOne =
-    '{"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}';
-  const resultOne = await messageHandler.handleMessage(dummyMsgOne, "12345", {
-    send: () => {},
-  });
-  expect(resultOne).toBeUndefined();
-
   const dummyMsgTwo =
     '{"jsonrpc":"2.0","method":"invalidMethod","params":{"listen":true},"id":1}';
   await messageHandler.handleMessage(dummyMsgTwo, "12345", { send: () => {} });
   expect(infoSpy).toHaveBeenCalled();
+});
+
+test(`messageHandler.handleMessage works properly, message param is false`, async () => {
+  fireboltOpenRpc.testExports.methodMaps["core"] = {
+    "lifecycle.onInactive": {
+      name: "lifecycle.onInactive",
+      summary: "Firebolt OpenRPC schema",
+      params: [],
+      result: {
+        name: "OpenRPC Schema",
+        schema: {
+          type: "object",
+        },
+      },
+    },
+    "rpc.discover": {
+      name: "rpc.discover",
+      summary: "Firebolt OpenRPC schema",
+      params: [],
+      result: {
+        name: "OpenRPC Schema",
+        schema: {
+          type: "object",
+        },
+      },
+    },
+  };
+
+  methodTriggers["rpc.discover"] = {
+    pre: {
+      call: () => {},
+    },
+    post: {
+      call: () => {},
+    },
+  };
 
   const dummyMsgThree =
     '{"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":false},"id":1}';
@@ -90,12 +162,75 @@ test(`messageHandler.handleMessage works properly`, async () => {
     { send: () => {} }
   );
   expect(resultThree).toBeUndefined();
+});
+
+test(`messageHandler.handleMessage works properly, for logger.debug`, async () => {
+  fireboltOpenRpc.testExports.methodMaps["core"] = {
+    "lifecycle.onInactive": {
+      name: "lifecycle.onInactive",
+      summary: "Firebolt OpenRPC schema",
+      params: [],
+      result: {
+        name: "OpenRPC Schema",
+        schema: {
+          type: "object",
+        },
+      },
+    },
+    "rpc.discover": {
+      name: "rpc.discover",
+      summary: "Firebolt OpenRPC schema",
+      params: [],
+      result: {
+        name: "OpenRPC Schema",
+        schema: {
+          type: "object",
+        },
+      },
+    },
+  };
+
+  methodTriggers["rpc.discover"] = {
+    pre: {
+      call: () => {},
+    },
+    post: {
+      call: () => {},
+    },
+  };
 
   const debugSpy = jest.spyOn(logger, "debug");
   const dummyMsgFour =
     '{"jsonrpc":"2.0","method":"rpc.discover","params":{"listen":true},"id":1}';
   await messageHandler.handleMessage(dummyMsgFour, "12345", { send: () => {} });
   expect(debugSpy).toHaveBeenCalled();
+});
+
+test(`messageHandler.handleMessage works properly for error scenarios`, async () => {
+  fireboltOpenRpc.testExports.methodMaps["core"] = {
+    "lifecycle.onInactive": {
+      name: "lifecycle.onInactive",
+      summary: "Firebolt OpenRPC schema",
+      params: [],
+      result: {
+        name: "OpenRPC Schema",
+        schema: {
+          type: "object",
+        },
+      },
+    },
+    "rpc.discover": {
+      name: "rpc.discover",
+      summary: "Firebolt OpenRPC schema",
+      params: [],
+      result: {
+        name: "OpenRPC Schema",
+        schema: {
+          type: "object",
+        },
+      },
+    },
+  };
 
   methodTriggers["rpc.discover"] = {
     pre: {},
@@ -106,4 +241,32 @@ test(`messageHandler.handleMessage works properly`, async () => {
     '{"jsonrpc":"2.0","method":"rpc.discover","params":{"listen":true},"id":1}';
   await messageHandler.handleMessage(dummyMsgFive, "12345", { send: () => {} });
   expect(errorSpy).toHaveBeenCalled();
+});
+
+test(`messageHandler.handleMessage works properly for developerNotes`, async () => {
+  fireboltOpenRpc.testExports.methodMaps["core"] = {
+    validMethodName: {
+      name: "validMethodName",
+      summary: "Get the platform back-office account identifier",
+      params: [],
+      tags: [
+        {
+          name: "developerNotes",
+          "x-notes": "test notes",
+          "x-doc-url": "test url",
+        },
+      ],
+      result: {
+        name: "id",
+      },
+    },
+  };
+  const spy = jest.spyOn(logger, "warning");
+  const dummyMsgSix =
+    '{"jsonrpc":"2.0","method":"validMethodName","params":{"listen":true},"id":1}';
+  const resultFour = await messageHandler.handleMessage(dummyMsgSix, "12345", {
+    send: () => {},
+  });
+  expect(spy).toHaveBeenCalled();
+  expect(resultFour).toBeUndefined();
 });
