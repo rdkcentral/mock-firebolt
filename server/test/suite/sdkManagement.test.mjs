@@ -21,6 +21,7 @@
 "use strict";
 
 import * as sdkManagement from "../../src/sdkManagement.mjs";
+import * as commandLine from "../../src/commandLine.mjs";
 
 test(`sdkManagement works properly`, () => {
   const dummyArray = [
@@ -32,4 +33,11 @@ test(`sdkManagement works properly`, () => {
     const result = sdkManagement.isSdkEnabled(sdk.in);
     expect(result).toBe(sdk.output);
   });
+});
+
+test(`sdkManagement works properly with given name is enabled via a command-line flag`, () => {
+  commandLine.enabledSdkNames.push("discovery");
+  const result = sdkManagement.isSdkEnabled("discovery");
+  expect(result).toBe(true);
+  commandLine.enabledSdkNames.pop();
 });

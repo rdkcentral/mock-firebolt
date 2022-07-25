@@ -839,3 +839,18 @@ test(`fireboltOpenRpcDereferencing works properly`, () => {
   const result = fireboltOpenRpcDereferencing.dereferenceMeta(meta);
   expect(result).toEqual(expect.not.objectContaining({ components: {} }));
 });
+
+test(``, () => {
+  const testArrWithItemWithRef = [];
+  const testPosInArrWithRef = 0;
+  const testLookedUpSchema = { test: "Test" };
+  const expectedResult = [{ test: "Test" }];
+  fireboltOpenRpcDereferencing.testExports.replaceRefArr(
+    testArrWithItemWithRef,
+    testPosInArrWithRef,
+    testLookedUpSchema
+  );
+  expect(testArrWithItemWithRef).toEqual(
+    expect.arrayContaining(expectedResult)
+  );
+});
