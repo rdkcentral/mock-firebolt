@@ -38,6 +38,23 @@ function registerEventListener(userId, oMsg) {
   logger.debug(`Registered event listener mapping: ${userId}:${oMsg.method}:${oMsg.id}`);
 }
 
+// Return true if at least one user in the user’s group is registered for the given method
+function isAnyRegisteredInGroup(userId, method) {
+  const userList = userManagement.getUserListForUser(userId);
+  for (const user of userList){
+    console.log('user', user);
+    if ( isRegisteredEventListener(user, method) ){
+      return true;
+    }
+  }
+  return false;
+}
+
+// Check the user’s group is registered for the given method
+function isRegisteredEventListenerInGroup(userId, method) {
+  return isAnyRegisteredInGroup(userId, method);
+}
+
 function isRegisteredEventListener(userId, method) {
   if ( ! eventListenerMap[userId] ) { return false; }
   return ( method in eventListenerMap[userId] );
@@ -102,12 +119,25 @@ function sendEventListenerAck(ws, oMsg) {
   logger.debug(`Sent event listener ack message: ${ackMessage}`);
 }
 
+function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
+  coreSendEvent(false, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+}
+
+function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
+  coreSendEvent(true, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+}
+
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
-function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
+function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
   try {
-    if ( !isRegisteredEventListener(userId, method) ) {
+    if (  ! isBroadcast && !isRegisteredEventListener(userId, method) ) {
       logger.info(`${method} event not registered`);
       fErr.call(null, method);
+
+    } else if ( isBroadcast && !isRegisteredEventListenerInGroup(userId, method) ){
+      logger.info(`${method} event not registered`);
+      fErr.call(null, method);
+
     } else {
        // Fire pre trigger if there is one for this method
        if ( method in eventTriggers ) {
@@ -129,7 +159,19 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent(false, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+              },
+              sendBroadcastEvent: function(onMethod, result, msg) {
+                function fSuccess() {
+                  logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+                }
+                function fErr() {
+                  logger.info(`Could not send ${onMethod} event because no listener is active`)
+                }
+                function fFatalErr() {
+                  logger.info(`Internal error`)
+                }
+                events.sendEvent(true, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -163,7 +205,19 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent(false, ws, method, result, msg, fSuccess, fErr, fFatalErr);
+              },
+              sendBroadcastEvent: function(onMethod, result, msg) {
+                function fSuccess() {
+                  logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+                }
+                function fErr() {
+                  logger.info(`Could not send ${onMethod} event because no listener is active`)
+                }
+                function fFatalErr() {
+                  logger.info(`Internal error`)
+                }
+                events.sendEvent(true, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
               },
               ...response
             };
@@ -184,25 +238,40 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
       // There may be more than one app using different base userId values
       // but the same group name. We need to send the event to all
       // clients/apps within the group (whether just this one or more than one).
-      const wsList = userManagement.getWsListForUser(userId);
-      if ( wsList && wsList.length >= 1 ) {
-        for (const ww of wsList ) {
-          const id = getRegisteredEventListener(userId, method);
-          const oEventMessage = {
-            jsonrpc: '2.0',
-            id: id,
-            result: finalResult
-          };
-          const eventMessage = JSON.stringify(oEventMessage);
-          // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
-          ww.send(eventMessage);
-          logger.info(`${msg}: Sent event message: ${eventMessage}`);
+      let id;
+      if( isBroadcast ){
+        const wsList = userManagement.getWsListForUser(userId);
+        if ( wsList && wsList.length >= 1 ) {
+          for (const ww of wsList ) {
+            id = getRegisteredEventListener(userId, method);
+            const oEventMessage = {
+              jsonrpc: '2.0',
+              id: id,
+              result: finalResult
+            };
+            const eventMessage = JSON.stringify(oEventMessage);
+            // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
+            ww.send(eventMessage);
+            logger.info(`${msg}: Sent event message: ${eventMessage}`);
+          }
+          fSuccess.call(null);
+        } else {
+          // Internal error
+          const msg = 'sendEvent: ERROR: Internal Error: No sockets in list';
+          throw new Error(msg);
         }
-        fSuccess.call(null);
       } else {
-        // Internal error
-        const msg = 'sendEvent: ERROR: Internal Error: No sockets in list';
-        throw new Error(msg);
+        id = getRegisteredEventListener(userId, method);
+        const oEventMessage = {
+          jsonrpc: '2.0',
+          id: id,
+          result: finalResult
+        };
+        const eventMessage = JSON.stringify(oEventMessage);
+        // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
+        ws.send(eventMessage);
+        logger.info(`${msg}: Sent event message: ${eventMessage}`);
+        fSuccess.call(null);
       }
     }
   } catch ( ex ) {
@@ -218,5 +287,5 @@ export {
   registerEventListener, deregisterEventListener,
   isEventListenerOnMessage, isEventListenerOffMessage,
   sendEventListenerAck,
-  sendEvent
+  sendEvent, sendBroadcastEvent
 };

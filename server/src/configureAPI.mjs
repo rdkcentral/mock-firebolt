@@ -72,6 +72,9 @@ function configureAPI(app) {
     // Send an event
     app.post('/api/v1/event',                           eventApi.sendEvent);
 
+    // Broadcast an event
+    app.post('/api/v1/broadcastEvent',                  eventApi.sendBroadcastEvent);
+
     // ======================= Session-Related API Routes =======================
 
     // Toggle session state

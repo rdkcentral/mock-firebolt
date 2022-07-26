@@ -151,7 +151,19 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
           function fFatalErr() {
             logger.info(`Internal error`)
           }
-          events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          events.sendEvent(false, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+        },
+        sendBroadcastEvent: function(onMethod, result, msg) {
+          function fSuccess() {
+            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+          }
+          function fErr() {
+            logger.info(`Could not send ${onMethod} event because no listener is active`)
+          }
+          function fFatalErr() {
+            logger.info(`Internal error`)
+          }
+          events.sendEvent(true, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
         },
         FireboltError: commonErrors.FireboltError
       };
