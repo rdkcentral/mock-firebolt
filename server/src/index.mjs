@@ -50,7 +50,6 @@ server.on('upgrade', async function upgrade(request, socket, head) {
     process.env.proxyServerIP = commandLine.proxy
     logger.info('Send proxy request to websocket server: ' + process.env.proxyServerIP);
     process.env.proxy = true
-    userId = config.app.defaultUserId;
     // Get token from connection parameter or from env
     const token = await proxyManagement.getToken(request)
     if( token.stdout ) {
