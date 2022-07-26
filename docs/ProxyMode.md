@@ -18,7 +18,9 @@ When Mock Firebolt starts up, it will check for `--proxy` in command line argume
 
 # Usage
 If you need to use proxy connection for any reason:
+
 ```npm run dev -- --proxy 192.168.0.100```
 
-Note: To use token while building websocket connection for proxy server, run before starting Mock Firebolt
+*Note*: To use token while building websocket connection for proxy server and its optional, run export command before starting Mock Firebolt. 
+
 ```export TOKEN=<token>```
