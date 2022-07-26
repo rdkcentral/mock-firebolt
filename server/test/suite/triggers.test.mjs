@@ -26,12 +26,22 @@ import * as triggers from "../../src/triggers.mjs";
 import { logger } from "../../src/logger.mjs";
 
 const __dirname = path.resolve();
-const filePath =
-  __dirname +
-  "\\src\\triggers\\eventTriggers\\device.onDeviceNameChanged\\pre.mjs";
-const dirPath =
-  __dirname + "\\src\\triggers\\eventTriggers\\device.onDeviceNameChanged";
-const testPath = __dirname + "\\src\\triggers\\methodTriggers";
+const filePath = path.resolve(
+  __dirname,
+  "src",
+  "triggers",
+  "eventTriggers",
+  "device.onDeviceNameChanged",
+  "pre.mjs"
+);
+const dirPath = path.resolve(
+  __dirname,
+  "src",
+  "triggers",
+  "eventTriggers",
+  "device.onDeviceNameChanged"
+);
+const testPath = path.resolve(__dirname, "src", "triggers", "methodTriggers");
 
 jest.setTimeout(30000);
 
