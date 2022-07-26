@@ -160,7 +160,7 @@ npm run dev -- --httpPort 3456 --socketPort 9876
 
 # If you need to use proxy connection for any reason:
 npm run dev -- --proxy 192.168.0.100
-Refer more about proxy mode [docs/ProxyMode.md](./docs/ProxyMode.md)
+Refer more about proxy mode here (./docs/ProxyMode.md)
 
 # To use the control CLI (assuming you're in the top-level directory for this repo)
 cd cli
