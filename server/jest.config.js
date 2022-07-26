@@ -21,6 +21,7 @@ module.exports = {
   moduleFileExtensions: ["js", "jsx", "mjs"],
 
   collectCoverage: true,
+  coverageThreshold: {global: {lines: 100,},},
   collectCoverageFrom: [
     './src/**/*.mjs',
     '!**<rootDir>/server/node_modules/**'
