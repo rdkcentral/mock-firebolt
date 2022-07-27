@@ -112,6 +112,7 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
 
         {
             in:  { "foo": "{{+0s|x}}" },
+            isNumber: true,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime();
@@ -122,6 +123,7 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         },
         {
             in:  { "foo": "{{-0s|x}}" },
+            isNumber: true,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime();
@@ -132,7 +134,7 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         },
         {
             in:  { "foo": "{{19:00+1d|x}}" },
-            isOddCase: true,
+            isNumber: true,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime()+135000000;
@@ -143,7 +145,7 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         },
         {
             in:  { "foo": "{{19:00:00+1d|x}}" },
-            isOddCase: true,
+            isNumber: true,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime()+135000000;
@@ -162,7 +164,7 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         objIn = tests[ii].in;
         objOut = magicDateTime.replaceDynamicDateTimeVariablesObj(objIn, '{{', '}}');
         objExpectedOut = tests[ii].expectedOut.call(null);
-        if (test[ii] && test[ii].isOddCase) {
+        if (test[ii] && test[ii].isNumber) {
             expect(typeof objOut.foo).toBe('number');
         } else {
             expect(objOut).toMatchObject(objExpectedOut);
