@@ -42,11 +42,15 @@ server.on('upgrade', async function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
   let userId = pathname.substring(1);
 
+  if ( ! userId ) {
+    logger.info('Using default user');
+    userId = config.app.defaultUserId;
+  } else if ( ! userManagement.isKnownUser(userId) ) {
+    logger.warn(`WARNING: Unknown userId: ${userId}; Using default user`);
+    userId = config.app.defaultUserId;
+  }
+  
   if(commandLine.proxy) {
-    if(!validateIPaddress(commandLine.proxy)) {
-      logger.error('ERROR: Invalid IP address');
-      socket.destroy();
-    }
     process.env.proxyServerIP = commandLine.proxy
     logger.info('Send proxy request to websocket server: ' + process.env.proxyServerIP);
     process.env.proxy = true
@@ -59,13 +63,6 @@ server.on('upgrade', async function upgrade(request, socket, head) {
     }
   }
 
-  if ( ! userId ) {
-    logger.info('Using default user');
-    userId = config.app.defaultUserId;
-  } else if ( ! userManagement.isKnownUser(userId) ) {
-    logger.warn(`WARNING: Unknown userId: ${userId}; Using default user`);
-    userId = config.app.defaultUserId;
-  }
   const wss = userManagement.getWssForUser(userId);
   if ( wss ) {
     wss.handleUpgrade(request, socket, head, function done(ws) {

@@ -81,6 +81,10 @@ function getMethod(methodName) {
 }
 
 function isMethodKnown(methodName) {
+  // Returns an empty array in "proxy mode"
+  if( process.env.proxy ){
+    return true;
+  }
   const oMethod = getMethod(methodName);
   return ( oMethod ? true : false );
 }
@@ -121,6 +125,10 @@ function getDeveloperNotesForMethod(methodName) {
 // Are the given params valid for thegiven method, based on the OpenRPC metadata?
 // Returns an array of errors; Returns an empty array if no errors are found
 function validateMethodCall(methodName, params) {
+  // Returns an empty array in "proxy mode"
+  if( process.env.proxy ){
+    return [];
+  }
   let errors = [];
 
   try {

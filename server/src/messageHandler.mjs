@@ -48,33 +48,8 @@ async function handleMessage(message, userId, ws) {
     return;
   }
 
-  //bypass JSON-RPC calls and directly target device. 
-  if(process.env.proxy) {
-    let wsProxy = await proxyManagement.getProxyWSConnection()
-    if( ! wsProxy ) {
-      //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
-      try {
-        wsProxy = await proxyManagement.initialize() 
-      } catch (err) {
-        logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
-        process.exit(1)
-      }
-    }
-    
-    proxyManagement.sendRequest(JSON.stringify(oMsg)).then(async (responseMessage) => {
-      const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
-      await util.delay(dly);
-      //Proxy that response to the caller
-      ws.send(responseMessage);
-      logger.info(`Sent outbound message: ${responseMessage}`);
-    }).catch(err => { 
-      logger.error(`ERROR: Unable to send outbound message due to ${err}`);
-    })
-    return
-  }
-
   // Handle JSON-RPC message that is somehow for an unknown method
-  if ( ! fireboltOpenRpc.isMethodKnown(oMsg.method) ) {
+  if ( ! fireboltOpenRpc.isMethodKnown(oMsg.method) && ! process.env.proxy ) {
     // Somehow, we got a socket message representing a Firebolt method call for a method name we don't recognize!
     logger.error(`ERROR: Method ${oMsg.method} called, but there is no such method in the Firebolt API OpenRPC specification`);
     const oResponseMessage = {
@@ -161,8 +136,24 @@ async function handleMessage(message, userId, ws) {
     }
   }
 
-  //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
-  response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws);
+   //bypass JSON-RPC calls and directly target device. 
+  if(process.env.proxy) {
+    let wsProxy = await proxyManagement.getProxyWSConnection()
+    if( ! wsProxy ) {
+      //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
+      try {
+        wsProxy = await proxyManagement.initialize() 
+      } catch (err) {
+        logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
+        process.exit(1)
+      }
+    }
+    
+    response = await proxyManagement.sendRequest(JSON.stringify(oMsg))
+  } else {
+    //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
+    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws);
+  }
 
   // Emit developerNotes for the method, if any
   const developerNotes = fireboltOpenRpc.getDeveloperNotesForMethod(oMsg.method);
@@ -237,17 +228,19 @@ async function handleMessage(message, userId, ws) {
   // Send client app back a message with the response to their Firebolt method call
 
   logger.debug(`Sending response for method ${oMsg.method}`);
-  const finalResponse = ( newResponse ? newResponse : response );
-  const oResponseMessage = {
-    jsonrpc: '2.0',
-    id: oMsg.id,
-    ...finalResponse  // layer in either a 'result' key and value or an 'error' key and a value like { code: xxx, message: xxx }
-  };
-  const responseMessage = JSON.stringify(oResponseMessage);
+  let finalResponse = ( newResponse ? newResponse : response );
+  if( ! process.env.proxy ) {
+    const oResponseMessage = {
+      jsonrpc: '2.0',
+      id: oMsg.id,
+      ...finalResponse  // layer in either a 'result' key and value or an 'error' key and a value like { code: xxx, message: xxx }
+    };
+    finalResponse = JSON.stringify(oResponseMessage);
+  } 
   const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
   await util.delay(dly);
-  ws.send(responseMessage);
-  logger.debug(`Sent message: ${responseMessage}`);
+  ws.send(finalResponse);
+  logger.debug(`Sent message: ${finalResponse}`);
 }
 
 // --- Exports ---

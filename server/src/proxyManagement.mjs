@@ -23,9 +23,9 @@ import WebSocket from 'ws';
 let websocketConnection = null;
 
 async function initialize() {
-    const url = await buildWSUrl()
+    const url = await buildWSUrl(userId)
+    console.log(url)
     if (url) {
-      console.log("Establishing proxy connection which would forward request to websocket server")
       try {
         let ws = new WebSocket(url)
         return new Promise((res, rej) => {
@@ -81,9 +81,9 @@ function sendRequest(payload) {
         throw new Error("websocketConnection not established")
     }
     waitForSocketConnection(ws, function(socket){
-          socket.addEventListener('error', function(event) {
-            rej(event.data)
-          })
+          // socket.addEventListener('error', function(event) {
+          //   rej(event.data)
+          // })
     
           let websocket = socket
           let sendCallback = function(event) {
@@ -118,20 +118,24 @@ function waitForSocketConnection(socket, callback){
 }
 
 function buildWSUrl() {
-    return new Promise(resolve => {
-        //support wss and ws
-        const wsUrlProtocol = 'ws://'
-        const port = 9998
-        const path = '/jsonrpc'
-        const deviceHost = process.env.proxyServerIP
-        resolve([
-            wsUrlProtocol,
-            deviceHost,
-            ':' + port,
-            path,
-            process.env.TOKEN ? '?token=' + process.env.TOKEN : null,
-        ].join(''))
-    })    
+  let proxyUrl = process.env.proxyServerIP
+  if( ! proxyUrl ) {
+    throw Error('ERROR: Proxy Url not found in env')
+  } else if ( ! proxyUrl.includes(":") ) {
+    proxyUrl = proxyUrl + ":" + 9998
+  }
+  return new Promise(resolve => {
+    //support ws
+    const wsUrlProtocol = 'ws://'
+    const path = '/jsonrpc'
+    const hostPort = proxyUrl
+    resolve([
+        wsUrlProtocol,
+        hostPort,
+        path,
+        process.env.TOKEN ? '?token=' + process.env.TOKEN : null,
+    ].join(''))
+  })
 }
 
 function close() {
