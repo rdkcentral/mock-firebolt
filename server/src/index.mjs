@@ -24,7 +24,7 @@ import './developerTools.mjs';
 import { logger } from './logger.mjs';
 import { config } from './config.mjs';
 import * as commandLine from './commandLine.mjs';
-import { getUserIdFromReq, validateIPaddress } from './util.mjs';
+import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs';

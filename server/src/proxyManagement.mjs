@@ -23,7 +23,7 @@ import WebSocket from 'ws';
 let websocketConnection = null;
 
 async function initialize() {
-    const url = await buildWSUrl(userId)
+    const url = await buildWSUrl()
     console.log(url)
     if (url) {
       try {
