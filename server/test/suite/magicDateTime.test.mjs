@@ -24,6 +24,7 @@ import {jest} from '@jest/globals';
 import * as fs from 'fs';
 import Setup from '../Setup';
 import * as magicDateTime from '../../src/magicDateTime.mjs';
+import { logger } from "../../src/logger.mjs";
 
 test(`magicDateTime.replaceDynamicDateTimeVariablesStr works properly`, () => {
     let sIn, sOut, sExpectedOut;
@@ -111,6 +112,7 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
 
         {
             in:  { "foo": "{{+0s|x}}" },
+            isNumber: true,
             expectedOut: function() {
                 const today = new Date();
                 const epoch = today.getTime();
@@ -118,7 +120,40 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
                 final['foo'] = epoch;
                 return final;
             }
-        }
+        },
+        {
+            in:  { "foo": "{{-0s|x}}" },
+            isNumber: true,
+            expectedOut: function() {
+                const today = new Date();
+                const epoch = today.getTime();
+                const final = {};
+                final['foo'] = epoch;
+                return final;
+            }
+        },
+        {
+            in:  { "foo": "{{19:00+1d|x}}" },
+            isNumber: true,
+            expectedOut: function() {
+                const today = new Date();
+                const epoch = today.getTime()+135000000;
+                const final = {};
+                final['foo'] = epoch;
+                return final;
+            }
+        },
+        {
+            in:  { "foo": "{{19:00:00+1d|x}}" },
+            isNumber: true,
+            expectedOut: function() {
+                const today = new Date();
+                const epoch = today.getTime()+135000000;
+                const final = {};
+                final['foo'] = epoch;
+                return final;
+            }
+        },
     ];
 
     jest.useFakeTimers()
@@ -129,9 +164,18 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         objIn = tests[ii].in;
         objOut = magicDateTime.replaceDynamicDateTimeVariablesObj(objIn, '{{', '}}');
         objExpectedOut = tests[ii].expectedOut.call(null);
-        //console.log(`Test case: in: ${JSON.stringify(objIn)}, expectedOut: ${JSON.stringify(objExpectedOut)}`);
-        expect(objOut).toMatchObject(objExpectedOut);
+        if (tests[ii] && tests[ii].isNumber) {
+            expect(typeof objOut.foo).toBe('number');
+        } else {
+            expect(objOut).toMatchObject(objExpectedOut);
+        }
     }
 
     jest.useRealTimers();
+});
+
+test(`magicDateTime.replaceDynamicDateTimeVariablesObj error scenario`, () => {
+    const spy = jest.spyOn(logger, 'error');
+    magicDateTime.replaceDynamicDateTimeVariablesObj({ "foo": "{{23*19:00:00+1d|x}}" }, '{{', '}}');
+    expect(spy).toHaveBeenCalled();
 });
