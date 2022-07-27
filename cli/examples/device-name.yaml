@@ -1,0 +1,19 @@
+---
+methods:
+  device.name:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('deviceName');
+        return ccs.name;
+      }    
+  device.setName:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('deviceName');
+        ccs.name=params.value
+        ctx.set('deviceName',ccs)
+        const result = ctx.get('deviceName');
+        const msg = 'Post trigger for device.setName';
+        ctx.sendEvent('device.onDeviceNameChanged', result, msg);
+        return null;
+      }
