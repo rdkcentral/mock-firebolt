@@ -106,3 +106,8 @@ test(`userManagement.handleGroupMembership works properly`, () => {
   userManagement.testExports.group2user.delete("A");
   userManagement.testExports.user2ws.delete("123");
 });
+
+test(`userManagement.handleGroupMembership returns with userId 12345`, () => {
+  const result = userManagement.testExports.handleGroupMembership("12345");
+  expect(result).toBeUndefined();
+});
