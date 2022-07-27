@@ -164,7 +164,7 @@ test(`magicDateTime.replaceDynamicDateTimeVariablesObj works properly`, () => {
         objIn = tests[ii].in;
         objOut = magicDateTime.replaceDynamicDateTimeVariablesObj(objIn, '{{', '}}');
         objExpectedOut = tests[ii].expectedOut.call(null);
-        if (test[ii] && test[ii].isNumber) {
+        if (tests[ii] && tests[ii].isNumber) {
             expect(typeof objOut.foo).toBe('number');
         } else {
             expect(objOut).toMatchObject(objExpectedOut);
