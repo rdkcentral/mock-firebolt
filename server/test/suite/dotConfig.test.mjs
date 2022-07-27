@@ -47,6 +47,7 @@ test(`dotConfig works properly`, () => {
         name: "discovery",
       },
     ],
+    validateMethodOverrides: true,
   };
   expect(dotConfig).toEqual(expectedResult);
 });
