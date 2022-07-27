@@ -59,6 +59,7 @@ test(`config works properly`, () => {
           name: "discovery",
         },
       ],
+      validateMethodOverrides: true,
     },
     validateMethodOverrides: true,
   };
