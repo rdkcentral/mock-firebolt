@@ -22,7 +22,6 @@
 
 import {jest} from '@jest/globals';
 import * as fs from 'fs';
-//import Setup from '../Setup';
 import * as util from '../../src/util.mjs';
 
 test(`util.delay works properly`, () => {
@@ -75,17 +74,3 @@ test(`util.createTmpFile returns a file whose name contains the given prefix and
     // Cleanup after ourselves
     tmpObj.removeCallback();
 });
-
-test('Verify util.validateIPaddress return boolean if ip addresses are valid/invalid', () => {
-    const validIPv4Address = "192.168.0.100"
-    const validIPv6Address = "fe80::aede:48ff:fe00:1122"
-
-    expect(util.validateIPaddress(validIPv4Address)).toBe(true)
-    expect(util.validateIPaddress(validIPv6Address)).toBe(true)
-
-    const inValidIPv4Address = "192.168.0.0.100"
-    const inValidIPv6Address = "fe80::aede:48ff:fe00::1122"
-
-    expect(util.validateIPaddress(inValidIPv4Address)).toBe(false)
-    expect(util.validateIPaddress(inValidIPv6Address)).toBe(false)
-})
