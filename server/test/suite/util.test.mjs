@@ -57,6 +57,18 @@ test(`util.getUserIdFromReq works properly`, () => {
     expect(v).toBe('987');
 });
 
+test(`util.getUserIdFromReq works properly to get defaultUserId`, () => {
+    const req = {
+        get: function(hh) {
+            if ( hh === 'x-mockfirebolt-userid' ) {
+                return undefined;
+            }
+        }
+    };
+    const v = util.getUserIdFromReq(req);
+    expect(v).toBe('12345');
+});
+
 test(`util.createTmpFile returns a file whose name contains the given prefix and suffix and which exists`, () => {
     const prefix = 'prefix';
     const postfix = 'postfix';

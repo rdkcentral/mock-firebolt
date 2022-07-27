@@ -840,7 +840,7 @@ test(`fireboltOpenRpcDereferencing works properly`, () => {
   expect(result).toEqual(expect.not.objectContaining({ components: {} }));
 });
 
-test(``, () => {
+test(`fireboltOpenRpcDereferencing.replaceRefArr works properly`, () => {
   const testArrWithItemWithRef = [];
   const testPosInArrWithRef = 0;
   const testLookedUpSchema = { test: "Test" };
