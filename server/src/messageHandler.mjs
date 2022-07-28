@@ -124,7 +124,7 @@ async function handleMessage(message, userId, ws) {
             function fFatalErr() {
               logger.info(`Internal error`)
             }
-            events.sendEvent(false, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
           sendBroadcastEvent: function(onMethod, result, msg) {
             function fSuccess() {
@@ -136,7 +136,7 @@ async function handleMessage(message, userId, ws) {
             function fFatalErr() {
               logger.info(`Internal error`)
             }
-            events.sendEvent(true, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
@@ -185,7 +185,7 @@ async function handleMessage(message, userId, ws) {
             function fFatalErr() {
               logger.info(`Internal error`)
             }
-            events.sendEvent(false, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
           sendBroadcastEvent: function(onMethod, result, msg) {
             function fSuccess() {
@@ -197,7 +197,7 @@ async function handleMessage(message, userId, ws) {
             function fFatalErr() {
               logger.info(`Internal error`)
             }
-            events.sendEvent(true, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };

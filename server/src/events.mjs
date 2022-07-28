@@ -42,17 +42,11 @@ function registerEventListener(userId, oMsg) {
 function isAnyRegisteredInGroup(userId, method) {
   const userList = userManagement.getUserListForUser(userId);
   for (const user of userList){
-    console.log('user', user);
     if ( isRegisteredEventListener(user, method) ){
       return true;
     }
   }
   return false;
-}
-
-// Check the user’s group is registered for the given method
-function isRegisteredEventListenerInGroup(userId, method) {
-  return isAnyRegisteredInGroup(userId, method);
 }
 
 function isRegisteredEventListener(userId, method) {
@@ -127,6 +121,20 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
   coreSendEvent(true, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
 }
 
+// sending response to web-socket
+function emitResponse(ws, finalResult, msg, userId, method){
+  let id = getRegisteredEventListener(userId, method);
+  const oEventMessage = {
+    jsonrpc: '2.0',
+    id: id,
+    result: finalResult
+  };
+  const eventMessage = JSON.stringify(oEventMessage);
+  // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
+  ws.send(eventMessage);
+  logger.info(`${msg}: Sent event message: ${eventMessage}`);
+}
+
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
 function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
   try {
@@ -134,7 +142,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       logger.info(`${method} event not registered`);
       fErr.call(null, method);
 
-    } else if ( isBroadcast && !isRegisteredEventListenerInGroup(userId, method) ){
+    } else if ( isBroadcast && !isAnyRegisteredInGroup(userId, method) ){
       logger.info(`${method} event not registered`);
       fErr.call(null, method);
 
@@ -159,7 +167,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                sendEvent(false, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
                 function fSuccess() {
@@ -171,7 +179,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                events.sendEvent(true, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+                events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -205,7 +213,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                sendEvent(false, ws, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
                 function fSuccess() {
@@ -217,7 +225,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                events.sendEvent(true, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+                events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
               },
               ...response
             };
@@ -238,21 +246,11 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       // There may be more than one app using different base userId values
       // but the same group name. We need to send the event to all
       // clients/apps within the group (whether just this one or more than one).
-      let id;
       if( isBroadcast ){
         const wsList = userManagement.getWsListForUser(userId);
         if ( wsList && wsList.length >= 1 ) {
           for (const ww of wsList ) {
-            id = getRegisteredEventListener(userId, method);
-            const oEventMessage = {
-              jsonrpc: '2.0',
-              id: id,
-              result: finalResult
-            };
-            const eventMessage = JSON.stringify(oEventMessage);
-            // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
-            ww.send(eventMessage);
-            logger.info(`${msg}: Sent event message: ${eventMessage}`);
+            emitResponse(ww, finalResult, msg, userId, method);
           }
           fSuccess.call(null);
         } else {
@@ -261,16 +259,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
           throw new Error(msg);
         }
       } else {
-        id = getRegisteredEventListener(userId, method);
-        const oEventMessage = {
-          jsonrpc: '2.0',
-          id: id,
-          result: finalResult
-        };
-        const eventMessage = JSON.stringify(oEventMessage);
-        // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
-        ws.send(eventMessage);
-        logger.info(`${msg}: Sent event message: ${eventMessage}`);
+        emitResponse(ws, finalResult, msg, userId, method);
         fSuccess.call(null);
       }
     }

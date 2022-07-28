@@ -151,7 +151,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
           function fFatalErr() {
             logger.info(`Internal error`)
           }
-          events.sendEvent(false, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
         },
         sendBroadcastEvent: function(onMethod, result, msg) {
           function fSuccess() {
@@ -163,7 +163,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
           function fFatalErr() {
             logger.info(`Internal error`)
           }
-          events.sendEvent(true, ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
         },
         FireboltError: commonErrors.FireboltError
       };
