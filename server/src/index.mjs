@@ -38,7 +38,7 @@ logger.important(`Welcome to Mock Firebolt`);
 
 const server = createServer();
 
-server.on('upgrade', async function upgrade(request, socket, head) {
+server.on('upgrade', function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
   let userId = pathname.substring(1);
 
@@ -50,12 +50,12 @@ server.on('upgrade', async function upgrade(request, socket, head) {
     userId = config.app.defaultUserId;
   }
   
-  if(commandLine.proxy) {
+  if( commandLine.proxy ) {
     process.env.proxyServerIP = commandLine.proxy
     logger.info('Send proxy request to websocket server: ' + process.env.proxyServerIP);
     process.env.proxy = true
     // Get token from connection parameter or from env
-    const token = await proxyManagement.getToken(request)
+    const token = proxyManagement.getToken(request)
     if( token.stdout ) {
       process.env.wsToken = token.stdout
     } else {

@@ -147,26 +147,24 @@ function close() {
 
 // Get token from request param or env variable
 function getToken(request) {
-    return new Promise(async (resolve) => {
-      let output = {
-        stdout: '',
-        stderr: '',
-      };
-      // If token already exists, return token
-      if(process.env.TOKEN) {
-        output.stdout = process.env.TOKEN
-        resolve(output)
-      }
-      const { query } = parse(request.url);
-      if(query && query.includes("token=") && query.length > 6) {
-        const token = query.split('token=').pop().split('&')[0];
-        output.stdout = token
-        resolve(output)
-      } else {
-        output.stderr = "Unable to get token from connection param or not present in env"
-        resolve(output)
-      }
-    })
+  let output = {
+    stdout: '',
+    stderr: '',
+  };
+  // If token already exists, return token
+  if(process.env.TOKEN) {
+    output.stdout = process.env.TOKEN
+    return output
+  }
+  const { query } = parse(request.url);
+  if(query && query.includes("token=") && query.length > 6) {
+    const token = query.split('token=').pop().split('&')[0];
+    output.stdout = token
+    return output
+  } else {
+    output.stderr = "Unable to get token from connection param or not present in env"
+    return output
+  }
 }
 
 export {
