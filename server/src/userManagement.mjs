@@ -141,5 +141,5 @@ export const testExports={
 }
 
 export {
-  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser
+  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
 };

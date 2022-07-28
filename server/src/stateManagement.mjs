@@ -153,6 +153,18 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
           }
           events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
         },
+        sendBroadcastEvent: function(onMethod, result, msg) {
+          function fSuccess() {
+            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+          }
+          function fErr() {
+            logger.info(`Could not send ${onMethod} event because no listener is active`)
+          }
+          function fFatalErr() {
+            logger.info(`Internal error`)
+          }
+          events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+        },
         FireboltError: commonErrors.FireboltError
       };
       const sFcnBody = resp.response + ';' + 'return f(ctx, params);'
