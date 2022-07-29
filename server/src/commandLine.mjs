@@ -23,6 +23,7 @@
 import nopt from 'nopt';
 import { logger } from './logger.mjs';
 import { config } from './config.mjs';
+import { mergeArrayOfStrings } from './util.mjs';
 
 // Usage:
 //   node index.mjs                                          (core SDK only, default)
@@ -31,13 +32,13 @@ import { config } from './config.mjs';
 //   node index.mjs --manage ...                             (core + manage SDKs)
 //   node index.mjs --manage --discovery ...                 (core + manage + discovery SDKs)
 //   node index.mjs --triggers <path1> --triggers <path2>    (Load triggers from files in these paths)
-//   node index.mjs --novalidate                             (does not validate uploaded method overrides)
+//   node index.mjs --novalidate <opt1> --novalidate <opt2>  (does not validate options provided by user)
 
 const knownOpts = {
   'httpPort'   : Number,
   'socketPort' : Number,
   'triggers'   : [String, Array],
-  'novalidate' : Boolean,
+  'novalidate' : [String, Array],
   'proxy'      : String
 };
 for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
@@ -74,11 +75,8 @@ const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
 const proxy = parsed.proxy;
 
-// --- novalidate method overrides
-if(!config.dotConfig.validateMethodOverrides || parsed.novalidate ){
-  config.validateMethodOverrides = false;
-  logger.info('Schema validation disabled');
-}
+// --- novalidate overrides
+config.validate = mergeArrayOfStrings(config.validate, config.dotConfig.validate, parsed.novalidate)
 
 // --- Enabled SDKs specified via any SDK command-line flags OR via .mf.config.json file
 

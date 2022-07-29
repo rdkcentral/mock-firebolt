@@ -49,7 +49,7 @@ async function handleMessage(message, userId, ws) {
   }
 
   // Handle JSON-RPC message that is somehow for an unknown method
-  if ( ! fireboltOpenRpc.isMethodKnown(oMsg.method) && ! process.env.proxy ) {
+  if ( ! fireboltOpenRpc.isMethodKnown(oMsg.method) ) {
     // Somehow, we got a socket message representing a Firebolt method call for a method name we don't recognize!
     logger.error(`ERROR: Method ${oMsg.method} called, but there is no such method in the Firebolt API OpenRPC specification`);
     const oResponseMessage = {
@@ -136,8 +136,12 @@ async function handleMessage(message, userId, ws) {
     }
   }
 
-   //bypass JSON-RPC calls and directly target device. 
-  if(process.env.proxy) {
+  if ( stateManagement.hasOverride(userId, oMsg.method) ) {
+    // Handle Firebolt Method call using our in-memory mock values
+    logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
+    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params); // Could be optimized cuz we know we want an override response
+  } else if ( process.env.proxy ) {
+    //bypass JSON-RPC calls and hit proxy server endpoint
     let wsProxy = await proxyManagement.getProxyWSConnection()
     if( ! wsProxy ) {
       //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
@@ -148,10 +152,10 @@ async function handleMessage(message, userId, ws) {
         process.exit(1)
       }
     }
-    
     response = await proxyManagement.sendRequest(JSON.stringify(oMsg))
   } else {
     //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
+    logger.debug(`Returning default mock value for method ${oMsg.method}`);
     response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws);
   }
 

@@ -174,9 +174,9 @@ Run Mock Firebolt like: `npm run dev -- --triggers ./src/triggers`
 
 #### novalidate Flag
 
-Starting the server with validateMethodOverrides: false in the .mf.config.json file should allow "bad" method override values either via POSTs to /api/v1/state or via the CLI (--result or --upload)
+Starting the server with validate string arrays in the .mf.config.json file should allow to validate default options either via POSTs to /api/v1/state or via the CLI (--result or --upload)
 
-Run Mock Firebolt like: `npm run dev -- --novalidate`
+Run Mock Firebolt like: `npm run dev -- --novalidate response --novalidate params`
 
 ### Web Admin UI
 ```

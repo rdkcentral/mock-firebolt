@@ -81,8 +81,8 @@ function getMethod(methodName) {
 }
 
 function isMethodKnown(methodName) {
-  // Returns an empty array in "proxy mode"
-  if( process.env.proxy ){
+  // Returns true in "novalidate mode"
+  if( ! config.validate.includes("method") ){
     return true;
   }
   const oMethod = getMethod(methodName);
@@ -125,8 +125,8 @@ function getDeveloperNotesForMethod(methodName) {
 // Are the given params valid for thegiven method, based on the OpenRPC metadata?
 // Returns an array of errors; Returns an empty array if no errors are found
 function validateMethodCall(methodName, params) {
-  // Returns an empty array in "proxy mode"
-  if( process.env.proxy ){
+  // Returns an empty array in "novalidate mode"
+  if( ! config.validate.includes("params") ){
     return [];
   }
   let errors = [];
