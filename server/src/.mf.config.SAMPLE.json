@@ -1,5 +1,5 @@
 {
-    "validateMethodOverrides": true,
+    "validate": [ "method", "params", "response", "events"],
 
     "supportedSdks": [
 
