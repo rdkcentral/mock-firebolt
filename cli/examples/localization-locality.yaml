@@ -1,0 +1,19 @@
+---
+methods:
+  localization.locality:
+    response: |
+      function f(ctx, params) {
+        const ll = ctx.get('localizationLocality');
+        return ll.locality;
+      }    
+  localization.setLocalilty:
+    response: |
+      function f(ctx, params) {
+        const ll = ctx.get('localizationLocality');
+        ll.locality=params.value
+        ctx.set('localizationLocality',ll)
+        const result = ctx.get('localizationLocality');
+        const msg = 'Post trigger for localization.setLocality';
+        ctx.sendEvent('localization.onLocaliltyChanged', result.locality, msg);
+        return null;
+      } 

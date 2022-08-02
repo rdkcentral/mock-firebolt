@@ -1,0 +1,19 @@
+---
+methods:
+  localization.postalCode:
+    response: |
+      function f(ctx, params) {
+        const lp = ctx.get('localizationPostalCode');
+        return lp.postalCode;
+      }    
+  device.setPostalCode:
+    response: |
+      function f(ctx, params) {
+        const lp = ctx.get('localizationPostalCode');
+        lp.postalCode=params.value
+        ctx.set('localizationPostalCode',lp)
+        const result = ctx.get('localizationPostalCode');
+        const msg = 'Post trigger for localization.postalCode';
+        ctx.sendEvent('device.onPostalCodeChanged', result.postalCode, msg);
+        return null;
+      } 

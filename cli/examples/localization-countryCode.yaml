@@ -1,0 +1,19 @@
+---
+methods:
+  localization.countryCode:
+    response: |
+      function f(ctx, params) {
+        const lc = ctx.get('localizationCountryCode');
+        return lc.countryCode;
+      }    
+  localization.setCountryCode:
+    response: |
+      function f(ctx, params) {
+        const lc = ctx.get('localizationCountryCode');
+        lc.countryCode=params.value
+        ctx.set('localizationCountryCode',lc)
+        const result = ctx.get('localizationCountryCode');
+        const msg = 'Post trigger for localization.setcountryCode';
+        ctx.sendEvent('localization.onCountryCodeChanged', result.countryCode, msg);
+        return null;
+      }  

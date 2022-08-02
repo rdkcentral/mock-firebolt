@@ -1,0 +1,19 @@
+---
+methods:
+  localization.language:
+    response: |
+      function f(ctx, params) {
+        const ll = ctx.get('localizationLanguage');
+        return ll.language;
+      }    
+  localization.setLanguage:
+    response: |
+      function f(ctx, params) {
+        const ll = ctx.get('localizationLanguage');
+        ll.language=params.value
+        ctx.set('localizationLanguage',ll)
+        const result = ctx.get('localizationLanguage');
+        const msg = 'Post trigger for localization.setLocality';
+        ctx.sendEvent('localization.onLanguageChanged', result.language, msg);
+        return null;
+      } 
