@@ -171,6 +171,10 @@ function validateMethodCall(methodName, params) {
 // Is the given value a valid result for the given method, based on the OpenRPC metadata?
 // Returns an array of errors; Returns an empty array if no errors are found
 function validateMethodResult(val, methodName) {
+  // Returns an empty array in "novalidate mode"
+  if( ! config.validate.includes("response") ){
+    return [];
+  }
   let errors = [];
 
   // Short-circuit validation for result values specified as functions
