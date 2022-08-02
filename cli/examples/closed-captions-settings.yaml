@@ -226,6 +226,7 @@ methods:
           // Cause an accessibility.onClosedCaptionsSettingsChanged event
           // (done via post-method trigger on closedcaptions.fontFamily method)
           // Save for when accessibility.closedCaptionsSettings is called
+          
           const fontFamilies = ["serif","sans-serif","monospace","cursive","fantasy"]
           if ( fontFamilies.includes(params.value) ){
             ccs.styles.fontFamily = params.value;
