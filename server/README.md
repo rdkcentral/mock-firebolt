@@ -473,3 +473,24 @@ curl --location --request POST 'http://localhost:3333/api/v1/user'
     "userId": "<uuid>"
 }
 ```
+## Get list of users (returns a list of all the registered users)
+
+### Example cURL Command:
+
+```
+curl --location --request GET 'http://localhost:3333/api/v1/user'
+```
+
+### 200 Response:
+
+```
+{
+    "status": "SUCCESS",
+    "users": [
+        "<uuid1>",
+        "<uuid2>",
+        "<uuid3>",
+        "<uuid4>"
+    ]
+}
+```

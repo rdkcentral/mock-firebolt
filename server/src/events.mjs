@@ -272,6 +272,12 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
 
 // --- Exports ---
 
+export const testExports = {
+  eventListenerMap,
+  isRegisteredEventListener,
+  getRegisteredEventListener,
+}
+
 export {
   registerEventListener, deregisterEventListener,
   isEventListenerOnMessage, isEventListenerOffMessage,

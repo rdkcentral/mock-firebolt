@@ -16,7 +16,7 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-// session management
+// Session Management
 
 'use strict';
 
