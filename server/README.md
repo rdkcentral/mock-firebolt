@@ -396,6 +396,26 @@ curl --location --request POST 'http://localhost:3333/api/v1/event' \
 }
 ```
 
+## Send an event to all apps with user ID values in the same user group
+
+### Example cURL Command:
+
+```
+curl --location --request POST 'http://localhost:3333/api/v1/broadcastEvent' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "method": "device.onDeviceNameChanged",
+    "result": "NEW-DEVICE-NAME-1"
+}'
+```
+
+### 200 Response:
+
+```
+{
+    "status": "OK"
+}
+```
 
 ## Send an event sequence
 
