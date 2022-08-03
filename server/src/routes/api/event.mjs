@@ -58,8 +58,41 @@ function sendEvent(req, res) {
   events.sendEvent(ws, userId, method, result, `${method}`, fSuccess, fErr, fFatalErr);
 }
 
+// POST /api/v1/broadcastEvent
+// Expected body: { method: 'device.onDeviceNameChanged' result: ... }
+function sendBroadcastEvent(req, res) {
+  const { ws } = res.locals; // Like magic!
+  const userId = getUserIdFromReq(req);
+  const { method, result } = req.body;
+
+  function fSuccess() {
+    res.status(200).send({
+      status: 'SUCCESS'
+    });
+  }
+
+  function fErr(method) {
+    res.status(400).send({
+      status: 'ERROR',
+      errorCode: 'NO-EVENT-HANDLER-REGISTERED',
+      message: `Could not send ${method} event because no listener is active`
+    });
+  }
+
+  function fFatalErr(ex) {
+    res.status(500).send({
+      status: 'ERROR',
+      errorCode: 'COULD-NOT-SEND-EVENT',
+      message: 'Internal error',
+      error: ex.toString()
+    });
+  }
+
+  events.sendBroadcastEvent(ws, userId, method, result, `${method}`, fSuccess, fErr, fFatalErr);
+}
+
 // --- Exports ---
 
 export {
-  sendEvent
+  sendEvent, sendBroadcastEvent
 };

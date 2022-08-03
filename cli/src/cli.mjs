@@ -61,23 +61,24 @@ function url(host, port, path) {
 
 // Be sure to update usage.mjs if you make changes here
 const knownOpts = {
-  'help'         : Boolean,
-  'user'         : String,
-  'port'         : String,
-  'quiet'        : Boolean,
-  'healthcheck'  : Boolean,
-  'state'        : Boolean,
-  'revert'       : Boolean,
-  'latency'      : [ Number, Array ],
-  'mode'         : [ "default", "box" ],
-  'method'       : String,
-  'result'       : String,                 // JSON-encoded
-  'errCode'      : Number,
-  'errMsg'       : String,
-  'upload'       : String,
-  'event'        : String,
-  'sequence'     : String,
-  'session'      : String
+  'help'            : Boolean,
+  'user'            : String,
+  'port'            : String,
+  'quiet'           : Boolean,
+  'healthcheck'     : Boolean,
+  'state'           : Boolean,
+  'revert'          : Boolean,
+  'latency'         : [ Number, Array ],
+  'mode'            : [ "default", "box" ],
+  'method'          : String,
+  'result'          : String,                 // JSON-encoded
+  'errCode'         : Number,
+  'errMsg'          : String,
+  'upload'          : String,
+  'event'           : String,
+  'broadcastEvent'  : String,
+  'sequence'        : String,
+  'session'         : String
 };
 
 const shortHands = {
@@ -95,6 +96,7 @@ const shortHands = {
   'em'  : [ '--errMsg' ],
   'u'   : [ '--upload' ],
   'e'   : [ '--event' ],
+  'be'  : [ '--broadcastEvent' ],
   'seq' : [ '--sequence' ],
   'se'  : [ '--session' ]
 };
@@ -342,6 +344,32 @@ if ( parsed.help ) {
       });
   } catch ( ex ) {
     console.log(`ERROR: File ${eventFile} is either missing or contains invalid JSON or YAML`);
+    console.log(ex);
+  }
+
+}else if ( parsed.broadcastEvent ) {
+  const broadcastEventFile = parsed.broadcastEvent;
+  try {
+    const sbroadcastEvent = fs.readFileSync(path.resolve(__dirname, broadcastEventFile), {encoding:'utf8', flag:'r'});
+    let broadcastEvent;
+    if ( broadcastEventFile.endsWith('yaml') || broadcastEventFile.endsWith('yml') ) {
+      broadcastEvent = yaml.load(sbroadcastEvent);
+    } else {
+      broadcastEvent = JSON.parse(sbroadcastEvent);
+    }
+    msg(`Sending broadcastEvent based on file ${broadcastEventFile}...`);
+    axios.post(url(host, port, '/api/v1/broadcastEvent'), {
+        method: broadcastEvent.method,
+        result: broadcastEvent.result
+      })
+      .then(function (response) {
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        logError(error);
+      });
+  } catch ( ex ) {
+    console.log(`ERROR: File ${broadcastEventFile} is either missing or contains invalid JSON or YAML`);
     console.log(ex);
   }
 
