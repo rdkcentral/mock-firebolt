@@ -38,6 +38,7 @@ Note, too, that since the SDK does not validate parameters on method calls, app 
 - Share state between functions used to specify method responses
 - Specify a sequence of responses (fail once, succeed once, etc.)
 - Send events to the Firebolt SDK via the control plane (RESTful API, CLI, etc.)
+- Send an event to multiple apps via the control plane (RESTful API, CLI, etc.)
 - Send a timed sequence of events to the Firebolt SDK via the control plane (soon)
 - Import/export for loading/saving mock response values 
 - Magic date/time variable support (e.g., {{+1h|x}}, {{20:00|YYYY-MM-DD HH:mm:ssZ}})

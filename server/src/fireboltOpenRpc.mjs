@@ -224,15 +224,15 @@ function validateMethodError(val) {
   // Short-circuit validation for error values specified as functions
   if ( typeof val === 'string' && val.trimStart().startsWith('function') ) { return errors; }
 
-  if ( ! isObject(val) ) {
+  if ( !( isObject(val)) ) {
     errors.push(`ERROR: ${val} is not a valid error value: Object expected`);
     return errors;
   }
-  if ( ! 'code' in val ) {
+  if ( !('code' in val)) {
     errors.push(`ERROR: ${val} is not a valid error value: Mandatory 'code' property missing`);
     return errors;
   }
-  if ( ! 'message' in val ) {
+  if ( !('message' in val )) {
     errors.push(`ERROR: ${val} is not a valid error value: Mandatory 'message' property missing`);
     return errors; 
   }
@@ -335,8 +335,13 @@ readAllEnabledSdkJsonFiles()
 .then(() => meta = dereferenceMeta(rawMeta))
 .then(buildMethodMapsForAllEnabledSdks);
 
-// --- Exports ---
 
+
+// --- Exports ---
+export const testExports={
+  rawMeta, meta, methodMaps, buildMethodMapsForAllEnabledSdks,
+  toLowerCase, buildMethodMap
+}
 export {
   getRawMeta, getMeta,
   getMethod, isMethodKnown, getSchema,

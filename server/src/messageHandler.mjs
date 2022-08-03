@@ -43,7 +43,7 @@ async function handleMessage(message, userId, ws) {
 
   // Handle JSON-RPC notifications (w/ no id in request)
   // - Don't send reply message over socket back to SDK
-  if ( ! 'id' in oMsg) {
+  if ( ! ('id' in oMsg)) {
     logger.info('Not responding, since that message was a notification with no id');
     return;
   }
@@ -109,7 +109,7 @@ async function handleMessage(message, userId, ws) {
   if ( oMsg.method in methodTriggers ) {
     if ( 'pre' in methodTriggers[oMsg.method] ) {
       try {
-        const ctx = {          
+        const ctx = {
           logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
@@ -126,6 +126,18 @@ async function handleMessage(message, userId, ws) {
               logger.info(`Internal error`)
             }
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          },
+          sendBroadcastEvent: function(onMethod, result, msg) {
+            function fSuccess() {
+              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+            }
+            function fErr() {
+              logger.info(`Could not send ${onMethod} event because no listener is active`)
+            }
+            function fFatalErr() {
+              logger.info(`Internal error`)
+            }
+            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
@@ -195,6 +207,18 @@ async function handleMessage(message, userId, ws) {
               logger.info(`Internal error`)
             }
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          },
+          sendBroadcastEvent: function(onMethod, result, msg) {
+            function fSuccess() {
+              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+            }
+            function fErr() {
+              logger.info(`Could not send ${onMethod} event because no listener is active`)
+            }
+            function fFatalErr() {
+              logger.info(`Internal error`)
+            }
+            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };

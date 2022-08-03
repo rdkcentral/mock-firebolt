@@ -117,7 +117,7 @@ async function getAppropriateDelay(userId, methodName) {
 }
 
 // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
-function handleSequenceOfResponseValues(userId, methodName, params, resp) {
+function handleSequenceOfResponseValues(userId, methodName, params, resp, userState) {
   const nextIndex = userState.sequenceState[methodName] || 0;
   if ( nextIndex < resp.responses.length ) {
     resp = resp.responses[nextIndex];
@@ -152,6 +152,18 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
             logger.info(`Internal error`)
           }
           events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+        },
+        sendBroadcastEvent: function(onMethod, result, msg) {
+          function fSuccess() {
+            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+          }
+          function fErr() {
+            logger.info(`Could not send ${onMethod} event because no listener is active`)
+          }
+          function fFatalErr() {
+            logger.info(`Internal error`)
+          }
+          events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
         },
         FireboltError: commonErrors.FireboltError
       };
@@ -287,7 +299,7 @@ function getMethodResponse(userId, methodName, params, ws) {
 
     // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
     if ( resp && resp.responses ) {
-      resp = handleSequenceOfResponseValues(userId, methodName, params, resp);  
+      resp = handleSequenceOfResponseValues(userId, methodName, params, resp, userState);  
     }
 
     // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
@@ -551,6 +563,9 @@ function getScratch(userId, key) {
 
 // --- Exports ---
 
+export const testExports={
+  handleStaticAndDynamicError, state, validateMethodOverride
+}
 export {
   addUser,
   getState,
