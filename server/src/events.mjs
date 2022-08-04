@@ -243,6 +243,11 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
 
       const finalResult = ( postResult ? postResult : result );
 
+      // Error to be logged in "novalidate mode"
+      if( ! config.validate.includes("events") ) {
+        fErr.call(null, method);
+      }
+
       // There may be more than one app using different base userId values
       // but the same group name. We need to send the event to all
       // clients/apps within the group (whether just this one or more than one).

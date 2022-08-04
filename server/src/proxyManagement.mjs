@@ -23,51 +23,51 @@ import WebSocket from 'ws';
 let websocketConnection = null;
 
 async function initialize() {
-    const url = await buildWSUrl()
-    console.log(url)
-    if (url) {
-      try {
-        let ws = new WebSocket(url)
-        return new Promise((res, rej) => {
-          let websocket = ws
-          let openCallback = function(event) {
-            websocket.removeEventListener('close', openCallback)
-            websocket.removeEventListener('error', openCallback)
-            res(event.data)
-          }
+  const url = await buildWSUrl()
+  console.log(url)
+  if (url) {
+    try {
+      let ws = new WebSocket(url)
+      return new Promise((res, rej) => {
+        let websocket = ws
+        let openCallback = function(event) {
+          websocket.removeEventListener('close', openCallback)
+          websocket.removeEventListener('error', openCallback)
+          res(event.data)
+        }
 
-          ws.addEventListener('error', function(event) {
-            rej(event.data)
-          })
-
-          ws.addEventListener('close', function(event) {
-            rej(event.data)
-          })
-
-          ws.addEventListener('open', openCallback)
-
-          ws.onopen = function () {
-              console.log("Connection to websocket proxy server established") 
-              websocketConnection = ws
-          }
-
-          ws.onclose = function(){
-              // connection closed, discard old websocket and create a new one in 2s
-              console.log("Connection to websocket proxy server is closed.")
-              ws = null
-              websocketConnection = null
-              setTimeout(function() {
-                  console.log("Reinitialize websocket proxy connection")
-                  initialize();
-              }, 2000)
-          }
+        ws.addEventListener('error', function(event) {
+          rej(event.data)
         })
-      } catch (err) {
-        return err
-      }
-    } else {
-      throw new Error("Cannot establish proxy connection. \"url\" with ws://host:port or wss://host:port required")
+
+        ws.addEventListener('close', function(event) {
+          rej(event.data)
+        })
+
+        ws.addEventListener('open', openCallback)
+
+        ws.onopen = function () {
+            console.log("Connection to websocket proxy server established") 
+            websocketConnection = ws
+        }
+
+        ws.onclose = function(){
+            // connection closed, discard old websocket and create a new one in 2s
+            console.log("Connection to websocket proxy server is closed.")
+            ws = null
+            websocketConnection = null
+            setTimeout(function() {
+                console.log("Reinitialize websocket proxy connection")
+                initialize();
+            }, 2000)
+        }
+      })
+    } catch (err) {
+      return err
     }
+  } else {
+    throw new Error("Cannot establish proxy connection. \"url\" with ws://host:port or wss://host:port required")
+  }
 }
 
 function getProxyWSConnection() {
@@ -75,46 +75,42 @@ function getProxyWSConnection() {
 }
 
 function sendRequest(payload) {
-  return new Promise((res, rej) => {
+  return new Promise((res) => {
     const ws = getProxyWSConnection()
-    if (!ws) {
+    if ( ! ws ) {
         throw new Error("websocketConnection not established")
     }
-    waitForSocketConnection(ws, function(socket){
-          // socket.addEventListener('error', function(event) {
-          //   rej(event.data)
-          // })
-    
-          let websocket = socket
-          let sendCallback = function(event) {
-            websocket.removeEventListener('message', sendCallback)
-            websocket.removeEventListener('error', sendCallback)
-            res(event.data)
-          }
-    
-          socket.addEventListener('message', sendCallback)
-          socket.send(payload)
-          console.log("Request sent to device/server: ", payload);
-      })
-    });
+    waitForSocketConnection(ws, function(socket) {
+      let websocket = socket
+      let sendCallback = function(event) {
+        websocket.removeEventListener('message', sendCallback)
+        websocket.removeEventListener('error', sendCallback)
+        res(event.data)
+      }
+
+      socket.addEventListener('message', sendCallback)
+      socket.send(payload)
+      console.log("Request sent to proxy server: ", payload);
+    })
+  });
 }
 
 // Make the function wait until the connection is made...
-function waitForSocketConnection(socket, callback){
-    setTimeout(
-        function () {
-            if (socket.readyState === 1) {
-                if (callback != null){
-                    callback(socket);
-                }
-            } else {
-                if(getProxyWSConnection()) {
-                    socket = getProxyWSConnection()
-                }
-                console.log("Wait for connection...")
-                waitForSocketConnection(socket, callback);
-            }
-        }, 1000); // wait 1 second for the connection...
+function waitForSocketConnection(socket, callback) {
+  setTimeout(
+    function () {
+      if (socket.readyState === 1) {
+          if (callback != null){
+              callback(socket);
+          }
+      } else {
+          if(getProxyWSConnection()) {
+              socket = getProxyWSConnection()
+          }
+          console.log("Wait for connection...")
+          waitForSocketConnection(socket, callback);
+      }
+    }, 1000); // wait 1 second for the connection...
 }
 
 function buildWSUrl() {

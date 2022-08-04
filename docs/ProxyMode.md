@@ -22,7 +22,7 @@ If you need to use proxy connection for any reason:
 
 Default port will be 9998 if not passed expliclity.
 
-*Note*: To use token while building websocket connection for proxy server and its optional, run export command before starting Mock Firebolt. 
+To use token while building websocket connection for proxy server and its optional, run below export command before starting Mock Firebolt. 
 
 ```export TOKEN=<token>```
 
@@ -30,4 +30,4 @@ If you want to skip validation for specific use case use ```--novalidate``` flag
 
 ```--novalidate method --novalidate params --novalidate response --novalidate event```
 
-Proxy mode that only work for jsonrpc format. 
+*Note*: Proxy mode that only work for jsonrpc format. 
