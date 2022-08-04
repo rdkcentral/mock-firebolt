@@ -30,4 +30,4 @@ If you want to skip validation for specific use case use ```--novalidate``` flag
 
 ```--novalidate method --novalidate params --novalidate response --novalidate event```
 
-*Note*: Proxy mode that only work for jsonrpc format. 
+*Note*: Proxy mode only work for jsonrpc format. 
