@@ -44,8 +44,18 @@ function addUser(req, res) {
   });
 }
 
+//GET /api/v1/user
+function getUsers(req, res) {
+  const users = userManagement.getUsers();
+  res.status(200).send({
+    status: 'SUCCESS',
+    users: users
+  });
+}
+
+
 // --- Exports ---
 
 export {
-  addUser
+  addUser,getUsers
 };
