@@ -403,7 +403,7 @@ function validateNewState_MethodOverrides(newStateMethods) {
   let errors = [];
 
   // Returns an empty array in "novalidate mode"
-  if( !config.validate("response") ){
+  if( !config.validate.includes("response") ){
     return [];
   }
   
