@@ -16,8 +16,8 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-function post(ctx, params) {
-  const result = '1234567';   
-  const msg = 'Post trigger for device.id sent device.onDeviceNameChanged event';
-  ctx.sendBroadcastEvent('device.onNameChanged', result, msg);
+function pre(ctx, params) {
+  const result = 'Device.onNetworkChanged event sent';
+  const msg = 'Pre trigger for device.network sent device.onNetworkChanged event';
+  ctx.sendBroadcastEvent('device.onNetworkChanged', result, msg);
 }
