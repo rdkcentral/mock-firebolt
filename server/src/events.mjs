@@ -179,7 +179,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+                sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -225,7 +225,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                 function fFatalErr() {
                   logger.info(`Internal error`)
                 }
-                events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+                sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
               },
               ...response
             };

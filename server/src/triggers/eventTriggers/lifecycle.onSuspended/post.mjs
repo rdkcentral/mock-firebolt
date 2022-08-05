@@ -17,7 +17,6 @@
 */
 
 function post(ctx, params) {
-  const result = '1234567';   
-  const msg = 'Post trigger for device.id sent device.onDeviceNameChanged event';
-  ctx.sendBroadcastEvent('device.onNameChanged', result, msg);
+  const value = 'suspended called';   
+  return value;
 }
