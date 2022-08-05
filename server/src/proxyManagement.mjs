@@ -21,6 +21,8 @@
 import { parse } from 'url';
 import WebSocket from 'ws';
 let websocketConnection = null;
+const setTimeoutInterval = 1000
+const connectionTimeout = 5000
 
 async function initialize() {
   const url = await buildWSUrl()
@@ -47,15 +49,15 @@ async function initialize() {
         ws.addEventListener('open', openCallback)
 
         ws.onopen = function () {
-            console.log("Connection to websocket proxy server established") 
-            websocketConnection = ws
+          console.log("Connection to websocket proxy server established") 
+          setProxyWSConnection(ws)
         }
 
         ws.onclose = function(){
             // connection closed, discard old websocket and create a new one in 2s
             console.log("Connection to websocket proxy server is closed.")
             ws = null
-            websocketConnection = null
+            setProxyWSConnection(ws)
             setTimeout(function() {
                 console.log("Reinitialize websocket proxy connection")
                 initialize();
@@ -70,17 +72,26 @@ async function initialize() {
   }
 }
 
+function setProxyWSConnection(ws) {
+  websocketConnection = ws
+}
+
 function getProxyWSConnection() {
     return websocketConnection
 }
 
 function sendRequest(payload) {
-  return new Promise((res) => {
+  return new Promise((res, rej) => {
     const ws = getProxyWSConnection()
     if ( ! ws ) {
         throw new Error("websocketConnection not established")
     }
-    waitForSocketConnection(ws, function(socket) {
+    waitForSocketConnection(ws, 0, function(socket) {
+      if(socket == null) {
+        rej("Connection to proxy server timedout")
+        return
+      }
+
       let websocket = socket
       let sendCallback = function(event) {
         websocket.removeEventListener('message', sendCallback)
@@ -96,7 +107,7 @@ function sendRequest(payload) {
 }
 
 // Make the function wait until the connection is made...
-function waitForSocketConnection(socket, callback) {
+function waitForSocketConnection(socket, timeout, callback) {
   setTimeout(
     function () {
       if (socket.readyState === 1) {
@@ -107,10 +118,14 @@ function waitForSocketConnection(socket, callback) {
           if(getProxyWSConnection()) {
               socket = getProxyWSConnection()
           }
-          console.log("Wait for connection...")
-          waitForSocketConnection(socket, callback);
+          console.log("Wait for connection... ")
+          if(timeout >= connectionTimeout) {
+            callback(null);
+          } else {
+            waitForSocketConnection(socket, timeout + 1000, callback);
+          }
       }
-    }, 1000); // wait 1 second for the connection...
+  }, setTimeoutInterval); // wait 1 second for the connection...
 }
 
 function buildWSUrl() {
@@ -163,6 +178,7 @@ function getToken(request) {
   }
 }
 
+// --- Exports ---
 export {
-  getToken, initialize, getProxyWSConnection, sendRequest, close
+  getToken, initialize, getProxyWSConnection, sendRequest, close, setProxyWSConnection
 };
