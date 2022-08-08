@@ -396,6 +396,26 @@ curl --location --request POST 'http://localhost:3333/api/v1/event' \
 }
 ```
 
+## Send an event to all apps with user ID values in the same user group
+
+### Example cURL Command:
+
+```
+curl --location --request POST 'http://localhost:3333/api/v1/broadcastEvent' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "method": "device.onDeviceNameChanged",
+    "result": "NEW-DEVICE-NAME-1"
+}'
+```
+
+### 200 Response:
+
+```
+{
+    "status": "OK"
+}
+```
 
 ## Send an event sequence
 
@@ -432,5 +452,45 @@ curl --location --request POST 'http://localhost:3333/api/v1/sequence' \
 ```
 {
     "status": "OK"
+}
+```
+
+
+
+## Create a user (generates a UUID v4 and registers a user with this User ID)
+
+### Example cURL Command:
+
+```
+curl --location --request POST 'http://localhost:3333/api/v1/user'
+```
+
+### 200 Response:
+
+```
+{
+    "status": "OK",
+    "userId": "<uuid>"
+}
+```
+## Get list of users (returns a list of all the registered users)
+
+### Example cURL Command:
+
+```
+curl --location --request GET 'http://localhost:3333/api/v1/user'
+```
+
+### 200 Response:
+
+```
+{
+    "status": "SUCCESS",
+    "users": [
+        "<uuid1>",
+        "<uuid2>",
+        "<uuid3>",
+        "<uuid4>"
+    ]
 }
 ```

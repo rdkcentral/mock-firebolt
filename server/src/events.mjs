@@ -21,31 +21,50 @@
 'use strict';
 
 import * as stateManagement from './stateManagement.mjs';
+import * as userManagement from './userManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
 
-// Maps event listener request method name (e.g., lifecycle.onInactive) to message id (e.g., 17)
+// Maps full userIds to maps which map event listner request method
+// name (e.g., lifecycle.onInactive) to message id (e.g., 17)
 const eventListenerMap = {};
 
 // Associate this message ID with this method so if/when events are sent, we know which message ID to use
-function registerEventListener(oMsg) {
-  eventListenerMap[oMsg.method] = oMsg.id;
-  logger.debug(`Registered event listener mapping: ${oMsg.method}:${oMsg.id}`);
+function registerEventListener(userId, oMsg) {
+  if ( ! eventListenerMap[userId] ) {
+    eventListenerMap[userId] = {};
+  }
+  eventListenerMap[userId][oMsg.method] = oMsg.id;
+  logger.debug(`Registered event listener mapping: ${userId}:${oMsg.method}:${oMsg.id}`);
 }
 
-function isRegisteredEventListener(method) {
-  return ( method in eventListenerMap );
+// Return true if at least one user in the user’s group is registered for the given method
+function isAnyRegisteredInGroup(userId, method) {
+  const userList = userManagement.getUserListForUser(userId);
+  for (const user of userList){
+    if ( isRegisteredEventListener(user, method) ){
+      return true;
+    }
+  }
+  return false;
 }
 
-function getRegisteredEventListener(method) {
-  return eventListenerMap[method];
+function isRegisteredEventListener(userId, method) {
+  if ( ! eventListenerMap[userId] ) { return false; }
+  return ( method in eventListenerMap[userId] );
+}
+
+function getRegisteredEventListener(userId, method) {
+  if ( ! eventListenerMap[userId] ) { return undefined; }
+  return eventListenerMap[userId][method];
 }
 
 // Remove mapping from event listener request method name from our map
 // Attempts to send events to this listener going forward will fail
-function deregisterEventListener(oMsg) {
-  delete eventListenerMap[oMsg.method];
-  logger.debug(`Deregistered event listener for method: ${oMsg.method}`);
+function deregisterEventListener(userId, oMsg) {
+  if ( ! eventListenerMap[userId] ) { return; }
+  delete eventListenerMap[userId][oMsg.method];
+  logger.debug(`Deregistered event listener for method: ${userId}:${oMsg.method}`);
 }
 
 // Is the given (incoming) message one that enables or disables an event listener?
@@ -94,12 +113,39 @@ function sendEventListenerAck(ws, oMsg) {
   logger.debug(`Sent event listener ack message: ${ackMessage}`);
 }
 
+function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
+  coreSendEvent(false, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+}
+
+function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
+  coreSendEvent(true, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+}
+
+// sending response to web-socket
+function emitResponse(ws, finalResult, msg, userId, method){
+  let id = getRegisteredEventListener(userId, method);
+  const oEventMessage = {
+    jsonrpc: '2.0',
+    id: id,
+    result: finalResult
+  };
+  const eventMessage = JSON.stringify(oEventMessage);
+  // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
+  ws.send(eventMessage);
+  logger.info(`${msg}: Sent event message: ${eventMessage}`);
+}
+
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
-function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
+function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
   try {
-    if ( !isRegisteredEventListener(method) ) {
+    if (  ! isBroadcast && !isRegisteredEventListener(userId, method) ) {
       logger.info(`${method} event not registered`);
       fErr.call(null, method);
+
+    } else if ( isBroadcast && !isAnyRegisteredInGroup(userId, method) ){
+      logger.info(`${method} event not registered`);
+      fErr.call(null, method);
+
     } else {
        // Fire pre trigger if there is one for this method
        if ( method in eventTriggers ) {
@@ -122,6 +168,18 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
                   logger.info(`Internal error`)
                 }
                 sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+              },
+              sendBroadcastEvent: function(onMethod, result, msg) {
+                function fSuccess() {
+                  logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+                }
+                function fErr() {
+                  logger.info(`Could not send ${onMethod} event because no listener is active`)
+                }
+                function fFatalErr() {
+                  logger.info(`Internal error`)
+                }
+                events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -132,7 +190,6 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
         }
       }
 
-      const id = getRegisteredEventListener(method);
       const response = {result : result};
       let postResult;
       
@@ -158,6 +215,18 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
                 }
                 sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
               },
+              sendBroadcastEvent: function(onMethod, result, msg) {
+                function fSuccess() {
+                  logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+                }
+                function fErr() {
+                  logger.info(`Could not send ${onMethod} event because no listener is active`)
+                }
+                function fFatalErr() {
+                  logger.info(`Internal error`)
+                }
+                events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+              },
               ...response
             };
             logger.debug(`Calling post trigger for event ${method}`);
@@ -173,17 +242,26 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
       }
 
       const finalResult = ( postResult ? postResult : result );
-      const oEventMessage = {
-        jsonrpc: '2.0',
-        id: id,
-        result: finalResult
-      };
-      const eventMessage = JSON.stringify(oEventMessage);
-      // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
-      ws.send(eventMessage);
-      logger.info(`${msg}: Sent event message: ${eventMessage}`);
 
-      fSuccess.call(null);
+      // There may be more than one app using different base userId values
+      // but the same group name. We need to send the event to all
+      // clients/apps within the group (whether just this one or more than one).
+      if( isBroadcast ){
+        const wsList = userManagement.getWsListForUser(userId);
+        if ( wsList && wsList.length >= 1 ) {
+          for (const ww of wsList ) {
+            emitResponse(ww, finalResult, msg, userId, method);
+          }
+          fSuccess.call(null);
+        } else {
+          // Internal error
+          const msg = 'sendEvent: ERROR: Internal Error: No sockets in list';
+          throw new Error(msg);
+        }
+      } else {
+        emitResponse(ws, finalResult, msg, userId, method);
+        fSuccess.call(null);
+      }
     }
   } catch ( ex ) {
     logger.error('sendEvent: ERROR:');
@@ -194,8 +272,15 @@ function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
 
 // --- Exports ---
 
+export const testExports = {
+  eventListenerMap,
+  isRegisteredEventListener,
+  getRegisteredEventListener,
+}
+
 export {
-  registerEventListener, isRegisteredEventListener, getRegisteredEventListener, deregisterEventListener,
-  isEventListenerOnMessage, isEventListenerOffMessage,sendEventListenerAck,
-  sendEvent
+  registerEventListener, deregisterEventListener,
+  isEventListenerOnMessage, isEventListenerOffMessage,
+  sendEventListenerAck,
+  sendEvent, sendBroadcastEvent
 };
