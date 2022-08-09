@@ -28,6 +28,7 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
 import * as events from './events.mjs';
+import { sendBroadcastEvent, sendEvent } from './util.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -142,28 +143,10 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         set: function ss(key, val) { return setScratch(userId, key, val) },
         get: function gs(key) { return getScratch(userId, key); },
         sendEvent: function(onMethod, result, msg) {
-          function fSuccess() {
-            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-          }
-          function fErr() {
-            logger.info(`Could not send ${onMethod} event because no listener is active`)
-          }
-          function fFatalErr() {
-            logger.info(`Internal error`)
-          }
-          events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          sendEvent(ws, userId, onMethod, result, msg);
         },
         sendBroadcastEvent: function(onMethod, result, msg) {
-          function fSuccess() {
-            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-          }
-          function fErr() {
-            logger.info(`Could not send ${onMethod} event because no listener is active`)
-          }
-          function fFatalErr() {
-            logger.info(`Internal error`)
-          }
-          events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          sendBroadcastEvent(ws, userId, onMethod, result, msg);
         },
         FireboltError: commonErrors.FireboltError
       };
