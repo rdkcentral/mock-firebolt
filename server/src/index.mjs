@@ -28,7 +28,12 @@ import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
 
-// -------------------------------------------------- Web Socket --------------------------------------------------
+// --------------------------------------------------- Conduit ----------------------------------------------------
+
+import './conduit.mjs';
+import './conduitKeys.mjs';
+
+// ------------------------------------------ Firebolt OpenRPC WebSocket ------------------------------------------
 
 import { createServer } from 'http';
 import { parse } from 'url';

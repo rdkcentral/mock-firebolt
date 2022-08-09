@@ -28,6 +28,7 @@ import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
 import { addCall } from './sessionManagement.mjs';
+import * as conduit from './conduit.mjs';
 
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
@@ -147,8 +148,60 @@ async function handleMessage(message, userId, ws) {
     }
   }
 
-  //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
-  response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws);
+  // Handle the Firebolt call
+  // - If an override value has been specified (via response, result, error, results properties), use/return it
+  // - If Conduit is connected, route the incoming Firebolt call from the app under development through here
+  //   (Mock Firebolt) and the Conduit app on a device and back in order to get a real result.
+  // - Otherwise, return the standard static default mock results (from examples in the OpenRPC specification)
+
+  if ( stateManagement.hasOverride(userId, oMsg.method) ) {
+    // Handle Firebolt Method call using our in-memory mock values
+    logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
+    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params); // Could be optimized cuz we know we want an override response
+  }
+
+  else if ( conduit.isConduitConnected() ) {
+    // When the Conduit app is connected, we'll route incoming Firebolt calls from the app under development
+    // through here (Mock Firebolt) and the Conduit app on a device and back in order to get a real result.
+    logger.debug(`Forwarding Firebolt method call message to Conduit to get a real answer from a real device (method: ${oMsg.method})`);
+    conduit.sendMessageToConduit(oMsg);
+    // The actual Firebolt result, as collected and forwarded by the Conduit app will be returned upon
+    // receipt and handling of a FIREBOLT-RESPONSE message
+
+    let isTimeout = false;
+    let timeoutTimer = setTimeout(() => {
+      isTimeout = true;
+    }, 3000);
+    await new Promise((resolve, reject) => {
+      let intervalTimer = setInterval(_ => {
+        tmpResponse = conduit.getResponseFromConduit(oMsg);
+        if ( tmpResponse || isTimeout ) {
+          clearInterval(intervalTimer);
+          clearTimeout(timeoutTimer);
+          logger.debug('Received response from Conduit app');
+          // Make the real Firebolt response look like our normal response objects (with a result key or error key)
+          // @TODO: Test that the error case works correctly
+          if ( typeof tmpResponse === 'object' && tmpResponse.hasOwnProperty('code') && tmpResponse.hasOwnProperty('message') ) {
+            response = {
+              error: tmpResponse
+            };
+          } else {
+            response = {
+              result: tmpResponse
+            };
+          }
+          resolve();
+        } else {
+          // logger.debug('handleMessage: Still waiting for result response from Conduit app...');
+        }
+      }, 500);
+    });
+
+    } else {
+    // Handle Firebolt Method call using default defaults (from the examples in the Open RPC specification)
+    logger.debug(`Returning default mock value for method ${oMsg.method}`);
+    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params); // Could be optimized cuz we know we want a static response
+  }
 
   // Emit developerNotes for the method, if any
   const developerNotes = fireboltOpenRpc.getDeveloperNotesForMethod(oMsg.method);

@@ -34,6 +34,8 @@ const config = {
     allowMixedCase: false,
     socketPort: 9998,
     httpPort: 3333,
+    conduitSocketPort: 9997,
+    conduitKeyForwardingSocketPort: 9996,
     defaultUserId: '12345',
     magicDateTime: {
       prefix: '{{',

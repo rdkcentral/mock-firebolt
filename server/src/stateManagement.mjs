@@ -116,6 +116,18 @@ async function getAppropriateDelay(userId, methodName) {
   return dly;
 }
 
+function hasOverride(userId, methodName) {
+  const userState = getState(userId);
+  if ( ! userState ) { return false; }
+  const resp = userState.methods[methodName];
+  if ( ! resp ) { return false; }
+  if ( resp.response ) { return true; }
+  if ( resp.result ) { return true; }
+  if ( resp.error ) { return true; }
+  if ( resp.responses ) { return true; }
+  return false;
+}
+
 // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
 function handleSequenceOfResponseValues(userId, methodName, params, resp, userState) {
   const nextIndex = userState.sequenceState[methodName] || 0;
@@ -558,7 +570,7 @@ export {
   addUser,
   getState,
   getAppropriateDelay,
-  getMethodResponse,
+  hasOverride, getMethodResponse,
   updateState, revertState,
   setLatency, setLatencies,
   isLegalMode, setMode,
