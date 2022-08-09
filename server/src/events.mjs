@@ -24,6 +24,7 @@ import * as stateManagement from './stateManagement.mjs';
 import * as userManagement from './userManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
+import { fSuccess as fS, fFatalErr as fF, fErr as fE } from './util.mjs';
 
 // Maps full userIds to maps which map event listner request method
 // name (e.g., lifecycle.onInactive) to message id (e.g., 17)
@@ -158,28 +159,28 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               sendEvent: function(method, result, msg) {
-                function fSuccess() {
-                  logger.info(`${msg}: Sent event ${method} with result ${JSON.stringify(result)}`)
-                }
-                function fErr() {
-                  logger.info(`Could not send ${method} event because no listener is active`)
-                }
-                function fFatalErr() {
-                  logger.info(`Internal error`)
-                }
-                sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent(
+                  ws,
+                  userId,
+                  method,
+                  result,
+                  msg,
+                  fS.bind(this, method, result, msg),
+                  fE.bind(this, method),
+                  fF.bind(this)
+                );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                function fSuccess() {
-                  logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-                }
-                function fErr() {
-                  logger.info(`Could not send ${onMethod} event because no listener is active`)
-                }
-                function fFatalErr() {
-                  logger.info(`Internal error`)
-                }
-                sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+                sendBroadcastEvent(
+                  ws,
+                  userId,
+                  onMethod,
+                  result,
+                  msg,
+                  fS.bind(this, onMethod, result, msg),
+                  fE.bind(this, onMethod),
+                  fF.bind(this)
+                );
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -204,28 +205,28 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               sendEvent: function(method, result, msg) {
-                function fSuccess() {
-                  logger.info(`${msg}: Sent event ${method} with result ${JSON.stringify(result)}`)
-                }
-                function fErr() {
-                  logger.info(`Could not send ${method} event because no listener is active`)
-                }
-                function fFatalErr() {
-                  logger.info(`Internal error`)
-                }
-                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent(
+                  ws,
+                  userId,
+                  method,
+                  result,
+                  msg,
+                  fS.bind(this, method, result, msg),
+                  fE.bind(this, method),
+                  fF.bind(this)
+                );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                function fSuccess() {
-                  logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-                }
-                function fErr() {
-                  logger.info(`Could not send ${onMethod} event because no listener is active`)
-                }
-                function fFatalErr() {
-                  logger.info(`Internal error`)
-                }
-                sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+                sendBroadcastEvent(
+                  ws,
+                  userId,
+                  onMethod,
+                  result,
+                  msg,
+                  fS.bind(this, onMethod, result, msg),
+                  fE.bind(this, onMethod),
+                  fF.bind(this)
+                );
               },
               ...response
             };

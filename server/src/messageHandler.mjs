@@ -28,6 +28,7 @@ import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
 import { addCall } from './sessionManagement.mjs';
+import { sendBroadcastEvent, sendEvent } from './util.mjs';
 
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
@@ -115,28 +116,10 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           sendEvent: function(onMethod, result, msg) {
-            function fSuccess() {
-              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-            }
-            function fErr() {
-              logger.info(`Could not send ${onMethod} event because no listener is active`)
-            }
-            function fFatalErr() {
-              logger.info(`Internal error`)
-            }
-            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            sendEvent(ws, userId, onMethod, result, msg);
           },
           sendBroadcastEvent: function(onMethod, result, msg) {
-            function fSuccess() {
-              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-            }
-            function fErr() {
-              logger.info(`Could not send ${onMethod} event because no listener is active`)
-            }
-            function fFatalErr() {
-              logger.info(`Internal error`)
-            }
-            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            sendBroadcastEvent(ws, userId, onMethod, result, msg);
           }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
@@ -176,28 +159,10 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           sendEvent: function(onMethod, result, msg) {
-            function fSuccess() {
-              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-            }
-            function fErr() {
-              logger.info(`Could not send ${onMethod} event because no listener is active`)
-            }
-            function fFatalErr() {
-              logger.info(`Internal error`)
-            }
-            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            sendEvent(ws, userId, onMethod, result, msg);
           },
           sendBroadcastEvent: function(onMethod, result, msg) {
-            function fSuccess() {
-              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-            }
-            function fErr() {
-              logger.info(`Could not send ${onMethod} event because no listener is active`)
-            }
-            function fFatalErr() {
-              logger.info(`Internal error`)
-            }
-            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            sendBroadcastEvent(ws, userId, onMethod, result, msg);
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };
