@@ -172,6 +172,7 @@ async function handleMessage(message, userId, ws) {
     let timeoutTimer = setTimeout(() => {
       isTimeout = true;
     }, 3000);
+    let tmpResponse;
     await new Promise((resolve, reject) => {
       let intervalTimer = setInterval(_ => {
         tmpResponse = conduit.getResponseFromConduit(oMsg);

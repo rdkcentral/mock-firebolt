@@ -1,5 +1,6 @@
 const path = require('path');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const json5 = require('json5');
 
 module.exports = {
@@ -9,12 +10,17 @@ module.exports = {
     filename: 'bundle.js',  //relative to root of the application
   },
   plugins: [
+    new CopyPlugin({
+      patterns: [
+        { from: "src/activateMockFirebolt.js" },
+      ],
+    }),
     new HtmlWebpackPlugin({
         hash: true,
         title: 'Conduit',
         myPageHeader: 'Welcome to the Conduit App',
         template: './src/index.html'
-    })
+    }),
   ],
   module: {
     rules: [

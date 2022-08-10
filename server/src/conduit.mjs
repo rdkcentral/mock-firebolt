@@ -26,6 +26,7 @@ import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import * as conduitKeys from './conduitKeys.mjs';
+import * as commandLine from './commandLine.mjs';
 
 
 let heartbeatInterval;    // JS Interval ID for heartbeat feature
@@ -34,7 +35,9 @@ let conduitWs;            // WebSocket used by Conduit to talk to Mock Firebolt
 // Will (temporarily) hold Firebolt responses sent via the Conduit socket to a client
 const fireboltResponses = {};  // openRpcMsg.id -> response via Conduit from a real Firebolt on a real device
 
-const conduitWss = new WebSocketServer({ port: config.app.conduitSocketPort });
+const conduitSocketPort = commandLine.conduitSocketPort;
+
+const conduitWss = new WebSocketServer({ port: conduitSocketPort });
 
 conduitWss.on('error', (error) => {
   console.log('Conduit WebSocket Server Error:');
@@ -201,7 +204,7 @@ conduitWss.on('close', function close() {
   clearInterval(heartbeatInterval);
 });
 
-console.log(`Listening on socket port ${config.app.conduitSocketPort} (Conduit)...`);
+console.log(`Listening on socket port ${conduitSocketPort} (Conduit)...`);
 
 function isConduitConnected() {
   if ( ! conduitWs ) { return false; }

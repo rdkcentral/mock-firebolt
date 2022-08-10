@@ -449,10 +449,10 @@ function ensureMockFireboltConduitWebsocketUrl(pSocketUrl) {
     socketUrl = pSocketUrl;
   } else {
     const queryParams = new window.URLSearchParams(document.location.search);
-    socketUrl = queryParams.get('mf');
+    socketUrl = queryParams.get('mfc');
     if ( ! socketUrl ) {
       appendErrorMessage('Missing Mock Firebolt Conduit Web Socket URL');
-      throw new Error(`MISSING-MF-URL-PARAMETER`);
+      throw new Error(`MISSING-MFC-URL-PARAMETER`);
     }
   }
   appendMessage(`Using Mock Firebolt Conduit Web Socket URL: ${socketUrl}`);
