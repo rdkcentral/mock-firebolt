@@ -111,3 +111,10 @@ test(`userManagement.handleGroupMembership returns with userId 12345`, () => {
   const result = userManagement.testExports.handleGroupMembership("12345");
   expect(result).toBeUndefined();
 });
+
+test(`userManagement.heartbeat returns with websocket isalive true`, () => {
+  let ws = {};
+  ws.isAlive = false;
+  const result = userManagement.testExports.heartbeat(ws);
+  expect(ws.isAlive).toBe(true);
+});
