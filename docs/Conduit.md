@@ -23,7 +23,9 @@ Mock Firebolt: Conduit
 Follow these steps to get your app under development, Mock Firebolt, and Conduit to work together:
 
 1. Start the Mock Firebolt server
-2. Use Ibis to launch the Conduit app on your device (STB or TV)
+2. Use Ibis to launch the Conduit app on your device (STB or TV).
+  a. Provide a url parameter, mfc, whose value is the full web socket URL of the *Conduit* socket owned by Mock Firebolt. E.g., ws://(yourip#):9997
+  b. If you want to use a separate Mock Firebolt with Conduit (not typical), you can also provide the typical 'mf' query parameter to connect Conduit to a second/separate Mock Firebolt. Here, you'll want to use something like mf=http://(yourip#):(portNumberOfSecondMockFirebolt) and start the second Mock Firebolt server so it listens on this port (using the --port command-line argume)
 3. Start your app under development locally
 
 NOTE: Be sure to start the Conduit app prior to starting your app under development. If you start your app before Conduit, your app will get mock responses from Mock Firebolt (because Mock Firebolt isn't yet connected to Conduit) until Conduit is launched. It's generally a good idea to hit refresh in your local browser for your app to ensure it is 'launching' after Conduit is up and running.
@@ -50,7 +52,7 @@ Another diagram:
 
 The combination of Mock Firebolt on the developer’s machine and the Conduit app on the device (STB or TV) provides a “best of both worlds” solution to app developers, who want the fast develop-debug cycle of local development, but who need full/real integration with a real Firebolt implementation on a real device in order to properly interact with Firebolt (react to lifecycle events, etc.). Yet, 
 
-  - It does take a certain amount of “rigging”… making sure the app being developed talks to Mock Firebolt, running Mock Firebolt, and launching the Conduit app on a device. 
+  - It does take a certain amount of “rigging”... making sure the app being developed talks to Mock Firebolt, running Mock Firebolt, and launching the Conduit app on a device. 
 
   - This solution doesn’t ultimately address issues such as (a) performance considerations when running on a real device, (b) video player-related issues running on a real device, (c) metadata/content ingestion and VREX setup . 
 
