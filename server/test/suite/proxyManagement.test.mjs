@@ -6,6 +6,7 @@ import WebSocket from 'ws';
 
 jest.setTimeout(80 * 1000)
 describe('sequentially run tests', () => {
+
     beforeAll(() => {
         clearEnvs()
     })
@@ -19,19 +20,19 @@ describe('sequentially run tests', () => {
         expect(client).toBe(null);
     });
 
-    test(`proxyManagement.getToken works properly and get token from request param or from env`, async () => {
-        let token = proxyManagement.getToken({"url": "http://abcd.com?token=test"})
-        expect(token.stdout).toBe("test");
+    test(`proxyManagement.getMFToken works properly and get token from request param or from env`, async () => {
+        let token = proxyManagement.getMFToken({"url": "http://abcd.com?token=test"})
+        expect(token.token).toBe("test");
 
-        process.env.TOKEN = "abcd"
-        token = proxyManagement.getToken(null)
-        expect(token.stdout).toBe(process.env.TOKEN);
+        process.env.MF_TOKEN = "abcd"
+        token = proxyManagement.getMFToken(null)
+        expect(token.token).toBe(process.env.MF_TOKEN);
     });
 
     test(`proxyManagement.getToken works properly and when token nor present in request param and env`, async () => {
-        delete process.env.TOKEN
-        const token = proxyManagement.getToken({"url": "http://abcd.com"})
-        expect(token.stderr).toBe("Unable to get token from connection param or not present in env");
+        delete process.env.MF_TOKEN
+        const token = proxyManagement.getMFToken({"url": "http://abcd.com"})
+        expect(token.error).toBe("Unable to get token from connection param or not present in env");
     });
 
     test(`proxyManagement.sendRequest works properly`, async () => {
