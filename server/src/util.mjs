@@ -23,8 +23,6 @@
 import * as tmp from 'tmp';
 
 import { config } from './config.mjs';
-import { logger } from './logger.mjs';
-import * as events from './events.mjs';
 
 // Use: await delay(2000);
 function delay(ms) {
@@ -47,52 +45,9 @@ function createTmpFile(prefix, postfix) {
   return tmpObj;
 }
 
-function fSuccess(onMethod, result, msg) {
-  logger.info(
-    `${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`
-  );
-};
-
-function fErr(onMethod) {
-  logger.info(
-    `Could not send ${onMethod} event because no listener is active`
-  );
-};
-
-function fFatalErr() {
-  logger.info(`Internal error`);
-};
-
-function sendEvent(ws, userId, onMethod, result, msg) {
-  events.sendEvent(
-    ws,
-    userId,
-    onMethod,
-    result,
-    msg,
-    fSuccess.bind(this, onMethod, result, msg),
-    fErr.bind(this, onMethod),
-    fFatalErr.bind(this)
-  );
-};
-
-function sendBroadcastEvent(ws, userId, onMethod, result, msg) {
-  events.sendBroadcastEvent(
-    ws,
-    userId,
-    onMethod,
-    result,
-    msg,
-    fSuccess.bind(this, onMethod, result, msg),
-    fErr.bind(this, onMethod),
-    fFatalErr.bind(this)
-  );
-};
-
 // --- Exports ---
 
 export {
   delay, randomIntFromInterval,
-  getUserIdFromReq, createTmpFile, fSuccess,
-  fFatalErr, fErr, sendBroadcastEvent, sendEvent
+  getUserIdFromReq, createTmpFile
 };

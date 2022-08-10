@@ -27,8 +27,7 @@ import * as magicDateTime from './magicDateTime.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
-import * as events from './events.mjs';
-import { sendBroadcastEvent, sendEvent } from './util.mjs';
+import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -143,10 +142,28 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         set: function ss(key, val) { return setScratch(userId, key, val) },
         get: function gs(key) { return getScratch(userId, key); },
         sendEvent: function(onMethod, result, msg) {
-          sendEvent(ws, userId, onMethod, result, msg);
+          sendEvent(
+            ws,
+            userId,
+            onMethod,
+            result,
+            msg,
+            logSuccess.bind(this, onMethod, result, msg),
+            logErr.bind(this, onMethod),
+            logFatalErr.bind(this)
+          );
         },
         sendBroadcastEvent: function(onMethod, result, msg) {
-          sendBroadcastEvent(ws, userId, onMethod, result, msg);
+          sendBroadcastEvent(
+            ws,
+            userId,
+            onMethod,
+            result,
+            msg,
+            logSuccess.bind(this, onMethod, result, msg),
+            logErr.bind(this, onMethod),
+            logFatalErr.bind(this)
+          );
         },
         FireboltError: commonErrors.FireboltError
       };

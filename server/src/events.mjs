@@ -24,7 +24,22 @@ import * as stateManagement from './stateManagement.mjs';
 import * as userManagement from './userManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
-import { fSuccess as fS, fFatalErr as fF, fErr as fE } from './util.mjs';
+
+function logSuccess(onMethod, result, msg) {
+  logger.info(
+    `${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`
+  );
+};
+
+function logErr(onMethod) {
+  logger.info(
+    `Could not send ${onMethod} event because no listener is active`
+  );
+};
+
+function logFatalErr() {
+  logger.info(`Internal error`);
+};
 
 // Maps full userIds to maps which map event listner request method
 // name (e.g., lifecycle.onInactive) to message id (e.g., 17)
@@ -165,9 +180,9 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                   method,
                   result,
                   msg,
-                  fS.bind(this, method, result, msg),
-                  fE.bind(this, method),
-                  fF.bind(this)
+                  logSuccess.bind(this, method, result, msg),
+                  logErr.bind(this, method),
+                  logFatalErr.bind(this)
                 );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
@@ -177,9 +192,9 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                   onMethod,
                   result,
                   msg,
-                  fS.bind(this, onMethod, result, msg),
-                  fE.bind(this, onMethod),
-                  fF.bind(this)
+                  logSuccess.bind(this, onMethod, result, msg),
+                  logErr.bind(this, onMethod),
+                  logFatalErr.bind(this)
                 );
               }
             };
@@ -211,9 +226,9 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                   method,
                   result,
                   msg,
-                  fS.bind(this, method, result, msg),
-                  fE.bind(this, method),
-                  fF.bind(this)
+                  logSuccess.bind(this, method, result, msg),
+                  logErr.bind(this, method),
+                  logFatalErr.bind(this)
                 );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
@@ -223,9 +238,9 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
                   onMethod,
                   result,
                   msg,
-                  fS.bind(this, onMethod, result, msg),
-                  fE.bind(this, onMethod),
-                  fF.bind(this)
+                  logSuccess.bind(this, onMethod, result, msg),
+                  logErr.bind(this, onMethod),
+                  logFatalErr.bind(this)
                 );
               },
               ...response
@@ -283,5 +298,6 @@ export {
   registerEventListener, deregisterEventListener,
   isEventListenerOnMessage, isEventListenerOffMessage,
   sendEventListenerAck,
-  sendEvent, sendBroadcastEvent
+  sendEvent, sendBroadcastEvent, logSuccess, logErr,
+  logFatalErr
 };
