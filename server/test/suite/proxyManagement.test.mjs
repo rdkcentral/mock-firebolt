@@ -70,7 +70,7 @@ describe('sequentially run tests', () => {
 })
 
 function clearEnvs() {
-    delete process.env.TOKEN
+    delete process.env.MF_TOKEN
     delete process.env.proxyServerIP
     delete process.env.proxy
 }
