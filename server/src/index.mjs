@@ -27,7 +27,6 @@ import * as commandLine from './commandLine.mjs';
 import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
-
 // -------------------------------------------------- Web Socket --------------------------------------------------
 
 import { createServer } from 'http';
@@ -58,6 +57,7 @@ server.on('upgrade', function upgrade(request, socket, head) {
     socket.destroy();
   }
 });
+
 
 // Starter user(s)
 logger.info('Adding user 123...'); stateManagement.addUser('123'); userManagement.addUser('123');
