@@ -144,7 +144,7 @@ function buildWSUrl() {
         wsUrlProtocol,
         hostPort,
         path,
-        process.env.TOKEN ? '?token=' + process.env.TOKEN : null,
+        process.env.MF_TOKEN ? '?token=' + process.env.MF_TOKEN : null,
     ].join(''))
   })
 }
@@ -157,28 +157,28 @@ function close() {
 }
 
 // Get token from request param or env variable
-function getToken(request) {
+function getMFToken(request) {
   let output = {
-    stdout: '',
-    stderr: '',
+    token: '',
+    error: '',
   };
   // If token already exists, return token
-  if(process.env.TOKEN) {
-    output.stdout = process.env.TOKEN
+  if(process.env.MF_TOKEN) {
+    output.token = process.env.MF_TOKEN
     return output
   }
   const { query } = parse(request.url);
   if(query && query.includes("token=") && query.length > 6) {
     const token = query.split('token=').pop().split('&')[0];
-    output.stdout = token
+    output.token = token
     return output
   } else {
-    output.stderr = "Unable to get token from connection param or not present in env"
+    output.error = "Unable to get token from connection param or not present in env"
     return output
   }
 }
 
 // --- Exports ---
 export {
-  getToken, initialize, getProxyWSConnection, sendRequest, close, setProxyWSConnection
+  getMFToken, initialize, getProxyWSConnection, sendRequest, close, setProxyWSConnection
 };

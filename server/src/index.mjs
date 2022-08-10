@@ -55,11 +55,11 @@ server.on('upgrade', function upgrade(request, socket, head) {
     logger.info('Send proxy request to websocket server: ' + process.env.proxyServerIP);
     process.env.proxy = true
     // Get token from connection parameter or from env
-    const token = proxyManagement.getToken(request)
-    if( token.stdout ) {
-      process.env.wsToken = token.stdout
+    const mfToken = proxyManagement.getMFToken(request)
+    if( mfToken.token ) {
+      process.env.wsToken = mfToken.token
     } else {
-      logger.warn(`WARNING: ${token.stderr}`);
+      logger.warn(`WARNING: ${mfToken.error}`);
     }
   }
 
