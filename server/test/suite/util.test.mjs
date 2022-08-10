@@ -24,7 +24,6 @@ import {jest} from '@jest/globals';
 import * as fs from 'fs';
 import Setup from '../Setup';
 import * as util from '../../src/util.mjs';
-import { logger } from "../../src/logger.mjs";
 
 test(`util.delay works properly`, () => {
     jest.useFakeTimers();
@@ -87,48 +86,4 @@ test(`util.createTmpFile returns a file whose name contains the given prefix and
 
     // Cleanup after ourselves
     tmpObj.removeCallback();
-});
-
-test(`messageHandler.fSuccess works properly`, () => {
-  const spy = jest.spyOn(logger, "info");
-  util.fSuccess(
-    "dummyMethod",
-    { name: "test" },
-    "testMsg"
-  );
-  expect(spy).toHaveBeenCalled();
-});
-
-test(`messageHandler.fErr works properly`, () => {
-  const spy = jest.spyOn(logger, "info");
-  util.fErr("dummyMethod");
-  expect(spy).toHaveBeenCalled();
-});
-
-test(`messageHandler.fFatalErr works properly`, () => {
-  const spy = jest.spyOn(logger, "info");
-  util.fFatalErr();
-  expect(spy).toHaveBeenCalled();
-});
-
-test(`messageHandler.sendEvent works properly`, () => {
-  const result = util.sendEvent(
-    {},
-    "12345",
-    "dummyMethod",
-    { name: "test" },
-    "testMsg"
-  );
-  expect(result).toBeUndefined();
-});
-
-test(`messageHandler.sendBroadcastEvent works properly`, () => {
-  const result = util.sendBroadcastEvent(
-    {},
-    "12345",
-    "dummyMethod",
-    { name: "test" },
-    "testMsg"
-  );
-  expect(result).toBeUndefined();
 });

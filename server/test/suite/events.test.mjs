@@ -256,3 +256,21 @@ test(`events.sendEvent works properly`, () => {
   );
   expect(errorSpy).toHaveBeenCalled();
 });
+
+test(`events.logSuccess works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  events.logSuccess("dummyMethod", { name: "test" }, "testMsg");
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`events.logErr works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  events.logErr("dummyMethod");
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`events.logFatalErr works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  events.logFatalErr();
+  expect(spy).toHaveBeenCalled();
+});
