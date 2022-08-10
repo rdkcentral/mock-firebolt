@@ -37,6 +37,9 @@ Both the app under development and Mock Firebolt run on the developer’s machin
 
 ![Firebolt + Conduit System Overview](./images/conduit/SystemOverview.png)
 
+Another diagram:
+
+![Firebolt + Conduit](./images/conduit/MockFirebolt-And-Conduit.png)
 
 # Sequence Diagram 
 
