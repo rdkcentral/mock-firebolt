@@ -22,7 +22,6 @@
 
 import {jest} from '@jest/globals';
 import * as fs from 'fs';
-import Setup from '../Setup';
 import * as util from '../../src/util.mjs';
 
 test(`util.delay works properly`, () => {
