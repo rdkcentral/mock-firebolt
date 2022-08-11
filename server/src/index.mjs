@@ -27,12 +27,12 @@ import * as commandLine from './commandLine.mjs';
 import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
+import * as proxyManagement from './proxyManagement.mjs';
 
 // -------------------------------------------------- Web Socket --------------------------------------------------
 
 import { createServer } from 'http';
 import { parse } from 'url';
-import WebSocket, { WebSocketServer } from 'ws';
 
 logger.important(`Welcome to Mock Firebolt`);
 
@@ -41,6 +41,7 @@ const server = createServer();
 server.on('upgrade', function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
   let userId = pathname.substring(1);
+
   if ( ! userId ) {
     logger.info('Using default user');
     userId = config.app.defaultUserId;
@@ -48,6 +49,20 @@ server.on('upgrade', function upgrade(request, socket, head) {
     logger.warn(`WARNING: Unknown userId: ${userId}; Using default user`);
     userId = config.app.defaultUserId;
   }
+  
+  if( commandLine.proxy ) {
+    process.env.proxyServerIP = commandLine.proxy
+    logger.info('Send proxy request to websocket server: ' + process.env.proxyServerIP);
+    process.env.proxy = true
+    // Get token from connection parameter or from env
+    const mfToken = proxyManagement.getMFToken(request)
+    if( mfToken.token ) {
+      process.env.wsToken = mfToken.token
+    } else {
+      logger.warn(`WARNING: ${mfToken.error}`);
+    }
+  }
+
   const wss = userManagement.getWssForUser(userId);
   if ( wss ) {
     wss.handleUpgrade(request, socket, head, function done(ws) {

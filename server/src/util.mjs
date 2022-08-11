@@ -45,9 +45,21 @@ function createTmpFile(prefix, postfix) {
   return tmpObj;
 }
 
+function mergeArrayOfStrings(originalFlags, overrideFlags, denyFlags) {
+  //all three are arrays of strings, which returns newFlags (array of strings)
+  let newFlags = null
+  if ( overrideFlags ) {
+    newFlags = JSON.parse(JSON.stringify(overrideFlags)); // deep copy
+  } else {
+    newFlags = JSON.parse(JSON.stringify(originalFlags)); // deep copy
+  }
+  for(const string in denyFlags) {
+    //remove that string from newFlags
+    newFlags = newFlags.filter(item => item !== denyFlags[string])
+  }
+  return newFlags
+}
+
 // --- Exports ---
 
-export {
-  delay, randomIntFromInterval,
-  getUserIdFromReq, createTmpFile
-};
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings };
