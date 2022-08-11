@@ -1,6 +1,6 @@
 {
   "methods": {
-    "device.onScreenResolutionChanged": {
+    "device.screenResolution": {
       "policy": "REPEAT-LAST-RESPONSE",
       "responses": [
         {

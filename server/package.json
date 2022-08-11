@@ -50,6 +50,7 @@
     "express": "^4.17.1",
     "express-handlebars": "^6.0.2",
     "ip": "^1.1.8",
+    "js-yaml": "^4.1.0",
     "lodash-es": "^4.17.21",
     "moment": "^2.29.1",
     "nopt": "^5.0.0",
