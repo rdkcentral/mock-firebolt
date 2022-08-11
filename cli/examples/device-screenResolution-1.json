@@ -1,6 +1,6 @@
 {
   "methods": {
-    "device.onScreenResolutionChanged": {
+    "device.screenResolution": {
       "result": [ 100, 100 ]
     }
   }
