@@ -113,15 +113,35 @@ function handleGroupMembership(userId) {
   group2user.set(groupName, userList)
 }
 
+function heartbeat(ws) {
+  ws.isAlive = true;
+}
+
 function addUser(userId) {
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
   wss.on('connection', function connection(ws) {
+    ws.isAlive = true;
+    ws.on('pong', async hb => {
+      heartbeat(ws)
+    });
     associateUserWithWs(''+userId, ws);
     handleGroupMembership(''+userId)
     ws.on('message', async message => {
       messageHandler.handleMessage(message, ''+userId, ws);
     });
+  });
+
+  const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) return ws.terminate();
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', function close() {
+    clearInterval(interval);
   });
 }
 
@@ -137,9 +157,9 @@ function removeUser(userId) {
 
 // --- Exports ---
 export const testExports={
-  user2wss, user2ws, group2user, associateUserWithWs, handleGroupMembership
+  user2wss, user2ws, group2user, associateUserWithWs, handleGroupMembership, heartbeat
 }
 
 export {
-  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser
+  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
 };

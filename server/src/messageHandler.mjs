@@ -28,6 +28,7 @@ import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
 import { addCall } from './sessionManagement.mjs';
+import * as proxyManagement from './proxyManagement.mjs'
 
 // Process given message and send any ack/reply to given web socket connection
 async function handleMessage(message, userId, ws) {
@@ -108,7 +109,7 @@ async function handleMessage(message, userId, ws) {
   if ( oMsg.method in methodTriggers ) {
     if ( 'pre' in methodTriggers[oMsg.method] ) {
       try {
-        const ctx = {          
+        const ctx = {
           logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
@@ -125,6 +126,18 @@ async function handleMessage(message, userId, ws) {
               logger.info(`Internal error`)
             }
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          },
+          sendBroadcastEvent: function(onMethod, result, msg) {
+            function fSuccess() {
+              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+            }
+            function fErr() {
+              logger.info(`Could not send ${onMethod} event because no listener is active`)
+            }
+            function fFatalErr() {
+              logger.info(`Internal error`)
+            }
+            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
@@ -135,8 +148,28 @@ async function handleMessage(message, userId, ws) {
     }
   }
 
-  //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
-  response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws);
+  if ( stateManagement.hasOverride(userId, oMsg.method) ) {
+    // Handle Firebolt Method call using our in-memory mock values
+    logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
+    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params); // Could be optimized cuz we know we want an override response
+  } else if ( process.env.proxy ) {
+    //bypass JSON-RPC calls and hit proxy server endpoint
+    let wsProxy = await proxyManagement.getProxyWSConnection()
+    if( ! wsProxy ) {
+      //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
+      try {
+        wsProxy = await proxyManagement.initialize() 
+      } catch (err) {
+        logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
+        process.exit(1)
+      }
+    }
+    response = await proxyManagement.sendRequest(JSON.stringify(oMsg))
+  } else {
+    //  Fetching response from in-memory mock values and/or default defaults (from the examples in the Open RPC specification)
+    logger.debug(`Returning default mock value for method ${oMsg.method}`);
+    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws);
+  }
 
   // Emit developerNotes for the method, if any
   const developerNotes = fireboltOpenRpc.getDeveloperNotesForMethod(oMsg.method);
@@ -175,6 +208,18 @@ async function handleMessage(message, userId, ws) {
             }
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
           },
+          sendBroadcastEvent: function(onMethod, result, msg) {
+            function fSuccess() {
+              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+            }
+            function fErr() {
+              logger.info(`Could not send ${onMethod} event because no listener is active`)
+            }
+            function fFatalErr() {
+              logger.info(`Internal error`)
+            }
+            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };
         logger.debug(`Calling post trigger for method ${oMsg.method}`);
@@ -211,17 +256,19 @@ async function handleMessage(message, userId, ws) {
   // Send client app back a message with the response to their Firebolt method call
 
   logger.debug(`Sending response for method ${oMsg.method}`);
-  const finalResponse = ( newResponse ? newResponse : response );
-  const oResponseMessage = {
-    jsonrpc: '2.0',
-    id: oMsg.id,
-    ...finalResponse  // layer in either a 'result' key and value or an 'error' key and a value like { code: xxx, message: xxx }
-  };
-  const responseMessage = JSON.stringify(oResponseMessage);
+  let finalResponse = ( newResponse ? newResponse : response );
+  if( ! process.env.proxy ) {
+    const oResponseMessage = {
+      jsonrpc: '2.0',
+      id: oMsg.id,
+      ...finalResponse  // layer in either a 'result' key and value or an 'error' key and a value like { code: xxx, message: xxx }
+    };
+    finalResponse = JSON.stringify(oResponseMessage);
+  } 
   const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
   await util.delay(dly);
-  ws.send(responseMessage);
-  logger.debug(`Sent message: ${responseMessage}`);
+  ws.send(finalResponse);
+  logger.debug(`Sent message: ${finalResponse}`);
 }
 
 // --- Exports ---

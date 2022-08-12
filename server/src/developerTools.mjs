@@ -26,8 +26,8 @@ import { logger } from './logger.mjs';
 const options = {
     name     : 'Mock Firebolt',
     host     : ip.address(),           // Get IP# of current host (developer laptop)
-    port     : 9995,           // This will be a new port we open up
-    type     : 'ws',             // We may change this later
+    port     : 9995,                   // This will be a new port we open up
+    type     : 'ws',                   // We may change this later
     subtypes : [ 'firebolt' ],
     protocol : 'tcp',
     txt      : {}
