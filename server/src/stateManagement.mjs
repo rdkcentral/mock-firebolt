@@ -153,6 +153,18 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
           }
           events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
         },
+        sendBroadcastEvent: function(onMethod, result, msg) {
+          function fSuccess() {
+            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
+          }
+          function fErr() {
+            logger.info(`Could not send ${onMethod} event because no listener is active`)
+          }
+          function fFatalErr() {
+            logger.info(`Internal error`)
+          }
+          events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+        },
         FireboltError: commonErrors.FireboltError
       };
       const sFcnBody = resp.response + ';' + 'return f(ctx, params);'
@@ -257,6 +269,18 @@ function handleStaticAndDynamicError(userId, methodName, params, resp){
     // Assume resp.error is a "normal" error value (object with code and message keys); leave resp alone
   }
   return resp;
+}
+
+function hasOverride(userId, methodName) {
+  const userState = getState(userId);
+  if ( ! userState ) { return false; }
+  const resp = userState.methods[methodName];
+  if ( ! resp ) { return false; }
+  if ( resp.response ) { return true; }
+  if ( resp.result ) { return true; }
+  if ( resp.error ) { return true; }
+  if ( resp.responses ) { return true; }
+  return false;
 }
 
 // Returns either { result: xxx } or { error: { code: xxx, message: 'xxx' } }
@@ -379,7 +403,7 @@ function validateNewState_MethodOverrides(newStateMethods) {
   let errors = [];
 
   // Returns an empty array in "novalidate mode"
-  if( !config.validateMethodOverrides ){
+  if( !config.validate.includes("response") ){
     return [];
   }
   
@@ -546,6 +570,7 @@ export {
   addUser,
   getState,
   getAppropriateDelay,
+  hasOverride,
   getMethodResponse,
   updateState, revertState,
   setLatency, setLatencies,

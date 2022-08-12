@@ -67,10 +67,17 @@ function configureAPI(app) {
 
     app.post('/api/v1/user',                            userApi.addUser);
 
+    // =======================  User-Related Routes ===========================
+
+    app.get('/api/v1/user',                             userApi.getUsers);
+
 	// ======================= Event-Related API Routes =======================
 
     // Send an event
     app.post('/api/v1/event',                           eventApi.sendEvent);
+
+    // Broadcast an event
+    app.post('/api/v1/broadcastEvent',                  eventApi.sendBroadcastEvent);
 
     // ======================= Session-Related API Routes =======================
 
