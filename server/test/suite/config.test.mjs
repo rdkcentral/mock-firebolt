@@ -59,9 +59,9 @@ test(`config works properly`, () => {
           name: "discovery",
         },
       ],
-      validateMethodOverrides: true,
+      validate: [ "method", "params", "response", "events" ],
     },
-    validateMethodOverrides: true,
+    validate: [ "method", "params", "response", "events" ],
   };
   expect(config).toEqual(expectedResult);
 });

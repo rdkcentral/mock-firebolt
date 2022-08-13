@@ -47,7 +47,7 @@ test(`dotConfig works properly`, () => {
         name: "discovery",
       },
     ],
-    validateMethodOverrides: true,
+    validate: [ "method", "params", "response", "events" ],
   };
   expect(dotConfig).toEqual(expectedResult);
 });
