@@ -24,7 +24,8 @@ import * as stateManagement from './stateManagement.mjs';
 import * as userManagement from './userManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
-import * as fireboltOpenRpc from './fireboltOpenRpc.mjs'
+import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
+import { config } from './config.mjs';
 
 function logSuccess(onMethod, result, msg) {
   logger.info(
