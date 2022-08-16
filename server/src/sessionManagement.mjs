@@ -40,7 +40,7 @@ class Session{
         this.#sessionStart = Date.now();
     }
 
-    exportSession(){
+    exportSession() {
         try {
             this.#sessionEnd = Date.now();
             const sessionData = {
@@ -57,12 +57,52 @@ class Session{
             const sessionDataFile = `./sessions/FireboltCalls_${this.#sessionStart}.json`;
             // logger.info(`Saving session data to ${sessionDataFile}`);
             fs.writeFileSync(sessionDataFile, sessionDataJson);
+            //emit this json in time order.
+            this.sortJsonByTime(sessionData)
             return sessionDataFile;
         } catch (error) {
             logger.error("Error exporting session: " + error);
             return null;
         }
         
+    }
+
+    sortJsonByTime(sessionDataJson) {
+        const recordedJson = {
+            sessionStart: sessionDataJson.sessionStart, 
+            sessionEnd: sessionDataJson.sessionEnd
+        }
+        const recordings = []
+        for(let i = 0; i < sessionDataJson.calls.length; i++) {
+            const requestJson = {
+                type: "request",
+                timestamp: sessionDataJson.calls[i].timestamp,
+                sequenceId: sessionDataJson.calls[i].sequenceId,
+                method: sessionDataJson.calls[i].methodCall,
+                params: sessionDataJson.calls[i].params
+            }
+            recordings.push(requestJson)
+            if(sessionDataJson.calls[i].response) {
+                const responseJson = {
+                    type: "response",
+                    timestamp: sessionDataJson.calls[i].response.timestamp,
+                    sequenceId: sessionDataJson.calls[i].sequenceId,
+                    method: sessionDataJson.calls[i].methodCall,
+                    response: sessionDataJson.calls[i].response
+                }
+                recordings.push(responseJson)
+            }
+        }
+        //sort by timestamp ascending
+        recordings.sort(function(a,b) {
+            // Turn your strings into dates, and then subtract them
+            // to get a value that is either negative, positive, or zero.
+            return new Date(a.timestamp) - new Date(b.timestamp);
+        });
+        recordedJson.recordings = recordings
+        const sessionDataFile = `./sessions/FireboltCalls_Timestamp_Sorted_${sessionDataJson.sessionStart}.json`;
+        // logger.info(`Saving session data to ${sessionDataFile}`);
+        fs.writeFileSync(sessionDataFile, JSON.stringify(recordedJson, null, 4));
     }
 }
 
