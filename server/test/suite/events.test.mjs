@@ -274,3 +274,39 @@ test(`events.logFatalErr works properly`, () => {
   events.logFatalErr();
   expect(spy).toHaveBeenCalled();
 });
+
+test(`events.isAnyRegisteredInGroup works properly`, () => {
+  const result = events.testExports.isAnyRegisteredInGroup("12345", "core");
+  expect(result).toBe(false);
+});
+
+test(`events.isAnyRegisteredInGroup works properly with if path`, () => {
+  const result = events.testExports.isAnyRegisteredInGroup("12345", "");
+  expect(result).toBe(true);
+});
+
+test(`events.sendBroadcastEvent works properly`, () => {
+  const result = events.testExports.sendBroadcastEvent(
+    { send: () => {} },
+    "12345",
+    "core",
+    {},
+    "test_msg",
+    () => {},
+    () => {},
+    () => {}
+  );
+  expect(result).toBeUndefined();
+});
+
+test(`events.emitResponse works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  events.testExports.emitResponse(
+    { send: () => {} },
+    {},
+    "test_msg",
+    "12345",
+    "core"
+  );
+  expect(spy).toHaveBeenCalled();
+});
