@@ -300,6 +300,9 @@ export const testExports = {
   eventListenerMap,
   isRegisteredEventListener,
   getRegisteredEventListener,
+  isAnyRegisteredInGroup,
+  sendBroadcastEvent,
+  emitResponse
 }
 
 export {
