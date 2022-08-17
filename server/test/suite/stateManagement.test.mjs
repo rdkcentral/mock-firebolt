@@ -624,3 +624,9 @@ test(`stateManagement.hasOverride works properly and return false for not a vali
   const result = stateManagement.hasOverride("7574", "rpc.discover");
   expect(result).toBe(false);
 });
+
+test(`stateManagement.logError works properly`, () => {
+  const spy = jest.spyOn(logger, "error");
+  stateManagement.testExports.logError("DummyCore", "Test_Result_Error", {});
+  expect(spy).toHaveBeenCalled();
+});

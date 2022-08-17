@@ -130,6 +130,23 @@ function handleSequenceOfResponseValues(userId, methodName, params, resp, userSt
   return resp;
 }
 
+// Log Error for invalid methodName
+function logError(methodName, resultErrors, resp) {
+  logger.error(
+    `ERROR: The function specified for the result of ${methodName} returned an invalid value`
+  );
+  logger.error(JSON.stringify(resultErrors, null, 4));
+  resp = {
+    error: {
+      code: -32400, // @TODO: Ensure we're returning the right value and message
+      message: "Invalid parameters", // @TODO: Ensure we're returning the right value and message
+      data: {
+        errors: resultErrors, // @TODO: Ensure we're formally defining this schema / data value
+      },
+    },
+  };
+}
+
 // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
 function handleDynamicResponseValues(userId, methodName, params, ws, resp){
   if ( typeof resp.response === 'string' && resp.response.trimStart().startsWith('function') ) {
@@ -177,17 +194,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         };
       } else {
         // After the result function was called, we're realizing what it returned isn't valid!
-        logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-        logger.error(JSON.stringify(resultErrors, null, 4));
-        resp = {
-          error: {
-            code: -32400,                  // @TODO: Ensure we're returning the right value and message
-            message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
-            data: {
-              errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
-            }
-          }
-        };
+        logError(methodName, resultErrors, resp);
       }
     } catch ( ex ) {
       if ( ex instanceof commonErrors.FireboltError ) {
@@ -232,17 +239,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
         };
       } else {
         // After the result function was called, we're realizing what it returned isn't valid!
-        logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-        logger.error(JSON.stringify(resultErrors, null, 4));
-        resp = {
-          error: {
-            code: -32400,                  // @TODO: Ensure we're returning the right value and message
-            message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
-            data: {
-              errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
-            }
-          }
-        };
+        logError(methodName, resultErrors, resp);
       }
     } catch ( ex ) {
       logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
@@ -564,7 +561,7 @@ function getScratch(userId, key) {
 // --- Exports ---
 
 export const testExports={
-  handleStaticAndDynamicError, state, validateMethodOverride
+  handleStaticAndDynamicError, state, validateMethodOverride, logError
 }
 export {
   addUser,

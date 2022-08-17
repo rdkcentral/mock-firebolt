@@ -124,3 +124,33 @@ test(`triggers.processSubDir works properly`, async () => {
     );
   });
 });
+
+test(`triggers.logError works properly`, () => {
+  const testInputs = [
+    {
+      errorType: "eventTriggerError",
+      dummyErrorString: "This is the 1st error",
+      dummyPath: "Test_Path1",
+    },
+    {
+      errorType: "methodTriggerError",
+      dummyErrorString: "This is the 2nd error",
+      dummyPath: "Test_Path2",
+    },
+    {
+      errorType: "processSubDirError",
+      dummyErrorString: "This is the 3rd error",
+      dummyPath: "Test_Path3",
+    },
+    {
+      errorType: "",
+      dummyErrorString: "This is the 4th error",
+      dummyPath: "Test_Path4",
+    },
+  ];
+  const spy = jest.spyOn(logger, "error");
+  testInputs.forEach(({ errorType, dummyPath, dummyErrorString }) => {
+    triggers.testExports.logError(errorType, dummyPath, dummyErrorString);
+    expect(spy).toHaveBeenCalled();
+  });
+});
