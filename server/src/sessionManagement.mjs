@@ -101,8 +101,8 @@ class Session{
         });
         recordedJson.recordings = recordings
         const sessionDataFile = `./sessions/FireboltCalls_Timestamp_Sorted_${sessionDataJson.sessionStart}.json`;
-        // logger.info(`Saving session data to ${sessionDataFile}`);
         fs.writeFileSync(sessionDataFile, JSON.stringify(recordedJson, null, 4));
+        logger.info(`Saving session sorted data to ${sessionDataFile}`);
     }
 }
 
@@ -141,4 +141,16 @@ function addCall(methodCall, params){
     }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording};
+function updateCallWithResponse(method, result, key) {
+    if(isRecording()) {
+        const methodCalls = sessionRecording.recordedSession.calls
+        for(let i = 0; i < methodCalls.length; i++) {
+            if(methodCalls[i].methodCall == method) {
+                methodCalls[i].response = {[key]: result, timestamp: Date.now()}
+                sessionRecording.recordedSession.calls.concat(...methodCalls);
+            }
+        }
+    }
+}
+
+export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse};
