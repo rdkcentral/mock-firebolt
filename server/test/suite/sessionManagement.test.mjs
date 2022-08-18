@@ -102,5 +102,6 @@ test(`verify sortJsonByTime method is working`, () => {
 
 test('verify updateCallWithResponse is working', () => {
   sessionManagement.addCall("testing", {});
-  sessionManagement.updateCallWithResponse("testing", "testing_session", "result")
+  const result = sessionManagement.updateCallWithResponse("testing", "testing_session", "result")
+  expect(result).toBeUndefined();
 })
