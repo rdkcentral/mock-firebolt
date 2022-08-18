@@ -176,28 +176,10 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               sendEvent: function(method, result, msg) {
-                sendEvent(
-                  ws,
-                  userId,
-                  method,
-                  result,
-                  msg,
-                  logSuccess.bind(this, method, result, msg),
-                  logErr.bind(this, method),
-                  logFatalErr.bind(this)
-                );
+                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                sendBroadcastEvent(
-                  ws,
-                  userId,
-                  onMethod,
-                  result,
-                  msg,
-                  logSuccess.bind(this, onMethod, result, msg),
-                  logErr.bind(this, onMethod),
-                  logFatalErr.bind(this)
-                );
+                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -222,28 +204,10 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               sendEvent: function(method, result, msg) {
-                sendEvent(
-                  ws,
-                  userId,
-                  method,
-                  result,
-                  msg,
-                  logSuccess.bind(this, method, result, msg),
-                  logErr.bind(this, method),
-                  logFatalErr.bind(this)
-                );
+                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                sendBroadcastEvent(
-                  ws,
-                  userId,
-                  onMethod,
-                  result,
-                  msg,
-                  logSuccess.bind(this, onMethod, result, msg),
-                  logErr.bind(this, onMethod),
-                  logFatalErr.bind(this)
-                );
+                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
               },
               ...response
             };
