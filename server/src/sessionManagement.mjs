@@ -115,8 +115,6 @@ function startRecording(){
     logger.info('Starting recording');
     sessionRecording.recording = true;
     sessionRecording.recordedSession = new Session();
-    const call = new FireboltCall("Test Method", "Test Parameters");
-    sessionRecording.recordedSession.calls.push(call);
 }
   
 function stopRecording(){
@@ -137,6 +135,7 @@ function isRecording(){
 function addCall(methodCall, params){
     if(isRecording()){
         const call = new FireboltCall(methodCall, params);
+        call.sequenceId = sessionRecording.recordedSession.calls.length + 1
         sessionRecording.recordedSession.calls.push(call);
     }
 }
