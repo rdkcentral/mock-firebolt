@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import { logger } from '../../logger.mjs';
-import {startRecording, stopRecording} from '../../sessionManagement.mjs';
+import {startRecording, stopRecording, setOutput, setOutputDir} from '../../sessionManagement.mjs';
 
 // --- Route Handlers ---
 
@@ -43,9 +43,42 @@ function stopSession(req, res) {
     });
 }
 
+function setLogOutput(req, res) {
+    logger.info('Setting session output to log');
+    setOutput("log");
+    res.status(200).send({
+        status: 'SUCCESS'
+    });
+}
+
+function setMockOverridesOutput(req, res) {
+    logger.info('Setting session output to mock-overrides');
+    setOutput("mock-overrides");
+    res.status(200).send({
+        status: 'SUCCESS'
+    });
+}
+
+function setOutputPath(req, res) {
+    if (!req.body.path) {
+        res.status(400).send({
+            status: 'ERROR',
+            message: 'Path not found in request body'
+        });
+    }
+    logger.info('Setting session output path to: ' + req.body.path);
+    setOutputDir(req.body.path);
+    res.status(200).send({
+        status: 'SUCCESS'
+    });
+}
+
 // --- Exports ---
 export {
     toggleSession,
     startSession,
-    stopSession
+    stopSession,
+    setLogOutput,
+    setMockOverridesOutput,
+    setOutputPath
 };

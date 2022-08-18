@@ -28,6 +28,7 @@ import * as eventApi from './routes/api/event.mjs';
 import * as sessionApi from './routes/api/session.mjs';
 import * as sequenceApi from './routes/api/sequence.mjs';
 
+
 function configureAPI(app) {
 
 	// =========================== Health Check Route =========================
@@ -90,10 +91,21 @@ function configureAPI(app) {
     // End a session
     app.post('/api/v1/session/stop',                    sessionApi.stopSession);
 
+    // Set session output to log format
+    app.post('/api/v1/sessionoutput/log',               sessionApi.setLogOutput);
+
+    // Set session output to Mock Overrides format
+    app.post('/api/v1/sessionoutput/mock-overrides',    sessionApi.setMockOverridesOutput);
+
+    // Specifiy session output path
+    app.post('/api/v1/sessionoutputpath',               sessionApi.setOutputPath);
+
     // ======================= Sequence-Related API Routes =======================
 
     // Send an event sequence
     app.post('/api/v1/sequence',                        sequenceApi.sendSequence);
+
+
 }
 
 export { configureAPI };

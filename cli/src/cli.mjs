@@ -28,7 +28,7 @@
 const HTTP_HOST = 'localhost';
 const HTTP_PORT = 3333;         // Default port where Mock Firebolt receives control requests
 
-import path from 'path';
+import path, { parse } from 'path';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,7 +78,9 @@ const knownOpts = {
   'event'           : String,
   'broadcastEvent'  : String,
   'sequence'        : String,
-  'session'         : String
+  'session'         : String,
+  'sessionOutput'   : String,
+  'sessionOutputPath' :  String
 };
 
 const shortHands = {
@@ -347,7 +349,42 @@ if ( parsed.help ) {
     console.log(ex);
   }
 
-}else if ( parsed.broadcastEvent ) {
+} else if ( parsed.sessionOutput ) {
+  const sessionOutput = parsed.sessionOutput;
+  if ( sessionOutput === 'log' ) {
+    msg(`Set session output to "log"`);
+    axios.post(url(host, port, '/api/v1/sessionoutput/log'), undefined)
+    .then(function (response) {
+      console.log(response.data);
+    }
+    ).catch(function (error) {
+      logError(error);
+    }
+    );
+  }
+  else if ( sessionOutput === 'mock-overrides' ) {
+    msg(`Set session output to "mock-overrides"`);
+    axios.post(url(host, port, '/api/v1/sessionoutput/mock-overrides'), undefined)
+    .then(function (response) {
+      console.log(response.data);
+    }
+    ).catch(function (error) {
+      logError(error);
+    }
+    );
+  }
+} else if ( parsed.sessionOutputPath  ) {
+  const sessionOutputPath = parsed.sessionOutputPath;
+  msg(`Set session output path to: ` + sessionOutputPath);
+  axios.post(url(host, port, '/api/v1/sessionoutputpath'), { path : sessionOutputPath })
+  .then(function (response) {
+    console.log(response.data);
+  }
+  ).catch(function (error) {
+    logError(error);
+  }
+  );
+} else if ( parsed.broadcastEvent ) {
   const broadcastEventFile = parsed.broadcastEvent;
   try {
     const sbroadcastEvent = fs.readFileSync(path.resolve(__dirname, broadcastEventFile), {encoding:'utf8', flag:'r'});

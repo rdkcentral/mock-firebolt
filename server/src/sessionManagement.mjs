@@ -22,6 +22,7 @@
 
 import { logger } from './logger.mjs';
 import fs from 'fs';
+import { exec } from 'child_process';
 
 class FireboltCall {
     constructor(methodCall, params) {
@@ -38,6 +39,8 @@ class Session{
     constructor(){
         this.calls = [];
         this.#sessionStart = Date.now();
+        this.sessionOutput = "log";
+        this.sessionOutputPath = "./sessions";
     }
 
     exportSession(){
@@ -54,9 +57,30 @@ class Session{
             // const sessionStart = new Date(this.#sessionStart);
             // const sessionStartString = sessionStart.toISOString().replace(/T/, '_').replace(/\..+/, '');
             // logger.info(`${sessionStart.toISOString()}`);    
-            const sessionDataFile = `./sessions/FireboltCalls_${this.#sessionStart}.json`;
+
+            logger.info("inside export Session. checking for direcotry: " + this.sessionOutputPath)
+            if (!fs.existsSync(this.sessionOutputPath)) {
+                logger.info("Directory did not exist direcotry: " + this.sessionOutputPath)
+                fs.mkdirSync(this.sessionOutputPath, { recursive: true});
+            }
+            const sessionDataFile = this.sessionOutputPath + `/FireboltCalls_${this.#sessionStart}.json`;
+            logger.info("Session data file: " + sessionDataFile)
             // logger.info(`Saving session data to ${sessionDataFile}`);
             fs.writeFileSync(sessionDataFile, sessionDataJson);
+            if (this.sessionOutput == "mock-overrides") {
+                //TODO - convert json to yaml with mock-firebolt-harvest-converter
+                exec("node cli.mjs --input " + sessionDataFile  + " --output " + this.sessionOutputPath, (error, stdout, stderr) => {
+                    if (error) {
+                        console.log(`error: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.log(`stderr: ${stderr}`);
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                });
+            }
             return sessionDataFile;
         } catch (error) {
             logger.error("Error exporting session: " + error);
@@ -68,7 +92,7 @@ class Session{
 
 let sessionRecording = {
     recording : false,
-    recordedSession : new Session()
+    recordedSession : new Session(),
 };
 
 function startRecording(){
@@ -101,4 +125,16 @@ function addCall(methodCall, params){
     }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording};
+function setOutput(output){
+    logger.info("Setting output. Before setting: " + sessionRecording.recordedSession.sessionOutput);
+    sessionRecording.recordedSession.sessionOutput = output;
+    logger.info("Setting output. After setting: " + sessionRecording.recordedSession.sessionOutput);
+}
+
+function setOutputDir(dir){
+    logger.info("Setting output path. Before setting: " + sessionRecording.recordedSession.sessionOutputPath);
+    sessionRecording.recordedSession.sessionOutputPath = dir;
+    logger.info("Setting output path. After setting: " + sessionRecording.recordedSession.sessionOutputPath);
+}
+
+export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, setOutput, setOutputDir};
