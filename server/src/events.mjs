@@ -260,12 +260,12 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       }
 
       const finalResult = ( postResult ? postResult : result );
-
       // Error to be logged in "novalidate mode" if result validation failed
       if( config.validate.includes("events") ) {
         const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
-        if ( resultErrors ) {
+        if ( resultErrors && resultErrors.length > 0 ) {
           fErr.call(null, method);
+          return
         }
       }
       // There may be more than one app using different base userId values
