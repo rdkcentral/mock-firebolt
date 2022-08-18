@@ -125,7 +125,7 @@ test(`triggers.processSubDir works properly`, async () => {
   });
 });
 
-test(`triggers.logError works properly`, () => {
+test(`triggers.logInvalidPathError works properly`, () => {
   const testInputs = [
     {
       errorType: "eventTriggerError",
@@ -150,7 +150,7 @@ test(`triggers.logError works properly`, () => {
   ];
   const spy = jest.spyOn(logger, "error");
   testInputs.forEach(({ errorType, dummyPath, dummyErrorString }) => {
-    triggers.testExports.logError(errorType, dummyPath, dummyErrorString);
+    triggers.testExports.logInvalidPathError(errorType, dummyPath, dummyErrorString);
     expect(spy).toHaveBeenCalled();
   });
 });

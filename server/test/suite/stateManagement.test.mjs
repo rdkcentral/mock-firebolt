@@ -625,8 +625,8 @@ test(`stateManagement.hasOverride works properly and return false for not a vali
   expect(result).toBe(false);
 });
 
-test(`stateManagement.logError works properly`, () => {
+test(`stateManagement.logInvalidMethodError works properly`, () => {
   const spy = jest.spyOn(logger, "error");
-  stateManagement.testExports.logError("DummyCore", "Test_Result_Error", {});
+  stateManagement.testExports.logInvalidMethodError("DummyCore", "Test_Result_Error", {});
   expect(spy).toHaveBeenCalled();
 });

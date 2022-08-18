@@ -127,28 +127,10 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           sendEvent: function(onMethod, result, msg) {
-            sendEvent(
-              ws,
-              userId,
-              onMethod,
-              result,
-              msg,
-              logSuccess.bind(this, onMethod, result, msg),
-              logErr.bind(this, onMethod),
-              logFatalErr.bind(this)
-            );
+            sendEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
           },
           sendBroadcastEvent: function(onMethod, result, msg) {
-            sendBroadcastEvent(
-              ws,
-              userId,
-              onMethod,
-              result,
-              msg,
-              logSuccess.bind(this, onMethod, result, msg),
-              logErr.bind(this, onMethod),
-              logFatalErr.bind(this)
-            );
+            sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
           }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
@@ -208,28 +190,10 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           sendEvent: function(onMethod, result, msg) {
-            sendEvent(
-              ws,
-              userId,
-              onMethod,
-              result,
-              msg,
-              logSuccess.bind(this, onMethod, result, msg),
-              logErr.bind(this, onMethod),
-              logFatalErr.bind(this)
-            );
+            sendEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
           },
           sendBroadcastEvent: function(onMethod, result, msg) {
-            sendBroadcastEvent(
-              ws,
-              userId,
-              onMethod,
-              result,
-              msg,
-              logSuccess.bind(this, onMethod, result, msg),
-              logErr.bind(this, onMethod),
-              logFatalErr.bind(this)
-            );
+            sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };

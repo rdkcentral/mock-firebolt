@@ -131,7 +131,7 @@ function handleSequenceOfResponseValues(userId, methodName, params, resp, userSt
 }
 
 // Log Error for invalid methodName
-function logError(methodName, resultErrors, resp) {
+function logInvalidMethodError(methodName, resultErrors, resp) {
   logger.error(
     `ERROR: The function specified for the result of ${methodName} returned an invalid value`
   );
@@ -194,7 +194,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         };
       } else {
         // After the result function was called, we're realizing what it returned isn't valid!
-        logError(methodName, resultErrors, resp);
+        logInvalidMethodError(methodName, resultErrors, resp);
       }
     } catch ( ex ) {
       if ( ex instanceof commonErrors.FireboltError ) {
@@ -239,7 +239,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
         };
       } else {
         // After the result function was called, we're realizing what it returned isn't valid!
-        logError(methodName, resultErrors, resp);
+        logInvalidMethodError(methodName, resultErrors, resp);
       }
     } catch ( ex ) {
       logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
@@ -561,7 +561,7 @@ function getScratch(userId, key) {
 // --- Exports ---
 
 export const testExports={
-  handleStaticAndDynamicError, state, validateMethodOverride, logError
+  handleStaticAndDynamicError, state, validateMethodOverride, logInvalidMethodError
 }
 export {
   addUser,

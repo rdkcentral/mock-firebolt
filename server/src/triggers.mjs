@@ -27,8 +27,8 @@ import * as commandLine from './commandLine.mjs';
 const methodTriggers = {};
 const eventTriggers = {};
 
-// Log error
-function logError(errorType, pathDetails, ex) {
+// Log error for invalid path
+function logInvalidPathError(errorType, pathDetails, ex) {
   let errorString = '';
   switch (errorType) {
     case "eventTriggerError":
@@ -76,7 +76,7 @@ function processFile(methodName, filePath, fileName, fileExt) {
         eventTriggers[methodName][fileName] = fcn;
         logger.info(`Enabled event trigger defined in trigger file ${filePath}`);
       } catch ( ex ) {
-        logError('eventTriggerError', filePath, ex);
+        logInvalidPathError('eventTriggerError', filePath, ex);
       }
     });
   }  
@@ -96,7 +96,7 @@ function processFile(methodName, filePath, fileName, fileExt) {
         methodTriggers[methodName][fileName] = fcn;
         logger.info(`Enabled method trigger defined in trigger file ${filePath}`);
       } catch ( ex ) {
-        logError('methodTriggerError', filePath, ex);
+        logInvalidPathError('methodTriggerError', filePath, ex);
       }
     });
   }
@@ -160,7 +160,7 @@ function processSubDir(dir , processTopDir){
         try {
         processTopDir(subDir, processMethodDir);
       } catch ( ex ) {
-        logError('processSubDirError', dir, ex);
+        logInvalidPathError('processSubDirError', dir, ex);
       }};
     });
   });
@@ -172,7 +172,7 @@ enabledTriggerPaths.forEach((dir) => {
   try {
     processSubDir(dir, processTopDir);
   } catch ( ex ) {
-    logError('', dir, ex);
+    logInvalidPathError('', dir, ex);
   }
 });
 
@@ -184,7 +184,7 @@ export const testExports = {
   processMethodDir,
   processTopDir,
   processSubDir,
-  logError
+  logInvalidPathError
 };
 
 export {
