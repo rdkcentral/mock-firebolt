@@ -1,4 +1,13 @@
 {
-  "method": "discovery.onNavigateTo",
-  "result": "NEW-DISCOVERY-NAV-1"
+   "method": "discovery.onNavigateTo",
+   "result": {
+      "action": "search",
+       "data": {
+          "query": "a cool show"
+       },
+       "context": {
+          "campaign": "unknown",
+          "source": "voice"
+       }
+    }
 }

@@ -1,0 +1,4 @@
+{
+  "method": "localization.onLanguageChanged",
+  "result": "LANG_CHANGE"
+}
