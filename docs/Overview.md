@@ -186,3 +186,5 @@ http://localhost:3333
 ### Browser Extensions
 
 Demo Governor browser extension to send lifecycle events.
+
+Demo Injector browser extension to inject Mock Firebolt connectivity to an app that doesn't directly include the activateMockFirebolt.js script.
