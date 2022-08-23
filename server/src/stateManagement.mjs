@@ -283,6 +283,18 @@ function handleStaticAndDynamicError(userId, methodName, params, resp){
   return resp;
 }
 
+function hasOverride(userId, methodName) {
+  const userState = getState(userId);
+  if ( ! userState ) { return false; }
+  const resp = userState.methods[methodName];
+  if ( ! resp ) { return false; }
+  if ( resp.response ) { return true; }
+  if ( resp.result ) { return true; }
+  if ( resp.error ) { return true; }
+  if ( resp.responses ) { return true; }
+  return false;
+}
+
 // Returns either { result: xxx } or { error: { code: xxx, message: 'xxx' } }
 // The params parameter isn't used for static mock responses, but is useful when
 // specifying result or error by function (see examples/discovery-watched-1.json for an example)
@@ -403,7 +415,7 @@ function validateNewState_MethodOverrides(newStateMethods) {
   let errors = [];
 
   // Returns an empty array in "novalidate mode"
-  if( !config.validateMethodOverrides ){
+  if( !config.validate.includes("response") ){
     return [];
   }
   

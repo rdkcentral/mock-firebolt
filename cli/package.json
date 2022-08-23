@@ -3,8 +3,7 @@
   "version": "1.0.1",
   "description": "Command-line interface for controlling the Mock Firebolt server",
   "main": "./src/cli.mjs",
-  "scripts": {
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rdkcentral/mock-firebolt.git"
