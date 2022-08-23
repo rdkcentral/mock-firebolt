@@ -64,7 +64,7 @@ Pre- and post- triggers may be defined for any Firebolt method call. See [Trigge
 
 ## novalidate Flag
 
-Use this flag for novalidate mode where Mock Firebolt does not validate uploaded method overrides. This will be used by the certification test suite, not by normal app developer users.
+Use this flag to enable "novalidate mode", where Mock Firebolt skips certain validation steps, based on options you provide. This will be used by the certification test suite, not by normal app developer users.
 See (./DotConfig.md) for more information.
 
 

@@ -27,7 +27,8 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
-import { addCall } from './sessionManagement.mjs';
+import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
+import * as proxyManagement from './proxyManagement.mjs';
 import * as conduit from './conduit.mjs';
 
 // Process given message and send any ack/reply to given web socket connection
@@ -64,6 +65,7 @@ async function handleMessage(message, userId, ws) {
     // No delay
     ws.send(responseMessage);
     logger.info(`Sent "method not found" message: ${responseMessage}`);
+    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error")
     return;
   }
 
@@ -103,6 +105,7 @@ async function handleMessage(message, userId, ws) {
     // No delay
     ws.send(responseMessage);
     logger.info(`Sent "invalid params" message: ${responseMessage}`);
+    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error")
   }
 
   // Fire pre trigger if there is one for this method  
@@ -158,9 +161,20 @@ async function handleMessage(message, userId, ws) {
     // Handle Firebolt Method call using our in-memory mock values
     logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
     response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params); // Could be optimized cuz we know we want an override response
-  }
-
-  else if ( conduit.isConduitConnected() ) {
+  } else if ( process.env.proxy ) {
+        //bypass JSON-RPC calls and hit proxy server endpoint
+        let wsProxy = await proxyManagement.getProxyWSConnection()
+        if( ! wsProxy ) {
+          //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
+          try {
+            wsProxy = await proxyManagement.initialize()
+          } catch (err) {
+            logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
+            process.exit(1)
+          }
+        }
+        response = await proxyManagement.sendRequest(JSON.stringify(oMsg))
+   } else if ( conduit.isConduitConnected() ) {
     // When the Conduit app is connected, we'll route incoming Firebolt calls from the app under development
     // through here (Mock Firebolt) and the Conduit app on a device and back in order to get a real result.
     logger.debug(`Forwarding Firebolt method call message to Conduit to get a real answer from a real device (method: ${oMsg.method})`);
@@ -289,17 +303,20 @@ async function handleMessage(message, userId, ws) {
   // Send client app back a message with the response to their Firebolt method call
 
   logger.debug(`Sending response for method ${oMsg.method}`);
-  const finalResponse = ( newResponse ? newResponse : response );
-  const oResponseMessage = {
-    jsonrpc: '2.0',
-    id: oMsg.id,
-    ...finalResponse  // layer in either a 'result' key and value or an 'error' key and a value like { code: xxx, message: xxx }
-  };
-  const responseMessage = JSON.stringify(oResponseMessage);
+  let finalResponse = ( newResponse ? newResponse : response );
+  if( ! process.env.proxy ) {
+    const oResponseMessage = {
+      jsonrpc: '2.0',
+      id: oMsg.id,
+      ...finalResponse  // layer in either a 'result' key and value or an 'error' key and a value like { code: xxx, message: xxx }
+    };
+    finalResponse = JSON.stringify(oResponseMessage);
+  }
   const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
   await util.delay(dly);
-  ws.send(responseMessage);
-  logger.debug(`Sent message: ${responseMessage}`);
+  ws.send(finalResponse);
+  logger.debug(`Sent message: ${finalResponse}`);
+  updateCallWithResponse(oMsg.method, JSON.parse(finalResponse).result, "result")
 }
 
 // --- Exports ---

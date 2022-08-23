@@ -24,6 +24,9 @@ import * as stateManagement from './stateManagement.mjs';
 import * as userManagement from './userManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
+import * as fireboltOpenRpc from './fireboltOpenRpc.mjs'
+import { config } from './config.mjs';
+import { updateCallWithResponse } from './sessionManagement.mjs';
 
 // Maps full userIds to maps which map event listner request method
 // name (e.g., lifecycle.onInactive) to message id (e.g., 17)
@@ -111,6 +114,7 @@ function sendEventListenerAck(ws, oMsg) {
   const ackMessage = JSON.stringify(oAckMessage);
   ws.send(ackMessage);
   logger.debug(`Sent event listener ack message: ${ackMessage}`);
+  updateCallWithResponse(oMsg.method, oAckMessage.result, "result")
 }
 
 function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
@@ -242,7 +246,14 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       }
 
       const finalResult = ( postResult ? postResult : result );
-
+      // Error to be logged in "novalidate mode" if result validation failed
+      if( config.validate.includes("events") ) {
+        const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
+        if ( resultErrors && resultErrors.length > 0 ) {
+          fErr.call(null, method);
+          return
+        }
+      }
       // There may be more than one app using different base userId values
       // but the same group name. We need to send the event to all
       // clients/apps within the group (whether just this one or more than one).
