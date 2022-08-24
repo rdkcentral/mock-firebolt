@@ -136,7 +136,7 @@ function emitResponse(ws, finalResult, msg, userId, method){
   const eventMessage = JSON.stringify(oEventMessage);
   // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
   ws.send(eventMessage);
-  logger.info(`${msg}: Sent event message: ${eventMessage}`);
+  logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
 }
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
