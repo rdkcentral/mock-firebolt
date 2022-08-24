@@ -26,6 +26,7 @@ import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import { config } from './config.mjs';
+import { updateCallWithResponse } from './sessionManagement.mjs';
 
 function logSuccess(onMethod, result, msg) {
   logger.info(
@@ -129,6 +130,7 @@ function sendEventListenerAck(ws, oMsg) {
   const ackMessage = JSON.stringify(oAckMessage);
   ws.send(ackMessage);
   logger.debug(`Sent event listener ack message: ${ackMessage}`);
+  updateCallWithResponse(oMsg.method, oAckMessage.result, "result")
 }
 
 function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
