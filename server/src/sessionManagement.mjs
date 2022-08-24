@@ -22,7 +22,6 @@
 
 import { logger } from './logger.mjs';
 import fs from 'fs';
-import { exec } from 'child_process';
 
 class FireboltCall {
     constructor(methodCall, params) {
@@ -41,6 +40,7 @@ class Session{
         this.#sessionStart = Date.now();
         this.sessionOutput = "log";
         this.sessionOutputPath = "./sessions";
+        this.mockOutputPath = `./mocks/${this.#sessionStart}`;
     }
 
     exportSession(){
@@ -67,19 +67,9 @@ class Session{
             logger.info("Session data file: " + sessionDataFile)
             // logger.info(`Saving session data to ${sessionDataFile}`);
             fs.writeFileSync(sessionDataFile, sessionDataJson);
+
             if (this.sessionOutput == "mock-overrides") {
-                //TODO - convert json to yaml with mock-firebolt-harvest-converter
-                exec("node cli.mjs --input " + sessionDataFile  + " --output " + this.sessionOutputPath, (error, stdout, stderr) => {
-                    if (error) {
-                        console.log(`error: ${error.message}`);
-                        return;
-                    }
-                    if (stderr) {
-                        console.log(`stderr: ${stderr}`);
-                        return;
-                    }
-                    console.log(`stdout: ${stdout}`);
-                });
+               this.convertJsonToYml(sessionDataJson);
             }
             return sessionDataFile;
         } catch (error) {
@@ -88,11 +78,23 @@ class Session{
         }
         
     }
+
+    convertJsonToYml(jsonReport) {
+        if (!fs.existsSync(this.mockOutputPath)) {
+            logger.info("Mock directory did not exist direcotry: " + this.mockOutputPath)
+            fs.mkdirSync(this.mockOutputPath, { recursive: true});
+        }
+
+        for ( let i = 0; i < jsonReport.calls.length; i++) {
+
+        }
+
+    }
 }
 
 let sessionRecording = {
     recording : false,
-    recordedSession : new Session(),
+    recordedSession : new Session()
 };
 
 function startRecording(){
@@ -135,6 +137,10 @@ function setOutputDir(dir){
     logger.info("Setting output path. Before setting: " + sessionRecording.recordedSession.sessionOutputPath);
     sessionRecording.recordedSession.sessionOutputPath = dir;
     logger.info("Setting output path. After setting: " + sessionRecording.recordedSession.sessionOutputPath);
+
+    logger.info("Setting output path. Before setting: " + sessionRecording.recordedSession.mockOutputPath);
+    sessionRecording.recordedSession.mockOutputPath = dir;
+    logger.info("Setting output path. After setting: " + sessionRecording.recordedSession.mockOutputPath);
 }
 
 export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, setOutput, setOutputDir};

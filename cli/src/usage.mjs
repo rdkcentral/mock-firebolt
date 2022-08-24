@@ -42,7 +42,7 @@ const lines = [
   { cmdInfo: "--sequence ../examples/events1.sequence.json  ",                            comment: "Send an event sequence (See examples/device-onDeviceNameChanged.sequence.json)" },
   { cmdInfo: "--session start/stop  ",                                                    comment: "Start/Stop Firebolt session recording" },
   { cmdInfo: "--sessionOutput log/mock-overrides  ",                                      comment: "Set the output format to: the existing “log format” (time sequence of calls, responses)/a directory of mock overrides" },
-  { cmdInfo: "--sessionOutputPath ../examples/path  ",                                    comment: "Specifiy the sesseion output path" },
+  { cmdInfo: "--sessionOutputPath ../examples/path  ",                                    comment: "Specifiy the session output path. Default for 'log' format will be ./sessions and ./mocks/<START_TIME> for 'mock-overrides'." },
 ];
 
 function usage() {

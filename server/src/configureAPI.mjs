@@ -104,8 +104,6 @@ function configureAPI(app) {
 
     // Send an event sequence
     app.post('/api/v1/sequence',                        sequenceApi.sendSequence);
-
-
 }
 
 export { configureAPI };
