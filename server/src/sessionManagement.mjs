@@ -182,7 +182,6 @@ function setOutputDir(dir){
     logger.info("Setting output path. After setting: " + sessionRecording.recordedSession.mockOutputPath);
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, setOutput, setOutputDir};
 function updateCallWithResponse(method, result, key) {
     if(isRecording()) {
         const methodCalls = sessionRecording.recordedSession.calls
@@ -195,4 +194,4 @@ function updateCallWithResponse(method, result, key) {
     }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse};
+export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutput, setOutputDir};
