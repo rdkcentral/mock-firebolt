@@ -27,7 +27,7 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
-import { addCall } from './sessionManagement.mjs';
+import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs'
 
 // Process given message and send any ack/reply to given web socket connection
@@ -64,6 +64,7 @@ async function handleMessage(message, userId, ws) {
     // No delay
     ws.send(responseMessage);
     logger.info(`Sent "method not found" message: ${responseMessage}`);
+    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error")
     return;
   }
 
@@ -103,6 +104,7 @@ async function handleMessage(message, userId, ws) {
     // No delay
     ws.send(responseMessage);
     logger.info(`Sent "invalid params" message: ${responseMessage}`);
+    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error")
   }
 
   // Fire pre trigger if there is one for this method  
@@ -269,6 +271,7 @@ async function handleMessage(message, userId, ws) {
   await util.delay(dly);
   ws.send(finalResponse);
   logger.debug(`Sent message: ${finalResponse}`);
+  updateCallWithResponse(oMsg.method, JSON.parse(finalResponse).result, "result")
 }
 
 // --- Exports ---
