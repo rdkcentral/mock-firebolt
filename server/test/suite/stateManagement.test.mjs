@@ -630,3 +630,8 @@ test(`stateManagement.logInvalidMethodError works properly`, () => {
   stateManagement.testExports.logInvalidMethodError("DummyCore", "Test_Result_Error", {});
   expect(spy).toHaveBeenCalled();
 });
+
+test(`stateManagement.mergeCustomizer works properly`, () => {
+  const result = stateManagement.testExports.mergeCustomizer([], "dummy_value");
+  expect(result).toBe("dummy_value");
+});
