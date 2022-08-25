@@ -561,7 +561,8 @@ function getScratch(userId, key) {
 // --- Exports ---
 
 export const testExports={
-  handleStaticAndDynamicError, state, validateMethodOverride, logInvalidMethodError
+  handleStaticAndDynamicError, state, validateMethodOverride, logInvalidMethodError,
+  mergeCustomizer
 }
 export {
   addUser,
