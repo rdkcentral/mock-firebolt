@@ -27,19 +27,27 @@ import { mergeArrayOfStrings } from './util.mjs';
 
 // Usage:
 //   node index.mjs                                          (core SDK only, default)
-//   node index.mjs --httpPort 3334 ...                      (Use custom port for RESTful control API (default: 3333))
-//   node index.mjs --socketPort 9876 ...                    (Use custom socket port for Firebolt OpenRPC msgs (default: 9998))
+//   node index.mjs --httpPort 3343 ...                      (Use custom port for RESTful control API (default: 3333))
+//   node index.mjs --socketPort 9988 ...                    (Use custom socket port for Firebolt OpenRPC msgs (default: 9998))
+//   node index.mjs --conduitSocketPort 9987 ...             (Use custom socket port for Conduit msgs (default: 9997))
+//   node index.mjs --conduitKeySocketPort 9986 ...          (Use custom socket port for forwarding key presses over Conduit (default: 9996))
+//   node index.mjs --developerToolPort 9985 ...             (Use custom socket port for developer tool port (default: 9995))
+//   node index.mjs --developerToolName "My MF" ...          (Use custom developer tool name (default: "Mock Firebolt"))
 //   node index.mjs --manage ...                             (core + manage SDKs)
 //   node index.mjs --manage --discovery ...                 (core + manage + discovery SDKs)
 //   node index.mjs --triggers <path1> --triggers <path2>    (Load triggers from files in these paths)
 //   node index.mjs --novalidate <opt1> --novalidate <opt2>  (does not validate options provided by user)
 
 const knownOpts = {
-  'httpPort'   : Number,
-  'socketPort' : Number,
-  'triggers'   : [String, Array],
-  'novalidate' : [String, Array],
-  'proxy'      : String
+  'httpPort'             : Number,
+  'socketPort'           : Number,
+  'conduitSocketPort'    : Number,
+  'conduitKeySocketPort' : Number,
+  'developerToolPort'    : Number,
+  'developerToolName'    : String,
+  'triggers'             : [String, Array],
+  'novalidate'           : [String, Array],
+  'proxy'                : String
 };
 for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
   if ( oSdk.cliFlag ) {
@@ -73,6 +81,10 @@ const parsed = nopt(knownOpts, shortHands, process.argv, 2);
 
 const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
+const conduitSocketPort = parsed.conduitSocketPort || config.app.conduitSocketPort;
+const conduitKeySocketPort = parsed.conduitKeySocketPort || config.app.conduitKeySocketPort;
+const developerToolPort = parsed.developerToolPort || config.app.developerToolPort;
+const developerToolName = parsed.developerToolName || config.app.developerToolName;
 const proxy = parsed.proxy;
 
 // --- novalidate overrides
@@ -107,5 +119,8 @@ if ( enabledTriggerPaths.length > 0 ) {
 // --- Exports ---
 
 export {
-  httpPort, socketPort, enabledSdkNames, enabledTriggerPaths, proxy
+  httpPort, socketPort,
+  conduitSocketPort, conduitKeySocketPort,
+  developerToolPort, developerToolName,
+  enabledSdkNames, enabledTriggerPaths, proxy
 };
