@@ -417,28 +417,15 @@ if ( parsed.help ) {
 
   if ( parsed.sessionOutput ) {
     const sessionOutput = parsed.sessionOutput;
-    if ( sessionOutput === 'log' ) {
-      msg(`Set session output to "log"`);
-      await axios.post(url(host, port, '/api/v1/sessionoutput/log'), undefined)
-      .then(function (response) {
-        console.log(response.data);
-      }
-      ).catch(function (error) {
-        logError(error);
-      }
-      );
+    msg(`Set session output to "${sessionOutput}"`);
+    await axios.post(url(host, port, `/api/v1/sessionoutput/${sessionOutput}`), undefined)
+    .then(function (response) {
+      console.log(response.data);
     }
-    else if ( sessionOutput === 'mock-overrides' ) {
-      msg(`Set session output to "mock-overrides"`);
-      await axios.post(url(host, port, '/api/v1/sessionoutput/mock-overrides'), undefined)
-      .then(function (response) {
-        console.log(response.data);
-      }
-      ).catch(function (error) {
-        logError(error);
-      }
-      );
+    ).catch(function (error) {
+      logError(error);
     }
+    );
   }
 
   if ( parsed.sessionOutputPath ) {

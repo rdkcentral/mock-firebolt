@@ -91,11 +91,8 @@ function configureAPI(app) {
     // End a session
     app.post('/api/v1/session/stop',                    sessionApi.stopSession);
 
-    // Set session output to log format
-    app.post('/api/v1/sessionoutput/log',               sessionApi.setLogOutput);
-
-    // Set session output to Mock Overrides format
-    app.post('/api/v1/sessionoutput/mock-overrides',    sessionApi.setMockOverridesOutput);
+    // Set session output to format
+    app.post('/api/v1/sessionoutput/:format',           sessionApi.setOutput);
 
     // Specifiy session output path
     app.post('/api/v1/sessionoutputpath',               sessionApi.setOutputPath);

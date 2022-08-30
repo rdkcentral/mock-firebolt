@@ -63,16 +63,21 @@ class Session{
                 logger.info("Directory did not exist direcotry: " + this.sessionOutputPath)
                 fs.mkdirSync(this.sessionOutputPath, { recursive: true});
             }
-            const sessionDataFile = this.sessionOutputPath + `/FireboltCalls_${this.#sessionStart}.json`;
+            const sessionDataFile = this.sessionOutputPath + `/FireboltCalls_${this.#sessionStart}_${this.sessionOutput}.json`;
             logger.info("Session data file: " + sessionDataFile)
             // logger.info(`Saving session data to ${sessionDataFile}`);
-            fs.writeFileSync(sessionDataFile, sessionDataJson);
-            //emit this json in time order.
-            this.sortJsonByTime(sessionData)
-
-            if (this.sessionOutput == "mock-overrides") {
-               this.convertJsonToYml(sessionDataJson);
+            if (this.sessionOutput == 'raw') {
+                console.log("Inside raw format type");
+                fs.writeFileSync(sessionDataFile, sessionDataJson);
+            } else if (this.sessionOutput == "mock-overrides") {
+                console.log("Inside raw format type");
+                this.convertJsonToYml(sessionDataJson);
+            } else {
+                //emit this json in time order.
+                console.log("Inside log format type");
+                this.sortJsonByTime(sessionData, sessionDataFile);
             }
+
             return sessionDataFile;
         } catch (error) {
             logger.error("Error exporting session: " + error);
@@ -86,14 +91,241 @@ class Session{
             logger.info("Mock directory did not exist direcotry: " + this.mockOutputPath)
             fs.mkdirSync(this.mockOutputPath, { recursive: true});
         }
+        
+        let repetition = false;
 
         for ( let i = 0; i < jsonReport.calls.length; i++) {
+            // skip methods containing .on & Changed in fullTitle and .Subscribe (SKIPPING THE SUBSCRIBE VALIDATION AS WE ARE NOT CURRENTLY LOGGING) in title
+            if (calls[i].methodCall.indexOf('.on') !== -1 && calls[i].methodCall.indexOf('Changed') !== -1) {
+                continue;
+             } else {
+                let calls = jsonReport.calls;
+                let multipleExampleFlag = false;
+                let multipleExampleContext = [];
+                let multipleParams;
+                let methodName;
 
+
+                // skip .Subscribe (SKIPPING THE SUBSCRIBE VALIDATION AS WE ARE NOT CURRENTLY LOGGING) methods
+                for ( let j = i+1; j < jsonReport.calls.length; j++) { // iterate over rest of calls 
+
+                    if (j < (calls.length - 1) &&  calls[i].methodCall === method.tests[j].methodCall) { // looking for matching method calls
+                        multipleParams = {};
+                        //context = JSON.parse(method.tests[i].context);
+                        
+                        if (!multipleExampleFlag) { // if the first time we found a multiple we need to add calls[i] first
+                            // keeping result as null for methods having CertError else keeping result
+                            if (calls[i].error && calls[i].error.code == 'CertError' && calls[i].error.message == 'Received response as undefined') {
+                                multipleParams["paramDetails"] = {
+                                    "param": calls[i].params,
+                                    "result": null
+                                };
+                            } else {
+                                multipleParams["paramDetails"] = {
+                                    "param": calls[i].params,
+                                    "result": calls[i].response
+                                };
+                            }
+                        }
+
+                        // Then add the matching method call
+                        // keeping result as null for methods having CertError else keeping result
+                        if (calls[j].error && calls[j].error.code == 'CertError' && calls[j].error.message == 'Received response as undefined') {
+                            multipleParams["paramDetails"] = {
+                                "param": calls[j].params,
+                                "result": null
+                             };
+                        } else {
+                            multipleParams["paramDetails"] = {
+                                "param": calls[j].params,
+                                "result": calls[j].response
+                             };
+                        }
+    
+                        // to check repetition of params
+                        repetition = this.checkParams(multipleExampleContext,multipleParams);
+                        if(!repetition) {
+                            multipleExampleContext.push(multipleParams);
+                         }
+                         multipleExampleFlag = true;
+                    }
+                }
+
+
+                 //yaml file generation for methods with more than one example
+                 if (multipleExampleFlag) {
+                    multipleParams = {};
+                    if ( calls[i].error && calls[i].error.code == 'CertError' && calls[i].error.message == 'Received response as undefined') {
+                       multipleParams["paramDetails"] = {
+                          "param": calls[i].params,
+                          "result": null
+                       };
+                    }
+                    else{
+                       multipleParams["paramDetails"] = {
+                          "param": calls[i].params,
+                          "result": calls[i].result
+                       };
+                    }
+                    // to check repetition of params
+                    repetition = this.checkParams(multipleExampleContext,multipleParams);
+     
+                    if(!repetition) {
+                       multipleExampleContext.push(multipleParams);
+                       repetition = false;
+                    }
+                    let responseContent = this.handleMultipleExampleMethod(calls[i].methodCall, multipleExampleContext);
+                    methodName = calls[i].methodCall;
+                    let state = {
+                       "methods": {
+                          [methodName]: {
+                             "response": responseContent
+                          }
+                       }
+                    };
+                    let yamlStr = yaml.dump(state);
+                    try {
+                       fs.writeFileSync(`${this.mockOutputPath}/${methodName}.yaml`, yamlStr);
+                    } catch(e) {
+                       console.error('Invalid Output Directory');
+                       console.error(e);
+                       process.exit(0);
+                   }
+                 }
+
+             }
+
+            // json file generation for methods with only one example
+            if (!multipleExampleFlag) {
+                let staticObject = {};
+                staticObject["methods"] = calls[i].methodCall;
+                methodName = calls[i].methodCall;
+                let obj;
+ 
+                obj = this.handleSingleExampleMethod(calls,staticObject,method,methodName,obj,i) // edit this method
+                let data = JSON.stringify(obj, null, 2);
+                try {
+                   fs.writeFileSync(`${sessionDataFile}/${methodName}.json`, data);
+                } catch(e) {
+                   console.error('Invalid Output Directory');
+                   console.error(e);
+               }
+            }
         }
 
     }
 
-    sortJsonByTime(sessionDataJson) {
+    // Returns json object for methods with only one example
+    handleSingleExampleMethod(calls,staticObject,methodName,obj,i){
+        // handling result/ error/ CertError
+        if (context.hasOwnProperty('result')) {
+            if ( calls[i].error && calls[i].error.code == 'CertError' && calls[i].error.message == 'Received response as undefined') {
+                staticObject["result"] = null;
+            } else if (calls[i].response || calls[i].response === false) {
+                staticObject["result"] = calls[i].response;
+            }
+        }
+        obj = {
+            "methods": {
+                [methodName]: {
+                    "result": staticObject["result"]
+                }
+            }
+        };
+        return obj;
+    }
+
+
+    // Serializing context for yaml generation
+    // Returns the JS source code for the response function
+    handleMultipleExampleMethod(method, contexts) {
+        let arrResult = [];
+        let responseContent = "function (ctx,params){" + "\n";
+        let defaultResult;
+        let conditionalFlag = false;
+    
+        // traversing thorugh all methods-contexts
+        for (let i = 0; i < contexts.length; i++) {
+        arrResult = [];
+    
+        // check for null param
+        if (contexts[i].paramDetails.param.length == 0) {
+            defaultResult = JSON.stringify(contexts[i].paramDetails.result);
+        }
+    
+        else if ( !conditionalFlag ) {
+            arrResult.push("   if(");
+            for (let j = 0; j < contexts[i].paramDetails.param.length; j++) {
+                // Serializing name-value pair of each param
+                if (j == 0) {
+                    if( typeof( contexts[i].paramDetails.param[0].value) === "object" ){
+                    arrResult.push(`JSON.stringify(params.${contexts[i].paramDetails.param[0].name})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[0].value) + "'");
+                    }
+                    else{
+                    arrResult.push(`JSON.stringify(params.${contexts[i].paramDetails.param[0].name})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[0].value));
+                    }
+                } else {
+                    if( typeof( contexts[i].paramDetails.param[j].value) === "object" ){
+                    arrResult.push(` && JSON.stringify(params.${contexts[i].paramDetails.param[j].name})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[j].value) + "'");
+                    }
+                    else{
+                    arrResult.push(` && JSON.stringify(params.${contexts[i].paramDetails.param[j].name})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[j].value));
+                    }
+                }
+            }
+            arrResult.push("){\n");
+            arrResult.push("      return " + JSON.stringify(contexts[i].paramDetails.result) + '; \n   }\n');
+            conditionalFlag = true;
+        }
+        else {
+            arrResult.push("   else if(");
+            for (let j = 0; j < contexts[i].paramDetails.param.length; j++) {
+                // continuing serialization
+                if (j == 0) {
+                    if( typeof( contexts[i].paramDetails.param[0].value) === "object" ){
+                    arrResult.push(`JSON.stringify(params.${contexts[i].paramDetails.param[0].name})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[0].value) + "'");
+                    }
+                    else{
+                    arrResult.push(`JSON.stringify(params.${contexts[i].paramDetails.param[0].name})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[0].value));
+                    }
+                } else {
+                    if( typeof( contexts[i].paramDetails.param[j].value) === "object" ){
+                    arrResult.push(` && JSON.stringify(params.${contexts[i].paramDetails.param[j].name})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[j].value) + "'");
+                    }
+                    else{
+                    arrResult.push(` && JSON.stringify(params.${contexts[i].paramDetails.param[j].name})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[j].value));
+                    }
+                }
+            }
+            arrResult.push("){\n");
+            arrResult.push("      return " + JSON.stringify(contexts[i].paramDetails.result) + '; \n   }\n');
+        }
+        responseContent += arrResult.join("");
+        }
+    
+        if (defaultResult) {
+        responseContent += "   else{\n      return " + defaultResult + "; \n   } \n";
+        } else {
+        responseContent += `   throw new ctx.FireboltError(-32888,'${method} is not working')\n`;
+        }
+        responseContent += '}';
+        return responseContent;
+    }
+
+
+    //Returns flag to check the repetition of params
+    checkParams(multipleExampleContext,multipleParams){
+        let repetition = false;
+        for(let j=0; j < multipleExampleContext.length;j++){
+            if (JSON.stringify(multipleExampleContext[j]["paramDetails"].param) === JSON.stringify(multipleParams["paramDetails"].param)){
+                multipleExampleContext[j] = multipleParams;
+                repetition = true;
+            }
+        }
+        return repetition;
+    }
+
+    sortJsonByTime(sessionDataJson, sessionDataFile) {
         const recordedJson = {
             sessionStart: sessionDataJson.sessionStart,
             sessionEnd: sessionDataJson.sessionEnd
@@ -126,7 +358,6 @@ class Session{
             return new Date(a.timestamp) - new Date(b.timestamp);
         });
         recordedJson.recordings = recordings
-        const sessionDataFile = `./sessions/FireboltCalls_Timestamp_Sorted_${sessionDataJson.sessionStart}.json`;
         fs.writeFileSync(sessionDataFile, JSON.stringify(recordedJson, null, 4));
         logger.info(`Saving session sorted data to ${sessionDataFile}`);
     }
@@ -166,9 +397,9 @@ function addCall(methodCall, params){
     }
 }
 
-function setOutput(output){
+function setOutputFormat(format){
     logger.info("Setting output. Before setting: " + sessionRecording.recordedSession.sessionOutput);
-    sessionRecording.recordedSession.sessionOutput = output;
+    sessionRecording.recordedSession.sessionOutput = format;
     logger.info("Setting output. After setting: " + sessionRecording.recordedSession.sessionOutput);
 }
 
@@ -194,4 +425,4 @@ function updateCallWithResponse(method, result, key) {
     }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutput, setOutputDir};
+export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, setOutputDir};

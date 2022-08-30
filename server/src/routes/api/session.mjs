@@ -2,7 +2,7 @@
 
 import fs from 'fs';
 import { logger } from '../../logger.mjs';
-import {startRecording, stopRecording, setOutput, setOutputDir} from '../../sessionManagement.mjs';
+import {startRecording, stopRecording, setOutputFormat, setOutputDir} from '../../sessionManagement.mjs';
 
 // --- Route Handlers ---
 
@@ -35,25 +35,18 @@ function startSession(req, res) {
 function stopSession(req, res) {
     logger.info('Stopping session');
     const sessionFile = stopRecording();
-    let messages = JSON.parse(fs.readFileSync(sessionFile, 'utf8'));
+    //let messages = JSON.parse(fs.readFileSync(sessionFile, 'utf8'));
     res.status(200).send({
         status: 'SUCCESS',
-        sessionFile: sessionFile,
-        sessionMessages: messages
+        //sessionFile: sessionFile,
+        //sessionMessages: messages
     });
 }
 
-function setLogOutput(req, res) {
-    logger.info('Setting session output to log');
-    setOutput("log");
-    res.status(200).send({
-        status: 'SUCCESS'
-    });
-}
-
-function setMockOverridesOutput(req, res) {
-    logger.info('Setting session output to mock-overrides');
-    setOutput("mock-overrides");
+function setOutput(req, res) {
+    const format = req.params.format;
+    logger.info(`Setting session output to ${format}`);
+    setOutputFormat(format);
     res.status(200).send({
         status: 'SUCCESS'
     });
@@ -78,7 +71,6 @@ export {
     toggleSession,
     startSession,
     stopSession,
-    setLogOutput,
-    setMockOverridesOutput,
+    setOutput,
     setOutputPath
 };
