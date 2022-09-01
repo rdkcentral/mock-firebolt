@@ -4,11 +4,21 @@
 name: Node.js Package
 
 on:
-  release:
-    types: [created]
+  workflow_dispatch:
+    inputs:
+      tags:
+        required: false
+        description: 'Release tags'
 
 jobs:
+  printInputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Release Tags: ${{ github.event.inputs.tags }}" 
+
   build:
+    needs: printInputs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
