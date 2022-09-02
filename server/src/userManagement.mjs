@@ -76,14 +76,18 @@ function getWsListForUser(userId) {
   if ( ! userList ) { return undefined }
 
   // Covert an array of "<userId>-<groupName" values to an array of ws's
+  const wsUserMap = new Map();
+  for (const us of userList){
+    wsUserMap.set(getWsForUser(''+us),us);
+  }
   const wsList = userList.map((userId) => {
     return getWsForUser(''+userId);
   });
 
   // Filter out any undefined values
   wsList.filter(ws => ws);
-
-  return wsList;
+  const wsUserMapping = [wsList, wsUserMap];
+  return wsUserMapping;
 }
 
 function associateUserWithWss(userId, wss) {
