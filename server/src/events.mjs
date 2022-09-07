@@ -258,16 +258,13 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       // but the same group name. We need to send the event to all
       // clients/apps within the group (whether just this one or more than one).
       if( isBroadcast ){
-        // array containing an array of wsList and map of ws with their userId
-        const wsUserMapping = userManagement.getWsListForUser(userId);
-        const wsList = wsUserMapping[0];
-        // map of web-sockets and their respective userId
-        const wsUser = wsUserMapping[1];
-        if ( wsList && wsList.length >= 1 ) {
-          for (const ww of wsList ) {
-            let userWithSameGroup = wsUser.get(ww);
+        // object map with ws and userid as key value pair
+        const wsUserMap = userManagement.getWsListForUser(userId);
+        // looping over each web-sockets of same group
+        if ( wsUserMap && wsUserMap.size >=1 ) {
+          wsUserMap.forEach ((userWithSameGroup, ww) => {
             emitResponse(ww, finalResult, msg, userWithSameGroup, method);
-          }
+          });
           fSuccess.call(null);
         } else {
           // Internal error
