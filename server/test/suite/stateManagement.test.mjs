@@ -509,3 +509,129 @@ test(`stateManagement.getMethodResponse works properly`, () => {
   );
   expect(spy).toHaveBeenCalled();
 });
+
+test(`stateManagement.hasOverride works properly with methods.response`, () => {
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        response: { name: "test" },
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result = stateManagement.hasOverride("12345", "rpc.discover");
+  expect(result).toBe(true);
+});
+
+test(`stateManagement.hasOverride works properly with methods.result `, () => {
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        result: { name: "test" },
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result = stateManagement.hasOverride("12345", "rpc.discover");
+  expect(result).toBe(true);
+});
+
+test(`stateManagement.hasOverride works properly with methods.error`, () => {
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        error: { name: "test_error" },
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result = stateManagement.hasOverride("12345", "rpc.discover");
+  expect(result).toBe(true);
+});
+
+test(`stateManagement.hasOverride works properly with methods.responses`, () => {
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        responses: { name: "test_error" },
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result = stateManagement.hasOverride("12345", "rpc.discover");
+  expect(result).toBe(true);
+});
+
+test(`stateManagement.hasOverride works properly and return false`, () => {
+  stateManagement.testExports.state["12345"] = {
+    global: {
+      mode: "DEFAULT",
+      latency: {
+        min: 0,
+        max: 0,
+      },
+    },
+    scratch: {},
+    methods: {
+      "rpc.discover": {
+        policy: "REPEAT-LAST-RESPONSE",
+      },
+    },
+    sequenceState: {},
+  };
+  const result = stateManagement.hasOverride("12345", "rpc.discover");
+  expect(result).toBe(false);
+});
+
+test(`stateManagement.hasOverride works properly and return false for not a valid userID`, () => {
+  stateManagement.testExports.state["7574"] = undefined;
+  const result = stateManagement.hasOverride("7574", "rpc.discover");
+  expect(result).toBe(false);
+});
+
+test(`stateManagement.logInvalidMethodError works properly`, () => {
+  const spy = jest.spyOn(logger, "error");
+  stateManagement.testExports.logInvalidMethodError("DummyCore", "Test_Result_Error", {});
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`stateManagement.mergeCustomizer works properly`, () => {
+  const result = stateManagement.testExports.mergeCustomizer([], "dummy_value");
+  expect(result).toBe("dummy_value");
+});
