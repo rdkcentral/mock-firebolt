@@ -25,8 +25,19 @@ import { logger } from './logger.mjs';
 import * as util from './util.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
-import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
+import {
+  isEventListenerOnMessage,
+  sendEventListenerAck,
+  registerEventListener,
+  deregisterEventListener,
+  isEventListenerOffMessage,
+  sendBroadcastEvent,
+  sendEvent,
+  logSuccess,
+  logErr,
+  logFatalErr,
+} from "./events.mjs";
 import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs'
 
@@ -69,15 +80,15 @@ async function handleMessage(message, userId, ws) {
   }
 
   // Handle JSON-RPC messages that are event listener enable requests
-  if ( events.isEventListenerOnMessage(oMsg) ) {
-    events.sendEventListenerAck(ws, oMsg);
-    events.registerEventListener(userId, oMsg);
+  if ( isEventListenerOnMessage(oMsg) ) {
+    sendEventListenerAck(ws, oMsg);
+    registerEventListener(userId, oMsg);
     return;
   }
 
   // Handle JSON-RPC messages that are event listener disable requests
-  if ( events.isEventListenerOffMessage(oMsg) ) {
-    events.deregisterEventListener(userId, oMsg);
+  if ( isEventListenerOffMessage(oMsg) ) {
+    deregisterEventListener(userId, oMsg);
     return;
   }
 
@@ -118,28 +129,10 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           sendEvent: function(onMethod, result, msg) {
-            function fSuccess() {
-              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-            }
-            function fErr() {
-              logger.info(`Could not send ${onMethod} event because no listener is active`)
-            }
-            function fFatalErr() {
-              logger.info(`Internal error`)
-            }
-            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            sendEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
           },
           sendBroadcastEvent: function(onMethod, result, msg) {
-            function fSuccess() {
-              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-            }
-            function fErr() {
-              logger.info(`Could not send ${onMethod} event because no listener is active`)
-            }
-            function fFatalErr() {
-              logger.info(`Internal error`)
-            }
-            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
           }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
@@ -199,28 +192,10 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           sendEvent: function(onMethod, result, msg) {
-            function fSuccess() {
-              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-            }
-            function fErr() {
-              logger.info(`Could not send ${onMethod} event because no listener is active`)
-            }
-            function fFatalErr() {
-              logger.info(`Internal error`)
-            }
-            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            sendEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
           },
           sendBroadcastEvent: function(onMethod, result, msg) {
-            function fSuccess() {
-              logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-            }
-            function fErr() {
-              logger.info(`Could not send ${onMethod} event because no listener is active`)
-            }
-            function fFatalErr() {
-              logger.info(`Internal error`)
-            }
-            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+            sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };
