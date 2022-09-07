@@ -48,6 +48,8 @@ server.on('upgrade', function upgrade(request, socket, head) {
   } else if ( ! userManagement.isKnownUser(userId) ) {
     logger.warn(`WARNING: Unknown userId: ${userId}; Using default user`);
     userId = config.app.defaultUserId;
+  } else {
+    logger.info(`Using user ${userId}`);
   }
   
   if( commandLine.proxy ) {
