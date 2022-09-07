@@ -91,3 +91,17 @@ test(`sessionManagement.addCall works properly`, () => {
   const result = sessionManagement.addCall("methodName", "Parameters");
   expect(result).toBeUndefined();
 });
+
+test(`verify sortJsonByTime method is working`, () => {
+  const session = new sessionManagement.Session();
+  const spy = jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
+  session.sortJsonByTime({ "sessionStart": 1660644687500, "sessionEnd": 1660644699862, "calls": [ { "methodCall": "moneybadger.logMoneyBadgerLoaded", "params": { "startTime": 1660644697447, "version": "4.10.0-7e1cc95" }, "timestamp": 1660644697456, "sequenceId": 1 }, { "methodCall": "lifecycle.onInactive", "params": { "listen": true }, "timestamp": 1660644697795, "sequenceId": 2, "response": { "result": { "listening": true, "event": "lifecycle.onInactive" }, "timestamp": 1660644697796 } }]});
+  expect(spy).toHaveBeenCalled();
+  spy.mockClear();
+});
+
+test('verify updateCallWithResponse is working', () => {
+  sessionManagement.addCall("testing", {});
+  const result = sessionManagement.updateCallWithResponse("testing", "testing_session", "result")
+  expect(result).toBeUndefined();
+})

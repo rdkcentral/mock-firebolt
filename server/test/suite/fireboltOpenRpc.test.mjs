@@ -761,7 +761,7 @@ test(`fireboltOpenRpc.buildMethodMap works properly`, () => {
   config.app.allowMixedCase = true;
   outputs.forEach((output, index) => {
     let result;
-    if(index === 2) {
+    if (index === 2) {
       result = fireboltOpenRpc.testExports.buildMethodMap();
     } else {
       result = fireboltOpenRpc.testExports.buildMethodMap(inputs[index]);
@@ -769,4 +769,12 @@ test(`fireboltOpenRpc.buildMethodMap works properly`, () => {
     expect(typeof result).toBe(output);
   });
   config.app.allowMixedCase = false;
+});
+
+test(`fireboltOpenRpc.downloadOpenRpcJsonFile works properly`, () => {
+  fireboltOpenRpc.testExports
+    .downloadOpenRpcJsonFile("test_url")
+    .catch((err) => {
+      expect(err.message).toEqual("Invalid URL");
+    });
 });

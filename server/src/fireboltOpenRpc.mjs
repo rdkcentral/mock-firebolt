@@ -340,7 +340,7 @@ readAllEnabledSdkJsonFiles()
 // --- Exports ---
 export const testExports={
   rawMeta, meta, methodMaps, buildMethodMapsForAllEnabledSdks,
-  toLowerCase, buildMethodMap
+  toLowerCase, buildMethodMap, downloadOpenRpcJsonFile
 }
 export {
   getRawMeta, getMeta,
