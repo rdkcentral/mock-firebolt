@@ -136,7 +136,7 @@ function emitResponse(ws, finalResult, msg, userId, method){
   const eventMessage = JSON.stringify(oEventMessage);
   // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
   ws.send(eventMessage);
-  logger.info(`${msg}: Sent event message: ${eventMessage}`);
+  logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
 }
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
@@ -258,11 +258,13 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       // but the same group name. We need to send the event to all
       // clients/apps within the group (whether just this one or more than one).
       if( isBroadcast ){
-        const wsList = userManagement.getWsListForUser(userId);
-        if ( wsList && wsList.length >= 1 ) {
-          for (const ww of wsList ) {
-            emitResponse(ww, finalResult, msg, userId, method);
-          }
+        // object map with ws and userid as key value pair
+        const wsUserMap = userManagement.getWsListForUser(userId);
+        // looping over each web-sockets of same group
+        if ( wsUserMap && wsUserMap.size >=1 ) {
+          wsUserMap.forEach ((userWithSameGroup, ww) => {
+            emitResponse(ww, finalResult, msg, userWithSameGroup, method);
+          });
           fSuccess.call(null);
         } else {
           // Internal error

@@ -270,7 +270,7 @@ async function handleMessage(message, userId, ws) {
   const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
   await util.delay(dly);
   ws.send(finalResponse);
-  logger.debug(`Sent message: ${finalResponse}`);
+  logger.debug(`Sent message for user ${userId}: ${finalResponse}`);
   updateCallWithResponse(oMsg.method, JSON.parse(finalResponse).result, "result")
 }
 
