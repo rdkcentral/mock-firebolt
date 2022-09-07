@@ -27,7 +27,7 @@ import * as magicDateTime from './magicDateTime.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
-import * as events from './events.mjs';
+import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -130,6 +130,23 @@ function handleSequenceOfResponseValues(userId, methodName, params, resp, userSt
   return resp;
 }
 
+// Log Error for invalid methodName
+function logInvalidMethodError(methodName, resultErrors, resp) {
+  logger.error(
+    `ERROR: The function specified for the result of ${methodName} returned an invalid value`
+  );
+  logger.error(JSON.stringify(resultErrors, null, 4));
+  resp = {
+    error: {
+      code: -32400, // @TODO: Ensure we're returning the right value and message
+      message: "Invalid parameters", // @TODO: Ensure we're returning the right value and message
+      data: {
+        errors: resultErrors, // @TODO: Ensure we're formally defining this schema / data value
+      },
+    },
+  };
+}
+
 // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
 function handleDynamicResponseValues(userId, methodName, params, ws, resp){
   if ( typeof resp.response === 'string' && resp.response.trimStart().startsWith('function') ) {
@@ -142,28 +159,28 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         set: function ss(key, val) { return setScratch(userId, key, val) },
         get: function gs(key) { return getScratch(userId, key); },
         sendEvent: function(onMethod, result, msg) {
-          function fSuccess() {
-            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-          }
-          function fErr() {
-            logger.info(`Could not send ${onMethod} event because no listener is active`)
-          }
-          function fFatalErr() {
-            logger.info(`Internal error`)
-          }
-          events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          sendEvent(
+            ws,
+            userId,
+            onMethod,
+            result,
+            msg,
+            logSuccess.bind(this, onMethod, result, msg),
+            logErr.bind(this, onMethod),
+            logFatalErr.bind(this)
+          );
         },
         sendBroadcastEvent: function(onMethod, result, msg) {
-          function fSuccess() {
-            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-          }
-          function fErr() {
-            logger.info(`Could not send ${onMethod} event because no listener is active`)
-          }
-          function fFatalErr() {
-            logger.info(`Internal error`)
-          }
-          events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          sendBroadcastEvent(
+            ws,
+            userId,
+            onMethod,
+            result,
+            msg,
+            logSuccess.bind(this, onMethod, result, msg),
+            logErr.bind(this, onMethod),
+            logFatalErr.bind(this)
+          );
         },
         FireboltError: commonErrors.FireboltError
       };
@@ -177,17 +194,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         };
       } else {
         // After the result function was called, we're realizing what it returned isn't valid!
-        logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-        logger.error(JSON.stringify(resultErrors, null, 4));
-        resp = {
-          error: {
-            code: -32400,                  // @TODO: Ensure we're returning the right value and message
-            message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
-            data: {
-              errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
-            }
-          }
-        };
+        logInvalidMethodError(methodName, resultErrors, resp);
       }
     } catch ( ex ) {
       if ( ex instanceof commonErrors.FireboltError ) {
@@ -232,17 +239,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
         };
       } else {
         // After the result function was called, we're realizing what it returned isn't valid!
-        logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-        logger.error(JSON.stringify(resultErrors, null, 4));
-        resp = {
-          error: {
-            code: -32400,                  // @TODO: Ensure we're returning the right value and message
-            message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
-            data: {
-              errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
-            }
-          }
-        };
+        logInvalidMethodError(methodName, resultErrors, resp);
       }
     } catch ( ex ) {
       logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
@@ -567,7 +564,8 @@ function getScratch(userId, key) {
 // --- Exports ---
 
 export const testExports={
-  handleStaticAndDynamicError, state, validateMethodOverride
+  handleStaticAndDynamicError, state, validateMethodOverride, logInvalidMethodError,
+  mergeCustomizer
 }
 export {
   addUser,
