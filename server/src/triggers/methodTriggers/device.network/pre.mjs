@@ -16,10 +16,8 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-function post(ctx, params) {
-    ctx.setTimeout(function() {
-      const result = { state: 'inactive' };
-      const msg = 'Post trigger for lifecycle.close sent inactive lifecycle event';
-      ct.sendEvent('lifecycle.onInactive', result, msg);
-    }, 500);
-  }
+function pre(ctx, params) {
+  const result = 'Device.onNetworkChanged event sent';
+  const msg = 'Pre trigger for device.network sent device.onNetworkChanged event';
+  ctx.sendBroadcastEvent('device.onNetworkChanged', result, msg);
+}

@@ -20,9 +20,34 @@
 
 "use strict";
 
-import { dotConfig } from "../../src/dotConfig.mjs";
+import path from "path";
+import { jest } from "@jest/globals";
+import { dotConfig, testExports } from "../../src/dotConfig.mjs";
+import { logger } from "../../src/logger.mjs";
 
 test(`dotConfig works properly`, () => {
   const result = JSON.parse(JSON.stringify(dotConfig));
   expect(result).not.toBeUndefined();
+});
+
+test(`dotConfig.handleError works properly`, () => {
+  const __dirname = path.resolve();
+  const filePath = path.resolve(
+    __dirname,
+    "src",
+    "triggers",
+    "eventTriggers",
+    "device.onDeviceNameChanged",
+    "pre.mjs"
+  );
+  const dirPath = path.resolve(
+    __dirname,
+    "src",
+    "triggers",
+    "eventTriggers",
+    "device.onDeviceNameChanged"
+  );
+  const spy = jest.spyOn(logger, 'error');
+  testExports.handleError(filePath, dirPath);
+  expect(spy).toHaveBeenCalled();
 });

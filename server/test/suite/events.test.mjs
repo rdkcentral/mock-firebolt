@@ -256,3 +256,57 @@ test(`events.sendEvent works properly`, () => {
   );
   expect(errorSpy).toHaveBeenCalled();
 });
+
+test(`events.logSuccess works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  events.logSuccess("dummyMethod", { name: "test" }, "testMsg");
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`events.logErr works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  events.logErr("dummyMethod");
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`events.logFatalErr works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  events.logFatalErr();
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`events.isAnyRegisteredInGroup works properly`, () => {
+  const result = events.testExports.isAnyRegisteredInGroup("12345", "core");
+  expect(result).toBe(false);
+});
+
+test(`events.isAnyRegisteredInGroup works properly with if path`, () => {
+  const result = events.testExports.isAnyRegisteredInGroup("12345", "");
+  expect(result).toBe(true);
+});
+
+test(`events.sendBroadcastEvent works properly`, () => {
+  const result = events.testExports.sendBroadcastEvent(
+    { send: () => {} },
+    "12345",
+    "core",
+    {},
+    "test_msg",
+    () => {},
+    () => {},
+    () => {}
+  );
+  expect(result).toBeUndefined();
+});
+
+test(`events.emitResponse works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  events.testExports.emitResponse(
+    { send: () => {} },
+    {},
+    "test_msg",
+    "12345",
+    "core"
+  );
+  expect(spy).toHaveBeenCalled();
+});
