@@ -460,6 +460,9 @@ function updateState(userId, newState) {
       logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
     }
   }
+  else {
+    logger.info(`Updating state for user ${userId}`);
+  }
 
   const errors = validateNewState(newState);
   if ( errors.length <= 0 ) {
