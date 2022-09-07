@@ -19,6 +19,5 @@
 function post(ctx, params) {
   const result = '1234567';   
   const msg = 'Post trigger for device.id sent device.onDeviceNameChanged event';
-  ctx.sendEvent('device.onDeviceNameChanged', result, msg);  
-  return result;
+  ctx.sendBroadcastEvent('device.onNameChanged', result, msg);
 }

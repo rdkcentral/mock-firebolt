@@ -24,8 +24,25 @@ import * as stateManagement from './stateManagement.mjs';
 import * as userManagement from './userManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
 import { logger } from './logger.mjs';
-import * as fireboltOpenRpc from './fireboltOpenRpc.mjs'
+import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import { config } from './config.mjs';
+import { updateCallWithResponse } from './sessionManagement.mjs';
+
+function logSuccess(onMethod, result, msg) {
+  logger.info(
+    `${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`
+  );
+};
+
+function logErr(onMethod) {
+  logger.info(
+    `Could not send ${onMethod} event because no listener is active`
+  );
+};
+
+function logFatalErr() {
+  logger.info(`Internal error`);
+};
 
 // Maps full userIds to maps which map event listner request method
 // name (e.g., lifecycle.onInactive) to message id (e.g., 17)
@@ -113,6 +130,7 @@ function sendEventListenerAck(ws, oMsg) {
   const ackMessage = JSON.stringify(oAckMessage);
   ws.send(ackMessage);
   logger.debug(`Sent event listener ack message: ${ackMessage}`);
+  updateCallWithResponse(oMsg.method, oAckMessage.result, "result")
 }
 
 function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
@@ -134,7 +152,7 @@ function emitResponse(ws, finalResult, msg, userId, method){
   const eventMessage = JSON.stringify(oEventMessage);
   // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
   ws.send(eventMessage);
-  logger.info(`${msg}: Sent event message: ${eventMessage}`);
+  logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
 }
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
@@ -160,28 +178,10 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               sendEvent: function(method, result, msg) {
-                function fSuccess() {
-                  logger.info(`${msg}: Sent event ${method} with result ${JSON.stringify(result)}`)
-                }
-                function fErr() {
-                  logger.info(`Could not send ${method} event because no listener is active`)
-                }
-                function fFatalErr() {
-                  logger.info(`Internal error`)
-                }
-                sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                function fSuccess() {
-                  logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-                }
-                function fErr() {
-                  logger.info(`Could not send ${onMethod} event because no listener is active`)
-                }
-                function fFatalErr() {
-                  logger.info(`Internal error`)
-                }
-                events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -206,28 +206,10 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               sendEvent: function(method, result, msg) {
-                function fSuccess() {
-                  logger.info(`${msg}: Sent event ${method} with result ${JSON.stringify(result)}`)
-                }
-                function fErr() {
-                  logger.info(`Could not send ${method} event because no listener is active`)
-                }
-                function fFatalErr() {
-                  logger.info(`Internal error`)
-                }
-                sendEvent(ws, method, result, msg, fSuccess, fErr, fFatalErr);
+                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                function fSuccess() {
-                  logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-                }
-                function fErr() {
-                  logger.info(`Could not send ${onMethod} event because no listener is active`)
-                }
-                function fFatalErr() {
-                  logger.info(`Internal error`)
-                }
-                events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
               },
               ...response
             };
@@ -256,11 +238,13 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       // but the same group name. We need to send the event to all
       // clients/apps within the group (whether just this one or more than one).
       if( isBroadcast ){
-        const wsList = userManagement.getWsListForUser(userId);
-        if ( wsList && wsList.length >= 1 ) {
-          for (const ww of wsList ) {
-            emitResponse(ww, finalResult, msg, userId, method);
-          }
+        // object map with ws and userid as key value pair
+        const wsUserMap = userManagement.getWsListForUser(userId);
+        // looping over each web-sockets of same group
+        if ( wsUserMap && wsUserMap.size >=1 ) {
+          wsUserMap.forEach ((userWithSameGroup, ww) => {
+            emitResponse(ww, finalResult, msg, userWithSameGroup, method);
+          });
           fSuccess.call(null);
         } else {
           // Internal error
@@ -285,11 +269,15 @@ export const testExports = {
   eventListenerMap,
   isRegisteredEventListener,
   getRegisteredEventListener,
+  isAnyRegisteredInGroup,
+  sendBroadcastEvent,
+  emitResponse
 }
 
 export {
   registerEventListener, deregisterEventListener,
   isEventListenerOnMessage, isEventListenerOffMessage,
   sendEventListenerAck,
-  sendEvent, sendBroadcastEvent
+  sendEvent, sendBroadcastEvent, logSuccess, logErr,
+  logFatalErr
 };
