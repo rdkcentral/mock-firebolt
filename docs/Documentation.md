@@ -47,6 +47,11 @@ See [MockResponses.md](./MockResponses.md). This document describes how to speci
 To learn about specifying dynamic responses (controlled by a JavaScript function rather than a static value), see [Functions.md](./Functions.md).
 
 
+## Conduit
+
+For notes about how to use Mock Firebolt with the Conduit app (which runs on a STB/TV), see [Conduit.md](./Conduit.md).
+
+
 ## Events
 
 For notes about how Firebolt events work, see [Events.md](./Events.md).
@@ -56,10 +61,12 @@ For notes about how Firebolt events work, see [Events.md](./Events.md).
 
 Pre- and post- triggers may be defined for any Firebolt method call. See [Triggers.md](./Triggers.md) for more information.
 
+
 ## novalidate Flag
 
 Use this flag to enable "novalidate mode", where Mock Firebolt skips certain validation steps, based on options you provide. This will be used by the certification test suite, not by normal app developer users.
 See (./DotConfig.md) for more information.
+
 
 ## Multi-User Support
 
