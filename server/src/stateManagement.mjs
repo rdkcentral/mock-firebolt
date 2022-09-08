@@ -116,6 +116,18 @@ async function getAppropriateDelay(userId, methodName) {
   return dly;
 }
 
+function hasOverride(userId, methodName) {
+  const userState = getState(userId);
+  if ( ! userState ) { return false; }
+  const resp = userState.methods[methodName];
+  if ( ! resp ) { return false; }
+  if ( resp.response ) { return true; }
+  if ( resp.result ) { return true; }
+  if ( resp.error ) { return true; }
+  if ( resp.responses ) { return true; }
+  return false;
+}
+
 // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
 function handleSequenceOfResponseValues(userId, methodName, params, resp, userState) {
   const nextIndex = userState.sequenceState[methodName] || 0;
@@ -266,18 +278,6 @@ function handleStaticAndDynamicError(userId, methodName, params, resp){
     // Assume resp.error is a "normal" error value (object with code and message keys); leave resp alone
   }
   return resp;
-}
-
-function hasOverride(userId, methodName) {
-  const userState = getState(userId);
-  if ( ! userState ) { return false; }
-  const resp = userState.methods[methodName];
-  if ( ! resp ) { return false; }
-  if ( resp.response ) { return true; }
-  if ( resp.result ) { return true; }
-  if ( resp.error ) { return true; }
-  if ( resp.responses ) { return true; }
-  return false;
 }
 
 // Returns either { result: xxx } or { error: { code: xxx, message: 'xxx' } }
@@ -571,8 +571,7 @@ export {
   addUser,
   getState,
   getAppropriateDelay,
-  hasOverride,
-  getMethodResponse,
+  hasOverride, getMethodResponse,
   updateState, revertState,
   setLatency, setLatencies,
   isLegalMode, setMode,
