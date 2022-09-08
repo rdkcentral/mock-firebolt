@@ -86,3 +86,15 @@ test(`util.createTmpFile returns a file whose name contains the given prefix and
     // Cleanup after ourselves
     tmpObj.removeCallback();
 });
+
+test(`util.mergeArrayOfStrings works properly`, () => {
+    const dummyOverrideFlags = ["test"];
+    const dumOverrideFlags = undefined;
+    const dummyDenyFlags = { test: { id: 1 } };
+    const result = util.mergeArrayOfStrings(
+        dummyOverrideFlags,
+        dumOverrideFlags,
+        dummyDenyFlags
+    );
+    expect(result).toEqual(["test"]);
+});

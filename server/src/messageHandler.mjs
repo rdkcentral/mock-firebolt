@@ -25,8 +25,19 @@ import { logger } from './logger.mjs';
 import * as util from './util.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
-import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
+import {
+  isEventListenerOnMessage,
+  sendEventListenerAck,
+  registerEventListener,
+  deregisterEventListener,
+  isEventListenerOffMessage,
+  sendBroadcastEvent,
+  sendEvent,
+  logSuccess,
+  logErr,
+  logFatalErr,
+} from "./events.mjs";
 import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs';
 import * as conduit from './conduit.mjs';
@@ -315,7 +326,7 @@ async function handleMessage(message, userId, ws) {
   const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
   await util.delay(dly);
   ws.send(finalResponse);
-  logger.debug(`Sent message: ${finalResponse}`);
+  logger.debug(`Sent message for user ${userId}: ${finalResponse}`);
   updateCallWithResponse(oMsg.method, JSON.parse(finalResponse).result, "result")
 }
 

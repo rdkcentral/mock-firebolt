@@ -1,0 +1,36 @@
+{
+  "name": "Injector",
+  "version": "1.0",
+  "description": "Inject the activateMockFirebolt script on a page before it loads",
+
+  "manifest_version": 2,
+
+  "permissions": [
+    "activeTab",
+    "http://localhost:*/"
+  ],
+
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+
+  "browser_action": {
+    "default_title": "Injector",
+    "default_icon": {
+      "19": "icons/19x19.png",
+      "38": "icons/38x38.png"
+    },
+    "default_popup": "popup.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["http://*/*?mf=*", "https://*/*?mf=*", "http://*/*&mf=*", "https://*/*&mf=*"],
+      "run_at": "document_start",
+      "js": ["activateMockFirebolt.js"]
+    }
+  ],
+
+  "content_security_policy": "script-src 'self' https://ajax.googleapis.com http://localhost:*; object-src 'self'"
+}

@@ -16,10 +16,4 @@
 * SPDX-License-Identifier: Apache-2.0
 */
 
-function post(ctx, params) {
-    ctx.setTimeout(function() {
-      const result = { state: 'inactive' };
-      const msg = 'Post trigger for lifecycle.close sent inactive lifecycle event';
-      ct.sendEvent('lifecycle.onInactive', result, msg);
-    }, 500);
-  }
+// Nothing needed.

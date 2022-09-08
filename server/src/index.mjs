@@ -53,6 +53,8 @@ server.on('upgrade', function upgrade(request, socket, head) {
   } else if ( ! userManagement.isKnownUser(userId) ) {
     logger.warn(`WARNING: Unknown userId: ${userId}; Using default user`);
     userId = config.app.defaultUserId;
+  } else {
+    logger.info(`Using user ${userId}`);
   }
   
   if( commandLine.proxy ) {
@@ -85,6 +87,7 @@ logger.info('Adding user 456...'); stateManagement.addUser('456'); userManagemen
 logger.info('Adding user 789...'); stateManagement.addUser('789'); userManagement.addUser('789');
 
 logger.info('Adding user 123~A...'); stateManagement.addUser('123~A'); userManagement.addUser('123~A');
+logger.info('Adding user 567~B...'); stateManagement.addUser('567~B'); userManagement.addUser('567~B');
 logger.info('Adding user 456~A...'); stateManagement.addUser('456~A'); userManagement.addUser('456~A');
 logger.info('Adding user 789~A...'); stateManagement.addUser('789~A'); userManagement.addUser('789~A');
 
