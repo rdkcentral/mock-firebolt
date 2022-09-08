@@ -28,7 +28,6 @@ import * as eventApi from './routes/api/event.mjs';
 import * as sessionApi from './routes/api/session.mjs';
 import * as sequenceApi from './routes/api/sequence.mjs';
 
-
 function configureAPI(app) {
 
 	// =========================== Health Check Route =========================

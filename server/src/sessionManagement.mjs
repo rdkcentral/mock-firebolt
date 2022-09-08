@@ -59,27 +59,29 @@ class Session{
             // const sessionStartString = sessionStart.toISOString().replace(/T/, '_').replace(/\..+/, '');
             // logger.info(`${sessionStart.toISOString()}`);    
 
-            logger.info("inside export Session. checking for direcotry: " + this.sessionOutputPath)
             if (!fs.existsSync(this.sessionOutputPath)) {
                 logger.info("Directory did not exist direcotry: " + this.sessionOutputPath)
                 fs.mkdirSync(this.sessionOutputPath, { recursive: true});
             }
             const sessionDataFile = this.sessionOutputPath + `/FireboltCalls_${this.#sessionStart}_${this.sessionOutput}.json`;
-            logger.info("Session data file: " + sessionDataFile)
-            // logger.info(`Saving session data to ${sessionDataFile}`);
+
+            let returnStmt = null; // creating a return message
             if (this.sessionOutput == 'raw') {
                 console.log("Inside raw format type");
                 fs.writeFileSync(sessionDataFile, sessionDataJson);
+                returnStmt = `Succesfully wrote output in raw format to ${sessionDataFile}`;
             } else if (this.sessionOutput == "mock-overrides") {
                 console.log("Inside mock-overrides format type");
                 this.convertJsonToYml(sessionDataJson);
+                returnStmt = `Succesfully wrote output in mock-overrides format to ${this.mockOutputPath}`;
             } else {
                 //emit this json in time order.
                 console.log("Inside log format type");
                 this.sortJsonByTime(sessionData, sessionDataFile);
+                returnStmt = `Succesfully wrote output in log format to ${sessionDataFile}`;
             }
 
-            return sessionDataFile;
+            return returnStmt;
         } catch (error) {
             logger.error("Error exporting session: " + error);
             console.log(error.stack);
@@ -97,17 +99,17 @@ class Session{
         try {
             jsonReport = JSON.parse(jsonReport);
         } catch (e) {
-            console.log("NOT A JSON");
+            console.error('Invalid Input format');
+            console.error(e);
+            
         }
 
-        console.log(JSON.stringify(jsonReport));
-
-        let methodCallsWritten = [];
+        let methodCallsWritten = []; // creating an array to track which calls have already been written
         for ( let i = 0; i < jsonReport.calls.length; i++) {
             // skip methods containing .on & Changed in fullTitle and .Subscribe (SKIPPING THE SUBSCRIBE VALIDATION AS WE ARE NOT CURRENTLY LOGGING) in title
             if (jsonReport.calls[i].methodCall.indexOf('.on') !== -1 && jsonReport.calls[i].methodCall.indexOf('Changed') !== -1) {
                 continue;
-             } else if (methodCallsWritten.includes(jsonReport.calls[i].methodCall)) {
+             } else if (methodCallsWritten.includes(jsonReport.calls[i].methodCall)) { // if already added because of multiple can skip
                 continue;
              } else {
                 let calls = jsonReport.calls;
@@ -128,10 +130,15 @@ class Session{
                                 "param": calls[j].params,
                                 "result": null
                              };
-                        } else {
+                        } else if (calls[j].response.error) { // if there is an error we want that under 'result'
                             multipleParams["paramDetails"] = {
                                 "param": calls[j].params,
                                 "result": calls[j].response
+                             };
+                        } else { // if no error than we need to take out one level of 'result'
+                            multipleParams["paramDetails"] = {
+                                "param": calls[j].params,
+                                "result": calls[j].response.result
                              };
                         }
 
@@ -147,18 +154,22 @@ class Session{
 
 
                 //yaml file generation for methods with more than one example
-                if (multipleExampleFlag) {
+                if (multipleExampleFlag) { // if we ran into mulitple example we need to add i the first one since the j loop would have skipped it
                     multipleParams = {};
                     if ( calls[i].error && calls[i].error.code == 'CertError' && calls[i].error.message == 'Received response as undefined') {
                        multipleParams["paramDetails"] = {
                           "param": calls[i].params,
                           "result": null
                        };
-                    }
-                    else{
+                    } else if (calls[i].response.error) { // if there is an error we want that under 'result'
+                        multipleParams["paramDetails"] = {
+                            "param": calls[i].params,
+                            "result": calls[i].response
+                         };
+                    } else { // if no error than we need to take out one level of 'result'
                        multipleParams["paramDetails"] = {
                           "param": calls[i].params,
-                          "result": calls[i].response
+                          "result": calls[i].response.result
                        };
                     }
                     // to check repetition of params
@@ -217,8 +228,10 @@ class Session{
         if (calls[i].hasOwnProperty('response')) {
             if ( calls[i].error && calls[i].error.code == 'CertError' && calls[i].error.message == 'Received response as undefined') {
                 staticObject["result"] = null;
-            } else if (calls[i].response || calls[i].response === false) {
+            } else if (calls[i].response.error) {
                 staticObject["result"] = calls[i].response;
+            } else if (calls[i].response || calls[i].response === false) {  // if no error than we need to take out one level of 'result'
+                staticObject["result"] = calls[i].response.result;
             }
         }
         obj = {
@@ -235,80 +248,43 @@ class Session{
     // Serializing context for yaml generation
     // Returns the JS source code for the response function
     handleMultipleExampleMethod(method, contexts) {
-        console.log("Method: ", method);
-        console.log("Contexts: ", contexts);
-        console.log(JSON.stringify(contexts));
-
         let arrResult = [];
         let responseContent = "function (ctx,params){" + "\n";
         let defaultResult;
-        let conditionalFlag = false;
+        let ifStmt = "   if(";
     
         // traversing thorugh all methods-contexts
         for (let i = 0; i < contexts.length; i++) {
             arrResult = [];
-            let param = Object.keys(contexts[i].paramDetails.param);
-
-            console.log("Contexts we are checking: ", contexts[i]);
+            let param = Object.keys(contexts[i].paramDetails.param); // getting object keys as array
         
-            console.log("Param length: " + contexts[i].paramDetails.param.length);
-            console.log("Param length with object.keys: " + param.length);
             // check for null param
             if (param.length == 0) {
-                console.log("inside null param: ", param);
                 defaultResult = JSON.stringify(contexts[i].paramDetails.result);
-            } else if ( !conditionalFlag ) {
-                console.log("inside conditional flag");
-                arrResult.push("   if(");
+            } else {
+                arrResult.push(ifStmt);
                 for (let j = 0; j < param.length; j++) {
-                    console.log("looping over params. On step : " + j);
-                    console.log("param: ", param[j]);
                     // Serializing name-value pair of each param
                     if (j == 0) {
                         if( typeof( contexts[i].paramDetails.param[param[0]].value) === "object" ){
-                        arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[0]]) + "'");
+                            arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[0]]) + "'");
                         }
                         else{
-                        arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[param[0]]));
+                            arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[param[0]]));
                         }
                     } else {
                         if( typeof( contexts[i].paramDetails.param[param[j]].value) === "object" ){
-                        arrResult.push(` && JSON.stringify(params.${param[j]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[j]]) + "'");
+                            arrResult.push(` && JSON.stringify(params.${param[j]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[j]]) + "'");
                         }
                         else{
-                        arrResult.push(` && JSON.stringify(params.${param[j]})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[param[j]]));
+                            arrResult.push(` && JSON.stringify(params.${param[j]})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[param[j]]));
                         }
                     }
                 }
                 arrResult.push("){\n");
                 arrResult.push("      return " + JSON.stringify(contexts[i].paramDetails.result) + '; \n   }\n');
-                conditionalFlag = true;
-            } else {
-                console.log("else conditional flag: ", contexts[i].paramDetails.param);
-                arrResult.push("   else if(");
-                for (let j = 0; j < param.length; j++) {
-                    console.log("looping over params. On step : " + j);
-                    console.log("param: ", param[j]);
-                    // continuing serialization
-                    if (j == 0) {
-                        if( typeof( contexts[i].paramDetails.param[param[0]].value) === "object" ){
-                        arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[0]]) + "'");
-                        }
-                        else{
-                        arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[param[0]]));
-                        }
-                    } else {
-                        if( typeof( contexts[i].paramDetails.param[param[j]].value) === "object" ){
-                        arrResult.push(` && JSON.stringify(params.${param[j]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[j]]) + "'");
-                        }
-                        else{
-                        arrResult.push(` && JSON.stringify(params.${param[j]})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[param[j]]));
-                        }
-                    }
-                }
-                arrResult.push("){\n");
-                arrResult.push("      return " + JSON.stringify(contexts[i].paramDetails.result) + '; \n   }\n');
-            }
+                ifStmt = "   else if(";
+            } 
             responseContent += arrResult.join("");
         }
     
@@ -407,17 +383,12 @@ function addCall(methodCall, params){
 }
 
 function setOutputFormat(format){
-    logger.info("Setting output. Before setting: " + sessionRecording.recordedSession.sessionOutput);
     sessionRecording.recordedSession.sessionOutput = format;
     logger.info("Setting output. After setting: " + sessionRecording.recordedSession.sessionOutput);
 }
 
 function setOutputDir(dir){
-    logger.info("Setting output path. Before setting: " + sessionRecording.recordedSession.sessionOutputPath);
     sessionRecording.recordedSession.sessionOutputPath = dir;
-    logger.info("Setting output path. After setting: " + sessionRecording.recordedSession.sessionOutputPath);
-
-    logger.info("Setting output path. Before setting: " + sessionRecording.recordedSession.mockOutputPath);
     sessionRecording.recordedSession.mockOutputPath = dir;
     logger.info("Setting output path. After setting: " + sessionRecording.recordedSession.mockOutputPath);
 }

@@ -34,12 +34,10 @@ function startSession(req, res) {
 
 function stopSession(req, res) {
     logger.info('Stopping session');
-    const sessionFile = stopRecording();
-    //let messages = JSON.parse(fs.readFileSync(sessionFile, 'utf8'));
+    const message = stopRecording();
     res.status(200).send({
         status: 'SUCCESS',
-        //sessionFile: sessionFile,
-        //sessionMessages: messages
+        message: message
     });
 }
 

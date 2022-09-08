@@ -405,7 +405,7 @@ if ( parsed.help ) {
 } else if ( parsed.session || parsed.sessionOutput || parsed.sessionOutputPath) {
   if ( parsed.session && parsed.session == 'start' ) {
     msg(`Starting session...`);
-    axios.post(url(host, port, '/api/v1/session/start'), undefined)
+    await axios.post(url(host, port, '/api/v1/session/start'), undefined)
     .then(function (response) {
       console.log(response.data);
     }
