@@ -90,6 +90,12 @@ function configureAPI(app) {
     // End a session
     app.post('/api/v1/session/stop',                    sessionApi.stopSession);
 
+    // Set session output to format
+    app.post('/api/v1/sessionoutput/:format',           sessionApi.setOutput);
+
+    // Specifiy session output path
+    app.post('/api/v1/sessionoutputpath',               sessionApi.setOutputPath);
+
     // ======================= Sequence-Related API Routes =======================
 
     // Send an event sequence
