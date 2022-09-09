@@ -32,7 +32,7 @@ class FireboltCall {
     }
 }
 
-class Session{
+class Session {
     #sessionStart;
     #sessionEnd;
     
@@ -71,7 +71,7 @@ class Session{
                 fs.writeFileSync(sessionDataFile, sessionDataJson);
                 returnStmt = `Succesfully wrote output in raw format to ${sessionDataFile}`;
             } else if (this.sessionOutput == "mock-overrides") {
-                console.log("Inside mock-overrides format type");
+                console.log("Inside mock-overrides format type", sessionDataJson);
                 this.convertJsonToYml(sessionDataJson);
                 returnStmt = `Succesfully wrote output in mock-overrides format to ${this.mockOutputPath}`;
             } else {
@@ -100,8 +100,8 @@ class Session{
             jsonReport = JSON.parse(jsonReport);
         } catch (e) {
             console.error('Invalid Input format');
-            console.error(e);
-            
+            console.error("Error", e);
+            return e;
         }
 
         let methodCallsWritten = []; // creating an array to track which calls have already been written
@@ -207,7 +207,7 @@ class Session{
                     methodName = calls[i].methodCall;
                     let obj;
     
-                    obj = this.handleSingleExampleMethod(calls,staticObject,methodName,obj,i) // edit this method
+                    obj = this.handleSingleExampleMethod(calls,staticObject,methodName,obj,i) 
                     let data = JSON.stringify(obj, null, 2);
                     try {
                         fs.writeFileSync(`${this.mockOutputPath}/${methodName}.json`, data);

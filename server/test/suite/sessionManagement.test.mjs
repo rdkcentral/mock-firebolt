@@ -26,8 +26,10 @@ import { logger } from "../../src/logger.mjs";
 import * as sessionManagement from "../../src/sessionManagement.mjs";
 
 test(`sessionManagement.stopRecording works properly in case of throwing error`, () => {
+  const spy = jest.spyOn(fs, "writeFileSync").mockImplementation(() => { return error});
   sessionManagement.startRecording();
   const result = sessionManagement.stopRecording();
+  expect(spy).toHaveBeenCalled();
   expect(result).toBe(null);
 });
 
@@ -105,3 +107,144 @@ test('verify updateCallWithResponse is working', () => {
   const result = sessionManagement.updateCallWithResponse("testing", "testing_session", "result")
   expect(result).toBeUndefined();
 })
+
+test('verify a session output directory is created when it does not exist', () => {
+  const session = new sessionManagement.Session();
+  const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => false);
+  const spy2 = jest.spyOn(fs, "mkdirSync").mockImplementation(() => {});
+  const result = session.exportSession();
+  expect(spy).toHaveBeenCalled();
+  expect(spy2).toHaveBeenCalled();
+  expect(result).toMatch(/(sessions)/);
+  spy.mockClear();
+  spy2.mockClear();
+})
+
+test('verify a session output raw wrties raw output', () => {
+  const session = new sessionManagement.Session();
+  session.sessionOutput = 'raw';
+  const spy = jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
+  const result = session.exportSession();
+  expect(spy).toHaveBeenCalled();
+  expect(result).toMatch(/(raw)/);
+  expect(result).toMatch(/(Succesfully wrote output in raw format to)/);
+  spy.mockClear();
+})
+
+test('verify a session output mock-overrides calls conversion method', () => {
+  const session = new sessionManagement.Session();
+  session.sessionOutput = 'mock-overrides';
+  const spy = jest.spyOn(session, "convertJsonToYml").mockImplementation(() => {});
+  const result = session.exportSession();
+  expect(spy).toHaveBeenCalled();
+  expect(result).toMatch(/(mocks)/);
+  expect(result).toMatch(/(Succesfully wrote output in mock-overrides format to)/);
+  spy.mockClear();
+})
+
+
+test('sessionManagement.setOutputDir works properly', () => {
+  //const session = new sessionManagement.Session();
+  await sessionManagement.startRecording();
+  //session.sessionOutputPath = './sessions';
+  sessionManagement.setOutputDir('./test');
+  expect(JSON.stringify(sessionManagement.sessionRecording)).toBe('./test');
+  expect(session.mockOutputPath).toBe('./test');
+})
+
+// test('sessionManagement.setOutputFormat works properly', () => {
+//   const session = new sessionManagement.Session();
+//   session.sessionOutput = 'log';
+//   sessionManagement.setOutputDir('test');
+//   expect(session.sessionOutputPath).toBe('test');
+//   expect(session.mockOutputPath).toBe('test');
+// })
+
+// test('sessionManagement.handleSingleExampleMethod TODO', () => {
+//   const session = new sessionManagement.Session();
+//   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => true);
+//   const emptyInputResult = session.convertJsonToYml();
+//   expect(spy).toHaveBeenCalled();
+//   expect(emptyInputResult.stack).toMatch(/(Unexpected token u in JSON at position 0)/);
+
+//   const nullInputResult = session.convertJsonToYml();
+//   expect(spy).toHaveBeenCalled();
+//   expect(nullInputResult.stack).toMatch(/(Unexpected token u in JSON at position 0)/);
+  
+//   spy.mockClear();
+// })
+
+// test('sessionManagement.convertJsonToYml handles empty and null input', () => {
+//   const session = new sessionManagement.Session();
+//   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => true);
+//   const emptyInputResult = session.convertJsonToYml();
+//   expect(spy).toHaveBeenCalled();
+//   expect(emptyInputResult.stack).toMatch(/(Unexpected token u in JSON at position 0)/);
+
+//   const nullInputResult = session.convertJsonToYml();
+//   expect(spy).toHaveBeenCalled();
+//   expect(nullInputResult.stack).toMatch(/(Unexpected token u in JSON at position 0)/);
+  
+//   spy.mockClear();
+// })
+
+// test('sessionManagement.convertJsonToYml works properly with single method calls input', () => {
+//   const session = new sessionManagement.Session();
+//   const input = {
+//     "sessionStart": 1662743850633,
+//     "sessionEnd": 1662743893317,
+//     "calls": [
+//         {
+//             "methodCall": "advertising.advertisingId",
+//             "params": {},
+//             "timestamp": 1662743862314,
+//             "sequenceId": 1,
+//             "response": {
+//                 "result": {
+//                     "ifa": "01234567-89AB-CDEF-GH01-23456789ABCD",
+//                     "ifa_type": "idfa",
+//                     "lmt": "0"
+//                 },
+//                 "timestamp": 1662743862322
+//             }
+//         },
+//         {
+//             "methodCall": "advertising.deviceAttributes",
+//             "params": {},
+//             "timestamp": 1662743866706,
+//             "sequenceId": 2,
+//             "response": {
+//                 "result": {},
+//                 "timestamp": 1662743866716
+//             }
+//         },
+//         {
+//             "methodCall": "appcatalog.apps",
+//             "params": {
+//                 "request": {}
+//             },
+//             "timestamp": 1662743885216,
+//             "sequenceId": 3,
+//             "response": {
+//                 "error": {
+//                     "code": -32601,
+//                     "message": "Method not found"
+//                 },
+//                 "timestamp": 1662743885217
+//             }
+//         }
+//     ]
+// };
+//   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => false);
+//   const spy2 = jest.spyOn(session, "handleSingleExampleMethod").mockImplementation(() => false);
+//   const result = session.convertJsonToYml(JSON.stringify(input));
+//   expect(spy).toHaveBeenCalled();
+//   //expect(spy2).toHaveBeenCalled();
+//   // expect(emptyInputResult.stack).toMatch(/(Unexpected token u in JSON at position 0)/);
+
+//   // const nullInputResult = session.convertJsonToYml();
+//   // expect(spy).toHaveBeenCalled();
+//   // expect(nullInputResult.stack).toMatch(/(Unexpected token u in JSON at position 0)/);
+  
+//   spy.mockClear();
+// })
