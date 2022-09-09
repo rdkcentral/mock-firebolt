@@ -26,18 +26,7 @@ import * as util from './util.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import { methodTriggers } from './triggers.mjs';
-import {
-  isEventListenerOnMessage,
-  sendEventListenerAck,
-  registerEventListener,
-  deregisterEventListener,
-  isEventListenerOffMessage,
-  sendBroadcastEvent,
-  sendEvent,
-  logSuccess,
-  logErr,
-  logFatalErr,
-} from "./events.mjs";
+import * as events from "./events.mjs";
 import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs';
 import * as conduit from './conduit.mjs';
