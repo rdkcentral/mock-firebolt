@@ -27,6 +27,7 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
+import * as events from "./events.mjs";
 import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs';
 import * as conduit from './conduit.mjs';
