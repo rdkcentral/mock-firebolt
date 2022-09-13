@@ -144,21 +144,351 @@ test('verify a session output mock-overrides calls conversion method', () => {
 
 
 test('sessionManagement.setOutputDir works properly', () => {
-  //const session = new sessionManagement.Session();
-  await sessionManagement.startRecording();
-  //session.sessionOutputPath = './sessions';
   sessionManagement.setOutputDir('./test');
-  expect(JSON.stringify(sessionManagement.sessionRecording)).toBe('./test');
-  expect(session.mockOutputPath).toBe('./test');
+  const sessionOutputPath = sessionManagement.getSessionOutputDir()
+  const mockOutputPath = sessionManagement.getMockOutputDir()
+  expect(sessionOutputPath).toBe('./test');
+  expect(mockOutputPath).toBe('./test');
 })
 
-// test('sessionManagement.setOutputFormat works properly', () => {
-//   const session = new sessionManagement.Session();
-//   session.sessionOutput = 'log';
-//   sessionManagement.setOutputDir('test');
-//   expect(session.sessionOutputPath).toBe('test');
-//   expect(session.mockOutputPath).toBe('test');
-// })
+test('sessionManagement.setOutputFormat works properly', () => {
+  sessionManagement.setOutputFormat('test');
+  const format = sessionManagement.getOutputFormat();
+  expect(format).toBe('test');
+})
+
+test('verify check params finds repetition', () => {
+  const session = new sessionManagement.Session();
+  const array = [
+    {
+      paramDetails: {
+        param: {
+          options: {
+            environment:"prod",
+            authenticationEntity:"MVPD"
+          }
+        },
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    },{
+      paramDetails: {
+        param: {
+          options: {
+            environment:"prod",
+            authenticationEntity:"MVPD"
+          }
+        },
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    }
+  ]
+  const object = {
+    paramDetails: {
+      param: {
+        options: {
+          environment:"prod",
+          authenticationEntity:"MVPD"
+        }
+      },
+      result: {
+        adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+        adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+        adNetworkId: '519178',
+        adProfileId: '12345:caf_allinone_profile',
+        adSiteSectionId: 'caf_allinone_profile_section',
+        adOptOut: true,
+        privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+        ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+        ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+        appName: 'FutureToday',
+        appBundleId: 'FutureToday.comcast',
+        distributorAppId: '1001',
+        deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+        coppa: 0,
+        authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+      }
+    }
+  }
+  const result = session.checkParams(array, object);
+  expect(result).toBeTruthy;
+})
+
+test('verify check params does not find repetition', () => {
+  const array = [
+    {
+      paramDetails: {
+        param: {
+          options: {
+            environment:"prod",
+            authenticationEntity:"MVPD"
+          }
+        },
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    },{
+      paramDetails: {
+        param: {
+          options: {
+            coppa : "false",
+            environment:"prod",
+            authenticationEntity:"MVPD"
+          }
+        },
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    }
+  ]
+  const object = {
+    paramDetails: {
+      param: {
+        options: {
+          coppa : "true",
+          environment:"prod",
+          authenticationEntity:"MVPD"
+        }
+      },
+      result: {
+        adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+        adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+        adNetworkId: '519178',
+        adProfileId: '12345:caf_allinone_profile',
+        adSiteSectionId: 'caf_allinone_profile_section',
+        adOptOut: true,
+        privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+        ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+        ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+        appName: 'FutureToday',
+        appBundleId: 'FutureToday.comcast',
+        distributorAppId: '1001',
+        deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+        coppa: 0,
+        authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+      }
+    }
+  }
+  const session = new sessionManagement.Session();
+  const result = session.checkParams(array, object);
+  expect(result).toBeFalsy;
+})
+
+test('verify handleMultipleExampleMethod with multiple types of params', () => {
+  const method = 'advertising.config';
+  const array = [
+    {
+      paramDetails: {
+        param: {
+          anotherParam : "true",
+          options: {
+            environment:"prod",
+            authenticationEntity:"MVPD"
+          }
+        },
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    }, {
+      paramDetails: {
+        param: {
+          options: {
+            coppa : "false",
+            environment:"prod",
+            authenticationEntity:"MVPD"
+          }
+        },
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    }, {
+      paramDetails: {
+        param: {
+          options: {
+            coppa : "true",
+            environment:"prod",
+            authenticationEntity:"MVPD"
+          },
+          anotherParam : true
+        },
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    }, 
+  ]
+  const session = new sessionManagement.Session();
+  const result = session.handleMultipleExampleMethod(method, array);
+  expect(result).toMatch('function (ctx,params){');
+  expect(result).toMatch('if(JSON.stringify(params.anotherParam)  ===  \"true\" && JSON.stringify(params.options)  ===  \'{\"environment\":\"prod\",\"authenticationEntity\":\"MVPD\"}\'){');
+  expect(result).toMatch('else if(JSON.stringify(params.options)  ===  \'{\"coppa\":\"false\",\"environment\":\"prod\",\"authenticationEntity\":\"MVPD\"}\'){');
+  expect(result).toMatch('else if(JSON.stringify(params.options)  ===  \'{\"coppa\":\"true\",\"environment\":\"prod\",\"authenticationEntity\":\"MVPD\"}\' && JSON.stringify(params.anotherParam)  ===  true){');
+  expect(result).toMatch("throw new ctx.FireboltError(-32888,'advertising.config is not working')");  
+})
+
+test('verify handleMultipleExampleMethod using a default param', () => {
+  const method = 'advertising.config';
+  const array = [
+    {
+      paramDetails: {
+        param: {
+          options: {
+            environment:"prod",
+            authenticationEntity:"MVPD"
+          }
+        },
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    }, {
+      paramDetails: {
+        param: {},
+        result: {
+          adServerUrl: 'http://demo.v.fwmrm.net/ad/p/1',
+          adServerUrlTemplate: 'http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D',
+          adNetworkId: '519178',
+          adProfileId: '12345:caf_allinone_profile',
+          adSiteSectionId: 'caf_allinone_profile_section',
+          adOptOut: true,
+          privacyData: 'ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K',
+          ifaValue: '01234567-89AB-CDEF-GH01-23456789ABCD',
+          ifa: 'ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==',
+          appName: 'FutureToday',
+          appBundleId: 'FutureToday.comcast',
+          distributorAppId: '1001',
+          deviceAdAttributes: 'ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=',
+          coppa: 0,
+          authenticationEntity: '60f72475281cfba3852413bd53e957f6'
+        }
+      }
+    }
+  ]
+  const session = new sessionManagement.Session();
+  const result = session.handleMultipleExampleMethod(method, array);
+  expect(result).toMatch('function (ctx,params){');
+  expect(result).toMatch('if(JSON.stringify(params.options)  ===  \'{\"environment\":\"prod\",\"authenticationEntity\":\"MVPD\"}\'){');
+  expect(result).toMatch('else{');
+})
 
 // test('sessionManagement.handleSingleExampleMethod TODO', () => {
 //   const session = new sessionManagement.Session();

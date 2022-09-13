@@ -118,37 +118,39 @@ class Session {
                 let multipleParams;
                 let methodName;
 
-                // skip .Subscribe (SKIPPING THE SUBSCRIBE VALIDATION AS WE ARE NOT CURRENTLY LOGGING) methods
-                for ( let j = i+1; j < calls.length; j++) { // iterate over rest of calls                     
-                    if (j < (calls.length) &&  calls[i].methodCall === calls[j].methodCall) { // looking for matching method calls
-                        multipleParams = {};
+                if (calls[i].params) { // need to have a params object in order to be qualified to be a multiple method example
+                    // skip .Subscribe (SKIPPING THE SUBSCRIBE VALIDATION AS WE ARE NOT CURRENTLY LOGGING) methods
+                    for ( let j = i+1; j < calls.length; j++) { // iterate over rest of calls                     
+                        if (j < (calls.length) &&  calls[i].methodCall === calls[j].methodCall) { // looking for matching method calls
+                            multipleParams = {};
 
-                        // Then add the matching method call
-                        // keeping result as null for methods having CertError else keeping result
-                        if (calls[j].error && calls[j].error.code == 'CertError' && calls[j].error.message == 'Received response as undefined') {
-                            multipleParams["paramDetails"] = {
-                                "param": calls[j].params,
-                                "result": null
-                             };
-                        } else if (calls[j].response.error) { // if there is an error we want that under 'result'
-                            multipleParams["paramDetails"] = {
-                                "param": calls[j].params,
-                                "result": calls[j].response
-                             };
-                        } else { // if no error than we need to take out one level of 'result'
-                            multipleParams["paramDetails"] = {
-                                "param": calls[j].params,
-                                "result": calls[j].response.result
-                             };
-                        }
+                            // Then add the matching method call
+                            // keeping result as null for methods having CertError else keeping result
+                            if (calls[j].error && calls[j].error.code == 'CertError' && calls[j].error.message == 'Received response as undefined') {
+                                multipleParams["paramDetails"] = {
+                                    "param": calls[j].params,
+                                    "result": null
+                                };
+                            } else if (calls[j].response.error) { // if there is an error we want that under 'result'
+                                multipleParams["paramDetails"] = {
+                                    "param": calls[j].params,
+                                    "result": calls[j].response
+                                };
+                            } else { // if no error than we need to take out one level of 'result'
+                                multipleParams["paramDetails"] = {
+                                    "param": calls[j].params,
+                                    "result": calls[j].response.result
+                                };
+                            }
 
-                        // to check repetition of params
-                        repetition = this.checkParams(multipleExampleContext,multipleParams);
-                        if(!repetition) {
-                            multipleExampleContext.push(multipleParams);
-                            methodCallsWritten.push(calls[j].methodCall);
+                            // to check repetition of params
+                            repetition = this.checkParams(multipleExampleContext,multipleParams);
+                            if(!repetition) {
+                                multipleExampleContext.push(multipleParams);
+                                methodCallsWritten.push(calls[j].methodCall);
+                            }
+                            multipleExampleFlag = true;
                         }
-                        multipleExampleFlag = true;
                     }
                 }
 
@@ -266,14 +268,16 @@ class Session {
                 for (let j = 0; j < param.length; j++) {
                     // Serializing name-value pair of each param
                     if (j == 0) {
-                        if( typeof( contexts[i].paramDetails.param[param[0]].value) === "object" ){
+                        console.log("HERE ME FIRST", contexts[i].paramDetails.param[param[j]]);
+                        if( typeof( contexts[i].paramDetails.param[param[0]]) === "object" ){
                             arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[0]]) + "'");
                         }
                         else{
                             arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[param[0]]));
                         }
                     } else {
-                        if( typeof( contexts[i].paramDetails.param[param[j]].value) === "object" ){
+                        console.log("HERE ME", contexts[i].paramDetails.param[param[j]]);
+                        if( typeof( contexts[i].paramDetails.param[param[j]]) === "object" ){
                             arrResult.push(` && JSON.stringify(params.${param[j]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[j]]) + "'");
                         }
                         else{
@@ -300,6 +304,8 @@ class Session {
 
     //Returns flag to check the repetition of params
     checkParams(multipleExampleContext,multipleParams){
+        console.log(multipleExampleContext);
+        console.log(multipleParams);
         let repetition = false;
         for(let j=0; j < multipleExampleContext.length;j++){
             if (JSON.stringify(multipleExampleContext[j]["paramDetails"].param) === JSON.stringify(multipleParams["paramDetails"].param)){
@@ -387,10 +393,22 @@ function setOutputFormat(format){
     logger.info("Setting output. After setting: " + sessionRecording.recordedSession.sessionOutput);
 }
 
+function getOutputFormat(){
+    return sessionRecording.recordedSession.sessionOutput;
+}
+
 function setOutputDir(dir){
     sessionRecording.recordedSession.sessionOutputPath = dir;
     sessionRecording.recordedSession.mockOutputPath = dir;
     logger.info("Setting output path. After setting: " + sessionRecording.recordedSession.mockOutputPath);
+}
+
+function getSessionOutputDir(){
+    return sessionRecording.recordedSession.sessionOutputPath;
+}
+
+function getMockOutputDir(){
+    return sessionRecording.recordedSession.mockOutputPath;
 }
 
 function updateCallWithResponse(method, result, key) {
@@ -405,4 +423,4 @@ function updateCallWithResponse(method, result, key) {
     }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, setOutputDir};
+export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir};
