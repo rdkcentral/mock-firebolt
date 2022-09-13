@@ -159,6 +159,9 @@ npm run dev -- --manage --discovery
 # If you need to use non-standard ports for any reason:
 npm run dev -- --httpPort 3456 --socketPort 9876
 
+#If you wish to enable conduit functionality
+npm run dev -- --conduit
+
 # If you need to use proxy connection for any reason:
 npm run dev -- --proxy <ip>:<port>
 Refer more about proxy mode in ./docs/ProxyMode.md

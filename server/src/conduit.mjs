@@ -64,7 +64,7 @@ if (commandLine.conduit) {
       };
       const conduitMsg = JSON.stringify(oConduitMsg);
       conduitWs.send(conduitMsg);
-      //console.log('Conduit WebSocket sent a ping message to client');
+      //Conduit WebSocket sent a ping message to client
     });
   }, 30000);
 
