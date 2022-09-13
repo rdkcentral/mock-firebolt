@@ -21,12 +21,16 @@
 import ip from 'ip';
 import bonjour from 'bonjour';
 import { logger } from './logger.mjs';
+import * as commandLine from './commandLine.mjs';
 
-// advertise an HTTP server on port 9995
+// advertise a Firebolt developer tool (type=ws, subtype=firebolt)
+const developerToolPort = commandLine.developerToolPort;
+let developerToolName = commandLine.developerToolName;
+// @TODO: Look for conflicts and bump name (e.g., "Mock Firebolt 2", etc.)
 const options = {
-    name     : 'Mock Firebolt',
+    name     : developerToolName,
     host     : ip.address(),           // Get IP# of current host (developer laptop)
-    port     : 9995,                   // This will be a new port we open up
+    port     : developerToolPort,      // This will be a new port we open up @TODO
     type     : 'ws',                   // We may change this later
     subtypes : [ 'firebolt' ],
     protocol : 'tcp',
@@ -34,4 +38,4 @@ const options = {
 };
   
 bonjour().publish(options);
-logger.info(`Published on port #: ${options.port}`);
+logger.info(`Published as a Firebolt developer tool ${developerToolName} on port ${developerToolPort}`);
