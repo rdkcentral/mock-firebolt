@@ -24,17 +24,19 @@ import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as commandLine from './commandLine.mjs';
 
-const conduitKeySocketPort = commandLine.conduitKeySocketPort;
-
-const wss = new WebSocketServer({ port: conduitKeySocketPort });
 let keySocket;
+if (process.env.NODE_ENV !== 'test') {
+  const conduitKeySocketPort = commandLine.conduitKeySocketPort;
 
-wss.on('connection', function connection(ws) {
-  keySocket = ws;
-  // No need for ws.on('message', function message(data) {...}) because this socket is for sending from here only
-});
+  const wss = new WebSocketServer({ port: conduitKeySocketPort });
 
-console.log(`Listening on socket port ${conduitKeySocketPort} (key forwarding from Conduit app to app under development)...`);
+  wss.on('connection', function connection(ws) {
+    keySocket = ws;
+    // No need for ws.on('message', function message(data) {...}) because this socket is for sending from here only
+  });
+
+  console.log(`Listening on socket port ${conduitKeySocketPort} (key forwarding from Conduit app to app under development)...`);
+}
 
 function getKeySocket() {
   return keySocket;
