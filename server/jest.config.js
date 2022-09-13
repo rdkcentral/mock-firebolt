@@ -24,6 +24,8 @@ module.exports = {
   coverageThreshold: {global: {lines: 79,},},
   collectCoverageFrom: [
     './src/**/*.mjs',
+    '!./src/conduitKeys.mjs',
+    '!./src/conduit.mjs',
     '!**<rootDir>/server/node_modules/**'
   ],
   coveragePathIgnorePatterns: [
