@@ -67,16 +67,13 @@ class Session {
 
             let returnStmt = null; // creating a return message
             if (this.sessionOutput == 'raw') {
-                console.log("Inside raw format type");
                 fs.writeFileSync(sessionDataFile, sessionDataJson);
                 returnStmt = `Succesfully wrote output in raw format to ${sessionDataFile}`;
             } else if (this.sessionOutput == "mock-overrides") {
-                console.log("Inside mock-overrides format type");
                 this.convertJsonToYml(sessionDataJson);
                 returnStmt = `Succesfully wrote output in mock-overrides format to ${this.mockOutputPath}`;
             } else {
                 //emit this json in time order.
-                console.log("Inside log format type");
                 this.sortJsonByTime(sessionData, sessionDataFile);
                 returnStmt = `Succesfully wrote output in log format to ${sessionDataFile}`;
             }
