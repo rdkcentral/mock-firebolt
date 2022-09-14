@@ -91,8 +91,6 @@ class Session {
     }
 
     convertJsonToYml(jsonReport) {
-        console.log("input as object", jsonReport);
-        console.log("input as stringified" + JSON.stringify(jsonReport));
         if (!fs.existsSync(this.mockOutputPath)) {
             logger.info("Mock directory did not exist direcotry: " + this.mockOutputPath)
             fs.mkdirSync(this.mockOutputPath, { recursive: true});
