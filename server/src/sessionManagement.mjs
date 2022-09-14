@@ -186,8 +186,7 @@ class Session {
                         try {
                             fs.writeFileSync(`${this.mockOutputPath}/${methodName}.yaml`, yamlStr);
                         } catch(e) {
-                            console.error('Invalid Output Directory');
-                            console.error(e);
+                            console.error('Invalid Output Directory', e);
                             return e;
                         }
                     } else {
