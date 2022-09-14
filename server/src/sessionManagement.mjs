@@ -71,7 +71,7 @@ class Session {
                 fs.writeFileSync(sessionDataFile, sessionDataJson);
                 returnStmt = `Succesfully wrote output in raw format to ${sessionDataFile}`;
             } else if (this.sessionOutput == "mock-overrides") {
-                console.log("Inside mock-overrides format type", sessionDataJson);
+                console.log("Inside mock-overrides format type");
                 this.convertJsonToYml(sessionDataJson);
                 returnStmt = `Succesfully wrote output in mock-overrides format to ${this.mockOutputPath}`;
             } else {
@@ -91,6 +91,8 @@ class Session {
     }
 
     convertJsonToYml(jsonReport) {
+        console.log("input as object", jsonReport);
+        console.log("input as stringified" + JSON.stringify(jsonReport));
         if (!fs.existsSync(this.mockOutputPath)) {
             logger.info("Mock directory did not exist direcotry: " + this.mockOutputPath)
             fs.mkdirSync(this.mockOutputPath, { recursive: true});
@@ -118,39 +120,34 @@ class Session {
                 let multipleParams;
                 let methodName;
 
-                if (calls[i].params) { // need to have a params object in order to be qualified to be a multiple method example
-                    // skip .Subscribe (SKIPPING THE SUBSCRIBE VALIDATION AS WE ARE NOT CURRENTLY LOGGING) methods
-                    for ( let j = i+1; j < calls.length; j++) { // iterate over rest of calls                     
-                        if (j < (calls.length) &&  calls[i].methodCall === calls[j].methodCall) { // looking for matching method calls
-                            multipleParams = {};
+                // skip .Subscribe (SKIPPING THE SUBSCRIBE VALIDATION AS WE ARE NOT CURRENTLY LOGGING) methods
+                for ( let j = i+1; j < calls.length; j++) { // iterate over rest of calls                     
+                    if (j < (calls.length) &&  calls[i].methodCall === calls[j].methodCall) { // looking for matching method calls
+                        multipleParams = {};
 
-                            // Then add the matching method call
-                            // keeping result as null for methods having CertError else keeping result
-                            if (calls[j].error && calls[j].error.code == 'CertError' && calls[j].error.message == 'Received response as undefined') {
-                                multipleParams["paramDetails"] = {
-                                    "param": calls[j].params,
-                                    "result": null
-                                };
-                            } else if (calls[j].response.error) { // if there is an error we want that under 'result'
-                                multipleParams["paramDetails"] = {
-                                    "param": calls[j].params,
-                                    "result": calls[j].response
-                                };
-                            } else { // if no error than we need to take out one level of 'result'
-                                multipleParams["paramDetails"] = {
-                                    "param": calls[j].params,
-                                    "result": calls[j].response.result
-                                };
-                            }
-
-                            // to check repetition of params
-                            repetition = this.checkParams(multipleExampleContext,multipleParams);
-                            if(!repetition) {
-                                multipleExampleContext.push(multipleParams);
-                                methodCallsWritten.push(calls[j].methodCall);
-                            }
-                            multipleExampleFlag = true;
+                        // Then add the matching method call
+                        // keeping result as null for methods having CertError else keeping result
+                        if (calls[j].error && calls[j].error.code == 'CertError' && calls[j].error.message == 'Received response as undefined') {
+                            multipleParams["paramDetails"] = {
+                                "result": null
+                            };
+                        } else if (calls[j].response.error) { // if there is an error we want that under 'result'
+                            multipleParams["paramDetails"] = {
+                                "result": calls[j].response
+                            };
+                        } else { // if no error than we need to take out one level of 'result'
+                            multipleParams["paramDetails"] = {
+                                "result": calls[j].response.result
+                            };
                         }
+                        multipleParams["paramDetails"].param = calls[j].params ? calls[j].params : {};
+                        // to check repetition of params
+                        repetition = this.checkParams(multipleExampleContext,multipleParams);
+                        if(!repetition) {
+                            multipleExampleContext.push(multipleParams);
+                            methodCallsWritten.push(calls[j].methodCall);
+                        }
+                        multipleExampleFlag = true;
                     }
                 }
 
@@ -160,20 +157,18 @@ class Session {
                     multipleParams = {};
                     if ( calls[i].error && calls[i].error.code == 'CertError' && calls[i].error.message == 'Received response as undefined') {
                        multipleParams["paramDetails"] = {
-                          "param": calls[i].params,
                           "result": null
                        };
                     } else if (calls[i].response.error) { // if there is an error we want that under 'result'
                         multipleParams["paramDetails"] = {
-                            "param": calls[i].params,
                             "result": calls[i].response
                          };
                     } else { // if no error than we need to take out one level of 'result'
                        multipleParams["paramDetails"] = {
-                          "param": calls[i].params,
                           "result": calls[i].response.result
                        };
                     }
+                    multipleParams["paramDetails"].param = calls[i].params ? calls[i].params : {};
                     // to check repetition of params
                     repetition = this.checkParams(multipleExampleContext,multipleParams);
      
@@ -183,23 +178,27 @@ class Session {
                        repetition = false;
                     }
                     
-                    let responseContent = this.handleMultipleExampleMethod(calls[i].methodCall, multipleExampleContext);
-                    methodName = calls[i].methodCall;
-                    let state = {
-                       "methods": {
-                          [methodName]: {
-                             "response": responseContent
-                          }
-                       }
-                    };
-                    let yamlStr = yaml.dump(state);
-                    try {
-                       fs.writeFileSync(`${this.mockOutputPath}/${methodName}.yaml`, yamlStr);
-                    } catch(e) {
-                       console.error('Invalid Output Directory');
-                       console.error(e);
-                       process.exit(0);
-                   }
+                    if (multipleExampleContext.length > 1) { // making sure it is acutally multiple examples and was not just multiple duplicates
+                        let responseContent = this.handleMultipleExampleMethod(calls[i].methodCall, multipleExampleContext);
+                        methodName = calls[i].methodCall;
+                        let state = {
+                        "methods": {
+                            [methodName]: {
+                                "response": responseContent
+                            }
+                        }
+                        };
+                        let yamlStr = yaml.dump(state);
+                        try {
+                            fs.writeFileSync(`${this.mockOutputPath}/${methodName}.yaml`, yamlStr);
+                        } catch(e) {
+                            console.error('Invalid Output Directory');
+                            console.error(e);
+                            return e;
+                        }
+                    } else {
+                        multipleExampleFlag = false;
+                    }
                 }
 
                 // json file generation for methods with only one example
@@ -209,19 +208,18 @@ class Session {
                     methodName = calls[i].methodCall;
                     let obj;
     
-                    obj = this.handleSingleExampleMethod(calls,staticObject,methodName,obj,i) 
+                    obj = this.handleSingleExampleMethod(calls,staticObject,methodName,obj,i);
                     let data = JSON.stringify(obj, null, 2);
                     try {
                         fs.writeFileSync(`${this.mockOutputPath}/${methodName}.json`, data);
                     } catch(e) {
                         console.error('Invalid Output Directory');
                         console.error(e);
-                        console.log(e.stack);
+                        return e;
                     }
                 }
             }
         }
-
     }
 
     // Returns json object for methods with only one example
@@ -268,7 +266,6 @@ class Session {
                 for (let j = 0; j < param.length; j++) {
                     // Serializing name-value pair of each param
                     if (j == 0) {
-                        console.log("HERE ME FIRST", contexts[i].paramDetails.param[param[j]]);
                         if( typeof( contexts[i].paramDetails.param[param[0]]) === "object" ){
                             arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[0]]) + "'");
                         }
@@ -276,7 +273,6 @@ class Session {
                             arrResult.push(`JSON.stringify(params.${param[0]})` + "  ===  " + JSON.stringify(contexts[i].paramDetails.param[param[0]]));
                         }
                     } else {
-                        console.log("HERE ME", contexts[i].paramDetails.param[param[j]]);
                         if( typeof( contexts[i].paramDetails.param[param[j]]) === "object" ){
                             arrResult.push(` && JSON.stringify(params.${param[j]})` + "  ===  '" + JSON.stringify(contexts[i].paramDetails.param[param[j]]) + "'");
                         }
@@ -292,11 +288,11 @@ class Session {
             responseContent += arrResult.join("");
         }
     
+        
         if (defaultResult) {
             responseContent += "   else{\n      return " + defaultResult + "; \n   } \n";
         } else {
-            responseContent += `   throw new ctx.FireboltError(-32888,'${method} is not working')\n`;
-        }
+            responseContent += `   throw new ctx.FireboltError(-32888,'${method} is not working')\n`;        }
         responseContent += '}';
         return responseContent;
     }
@@ -304,8 +300,6 @@ class Session {
 
     //Returns flag to check the repetition of params
     checkParams(multipleExampleContext,multipleParams){
-        console.log(multipleExampleContext);
-        console.log(multipleParams);
         let repetition = false;
         for(let j=0; j < multipleExampleContext.length;j++){
             if (JSON.stringify(multipleExampleContext[j]["paramDetails"].param) === JSON.stringify(multipleParams["paramDetails"].param)){
