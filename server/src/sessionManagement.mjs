@@ -60,7 +60,7 @@ class Session {
             // logger.info(`${sessionStart.toISOString()}`);    
 
             if (!fs.existsSync(this.sessionOutputPath)) {
-                logger.info("Directory did not exist direcotry: " + this.sessionOutputPath)
+                logger.info("Directory does not exist for: " + this.sessionOutputPath)
                 fs.mkdirSync(this.sessionOutputPath, { recursive: true});
             }
             const sessionDataFile = this.sessionOutputPath + `/FireboltCalls_${this.#sessionStart}_${this.sessionOutput}.json`;
