@@ -89,15 +89,14 @@ class Session {
 
     convertJsonToYml(jsonReport) {
         if (!fs.existsSync(this.mockOutputPath)) {
-            logger.info("Mock directory did not exist direcotry: " + this.mockOutputPath)
+            logger.info("Mock directory does not exist for: " + this.mockOutputPath)
             fs.mkdirSync(this.mockOutputPath, { recursive: true});
         }
         let repetition = false;
         try {
             jsonReport = JSON.parse(jsonReport);
         } catch (e) {
-            console.error('Invalid Input format');
-            console.error("Error", e);
+            console.error('Invalid Input format', e);
             return e;
         }
 
