@@ -376,7 +376,7 @@ function addCall(methodCall, params){
 
 function setOutputFormat(format){
     sessionRecording.recordedSession.sessionOutput = format;
-    logger.info("Setting output. After setting: " + sessionRecording.recordedSession.sessionOutput);
+    logger.info("Setting output: " + sessionRecording.recordedSession.sessionOutput);
 }
 
 function getOutputFormat(){
@@ -386,7 +386,7 @@ function getOutputFormat(){
 function setOutputDir(dir){
     sessionRecording.recordedSession.sessionOutputPath = dir;
     sessionRecording.recordedSession.mockOutputPath = dir;
-    logger.info("Setting output path. After setting: " + sessionRecording.recordedSession.mockOutputPath);
+    logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
 }
 
 function getSessionOutputDir(){
