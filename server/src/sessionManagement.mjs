@@ -206,8 +206,7 @@ class Session {
                     try {
                         fs.writeFileSync(`${this.mockOutputPath}/${methodName}.json`, data);
                     } catch(e) {
-                        console.error('Invalid Output Directory');
-                        console.error(e);
+                        console.error('Invalid Output Directory', e);
                         return e;
                     }
                 }
