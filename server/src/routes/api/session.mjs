@@ -42,6 +42,12 @@ function stopSession(req, res) {
 }
 
 function setOutput(req, res) {
+    if (!req.params.format) {
+        res.status(400).send({
+            status: 'ERROR',
+            message: 'Format not found in request parameters'
+        });
+    }
     const format = req.params.format;
     logger.info(`Setting session output to ${format}`);
     setOutputFormat(format);
