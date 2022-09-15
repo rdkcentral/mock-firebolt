@@ -270,3 +270,21 @@ test(`messageHandler.handleMessage works properly for developerNotes`, async () 
   expect(spy).toHaveBeenCalled();
   expect(resultFour).toBeUndefined();
 });
+
+test(`messageHandler.fSuccess works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  messageHandler.testExports.fSuccess("", "", { id: "1" });
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`messageHandler.fErr works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  messageHandler.testExports.fErr("");
+  expect(spy).toHaveBeenCalled();
+});
+
+test(`messageHandler.fFatalErr works properly`, () => {
+  const spy = jest.spyOn(logger, "info");
+  messageHandler.testExports.fFatalErr();
+  expect(spy).toHaveBeenCalled();
+});
