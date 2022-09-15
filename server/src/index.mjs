@@ -27,12 +27,17 @@ import * as commandLine from './commandLine.mjs';
 import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
+import * as proxyManagement from './proxyManagement.mjs';
 
-// -------------------------------------------------- Web Socket --------------------------------------------------
+// --------------------------------------------------- Conduit ----------------------------------------------------
+
+import './conduit.mjs';
+import './conduitKeys.mjs';
+
+// ------------------------------------------ Firebolt OpenRPC WebSocket ------------------------------------------
 
 import { createServer } from 'http';
 import { parse } from 'url';
-import WebSocket, { WebSocketServer } from 'ws';
 
 logger.important(`Welcome to Mock Firebolt`);
 
@@ -41,13 +46,30 @@ const server = createServer();
 server.on('upgrade', function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
   let userId = pathname.substring(1);
+
   if ( ! userId ) {
     logger.info('Using default user');
     userId = config.app.defaultUserId;
   } else if ( ! userManagement.isKnownUser(userId) ) {
     logger.warn(`WARNING: Unknown userId: ${userId}; Using default user`);
     userId = config.app.defaultUserId;
+  } else {
+    logger.info(`Using user ${userId}`);
   }
+  
+  if( commandLine.proxy ) {
+    process.env.proxyServerIP = commandLine.proxy
+    logger.info('Send proxy request to websocket server: ' + process.env.proxyServerIP);
+    process.env.proxy = true
+    // Get token from connection parameter or from env
+    const mfToken = proxyManagement.getMFToken(request)
+    if( mfToken.token ) {
+      process.env.wsToken = mfToken.token
+    } else {
+      logger.warn(`WARNING: ${mfToken.error}`);
+    }
+  }
+
   const wss = userManagement.getWssForUser(userId);
   if ( wss ) {
     wss.handleUpgrade(request, socket, head, function done(ws) {
@@ -65,6 +87,7 @@ logger.info('Adding user 456...'); stateManagement.addUser('456'); userManagemen
 logger.info('Adding user 789...'); stateManagement.addUser('789'); userManagement.addUser('789');
 
 logger.info('Adding user 123~A...'); stateManagement.addUser('123~A'); userManagement.addUser('123~A');
+logger.info('Adding user 567~B...'); stateManagement.addUser('567~B'); userManagement.addUser('567~B');
 logger.info('Adding user 456~A...'); stateManagement.addUser('456~A'); userManagement.addUser('456~A');
 logger.info('Adding user 789~A...'); stateManagement.addUser('789~A'); userManagement.addUser('789~A');
 

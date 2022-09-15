@@ -174,9 +174,9 @@ Run Mock Firebolt like: `npm run dev -- --triggers ./src/triggers`
 
 #### novalidate Flag
 
-Starting the server with validateMethodOverrides: false in the .mf.config.json file should allow "bad" method override values either via POSTs to /api/v1/state or via the CLI (--result or --upload)
+By default, Mock Firebolt will validate incoming method names and parameters and outgoing events. If you want to prevent some or all of these validation checks, you must either set the value of validate in mf.config.json to a subset of the default values (["method", "params", "response", "event"]) or pass one or more --novalidate command line arguments when you start Mock Firebolt.
 
-Run Mock Firebolt like: `npm run dev -- --novalidate`
+Run Mock Firebolt like: `npm run dev -- --novalidate response --novalidate params`
 
 ### Web Admin UI
 ```
@@ -186,3 +186,5 @@ http://localhost:3333
 ### Browser Extensions
 
 Demo Governor browser extension to send lifecycle events.
+
+Demo Injector browser extension to inject Mock Firebolt connectivity to an app that doesn't directly include the activateMockFirebolt.js script.

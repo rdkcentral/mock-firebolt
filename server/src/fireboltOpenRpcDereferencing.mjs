@@ -99,6 +99,10 @@ function dereferenceMeta(_meta) {
 
 // --- Exports ---
 
+export const testExports = {
+  replaceRefArr
+};
+
 export {
   dereferenceMeta
 };

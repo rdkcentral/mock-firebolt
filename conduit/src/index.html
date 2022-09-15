@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <script src="activateMockFirebolt.js"></script>
+  </head>
+  <body>
+    <div id="container">
+      <h1><%= htmlWebpackPlugin.options.myPageHeader %> </h1>
+
+      <div id="navbar">
+        <button id="btnPairing">Pairing</button>
+        <button id="btnDashboard">Dashboard</button>
+        <button id="btnLog">Log</button>
+
+        <div id="keyHandling">
+          <span id="isKeyForwardingLabel">Key Forwarding:</span>
+          <button id="btnKeyForwarding">OFF</button>
+        </div>
+      </div>
+
+      <div id="sections">
+
+        <div id="pairingSection" style="display:none;">
+          <div id="pairingHeading">
+            <p>Use your D-PAD or number keys to enter the IP number and port of the Mock Firebolt Conduit WebSocket</p>
+          </div>
+          <div id="pairingIpAndPort">
+            <button id="ipNumber1">1</button>
+            <button id="ipNumber2">9</button>
+            <button id="ipNumber3">2</button>
+            <span class="period">.</span>
+            <button id="ipNumber4">1</button>
+            <button id="ipNumber5">6</button>
+            <button id="ipNumber6">8</button>
+            <span class="period">.</span>
+            <button id="ipNumber7">0</button>
+            <button id="ipNumber8">0</button>
+            <button id="ipNumber9">1</button>
+            <span class="period">.</span>
+            <button id="ipNumbera">1</button>
+            <button id="ipNumberb">1</button>
+            <button id="ipNumberc">5</button>
+            <span class="colon">:</span>
+            <button id="portNumber1">9</button>
+            <button id="portNumber2">9</button>
+            <button id="portNumber3">9</button>
+            <button id="portNumber4">7</button>
+            <button id="btnConfirmPairing">Connect</button>
+          </div>
+          <p class="note">Enter IPv4 web socket IP# and port#. Assumes you're using a non-XG device.</p>
+        </div>
+
+        <div id="dashboardSection" style="display:none;">
+          <table>
+            <tr>
+              <td>App Lifecycle State:</td><td><span id="lifecycleState"></span></td>
+            </tr>
+            <tr id="lastDynamicDashBoardInfo">
+              <td>Last Forwarded Key:</td><td><span id="mostRecentKeyEvent"></span></td>
+            </tr>
+
+            <tr>
+              <td>Account ID:</td><td><span id="accountId"></span></td>
+            </tr>
+            <tr>
+              <td>Device ID:</td><td><span id="deviceId"></span></td>
+            </tr>
+            <tr>
+              <td>Device Distributor:</td><td><span id="deviceDistributor"></span></td>
+            </tr>
+            <tr>
+              <td>Device Model:</td><td><span id="deviceModel"></span></td>
+            </tr>
+            <tr>
+              <td>Device Platform:</td><td><span id="devicePlatform"></span></td>
+            </tr>
+            <tr>
+              <td>Device SDK Version:</td><td><span id="deviceSdkVersion"></span></td>
+            </tr>
+            <tr>
+              <td>Device OS Version:</td><td><span id="deviceOsVersion"></span></td>
+            </tr>
+          </table>
+        </div>
+
+        <div id="logSection" style="display:none;">
+          <div id="output"></div>
+          <p class="note">Use LEFT and RIGHT to scroll up and down through the log; Use BACK to clear log.</p>
+        </div>
+
+      </div>
+
+    </div>
+    <!-- bundle goes here -->
+  </body>
+</html>
+

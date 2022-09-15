@@ -27,6 +27,31 @@ import * as commandLine from './commandLine.mjs';
 const methodTriggers = {};
 const eventTriggers = {};
 
+// Log error for invalid path
+function logInvalidPathError(errorType, pathDetails, ex) {
+  let errorString = '';
+  switch (errorType) {
+    case "eventTriggerError":
+      errorString = `Skipping event trigger file ${pathDetails}; an error occurred parsing the JavaScript`
+      break;
+
+    case "methodTriggerError":
+      errorString = `Skipping method trigger file ${pathDetails}; an error occurred parsing the JavaScript`
+      break;
+
+    case "processSubDirError":
+      errorString = `An error occurred trying to processSubDir on ${pathDetails}`;
+      break;
+  
+    default:
+      errorString = `An error occurred trying to processTopDir on ${pathDetails}`;
+      break;
+  }
+
+  logger.error(errorString);
+  logger.error(ex);
+}
+
 // Process a single file found in enabledTriggerPathN/pre.js and/or enabledTriggerPathN/post.js files
 // Read the file, create a function out of its source code, and set triggers[methodName][pre|post]
 function processFile(methodName, filePath, fileName, fileExt) {
@@ -51,8 +76,7 @@ function processFile(methodName, filePath, fileName, fileExt) {
         eventTriggers[methodName][fileName] = fcn;
         logger.info(`Enabled event trigger defined in trigger file ${filePath}`);
       } catch ( ex ) {
-        logger.error(`Skipping event trigger file ${filePath}; an error occurred parsing the JavaScript`);
-        logger.error(ex);
+        logInvalidPathError('eventTriggerError', filePath, ex);
       }
     });
   }  
@@ -72,8 +96,7 @@ function processFile(methodName, filePath, fileName, fileExt) {
         methodTriggers[methodName][fileName] = fcn;
         logger.info(`Enabled method trigger defined in trigger file ${filePath}`);
       } catch ( ex ) {
-        logger.error(`Skipping method trigger file ${filePath}; an error occurred parsing the JavaScript`);
-        logger.error(ex);
+        logInvalidPathError('methodTriggerError', filePath, ex);
       }
     });
   }
@@ -137,8 +160,7 @@ function processSubDir(dir , processTopDir){
         try {
         processTopDir(subDir, processMethodDir);
       } catch ( ex ) {
-        logger.error(`An error occurred trying to processSubDir on ${dir}`);
-        logger.error(ex);
+        logInvalidPathError('processSubDirError', dir, ex);
       }};
     });
   });
@@ -150,12 +172,20 @@ enabledTriggerPaths.forEach((dir) => {
   try {
     processSubDir(dir, processTopDir);
   } catch ( ex ) {
-    logger.error(`An error occurred trying to processTopDir on ${dir}`);
-    logger.error(ex);
+    logInvalidPathError('', dir, ex);
   }
 });
 
 // --- Exports ---
+
+export const testExports = {
+  processFile,
+  processMethodDir,
+  processMethodDir,
+  processTopDir,
+  processSubDir,
+  logInvalidPathError
+};
 
 export {
   methodTriggers, eventTriggers
