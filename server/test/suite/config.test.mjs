@@ -26,6 +26,10 @@ test(`config works properly`, () => {
   const expectedResult = {
     app: {
       allowMixedCase: false,
+      conduitKeySocketPort: 9996,
+      conduitSocketPort: 9997,
+      developerToolName: "Mock Firebolt",
+      developerToolPort: 9995,
       socketPort: 9998,
       httpPort: 3333,
       defaultUserId: "12345",
@@ -59,9 +63,9 @@ test(`config works properly`, () => {
           name: "discovery",
         },
       ],
-      validate: [ "method", "params", "response", "events" ],
+      validate: ["method", "params", "response", "events"],
     },
-    validate: [ "method", "params", "response", "events" ],
+    validate: ["method", "params", "response", "events"],
   };
   expect(config).toEqual(expectedResult);
 });

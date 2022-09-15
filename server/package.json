@@ -14,7 +14,7 @@
     "build:mf": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
     "build:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build": "npm run build:openrpc && npm run build:mf",
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
+    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
     "start:NOTES1": "Can do 'npm run start' (core SDK only) or 'npm run start --manage --discovery' (all three SDKs)",
     "start": "node build/index.mjs",
     "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
