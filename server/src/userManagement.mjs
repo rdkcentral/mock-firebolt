@@ -75,15 +75,14 @@ function getWsListForUser(userId) {
   const userList = getUserListForUser(userId);
   if ( ! userList ) { return undefined }
 
-  // Covert an array of "<userId>-<groupName" values to an array of ws's
-  const wsList = userList.map((userId) => {
-    return getWsForUser(''+userId);
-  });
-
-  // Filter out any undefined values
-  wsList.filter(ws => ws);
-
-  return wsList;
+  // creating an object map with ws and userId (of same user group) as key value pair
+  const wsUserMap = new Map();
+  for (const us of userList){
+    wsUserMap.set(getWsForUser(''+us),us);
+  }
+  //remove undefined keys
+  wsUserMap.delete();
+  return wsUserMap;
 }
 
 function associateUserWithWss(userId, wss) {
@@ -113,15 +112,35 @@ function handleGroupMembership(userId) {
   group2user.set(groupName, userList)
 }
 
+function heartbeat(ws) {
+  ws.isAlive = true;
+}
+
 function addUser(userId) {
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
   wss.on('connection', function connection(ws) {
+    ws.isAlive = true;
+    ws.on('pong', async hb => {
+      heartbeat(ws)
+    });
     associateUserWithWs(''+userId, ws);
     handleGroupMembership(''+userId)
     ws.on('message', async message => {
       messageHandler.handleMessage(message, ''+userId, ws);
     });
+  });
+
+  const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) return ws.terminate();
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', function close() {
+    clearInterval(interval);
   });
 }
 
@@ -136,7 +155,10 @@ function removeUser(userId) {
 }
 
 // --- Exports ---
+export const testExports={
+  user2wss, user2ws, group2user, associateUserWithWs, handleGroupMembership, heartbeat
+}
 
 export {
-  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser
+  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
 };

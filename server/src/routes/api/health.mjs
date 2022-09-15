@@ -28,7 +28,7 @@ import * as sdkManagement from '../../sdkManagement.mjs';
 // Load the package.json file
 const packageJson = JSON.parse(
   await readFile(
-    new URL('../../package.json', import.meta.url)
+    new URL('../../../package.json', import.meta.url)
   )
 );
 

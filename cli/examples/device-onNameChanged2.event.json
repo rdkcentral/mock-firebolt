@@ -1,0 +1,4 @@
+{
+  "method": "device.onNameChanged",
+  "result": "NEW-DEVICE-NAME-2"
+}

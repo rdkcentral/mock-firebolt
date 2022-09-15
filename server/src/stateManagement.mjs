@@ -27,7 +27,7 @@ import * as magicDateTime from './magicDateTime.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
-import * as events from './events.mjs';
+import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -116,8 +116,20 @@ async function getAppropriateDelay(userId, methodName) {
   return dly;
 }
 
+function hasOverride(userId, methodName) {
+  const userState = getState(userId);
+  if ( ! userState ) { return false; }
+  const resp = userState.methods[methodName];
+  if ( ! resp ) { return false; }
+  if ( resp.response ) { return true; }
+  if ( resp.result ) { return true; }
+  if ( resp.error ) { return true; }
+  if ( resp.responses ) { return true; }
+  return false;
+}
+
 // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
-function handleSequenceOfResponseValues(userId, methodName, params, resp) {
+function handleSequenceOfResponseValues(userId, methodName, params, resp, userState) {
   const nextIndex = userState.sequenceState[methodName] || 0;
   if ( nextIndex < resp.responses.length ) {
     resp = resp.responses[nextIndex];
@@ -128,6 +140,23 @@ function handleSequenceOfResponseValues(userId, methodName, params, resp) {
   }
   state[''+userId].sequenceState[methodName] = nextIndex + 1;
   return resp;
+}
+
+// Log Error for invalid methodName
+function logInvalidMethodError(methodName, resultErrors, resp) {
+  logger.error(
+    `ERROR: The function specified for the result of ${methodName} returned an invalid value`
+  );
+  logger.error(JSON.stringify(resultErrors, null, 4));
+  resp = {
+    error: {
+      code: -32400, // @TODO: Ensure we're returning the right value and message
+      message: "Invalid parameters", // @TODO: Ensure we're returning the right value and message
+      data: {
+        errors: resultErrors, // @TODO: Ensure we're formally defining this schema / data value
+      },
+    },
+  };
 }
 
 // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
@@ -142,16 +171,28 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         set: function ss(key, val) { return setScratch(userId, key, val) },
         get: function gs(key) { return getScratch(userId, key); },
         sendEvent: function(onMethod, result, msg) {
-          function fSuccess() {
-            logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
-          }
-          function fErr() {
-            logger.info(`Could not send ${onMethod} event because no listener is active`)
-          }
-          function fFatalErr() {
-            logger.info(`Internal error`)
-          }
-          events.sendEvent(ws, userId, onMethod, result, msg, fSuccess, fErr, fFatalErr);
+          sendEvent(
+            ws,
+            userId,
+            onMethod,
+            result,
+            msg,
+            logSuccess.bind(this, onMethod, result, msg),
+            logErr.bind(this, onMethod),
+            logFatalErr.bind(this)
+          );
+        },
+        sendBroadcastEvent: function(onMethod, result, msg) {
+          sendBroadcastEvent(
+            ws,
+            userId,
+            onMethod,
+            result,
+            msg,
+            logSuccess.bind(this, onMethod, result, msg),
+            logErr.bind(this, onMethod),
+            logFatalErr.bind(this)
+          );
         },
         FireboltError: commonErrors.FireboltError
       };
@@ -165,17 +206,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         };
       } else {
         // After the result function was called, we're realizing what it returned isn't valid!
-        logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-        logger.error(JSON.stringify(resultErrors, null, 4));
-        resp = {
-          error: {
-            code: -32400,                  // @TODO: Ensure we're returning the right value and message
-            message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
-            data: {
-              errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
-            }
-          }
-        };
+        logInvalidMethodError(methodName, resultErrors, resp);
       }
     } catch ( ex ) {
       if ( ex instanceof commonErrors.FireboltError ) {
@@ -220,17 +251,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
         };
       } else {
         // After the result function was called, we're realizing what it returned isn't valid!
-        logger.error(`ERROR: The function specified for the result of ${methodName} returned an invalid value`);
-        logger.error(JSON.stringify(resultErrors, null, 4));
-        resp = {
-          error: {
-            code: -32400,                  // @TODO: Ensure we're returning the right value and message
-            message: 'Invalid parameters', // @TODO: Ensure we're returning the right value and message
-            data: {
-              errors: resultErrors         // @TODO: Ensure we're formally defining this schema / data value
-            }
-          }
-        };
+        logInvalidMethodError(methodName, resultErrors, resp);
       }
     } catch ( ex ) {
       logger.error(`ERROR: Could not execute the function specified for the result of method ${methodName}`);
@@ -275,7 +296,7 @@ function getMethodResponse(userId, methodName, params, ws) {
 
     // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
     if ( resp && resp.responses ) {
-      resp = handleSequenceOfResponseValues(userId, methodName, params, resp);  
+      resp = handleSequenceOfResponseValues(userId, methodName, params, resp, userState);  
     }
 
     // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
@@ -379,7 +400,7 @@ function validateNewState_MethodOverrides(newStateMethods) {
   let errors = [];
 
   // Returns an empty array in "novalidate mode"
-  if( !config.validateMethodOverrides ){
+  if( !config.validate.includes("response") ){
     return [];
   }
   
@@ -435,6 +456,9 @@ function updateState(userId, newState) {
     } else {
       logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
     }
+  }
+  else {
+    logger.info(`Updating state for user ${userId}`);
   }
 
   const errors = validateNewState(newState);
@@ -539,11 +563,15 @@ function getScratch(userId, key) {
 
 // --- Exports ---
 
+export const testExports={
+  handleStaticAndDynamicError, state, validateMethodOverride, logInvalidMethodError,
+  mergeCustomizer
+}
 export {
   addUser,
   getState,
   getAppropriateDelay,
-  getMethodResponse,
+  hasOverride, getMethodResponse,
   updateState, revertState,
   setLatency, setLatencies,
   isLegalMode, setMode,
