@@ -1,4 +1,13 @@
 {
   "method": "discovery.onNavigateTo",
-  "result": "NEW-DISCOVERY-NAV-1"
+  "result": {
+    "action": "search",
+     "data": {
+        "query": "Entity navigate"
+     },
+     "context": {
+        "campaign": "unknown",
+        "source": "voice"
+     }
+  }
 }

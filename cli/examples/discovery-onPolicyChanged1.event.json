@@ -1,0 +1,8 @@
+{
+  "method": "discovery.onPolicyChanged",
+  "result": {
+    "enableRecommendations": true,
+    "shareWatchHistory": false,
+    "rememberWatchedPrograms": false
+ }
+}
