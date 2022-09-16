@@ -1,4 +1,6 @@
 {
+    "validate": [ "method", "params", "response", "events"],
+
     "supportedSdks": [
 
         {

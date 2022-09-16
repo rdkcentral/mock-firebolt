@@ -25,6 +25,19 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { logger } from './logger.mjs';
 
+function handleError(fileName, __dirname) {
+  logger.error(
+    `ERROR: Could not read Mock Firebolt configuration from ${fileName}`
+  );
+
+  fileName = path.resolve(__dirname, "../src", ".mf.config.SAMPLE.json");
+  if (fs.existsSync(fileName)) {
+    logger.error(
+      'You probably want to "cp src/.mf.config.SAMPLE.json src/.mf.config.json && npm run build:mf"'
+    );
+  }
+}
+
 function loadDotConfig() {
   let __filename, __dirname, fileName, dotConfig;
   try {
@@ -38,12 +51,7 @@ function loadDotConfig() {
 
     logger.info(`Read Mock Firebolt configuration from ${fileName}`);
   } catch ( ex ) {
-    logger.error(`ERROR: Could not read Mock Firebolt configuration from ${fileName}`);
-
-    fileName = path.resolve(__dirname, '../src', '.mf.config.SAMPLE.json');
-    if ( fs.existsSync(fileName) ) {
-      logger.error('You probably want to "cp src/.mf.config.SAMPLE.json src/.mf.config.json && npm run build:mf"');
-    }
+    handleError(fileName, __dirname);
 
     process.exit(1);
   }
@@ -53,6 +61,10 @@ function loadDotConfig() {
 const dotConfig = loadDotConfig();
 
 // --- Exports ---
+
+export const testExports = {
+  handleError
+};
 
 export {
   dotConfig

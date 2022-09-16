@@ -1,0 +1,8 @@
+{
+  "method": "accessibility.onVoiceGuidanceSettingsChanged",
+  "result": {
+      "enabled": false,
+      "speed": 5
+  }
+
+}

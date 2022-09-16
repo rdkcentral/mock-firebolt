@@ -14,8 +14,7 @@
     "build:mf": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
     "build:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build": "npm run build:openrpc && npm run build:mf",
-    "test:@TODO": "jest --config=jest.config.js --detectOpenHandles",
-    "test": "echo TEST",
+    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
     "start:NOTES1": "Can do 'npm run start' (core SDK only) or 'npm run start --manage --discovery' (all three SDKs)",
     "start": "node build/index.mjs",
     "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
@@ -36,7 +35,7 @@
     "@babel/node": "^7.14.5",
     "@babel/preset-env": "^7.14.5",
     "fs-extra": "^10.1.0",
-    "jest": "^27.0.4",
+    "jest": "^28.0.3",
     "mkdirp": "^1.0.4",
     "recursive-copy": "^2.0.14",
     "rimraf": "^3.0.2"
@@ -46,9 +45,11 @@
     "@formschema/native": "^2.0.0-beta.6",
     "ajv": "^6.12.6",
     "body-parser": "^1.19.0",
+    "bonjour": "^3.5.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-handlebars": "^6.0.2",
+    "ip": "^1.1.8",
     "lodash-es": "^4.17.21",
     "moment": "^2.29.1",
     "nopt": "^5.0.0",
@@ -57,8 +58,8 @@
     "ws": "^8.2.3"
   },
   "optionalDependencies": {
-    "@firebolt-js/manage-sdk": "git+https://github.com/rdkcentral/firebolt-manage-sdk.git",
-    "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git"
+    "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git",
+    "@firebolt-js/manage-sdk": "git+https://github.com/rdkcentral/firebolt-manage-sdk.git"
   },
   "keywords": [
     "firebolt",

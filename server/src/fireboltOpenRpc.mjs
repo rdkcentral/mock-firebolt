@@ -81,6 +81,10 @@ function getMethod(methodName) {
 }
 
 function isMethodKnown(methodName) {
+  // Returns true in "novalidate mode"
+  if( ! config.validate.includes("method") ){
+    return true;
+  }
   const oMethod = getMethod(methodName);
   return ( oMethod ? true : false );
 }
@@ -121,6 +125,10 @@ function getDeveloperNotesForMethod(methodName) {
 // Are the given params valid for thegiven method, based on the OpenRPC metadata?
 // Returns an array of errors; Returns an empty array if no errors are found
 function validateMethodCall(methodName, params) {
+  // Returns an empty array in "novalidate mode"
+  if( ! config.validate.includes("params") ){
+    return [];
+  }
   let errors = [];
 
   try {
@@ -163,6 +171,10 @@ function validateMethodCall(methodName, params) {
 // Is the given value a valid result for the given method, based on the OpenRPC metadata?
 // Returns an array of errors; Returns an empty array if no errors are found
 function validateMethodResult(val, methodName) {
+  // Returns an empty array in "novalidate mode"
+  if( ! config.validate.includes("response") ){
+    return [];
+  }
   let errors = [];
 
   // Short-circuit validation for result values specified as functions
@@ -212,15 +224,15 @@ function validateMethodError(val) {
   // Short-circuit validation for error values specified as functions
   if ( typeof val === 'string' && val.trimStart().startsWith('function') ) { return errors; }
 
-  if ( ! isObject(val) ) {
+  if ( !( isObject(val)) ) {
     errors.push(`ERROR: ${val} is not a valid error value: Object expected`);
     return errors;
   }
-  if ( ! 'code' in val ) {
+  if ( !('code' in val)) {
     errors.push(`ERROR: ${val} is not a valid error value: Mandatory 'code' property missing`);
     return errors;
   }
-  if ( ! 'message' in val ) {
+  if ( !('message' in val )) {
     errors.push(`ERROR: ${val} is not a valid error value: Mandatory 'message' property missing`);
     return errors; 
   }
@@ -323,8 +335,13 @@ readAllEnabledSdkJsonFiles()
 .then(() => meta = dereferenceMeta(rawMeta))
 .then(buildMethodMapsForAllEnabledSdks);
 
-// --- Exports ---
 
+
+// --- Exports ---
+export const testExports={
+  rawMeta, meta, methodMaps, buildMethodMapsForAllEnabledSdks,
+  toLowerCase, buildMethodMap, downloadOpenRpcJsonFile
+}
 export {
   getRawMeta, getMeta,
   getMethod, isMethodKnown, getSchema,

@@ -26,6 +26,7 @@ import * as messageHandler from './messageHandler.mjs';
 
 const user2wss = new Map();
 const user2ws  = new Map();
+const group2user = new Map(); // "<groupName>" -> [ "<userId1>-<groupName>", ... ]
 
 // Add default user, which will be used anytime a userId is not specified
 // in REST calls (calls without an x-mockfirebolt-userid header), regardless of
@@ -55,6 +56,35 @@ function getWsForUser(userId) {
   return undefined;
 }
 
+// Given a userId like "123~A", return all userIds like "<xxx>~A" (including the one passed in)
+function getUserListForUser(userId) {
+  const parts = (''+userId).split('~');
+  if ( parts.length === 1 ) {
+    // UserId does not have an embedded group name
+    return [ ''+userId ];
+  }
+
+  const groupName = parts[1];
+  if ( group2user.has(groupName) ) {
+    return group2user.get(groupName);
+  }
+  return undefined;
+}
+
+function getWsListForUser(userId) {
+  const userList = getUserListForUser(userId);
+  if ( ! userList ) { return undefined }
+
+  // creating an object map with ws and userId (of same user group) as key value pair
+  const wsUserMap = new Map();
+  for (const us of userList){
+    wsUserMap.set(getWsForUser(''+us),us);
+  }
+  //remove undefined keys
+  wsUserMap.delete();
+  return wsUserMap;
+}
+
 function associateUserWithWss(userId, wss) {
   user2wss.set(''+userId, wss);
 }
@@ -63,14 +93,54 @@ function associateUserWithWs(userId, ws) {
   user2ws.set(''+userId, ws);
 }
 
+function handleGroupMembership(userId) {
+  const parts = (''+userId).split('~');
+  if ( parts.length === 1 ) {
+    // UserId does not have an embedded group name
+    return;
+  }
+
+  const coreUserId = parts[0];
+  const groupName = parts[1];
+  if ( ! group2user.has(groupName) ) {
+    group2user.set(groupName, []);
+  }
+  const userList = group2user.get(groupName);
+  if ( ! userList.includes(''+userId) ) {
+    userList.push(''+userId);
+  }
+  group2user.set(groupName, userList)
+}
+
+function heartbeat(ws) {
+  ws.isAlive = true;
+}
+
 function addUser(userId) {
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
   wss.on('connection', function connection(ws) {
+    ws.isAlive = true;
+    ws.on('pong', async hb => {
+      heartbeat(ws)
+    });
     associateUserWithWs(''+userId, ws);
+    handleGroupMembership(''+userId)
     ws.on('message', async message => {
       messageHandler.handleMessage(message, ''+userId, ws);
     });
+  });
+
+  const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) return ws.terminate();
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', function close() {
+    clearInterval(interval);
   });
 }
 
@@ -85,7 +155,10 @@ function removeUser(userId) {
 }
 
 // --- Exports ---
+export const testExports={
+  user2wss, user2ws, group2user, associateUserWithWs, handleGroupMembership, heartbeat
+}
 
 export {
-  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser
+  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
 };

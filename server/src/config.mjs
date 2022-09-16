@@ -29,10 +29,17 @@ import { dotConfig } from './dotConfig.mjs';
 
 // Static configuration (some of which can be overridden by command-line arguments)
 const config = {
+
+  validate: [ "method", "params", "response", "events" ],
+  
   app: {
     allowMixedCase: false,
     socketPort: 9998,
     httpPort: 3333,
+    conduitSocketPort: 9997,
+    conduitKeySocketPort: 9996,         // Key forwarding from Conduit
+    developerToolPort: 9995,            // Port for Firebolt to connect to
+    developerToolName: 'Mock Firebolt', // Used when publishing with DNS-SD
     defaultUserId: '12345',
     magicDateTime: {
       prefix: '{{',
