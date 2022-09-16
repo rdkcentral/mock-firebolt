@@ -42,6 +42,9 @@ import { parse } from 'url';
 logger.important(`Welcome to Mock Firebolt`);
 
 const server = createServer();
+process.env.state_value = "initializing"
+process.env.previous_value = "null"
+
 
 server.on('upgrade', function upgrade(request, socket, head) {
   const { pathname } = parse(request.url);
