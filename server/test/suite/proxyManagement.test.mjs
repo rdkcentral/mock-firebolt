@@ -59,7 +59,7 @@ describe('sequentially run tests', () => {
 
     test(`proxyManagement.initialize works properly`, async () => {
         try {
-            // process.env.proxyServerIP = "localhost:40002"
+            process.env.proxyServerIP = "localhost:test"
             await proxyManagement.initialize()
             //TODO validation not performed yet. Need to mock websocket.
         } catch (e) {
