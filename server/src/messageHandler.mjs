@@ -160,7 +160,7 @@ async function handleMessage(message, userId, ws) {
   if (stateManagement.hasOverride(userId, oMsg.method)) {
     // Handle Firebolt Method call using our in-memory mock values
     logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
-    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params,ws); // Could be optimized cuz we know we want an override response
+    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
   } else if (process.env.proxy) {
     //bypass JSON-RPC calls and hit proxy server endpoint
     let wsProxy = await proxyManagement.getProxyWSConnection()
@@ -215,7 +215,7 @@ async function handleMessage(message, userId, ws) {
   } else {
     // Handle Firebolt Method call using default defaults (from the examples in the Open RPC specification)
     logger.debug(`Returning default mock value for method ${oMsg.method}`);
-    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params,ws); // Could be optimized cuz we know we want a static response
+    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want a static response
   }
 
   // Emit developerNotes for the method, if any
