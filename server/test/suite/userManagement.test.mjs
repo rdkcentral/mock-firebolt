@@ -79,13 +79,13 @@ test(`userManagement.removeUser works properly`, () => {
 
 test(`userManagement.getWsListForUser works properly`, () => {
   const inputArray = ["123~A", "123", "12345~B"];
-  const outputArray = [["123"], ["123"], undefined];
+  const outputArray = [undefined, "123", undefined];
   userManagement.testExports.group2user.set("A", ["123"]);
   userManagement.testExports.user2ws.set("123", "123");
   inputArray.forEach((input, index) => {
     const result = userManagement.getWsListForUser(input);
     if (typeof result === "object") {
-      expect(result).toEqual(expect.arrayContaining(outputArray[index]));
+      expect(result.get(input)).toEqual(outputArray[index]);
     } else {
       expect(result).toBeUndefined();
     }
