@@ -201,7 +201,7 @@ test('verify a session output raw wrties raw output', () => {
   const result = session.exportSession();
   expect(spy).toHaveBeenCalled();
   expect(result).toMatch(/(raw)/);
-  expect(result).toMatch(/(Succesfully wrote output in raw format to)/);
+  expect(result).toMatch(/(Succesfully wrote output in raw format to .\/output\/sessions)/);
   spy.mockClear();
 })
 
@@ -211,8 +211,7 @@ test('verify a session output mock-overrides calls conversion method', () => {
   const spy = jest.spyOn(session, "convertJsonToYml").mockImplementation(() => {});
   const result = session.exportSession();
   expect(spy).toHaveBeenCalled();
-  expect(result).toMatch(/(mocks)/);
-  expect(result).toMatch(/(Succesfully wrote output in mock-overrides format to)/);
+  expect(result).toMatch(/(Succesfully wrote output in mock-overrides format to .\/output\/mocks)/);
   spy.mockClear();
 })
 

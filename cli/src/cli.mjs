@@ -405,39 +405,34 @@ if ( parsed.help ) {
 } else if ( parsed.session || parsed.sessionOutput || parsed.sessionOutputPath) {
   if ( parsed.session && parsed.session == 'start' ) {
     msg(`Starting session...`);
-    await axios.post(url(host, port, '/api/v1/session/start'), undefined)
-    .then(function (response) {
+    try {
+      let response = await axios.post(url(host, port, '/api/v1/session/start'), undefined);
       console.log(response.data);
-    }
-    ).catch(function (error) {
+    } catch (error) {
       logError(error);
     }
-    );
   }
 
   if ( parsed.sessionOutput ) {
     const sessionOutput = parsed.sessionOutput;
     msg(`Set session output to "${sessionOutput}"`);
-    await axios.post(url(host, port, `/api/v1/sessionoutput/${sessionOutput}`), undefined)
-    .then(function (response) {
+    try {
+      let response = await axios.post(url(host, port, `/api/v1/sessionoutput/${sessionOutput}`), undefined);
       console.log(response.data);
-    }
-    ).catch(function (error) {
+    } catch (error) {
       logError(error);
     }
-    );
   }
 
   if ( parsed.sessionOutputPath ) {
     const sessionOutputPath = parsed.sessionOutputPath;
     msg(`Set session output path to: ` + sessionOutputPath);
-    await axios.post(url(host, port, '/api/v1/sessionoutputpath'), { path : sessionOutputPath })
-    .then(function (response) {
+    try {
+      let response = await axios.post(url(host, port, '/api/v1/sessionoutputpath'), { path : sessionOutputPath });
       console.log(response.data);
+    } catch (error) {
+      logError(error); 
     }
-    ).catch(function (error) {
-      logError(error);
-    });
   }
 
   if ( parsed.session && parsed.session == 'stop' ) {
