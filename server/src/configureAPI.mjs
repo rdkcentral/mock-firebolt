@@ -90,7 +90,7 @@ function configureAPI(app) {
     // End a session
     app.post('/api/v1/session/stop',                    sessionApi.stopSession);
 
-    // Set session output to format
+    // Set session output format
     app.post('/api/v1/sessionoutput/:format',           sessionApi.setOutput);
 
     // Specifiy session output path

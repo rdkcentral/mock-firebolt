@@ -40,8 +40,8 @@ class Session {
         this.calls = [];
         this.#sessionStart = Date.now();
         this.sessionOutput = "log";
-        this.sessionOutputPath = "./sessions";
-        this.mockOutputPath = `./mocks/${this.#sessionStart}`;
+        this.sessionOutputPath = "./output/sessions";
+        this.mockOutputPath = `./output/mocks/${this.#sessionStart}`;
     }
 
     exportSession() {
