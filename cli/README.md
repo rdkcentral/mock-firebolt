@@ -46,9 +46,9 @@ To change the output format of the session recording use option
 `--sessionOutput log` 
 with start, stop, or call in between starting and stopping.
 Valid output options are:
-- log: method call request and response objects ordered by the timestamp of the objects
-- raw (default): list of method call objects containing both request and response in one object
-- mock-overrides: a directory of method calls that are either a json file or yml file if there were multiple of the same method call with different params
+- log (default): method call request and response objects ordered by the timestamp of the objects.
+- raw: list of method call objects containing both request and response in one object.
+- mock-overrides: a directory of method calls extrapolated from the raw format. This option converts the raw formats into json files or yaml files. A json file would be the response from a method call that took place when mock-firebolt processed it. Yaml files contain a function that returns a json response depending on input params. Yaml files are only generated if there were multiple of the same method call with different params. 
 
 To change the output directory of the session recording use 
 `--sessionOutputPath ./output/examples`
