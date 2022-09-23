@@ -84,9 +84,22 @@ function addDefaultUser(userId) {
   state[''+userId].isDefaultUserState = true;
 }
 
+// return state based on hierarchy (From lowest priority to highest) global->group->user
 function getState(userId) {
   if ( userId in state ) {
     return state[''+userId];
+  }
+  else if( userId.includes("~")){
+    group = "~"+userId.split("~")[1];
+    if (group in state){
+      return state[''+group];
+    }
+    else if ("global" in state){
+      return state[''+global];
+    }
+  }
+  else if ("global" in state){
+    return state[''+global];
   }
   logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
   return state[config.app.defaultUserId];
@@ -168,8 +181,9 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         logger: logger,
         setTimeout: setTimeout,
         setInterval: setInterval,
-        set: function ss(key, val) { return setScratch(userId, key, val) },
+        set: function ss(key, val, scope) { return setScratch(userId, key, val, scope) },
         get: function gs(key) { return getScratch(userId, key); },
+        delete: function ds(key, scope) { return deleteScratch(userId, key, scope)},
         sendEvent: function(onMethod, result, msg) {
           sendEvent(
             ws,
@@ -238,8 +252,9 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
     // Looks like resp.result is specified as a function; evaluate it
     try {
       const ctx = {
-        set: function ss(key, val) { return setScratch(userId, key, val) },
+        set: function ss(key, val, scope) { return setScratch(userId, key, val, scope) },
         get: function gs(key) { return getScratch(userId, key); },
+        delete: function ds(key, scope) { return deleteScratch(userId, key, scope)},
       };
       const sFcnBody = resp.result + ';' + 'return f(ctx, params);'
       const fcn = new Function('ctx', 'params', sFcnBody);
@@ -447,19 +462,52 @@ function mergeCustomizer(objValue, srcValue) {
   }
 }
 
-function updateState(userId, newState) {
-  const userState = getState(userId);
+function updateState(userId, newState, scope = "") {
+  let userState;
 
-  if ( userState.isDefaultUserState ) {
-    if ( userId === config.app.defaultUserId ) {
-      logger.info(`Updating state for default user ${userId}`);
-    } else {
-      logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
+  //to check the scratch space in scope
+  if ( scope in state ){
+    userState = getState(scope);
+    if ( scope[0] === "~" ){
+      logger.info(`Updating state for group ${scope}`);
+    }
+    else if ( scope === "global" ){
+      logger.info('Updating state globally');
+    }
+    else{
+      logger.info(`Updating state for user ${scope}`);
     }
   }
-  else {
-    logger.info(`Updating state for user ${userId}`);
-  }
+  else{
+      if ( scope ==="" ){
+        userState = getState(userId)
+        if ( userState.isDefaultUserState ) {
+          if ( userId === config.app.defaultUserId ) {
+            logger.info(`Updating state for default user ${userId}`);
+          } else {
+            logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
+          }
+        }
+        else {
+          logger.info(`Updating state for user ${userId}`);
+        }
+      }
+      else if ( scope[0] === "~" ){
+        state[''+scope] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
+        userState = state[''+scope];
+        logger.info(`Updating state for group ${scope}`);
+      }
+      else if ( scope === "global" ){
+        state[''+scope] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
+        userState = state[''+scope];
+        logger.info('Updating state globally');
+      }
+      else{
+        state[''+scope] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
+        userState = state[''+scope];
+        logger.info(`Updating state for user ${scope}`);
+      }
+    }
 
   const errors = validateNewState(newState);
   if ( errors.length <= 0 ) {
@@ -544,12 +592,12 @@ function setMethodError(userId, methodName, code, message) {
   });
 }
 
-function setScratch(userId, key, val) {
+function setScratch(userId, key, val, scope) {
   updateState(userId, {
     scratch: {
       [key]: val
     }
-  });
+  }, scope);
 }
 
 function getScratch(userId, key) {
@@ -559,6 +607,20 @@ function getScratch(userId, key) {
     return userState.scratch[key];
   }
   return undefined;
+}
+
+// delete key from scratch space of provided scope
+function deleteScratch(userId, key, scope=""){
+  if ( scope !== "" ){
+    if ( scope in state && key in state[scope].scratch ){
+      delete state[scope].scratch[key];
+    }
+  }
+  else{
+    if ( userId in state && key in state[userId].scratch ){
+      delete state[userId].scratch[key];
+    }
+  }
 }
 
 // --- Exports ---
@@ -576,5 +638,5 @@ export {
   setLatency, setLatencies,
   isLegalMode, setMode,
   setMethodResult, setMethodError,
-  setScratch, getScratch
+  setScratch, getScratch, deleteScratch
 };
