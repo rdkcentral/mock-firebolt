@@ -32,6 +32,11 @@ NOTE: Be sure to start the Conduit app prior to starting your app under developm
 
 NOTE: Given that you are starting Conduit before your app, when your app starts up, it will not get forwarded "inactive" and "foreground" lifecycle events from Mock Firebolt (because Mock Firebolt couldn't forward them to your app when it received them (when it launched), because your app wasn't launched at that time). Instead, Mock Firebolt detects that your app was started up after the Conduit app and "artificially" sends these two events to your app. After that, any/all lifecycle events experienced by the Conduit app will be forwarded to your app as they occur within/to the Conduit app.
 
+# Why Conduit
+
+Developers can run the Conduit app on their device and provide Mock Firebolt's host and port number when launching it via IBIS. Then, when their app (running locally, launched with ?mf=true or similar) makes Firebolt calls, Mock Firebolt will forward those calls to Conduit, which will ask Firebolt on the device to perform the method, and then return the response to Mock Firebolt, which will return it to the app. 
+   
+NOTE: This only happens if/when no mock override is specified for the method.
 
 # System Overview 
 
