@@ -78,7 +78,9 @@ const knownOpts = {
   'event'           : String,
   'broadcastEvent'  : String,
   'sequence'        : String,
-  'session'         : String
+  'session'         : String,
+  'sessionOutput'   : String,
+  'sessionOutputPath' :  String
 };
 
 const shortHands = {
@@ -347,7 +349,7 @@ if ( parsed.help ) {
     console.log(ex);
   }
 
-}else if ( parsed.broadcastEvent ) {
+} else if ( parsed.broadcastEvent ) {
   const broadcastEventFile = parsed.broadcastEvent;
   try {
     const sbroadcastEvent = fs.readFileSync(path.resolve(__dirname, broadcastEventFile), {encoding:'utf8', flag:'r'});
@@ -400,20 +402,40 @@ if ( parsed.help ) {
     console.log(ex);
   }
 
-} else if ( parsed.session ) {
-  const record = parsed.session;
-  if ( record === 'start' ) {
+} else if ( parsed.session || parsed.sessionOutput || parsed.sessionOutputPath) {
+  if ( parsed.session && parsed.session == 'start' ) {
     msg(`Starting session...`);
-    axios.post(url(host, port, '/api/v1/session/start'), undefined)
-    .then(function (response) {
+    try {
+      let response = await axios.post(url(host, port, '/api/v1/session/start'), undefined);
       console.log(response.data);
-    }
-    ).catch(function (error) {
+    } catch (error) {
       logError(error);
     }
-    );
   }
-  else if ( record === 'stop' ) {
+
+  if ( parsed.sessionOutput ) {
+    const sessionOutput = parsed.sessionOutput;
+    msg(`Set session output to "${sessionOutput}"`);
+    try {
+      let response = await axios.post(url(host, port, `/api/v1/sessionoutput/${sessionOutput}`), undefined);
+      console.log(response.data);
+    } catch (error) {
+      logError(error);
+    }
+  }
+
+  if ( parsed.sessionOutputPath ) {
+    const sessionOutputPath = parsed.sessionOutputPath;
+    msg(`Set session output path to: ` + sessionOutputPath);
+    try {
+      let response = await axios.post(url(host, port, '/api/v1/sessionoutputpath'), { path : sessionOutputPath });
+      console.log(response.data);
+    } catch (error) {
+      logError(error); 
+    }
+  }
+
+  if ( parsed.session && parsed.session == 'stop' ) {
     msg(`Stopping session...`);
     axios.post(url(host, port, '/api/v1/session/stop'), undefined)
     .then(function (response) {
@@ -421,8 +443,7 @@ if ( parsed.help ) {
     }
     ).catch(function (error) {
       logError(error);
-    }
-    );
+    });    
   }
 
 } else {

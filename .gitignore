@@ -19,7 +19,7 @@ server/package.json
 
 .mf.config.json
 .vscode/*
-server/sessions/*
+output/*
 
 server/coverage/*
 cli/coverage/*
