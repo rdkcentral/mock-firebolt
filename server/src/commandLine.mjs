@@ -41,6 +41,7 @@ import { mergeArrayOfStrings } from './util.mjs';
 const knownOpts = {
   'httpPort'             : Number,
   'socketPort'           : Number,
+  'conduit'              : Boolean,
   'conduitSocketPort'    : Number,
   'conduitKeySocketPort' : Number,
   'developerToolPort'    : Number,
@@ -86,6 +87,7 @@ const conduitKeySocketPort = parsed.conduitKeySocketPort || config.app.conduitKe
 const developerToolPort = parsed.developerToolPort || config.app.developerToolPort;
 const developerToolName = parsed.developerToolName || config.app.developerToolName;
 const proxy = parsed.proxy;
+const conduit = parsed.conduit;
 
 // --- novalidate overrides
 config.validate = mergeArrayOfStrings(config.validate, config.dotConfig.validate, parsed.novalidate)
@@ -122,5 +124,6 @@ export {
   httpPort, socketPort,
   conduitSocketPort, conduitKeySocketPort,
   developerToolPort, developerToolName,
-  enabledSdkNames, enabledTriggerPaths, proxy
+  enabledSdkNames, enabledTriggerPaths, proxy,
+  conduit
 };
