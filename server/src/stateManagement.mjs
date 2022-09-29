@@ -87,8 +87,8 @@ function addDefaultUser(userId) {
 // return state based on hierarchy (From lowest priority to highest) global->group->user
 function getState(userId) {
   const stateCopy = JSON.parse(JSON.stringify(state))
-  let finalState = stateCopy['global']
-
+  let finalState = stateCopy['global'];
+  userId = '' + userId;
   if( userId.includes("~")){
     group = "~"+userId.split("~")[1];
     if (group in state){
@@ -98,7 +98,7 @@ function getState(userId) {
     }
   }
   if (userId in state){
-    userState = stateCopy[''+userId];
+    const userState = stateCopy[''+userId];
     resetSequenceStateValues(finalState, userState);
     mergeWith(finalState, userState, mergeCustomizer);
   }
