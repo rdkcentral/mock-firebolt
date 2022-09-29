@@ -31,44 +31,91 @@ import * as commandLine from './commandLine.mjs';
 
 let heartbeatInterval;    // JS Interval ID for heartbeat feature
 let conduitWs;            // WebSocket used by Conduit to talk to Mock Firebolt
+let conduitWss;
 
 // Will (temporarily) hold Firebolt responses sent via the Conduit socket to a client
 const fireboltResponses = {};  // openRpcMsg.id -> response via Conduit from a real Firebolt on a real device
 
 const conduitSocketPort = commandLine.conduitSocketPort;
 
-const conduitWss = new WebSocketServer({ port: conduitSocketPort });
+if (commandLine.conduit) {
+  conduitWss = new WebSocketServer({ port: conduitSocketPort });
 
-conduitWss.on('error', (error) => {
-  console.log('Conduit WebSocket Server Error:');
-  console.log(error.message);
-});
+  conduitWss.on('error', (error) => {
+    console.log('Conduit WebSocket Server Error:');
+    console.log(error.message);
+  });
+
+  // Send pings from server to client to track whether client is alive
+  // Terminates conduitWs if client isn't alive
+  heartbeatInterval = setInterval(function ping() {
+    conduitWss.clients.forEach(function each(conduitWs) {
+      // Note the form of the expression; 'clientIsAlive' might not be present 1st time thru
+      if ( conduitWs.clientIsAlive === false ) {
+        console.log('Heartbeat processing discovered a dead client; terminating socket');
+        return conduitWs.terminate();
+      }
+
+      conduitWs.clientIsAlive = false;
+      const oConduitMsg = {
+        from: 'mock-firebolt',
+        type: 'PING-FROM-SERVER',
+        data: undefined
+      };
+      const conduitMsg = JSON.stringify(oConduitMsg);
+      conduitWs.send(conduitMsg);
+      //Conduit WebSocket sent a ping message to client
+    });
+  }, 30000);
+
+  conduitWss.on('connection', function connection(pConduitWs, request) {
+    console.log('Conduit WebSocket Server received a connection event');
+  
+    conduitWs = pConduitWs;
+  
+    conduitWs.clientIssAlive = true;
+  
+    conduitWs.on('close', function socketClose(code, reason) {
+      console.log(`Conduit WebSocket Close: ${code}: ${reason}`);
+      for (const prop of Object.getOwnPropertyNames(fireboltResponses)) {
+        delete fireboltResponses[prop];
+      }
+    });
+  
+    conduitWs.on('error', function socketError(error) {
+      console.log('Conduit WebSocket Error:');
+      console.log(error.message);
+    });
+  
+    conduitWs.on('message', function socketMessage(data) {
+      const str = String.fromCharCode.apply(null, new Uint16Array(data)); // Buf -> JSON String
+      const oConduitMsg = JSON.parse(str); // JSON String -> Object
+      // console.log('Conduit WebSocket received a message event:');
+      // console.log(JSON.stringify(oConduitMsg, null, 4));
+      handleConduitMessage(oConduitMsg);
+    });
+  });
+  
+  conduitWss.on('listening', function listening() {
+    console.log('Conduit WebSocket Server received a listening event');
+  });
+  
+  conduitWss.on('error', function error(err) {
+    console.log('Conduit WebSocket Server received an error event:');
+    console.log(err);
+  });
+  
+  conduitWss.on('close', function close() {
+    console.log('Conduit WebSocket Server received a close event');
+    clearInterval(heartbeatInterval);
+  });
+  
+  console.log(`Listening on socket port ${conduitSocketPort} (Conduit)...`);
+}
 
 function uc1(s) {
   return s && s[0].toUpperCase() + s.slice(1);
 }
-
-// Send pings from server to client to track whether client is alive
-// Terminates conduitWs if client isn't alive
-heartbeatInterval = setInterval(function ping() {
-  conduitWss.clients.forEach(function each(conduitWs) {
-    // Note the form of the expression; 'clientIsAlive' might not be present 1st time thru
-    if ( conduitWs.clientIsAlive === false ) {
-      console.log('Heartbeat processing discovered a dead client; terminating socket');
-      return conduitWs.terminate();
-    }
-
-    conduitWs.clientIsAlive = false;
-    const oConduitMsg = {
-      from: 'mock-firebolt',
-      type: 'PING-FROM-SERVER',
-      data: undefined
-    };
-    const conduitMsg = JSON.stringify(oConduitMsg);
-    conduitWs.send(conduitMsg);
-    //console.log('Conduit WebSocket sent a ping message to client');
-  });
-}, 30000);
 
 function handleConduitMessage(oConduitMsg) {
   if ( oConduitMsg.from !== 'conduit' ) {
@@ -161,50 +208,6 @@ function handleConduitMessage(oConduitMsg) {
     console.log(JSON.stringify(oConduitMsg, null, 4));
   }
 }
-
-conduitWss.on('connection', function connection(pConduitWs, request) {
-  console.log('Conduit WebSocket Server received a connection event');
-
-  conduitWs = pConduitWs;
-
-  conduitWs.clientIssAlive = true;
-
-  conduitWs.on('close', function socketClose(code, reason) {
-    console.log(`Conduit WebSocket Close: ${code}: ${reason}`);
-    for (const prop of Object.getOwnPropertyNames(fireboltResponses)) {
-      delete fireboltResponses[prop];
-    }
-  });
-
-  conduitWs.on('error', function socketError(error) {
-    console.log('Conduit WebSocket Error:');
-    console.log(error.message);
-  });
-
-  conduitWs.on('message', function socketMessage(data) {
-    const str = String.fromCharCode.apply(null, new Uint16Array(data)); // Buf -> JSON String
-    const oConduitMsg = JSON.parse(str); // JSON String -> Object
-    // console.log('Conduit WebSocket received a message event:');
-    // console.log(JSON.stringify(oConduitMsg, null, 4));
-    handleConduitMessage(oConduitMsg);
-  });
-});
-
-conduitWss.on('listening', function listening() {
-  console.log('Conduit WebSocket Server received a listening event');
-});
-
-conduitWss.on('error', function error(err) {
-  console.log('Conduit WebSocket Server received an error event:');
-  console.log(err);
-});
-
-conduitWss.on('close', function close() {
-  console.log('Conduit WebSocket Server received a close event');
-  clearInterval(heartbeatInterval);
-});
-
-console.log(`Listening on socket port ${conduitSocketPort} (Conduit)...`);
 
 function isConduitConnected() {
   if ( ! conduitWs ) { return false; }

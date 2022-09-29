@@ -24,10 +24,10 @@ import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as commandLine from './commandLine.mjs';
 
+const conduitKeySocketPort = commandLine.conduitKeySocketPort;
 let keySocket;
-if (process.env.NODE_ENV !== 'test') {
-  const conduitKeySocketPort = commandLine.conduitKeySocketPort;
 
+if (commandLine.conduit) {
   const wss = new WebSocketServer({ port: conduitKeySocketPort });
 
   wss.on('connection', function connection(ws) {
