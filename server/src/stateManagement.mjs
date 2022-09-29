@@ -86,23 +86,24 @@ function addDefaultUser(userId) {
 
 // return state based on hierarchy (From lowest priority to highest) global->group->user
 function getState(userId) {
-  if ( userId in state ) {
-    return state[''+userId];
-  }
-  else if( userId.includes("~")){
+  StateCopy = JSON.parse(JSON.stringify(state))
+  finalState = StateCopy['global']
+
+  if( userId.includes("~")){
     group = "~"+userId.split("~")[1];
     if (group in state){
-      return state[''+group];
-    }
-    else if ("global" in state){
-      return state[''+global];
+      groupState = StateCopy[''+group];
+      resetSequenceStateValues(finalState, groupState);
+      mergeWith(finalState, groupState, mergeCustomizer);
     }
   }
-  else if ("global" in state){
-    return state[''+global];
+  if (userId in state){
+    userState = StateCopy[''+userId];
+    resetSequenceStateValues(finalState, userState);
+    mergeWith(finalState, userState, mergeCustomizer);
   }
-  logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
-  return state[config.app.defaultUserId];
+
+  return finalState
 }
 
 async function getAppropriateDelay(userId, methodName) {
