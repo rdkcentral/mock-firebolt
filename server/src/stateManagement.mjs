@@ -75,6 +75,9 @@ let state = {};
 // the CLI, the web admin UI, or a browser extension.
 addDefaultUser(config.app.defaultUserId);
 
+//Adding global user while initialising mfos
+addUser('global');
+
 function addUser(userId) {
   state[''+userId] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
 }
@@ -86,7 +89,7 @@ function addDefaultUser(userId) {
 
 // return state based on hierarchy (From lowest priority to highest) global->group->user
 function getState(userId) {
-  const stateCopy = JSON.parse(JSON.stringify(state))
+  const stateCopy = JSON.parse( JSON.stringify(state) )
   let finalState = stateCopy['global'];
   userId = '' + userId;
   if( userId.includes("~")){
@@ -103,7 +106,7 @@ function getState(userId) {
     mergeWith(finalState, userState, mergeCustomizer);
   }
 
-  return finalState
+  return finalState;
 }
 
 async function getAppropriateDelay(userId, methodName) {
