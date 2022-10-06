@@ -94,13 +94,13 @@ function getState(userId) {
   userId = '' + userId;
   if( userId.includes("~")){
     group = "~"+userId.split("~")[1];
-    if (group in state){
+    if (group in stateCopy){
       groupState = stateCopy[''+group];
       resetSequenceStateValues(finalState, groupState);
       mergeWith(finalState, groupState, mergeCustomizer);
     }
   }
-  if (userId in state){
+  if (userId in stateCopy){
     const userState = stateCopy[''+userId];
     resetSequenceStateValues(finalState, userState);
     mergeWith(finalState, userState, mergeCustomizer);
