@@ -42,10 +42,6 @@ test(`stateManagement.getState works properly`, () => {
     sequenceState: {},
   };
   expect(result1).toEqual(expectedResult);
-
-  const spy = jest.spyOn(logger, "info");
-  const result2 = stateManagement.getState(34567);
-  expect(spy).toHaveBeenCalled();
 });
 
 test(`stateManagement.getAppropriateDelay works properly`, async () => {
@@ -58,14 +54,14 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
     4567,
     "accessibility.closedCaptions"
   );
-  expect(undefinedResultOne).toBeUndefined();
+  expect(undefinedResultOne).toBe(0);
 
   stateManagement.testExports.state[6789] = {};
   const undefinedResultTwo = await stateManagement.getAppropriateDelay(
     6789,
     "accessibility.closedCaptions"
   );
-  expect(undefinedResultTwo).toBeUndefined();
+  expect(undefinedResultTwo).toBe(0);
 
   stateManagement.testExports.state[9012] = {
     global: {
@@ -207,28 +203,9 @@ test(`stateManagement.setScratch works properly`, () => {
 test(`stateManagement.getScratch works properly`, () => {
   const userId = 12345;
   const keysArray = ["closedCaptionsSettings", "abc"];
-  const expectedResult = {
-    enabled: true,
-    styles: {
-      backgroundColor: "#000000",
-      backgroundOpacity: 100,
-      fontColor: "#ffffff",
-      fontEdge: "none",
-      fontEdgeColor: "#7F7F7F",
-      fontFamily: "Monospace sans-serif",
-      fontOpacity: 100,
-      fontSize: 1,
-      textAlign: "center",
-      textAlignVertical: "middle",
-    },
-  };
   keysArray.forEach((key) => {
     const result = stateManagement.getScratch(userId, key);
-    if (key === "abc") {
-      expect(result).toBeUndefined();
-    } else {
-      expect(result).toEqual(expectedResult);
-    }
+    expect(result).toBeUndefined();
   });
 });
 
