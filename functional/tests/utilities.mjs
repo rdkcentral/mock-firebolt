@@ -13,6 +13,12 @@ function url(host, port, path) {
   return `http://${host}:${port}${path}`;
 }
 
+function fireboltCommand(command) {
+  //Establish a WS connection to MF living at port 9998
+  //Send the firebolt command given by "command"
+  //Return the response from MF
+}
+
 /**
  * 
  * Make an HTTP call to MF using an auto-generated host:port
@@ -75,8 +81,10 @@ async function callApi(path, user, body, method) {
   })
 }
 
-function callMfCli() {
+function callMfCli(command) {
   //Send a command via cli/cli.mjs and return the response
+  //Ex: callMfCli(command) should generate a call to the CLI like
+  //"node cli/src/cli.mjs <command>"
 }
 
 /**
