@@ -16,6 +16,13 @@ test(`MF Startup/Health Check`, async () => {
   expect(healthCheckResponse.status).toBe(200)
 });
 
+test(`OPENRPC Response for CORE SDK`, async () => {
+  await utilities.mfState(true)
+
+  const response = await utilities.fireboltCommand({"method": "accessibility.closedCaptionsSettings", params: {}})  
+  expect(response.enabled).toEqual(true);
+})
+
 test('MF Startup -> Set override response -> Send Firebolt Command', async () => {
 
   //Start Mock Firebolt
