@@ -8,15 +8,31 @@ const mfStarted = "Listening on HTTP port"
 const mfDirectory = "../../server/src"
 const mfHost = 'localhost'
 const mfUserHeader = 'x-mockfirebolt-userid'
+const wsClient = 'ws://localhost:9998'
 
 function url(host, port, path) {
   return `http://${host}:${port}${path}`;
 }
 
-function fireboltCommand(command) {
-  //Establish a WS connection to MF living at port 9998
-  //Send the firebolt command given by "command"
-  //Return the response from MF
+export async function fireboltCommand(command) {
+  //NOT-TESTED
+  //TODO - websocket need not to be init all the time, it needs to be handled to init once and close the connection once testing completed.
+  return new Promise((res) => {
+    //Establish a WS connection to MF living at port 9998
+    //Send the firebolt command given by "command"
+    //Return the response from MF
+    //TODO - wsClient is added for testing, it needs to be moved to differnt method to init WS client
+    const ws = new WebSocket(wsClient)
+    let websocket = ws
+    let sendCallback = function(event) {
+      websocket.removeEventListener('message', sendCallback)
+      websocket.removeEventListener('error', sendCallback)
+      res(event.data)
+    }
+
+    socket.addEventListener('message', sendCallback)
+    socket.send(command)
+  })
 }
 
 /**
