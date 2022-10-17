@@ -93,7 +93,7 @@ function getState(userId) {
   let finalState = stateCopy['global'];
   userId = '' + userId;
   if( userId.includes("~")){
-    group = "~"+userId.split("~")[1];
+    let group = "~"+userId.split("~")[1];
     if (group in stateCopy){
       groupState = stateCopy[''+group];
       resetSequenceStateValues(finalState, groupState);
