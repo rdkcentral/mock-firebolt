@@ -95,7 +95,7 @@ function getState(userId) {
   if( userId.includes("~")){
     let group = "~"+userId.split("~")[1];
     if (group in stateCopy){
-      groupState = stateCopy[''+group];
+      let groupState = stateCopy[''+group];
       resetSequenceStateValues(finalState, groupState);
       mergeWith(finalState, groupState, mergeCustomizer);
     }
