@@ -89,24 +89,32 @@ function addDefaultUser(userId) {
 
 // return state based on hierarchy (From lowest priority to highest) global->group->user
 function getState(userId) {
-  const stateCopy = JSON.parse( JSON.stringify(state) )
-  let finalState = stateCopy['global'];
-  userId = '' + userId;
-  if( userId.includes("~")){
-    let group = "~"+userId.split("~")[1];
-    if (group in stateCopy){
-      let groupState = stateCopy[''+group];
-      resetSequenceStateValues(finalState, groupState);
-      mergeWith(finalState, groupState, mergeCustomizer);
+
+  if ( userId in state ) {
+    const stateCopy = JSON.parse( JSON.stringify(state) )
+    let finalState = stateCopy['global'];
+    userId = '' + userId;
+    if( userId.includes("~")){
+      let group = "~"+userId.split("~")[1];
+      if (group in stateCopy){
+        let groupState = stateCopy[''+group];
+        resetSequenceStateValues(finalState, groupState);
+        mergeWith(finalState, groupState, mergeCustomizer);
+      }
     }
-  }
-  if (userId in stateCopy){
-    const userState = stateCopy[''+userId];
-    resetSequenceStateValues(finalState, userState);
-    mergeWith(finalState, userState, mergeCustomizer);
+    if (userId in stateCopy){
+      const userState = stateCopy[''+userId];
+      resetSequenceStateValues(finalState, userState);
+      mergeWith(finalState, userState, mergeCustomizer);
+    }
+
+    resetSequenceStateValues(state[''+userId], finalState);
+    mergeWith(state[''+userId], finalState, mergeCustomizer);
+    return state[''+userId];
   }
 
-  return finalState;
+  logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
+  return state[config.app.defaultUserId];
 }
 
 async function getAppropriateDelay(userId, methodName) {
@@ -469,9 +477,25 @@ function mergeCustomizer(objValue, srcValue) {
 function updateState(userId, newState, scope = "") {
   let userState;
 
-  //to check the scratch space in scope
+  //If no scope is provided, considering userId as scope
+  if (scope === ""){
+    scope = userId
+  }
   if ( scope in state ){
     userState = getState(scope);
+  }
+  else{
+    state[''+scope] = JSON.parse(JSON.stringify(perUserStartState));
+    userState = getState(scope);
+  }
+  if ( userState.isDefaultUserState ) {
+    if ( scope === config.app.defaultUserId ) {
+      logger.info(`Updating state for default user ${scope}`);
+    } else {
+      logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
+    }
+  }
+  else {
     if ( scope[0] === "~" ){
       logger.info(`Updating state for group ${scope}`);
     }
@@ -482,36 +506,6 @@ function updateState(userId, newState, scope = "") {
       logger.info(`Updating state for user ${scope}`);
     }
   }
-  else{
-      if ( scope ==="" ){
-        userState = getState(userId)
-        if ( userState.isDefaultUserState ) {
-          if ( userId === config.app.defaultUserId ) {
-            logger.info(`Updating state for default user ${userId}`);
-          } else {
-            logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
-          }
-        }
-        else {
-          logger.info(`Updating state for user ${userId}`);
-        }
-      }
-      else if ( scope[0] === "~" ){
-        state[''+scope] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
-        userState = state[''+scope];
-        logger.info(`Updating state for group ${scope}`);
-      }
-      else if ( scope === "global" ){
-        state[''+scope] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
-        userState = state[''+scope];
-        logger.info('Updating state globally');
-      }
-      else{
-        state[''+scope] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
-        userState = state[''+scope];
-        logger.info(`Updating state for user ${scope}`);
-      }
-    }
 
   const errors = validateNewState(newState);
   if ( errors.length <= 0 ) {
