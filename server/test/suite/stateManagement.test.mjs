@@ -50,18 +50,18 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
       mode: "Default",
     },
   };
-  const undefinedResultOne = await stateManagement.getAppropriateDelay(
+  const resultOne = await stateManagement.getAppropriateDelay(
     4567,
     "accessibility.closedCaptions"
   );
-  expect(undefinedResultOne).toBe(0);
+  expect(resultOne).toBe(0);
 
   stateManagement.testExports.state[6789] = {};
-  const undefinedResultTwo = await stateManagement.getAppropriateDelay(
+  const resultTwo = await stateManagement.getAppropriateDelay(
     6789,
     "accessibility.closedCaptions"
   );
-  expect(undefinedResultTwo).toBe(0);
+  expect(resultTwo).toBe(0);
 
   stateManagement.testExports.state[9012] = {
     global: {
