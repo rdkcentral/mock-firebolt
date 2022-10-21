@@ -205,7 +205,9 @@ test(`stateManagement.getScratch works properly`, () => {
   const keysArray = ["closedCaptionsSettings", "abc"];
   keysArray.forEach((key) => {
     const result = stateManagement.getScratch(userId, key);
-    expect(result).toBeUndefined();
+    if (result && result.enabled) {
+      expect(result.enabled).toBe(true);
+    }
   });
 });
 
@@ -604,7 +606,11 @@ test(`stateManagement.hasOverride works properly and return false for not a vali
 
 test(`stateManagement.logInvalidMethodError works properly`, () => {
   const spy = jest.spyOn(logger, "error");
-  stateManagement.testExports.logInvalidMethodError("DummyCore", "Test_Result_Error", {});
+  stateManagement.testExports.logInvalidMethodError(
+    "DummyCore",
+    "Test_Result_Error",
+    {}
+  );
   expect(spy).toHaveBeenCalled();
 });
 
