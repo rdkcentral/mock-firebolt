@@ -20,8 +20,12 @@
 
 "use strict";
 
-import { jest } from "@jest/globals";
-import { logger } from "../../src/logger.mjs";
+import {
+  jest
+} from "@jest/globals";
+import {
+  logger
+} from "../../src/logger.mjs";
 import * as stateManagement from "../../src/stateManagement.mjs";
 
 //jest.mock('stateManagement');
@@ -36,12 +40,72 @@ test(`stateManagement.addUser works properly`, () => {
 test(`stateManagement.getState works properly`, () => {
   const result1 = stateManagement.getState(12345);
   const expectedResult = {
-    global: { latency: { max: 0, min: 0 }, mode: "DEFAULT" },
+    global: {
+      latency: {
+        max: 0,
+        min: 0
+      },
+      mode: "DEFAULT"
+    },
     methods: {},
     scratch: {},
     sequenceState: {},
   };
   expect(result1).toEqual(expectedResult);
+});
+
+test(`stateManagement.getState works properly for global and group`, () => {
+  stateManagement.testExports.state["global"] = {
+    global: {
+      mode: "Default",
+    },
+    methods: {
+      "account.id": {
+        result: "A111"
+      },
+    }
+  };
+  stateManagement.testExports.state["~A"] = {
+    global: {
+      mode: "Default",
+    },
+    methods: {
+      "account.id": {
+        result: "A222"
+      },
+      "account.uid": {
+        "result": "A111-222"
+      },
+    }
+  };
+  stateManagement.testExports.state["123~A"] = {
+    global: {
+      mode: "Default",
+    },
+  };
+
+  stateManagement.addUser("123~A")
+  const result2 = stateManagement.getState("123~A");
+  const expectedResult2 = {
+    global: {
+      latency: {
+        max: 0,
+        min: 0
+      },
+      mode: "DEFAULT"
+    },
+    methods: {
+      "account.id": {
+        result: "A222"
+      },
+      "account.uid": {
+        "result": "A111-222"
+      },
+    },
+    scratch: {},
+    sequenceState: {},
+  };
+  expect(result2).toEqual(expectedResult2);
 });
 
 test(`stateManagement.getAppropriateDelay works properly`, async () => {
@@ -54,14 +118,14 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
     4567,
     "accessibility.closedCaptions"
   );
-  expect(resultOne).toBe(0);
+  expect(resultOne).toBeUndefined();
 
   stateManagement.testExports.state[6789] = {};
   const resultTwo = await stateManagement.getAppropriateDelay(
     6789,
     "accessibility.closedCaptions"
   );
-  expect(resultTwo).toBe(0);
+  expect(resultTwo).toBeUndefined();
 
   stateManagement.testExports.state[9012] = {
     global: {
@@ -99,7 +163,9 @@ test(`getMethodResponse works properly`, () => {
 });
 
 test(`stateManagement.updateState works properly`, () => {
-  stateManagement.testExports.state["12345"] = { isDefaultUserState: true };
+  stateManagement.testExports.state["12345"] = {
+    isDefaultUserState: true
+  };
   const userId1 = "12345",
     userId2 = "56789";
   const newState = {
@@ -117,6 +183,25 @@ test(`stateManagement.updateState works properly`, () => {
   const spy2 = jest.spyOn(logger, "info");
   stateManagement.updateState(userId2, newState);
   expect(spy2).toHaveBeenCalled();
+});
+
+test(`stateManagement.updateState with scope works properly`, () => {
+  stateManagement.testExports.state["123~A"] = {
+    isDefaultUserState: true
+  };
+  const userId1 = "12345",
+    scope = "123~A";
+  const newState = {
+    global: {
+      latency: {
+        min: 3000,
+        max: 3000,
+      },
+    },
+  };
+  const spy1 = jest.spyOn(logger, "info");
+  stateManagement.updateState(userId1, newState, scope);
+  expect(spy1).toHaveBeenCalled();
 });
 
 test(`stateManagement.revertState works properly`, () => {
@@ -141,7 +226,12 @@ test(`stateManagement.setLatencies works properly`, () => {
   const dummyoLatency = {
     min: 0,
     max: 0,
-    device: { type: { min: 3000, max: 3000 } },
+    device: {
+      type: {
+        min: 3000,
+        max: 3000
+      }
+    },
   };
   const userId = 12345;
   expect(stateManagement.setLatencies(userId, dummyoLatency)).toBeUndefined();
@@ -211,11 +301,44 @@ test(`stateManagement.getScratch works properly`, () => {
   });
 });
 
+test(`stateManagement.deleteScratch works properly`, () => {
+  const userId = 12345;
+  const key = "closedCaptionsSettings";
+  expect(stateManagement.deleteScratch(userId, key,)).toBeUndefined();
+});
+
+test(`stateManagement.deleteScratch with scope works properly`, () => {
+  stateManagement.testExports.state["123~A"] = {
+    global: {
+      latency: {
+        max: 0,
+        min: 0
+      },
+      mode: "DEFAULT"
+    },
+    methods: {},
+    scratch: {
+      "account.id": {
+        result: "A222"
+      },
+    },
+    sequenceState: {},
+  };
+
+  const userId = 12345,
+      scope = "123~A"
+  const key = "account.id";
+  expect(stateManagement.deleteScratch(userId, key, scope)).toBeUndefined();
+});
+
+
 test(`stateManagement.handleStaticAndDynamicError works properly`, () => {
   const userId = "12345",
     methodName = "rpc.discover",
     params = [],
-    resp1 = { error: "function()12345" },
+    resp1 = {
+      error: "function()12345"
+    },
     resp2 = "test-elsePath";
   const expectedResult1 = {
     result: "NOT-IMPLEMENTED-YET",
@@ -238,8 +361,7 @@ test(`stateManagement.handleStaticAndDynamicError works properly`, () => {
 
 test(`stateManagement.validateMethodOverride works properly`, () => {
   const dummyMethodName = "rpc.discover",
-    dummyMethodOverrideObject = [
-      {
+    dummyMethodOverrideObject = [{
         result: "result",
       },
       {
@@ -249,25 +371,19 @@ test(`stateManagement.validateMethodOverride works properly`, () => {
         reponse: "response",
       },
       {
-        responses: [
-          {
-            result: "result",
-          },
-        ],
+        responses: [{
+          result: "result",
+        }, ],
       },
       {
-        responses: [
-          {
-            error: "error",
-          },
-        ],
+        responses: [{
+          error: "error",
+        }, ],
       },
       {
-        responses: [
-          {
-            reponse: "response",
-          },
-        ],
+        responses: [{
+          reponse: "response",
+        }, ],
       },
     ];
   const expectedResult = [
@@ -304,7 +420,9 @@ test(`stateManagement.getMethodResponse works properly`, () => {
       scratch: {},
       methods: {
         "rpc.discover": {
-          responses: [{ name: "test" }],
+          responses: [{
+            name: "test"
+          }],
           policy: "REPEAT-LAST-RESPONSE",
         },
       },
@@ -321,7 +439,9 @@ test(`stateManagement.getMethodResponse works properly`, () => {
       scratch: {},
       methods: {
         "rpc.discover": {
-          responses: [{ name: "test" }],
+          responses: [{
+            name: "test"
+          }],
           policy: "REPEAT-LAST-RESPONSE",
         },
       },
@@ -340,7 +460,9 @@ test(`stateManagement.getMethodResponse works properly`, () => {
       scratch: {},
       methods: {
         "rpc.discover": {
-          responses: [{ name: "test" }],
+          responses: [{
+            name: "test"
+          }],
           policy: "REPEAT-LAST",
         },
       },
@@ -349,7 +471,11 @@ test(`stateManagement.getMethodResponse works properly`, () => {
       },
     },
   };
-  const expectedResult = [{ name: "test" }, { name: "test" }, {}];
+  const expectedResult = [{
+    name: "test"
+  }, {
+    name: "test"
+  }, {}];
   userIdArray.forEach((userId, index) => {
     stateManagement.testExports.state[userId] = obj[userId];
     const result = stateManagement.getMethodResponse(
@@ -418,7 +544,9 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     scratch: {},
     methods: {
       "rpc.discover": {
-        result: [{ name: "test" }],
+        result: [{
+          name: "test"
+        }],
         policy: "REPEAT-LAST-RESPONSE",
       },
     },
@@ -430,7 +558,9 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     params
   );
   expect(result2).toEqual({
-    result: [{ name: "test" }],
+    result: [{
+      name: "test"
+    }],
     policy: "REPEAT-LAST-RESPONSE",
   });
 
@@ -475,7 +605,9 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     scratch: {},
     methods: {
       "rpc.discover": {
-        response: { name: "test" },
+        response: {
+          name: "test"
+        },
         policy: "REPEAT-LAST-RESPONSE",
       },
     },
@@ -501,7 +633,9 @@ test(`stateManagement.hasOverride works properly with methods.response`, () => {
     scratch: {},
     methods: {
       "rpc.discover": {
-        response: { name: "test" },
+        response: {
+          name: "test"
+        },
         policy: "REPEAT-LAST-RESPONSE",
       },
     },
@@ -523,7 +657,9 @@ test(`stateManagement.hasOverride works properly with methods.result `, () => {
     scratch: {},
     methods: {
       "rpc.discover": {
-        result: { name: "test" },
+        result: {
+          name: "test"
+        },
         policy: "REPEAT-LAST-RESPONSE",
       },
     },
@@ -545,7 +681,9 @@ test(`stateManagement.hasOverride works properly with methods.error`, () => {
     scratch: {},
     methods: {
       "rpc.discover": {
-        error: { name: "test_error" },
+        error: {
+          name: "test_error"
+        },
         policy: "REPEAT-LAST-RESPONSE",
       },
     },
@@ -567,7 +705,9 @@ test(`stateManagement.hasOverride works properly with methods.responses`, () => 
     scratch: {},
     methods: {
       "rpc.discover": {
-        responses: { name: "test_error" },
+        responses: {
+          name: "test_error"
+        },
         policy: "REPEAT-LAST-RESPONSE",
       },
     },
@@ -608,8 +748,7 @@ test(`stateManagement.logInvalidMethodError works properly`, () => {
   const spy = jest.spyOn(logger, "error");
   stateManagement.testExports.logInvalidMethodError(
     "DummyCore",
-    "Test_Result_Error",
-    {}
+    "Test_Result_Error", {}
   );
   expect(spy).toHaveBeenCalled();
 });

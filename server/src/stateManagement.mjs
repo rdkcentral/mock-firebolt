@@ -461,6 +461,7 @@ function validateNewState(newState) {
 function resetSequenceStateValues(oldState, newState) {
   if ( 'methods' in newState ) {
     for ( let methodName in newState.methods ) {
+      if (oldState && oldState.sequenceState && oldState.sequenceState[methodName])
       delete oldState.sequenceState[methodName];
     }
   }
@@ -625,7 +626,7 @@ function deleteScratch(userId, key, scope=""){
 
 export const testExports={
   handleStaticAndDynamicError, state, validateMethodOverride, logInvalidMethodError,
-  mergeCustomizer
+  mergeCustomizer,
 }
 export {
   addUser,
