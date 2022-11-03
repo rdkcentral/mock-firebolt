@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { exec } from 'child_process'
-import config from '../../server/src/config.mjs'
+//import config from '../../server/src/config.mjs'
 
 let mfProcess
 const startMf = "npm run build && npm run start"
@@ -47,7 +47,7 @@ export async function fireboltCommand(command) {
  * @return Promise yielding an axios response on resolve() and error on reject()
  */
 async function callApi(path, user, body, method) {
-  let httpPort = config.httpPort
+  let httpPort = 8080;//config.httpPort
   let fullUrl = url(mfHost, httpPort, path)
 
   let headers = user ? {
