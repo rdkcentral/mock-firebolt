@@ -1,3 +1,5 @@
+"use strict"
+
 import {expect, jest, test} from '@jest/globals';
 import utilities from './utilities.mjs'
 
