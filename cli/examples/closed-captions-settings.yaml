@@ -13,6 +13,9 @@ methods:
       function f(ctx, params) {
         const ccs = ctx.get('closedCaptionsSettings');
         ccs.enabled=params.value
+        ctx.set('closedCaptionsSettings',ccs)
+
+        //Examples for setting and deleting with a scope in mind
         //ctx.set('closedCaptionsSettings',ccs, '~A')
         //ctx.delete('closedCaptionsSettings', '~A')
         console.log("### value of ctx inside closedcaptions.setEnabled of yaml",ctx)
