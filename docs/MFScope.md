@@ -45,7 +45,7 @@ This scratch space can be accessed via the context object (ctx) can be altered u
     - It takes two parameter:
         - key: The key to delete
         - scope: The scope of the deletion
-    - Similarly to "set()" this will default to the current user's scratch space unless another scratch space is defined in "scope
+    - Similarly to "set()" this will default to the current user's scratch space unless another scratch space is defined in "scope"
 
 # Example 
 
