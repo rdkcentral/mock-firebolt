@@ -1,6 +1,6 @@
 Mock Firebolt: MF Scope Implementation
 =======================
-This feature will allow users to share state belonging to same group.
+This feature allows user to share state belonging to same group.
 
 ## User
 
@@ -19,7 +19,7 @@ There will also be a "global" user. This is a reserved userId representing the g
 
 MFOS will return userState as a combination of userState, groupState and globalState maintaining hierarchy (From lowest priority to highest) global->group->user. In case of conflicts, the one with higher priority will be considered.
 For example :
-- every userId will have the global state.
+- Every userId will have the global state.
 - If state for group **"~bar"** exists, every userId ("abc~bar", "xyz~bar", etc.) belonging to this group will have this state.
 
 
@@ -29,7 +29,7 @@ Response functions have access to certain parts of a user's state known as the s
 
 This scratch space can be accessed via the context object (ctx) can be altered using **scope** variable.
 - **set()**
-    - The set() function accepts accept "scope" parameter.
+    - The set() function accepts "scope" parameter.
     - If "scope" is empty it will set the key/value to the current user's scratch space
     - If "scope" contains a user and/or group, it will set the key/value to that user's scratch space
         - Ex: set(key, value, "foo~bar") will set the key/value to the scratch space of userId "foo~bar"
