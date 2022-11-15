@@ -3,7 +3,7 @@
 import { expect, jest, test, beforeAll, afterAll } from "@jest/globals";
 import * as utilities from "./utilities.mjs";
 
-jest.setTimeout(20000);
+jest.setTimeout(20010);
 
 const httpPort = 3456;
 const socketPort = 9876;

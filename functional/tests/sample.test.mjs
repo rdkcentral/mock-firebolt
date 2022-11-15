@@ -11,7 +11,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   //Stop Mock Firebolt
-  console.log(await utilities.mfState(false));
+  // console.log(await utilities.mfState(false));
   console.log(await utilities.killPort(9998));
 });
 
@@ -60,4 +60,18 @@ test(`run MF cli command to upload json settings for user 123~A`, async () => {
     true
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+});
+
+test(`run MF cli command to set perform Method Latency`, async () => {
+  const result = await utilities.callMfCli(
+    `--method device.type --latency 2500 --latency 3500`
+  );
+  expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+});
+
+test(`run MF cli command to set perform start and stop session`, async () => {
+  const startResult = await utilities.callMfCli(`--session start`);
+  expect(startResult.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  const stopResult = await utilities.callMfCli(`--session stop`);
+  expect(stopResult.includes(`status: 'SUCCESS'`)).toBe(true);
 });
