@@ -49,7 +49,7 @@ This scratch space can be accessed via the context object (ctx) can be altered u
 
 # Example 
 
-- To set state for "global" via HTTP, use below curl command.
+- **To set state for "global" via HTTP, use below curl command:**
 ```
 curl --location --request PUT 'http://localhost:3333/api/v1/state' \
 --header 'content-type: application/json'  \
@@ -68,7 +68,7 @@ curl --location --request PUT 'http://localhost:3333/api/v1/state' \
 	}'
 ```
 
-- To set state for "~A" group via HTTP, use below curl command
+- **To set state for "~A" group via HTTP, use below curl command :**
 
 ```
 curl --location --request PUT 'http://localhost:3333/api/v1/state' \
@@ -87,13 +87,88 @@ curl --location --request PUT 'http://localhost:3333/api/v1/state' \
 	    }
 	}'
 ```
-- To change scratch space via yaml file 
-    - upload closed-captions-settings-reset.json for user "~A".
+- **To change scratch space via yaml file :** 
+
+	- Use the below code for closed-captions-settings-reset.json
+	```
+	{
+		"scratch": {
+			"closedCaptionsSettings": {
+				"enabled": true,
+				"styles": {
+					"fontFamily": "Monospace sans-serif",
+					"fontSize": 1,
+					"fontColor": "#ffffff",
+					"fontEdge": "none",
+					"fontEdgeColor": "#7F7F7F",
+					"fontOpacity": 100,
+					"backgroundColor": "#000000",
+					"backgroundOpacity": 100,
+					"textAlign": "center",
+					"textAlignVertical": "middle"
+				}
+			}
+		}
+	}
+	```
+	- Upload closed-captions-settings-reset.json for user "~A".
     ```
     node cli.mjs --user  ‘~A‘ --upload ../examples/closed-captions-settings-reset.json 
     ```
 
-    - upload closed-captions-settings.yaml with scope  "~A"
+	- Use below code for closed-captions-settings.yaml
+
+	```
+	---
+	methods:
+	closedcaptions.enabled:
+		response: |
+		function f(ctx, params) {
+			const ccs = ctx.get('closedCaptionsSettings');
+			console.log("### value of ctx inside closedcaptions.enabled of yaml",ctx)
+			console.log("*** value of ccs.enabled in yaml----",ccs.enabled)
+			return ccs.enabled;
+		}
+	closedcaptions.setEnabled:
+		response: |
+		function f(ctx, params) {
+			const ccs = ctx.get('closedCaptionsSettings');
+			ccs.enabled=params.value
+			ctx.set('closedCaptionsSettings',ccs, '~A')
+			//ctx.delete('closedCaptionsSettings', '~A')
+			console.log("### value of ctx inside closedcaptions.setEnabled of yaml",ctx)
+
+			const result = ctx.get('closedCaptionsSettings');
+			const msg = 'Post trigger for closedCaptions.setEnabled';
+			console.log("value of result inside yaml ",result)
+			console.log("value of msg inside in yaml",msg)
+			ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+			//ctx.sendEvent('closedcaptions.onEnabledChanged', result.enabled, msg);
+
+
+			return null;
+		}
+	accessibility.closedCaptionsSettings:
+		response: |
+		function f(ctx, params) {
+			// Getter called... Return our stashed value, per last setter call
+			const ccs = ctx.get('closedCaptionsSettings');
+			return ccs;
+		}
+
+	```
+	- Here **ctx.set('closedCaptionsSettings',ccs, '~A')** is used to set the scope for "~A". "~A" represents group A (ex: "~B" represents group B). This will set/update the scratch space for the provided group and all the users belonging to that group ( for ex. "123~A", "456~A") can access them. 
+
+	- To update state for a user , change the scope parameter to that user.
+	example : **ctx.set('closedCaptionsSettings',ccs, '123~A')**. This will update the state of user "123~A".
+
+	- To delete key from scratch space: **ctx.delete('closedCaptionsSettings', '~A')**. 
+	Here group "~A" is scope and "closedCaptionsSettings" is the key. This will remove the key from scratch space of group A. 
+	Similarly to delete key from user, change the scope to that user.
+	**ctx.delete('closedCaptionsSettings', '123~A')**.This will remove the key from scratch space of user ( "123~A").
+
+    - Upload closed-captions-settings.yaml with scope  "~A"
+
     ```
     node cli.mjs --user ‘~A’ --upload ../examples/closed-captions-settings.yaml
     ```
