@@ -1,6 +1,6 @@
 # This workflow will do a health check of MFOS overnight and run the health test cases.
 
-name: Run health check of MFOS on a different port
+name: Health check
 
 on:
   schedule:
