@@ -128,8 +128,9 @@ async function handleMessage(message, userId, ws) {
           logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
-          set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
+          set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
+          delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
           sendEvent: function (onMethod, result, msg) {
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod), fFatalErr.bind(this));
           },
@@ -235,8 +236,9 @@ async function handleMessage(message, userId, ws) {
           logger: logger,
           setTimeout: setTimeout,
           setInterval: setInterval,
-          set: function ss(key, val) { return stateManagement.setScratch(userId, key, val) },
+          set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
+          delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
           sendEvent: function (onMethod, result, msg) {
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod), fFatalErr.bind(this));
           },

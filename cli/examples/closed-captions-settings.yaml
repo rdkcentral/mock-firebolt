@@ -4,19 +4,31 @@ methods:
     response: |
       function f(ctx, params) {
         const ccs = ctx.get('closedCaptionsSettings');
-        if ( params && params.hasOwnProperty('value') ) {
-          // Setter called:
-          // Cause an accessibility.onClosedCaptionsSettingsChanged event
-          // (done via post-method trigger on closedcaptions.enabled method)
-          // Save for when accessibility.closedCaptionsSettings is called
-          ccs.enabled = params.value;
-          ctx.set('closedCaptionsSettings', ccs);
-          return true;
-        } else {
-          // Getter called:
-          // Return what we last saved when this func was called as a setter
-          return ccs.enabled;
-        }
+        console.log("### value of ctx inside closedcaptions.enabled of yaml",ctx)
+        console.log("*** value of ccs.enabled in yaml----",ccs.enabled)
+        return ccs.enabled;
+      }
+  closedcaptions.setEnabled:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        ccs.enabled=params.value
+        ctx.set('closedCaptionsSettings',ccs)
+
+        //Examples for setting and deleting with a scope in mind
+        //ctx.set('closedCaptionsSettings',ccs, '~A')
+        //ctx.delete('closedCaptionsSettings', '~A')
+        console.log("### value of ctx inside closedcaptions.setEnabled of yaml",ctx)
+
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setEnabled';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        //ctx.sendEvent('closedcaptions.onEnabledChanged', result.enabled, msg);
+
+
+        return null;
       }
   accessibility.closedCaptionsSettings:
     response: |
