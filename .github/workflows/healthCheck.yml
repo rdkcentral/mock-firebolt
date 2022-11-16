@@ -4,7 +4,7 @@ name: Run health check of MFOS on a different port
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 0 * * *"
 
 jobs:
   build:
@@ -26,4 +26,4 @@ jobs:
       run: |
         cd functional; \
         npm install; \
-        npm run test
+        npm run test -- ./tests/health-check.test.mjs
