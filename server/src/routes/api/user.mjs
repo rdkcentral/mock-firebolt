@@ -27,21 +27,43 @@ import * as stateManagement from '../../stateManagement.mjs';
 
 // --- Route Handlers ---
 
-// POST /api/v1/user
+// PUT /api/v1/user
 // Expected body: N/A
 function addUser(req, res) {
-  // Generate a unique userId for this user (no vanity userIds, at least for now)
-  const userId = uuidv4();
+  let userId = req.params.userId;
+  if (userId){
+    // Make sure we have a web socket server for this user
+    userManagement.addUser(userId);
+    // Make sure we have starter (empty) state for this user
+    let response = stateManagement.addUser(userId);
+    if (response){
+      res.status(200).send({
+        status: 'SUCCESS',
+        userId: userId
+      });
+    }
+    else{
+      res.status(400).send({
+        status: 'ERROR',
+        errorCode: 'User already exist',
+        message: `Could not add user ${userId}`
+      });
+    }
+  }
+  else {
+    // Generate a unique userId for this user (no vanity userIds, at least for now)
+    userId = uuidv4();
 
-  // Make sure we have a web socket server for this user
-  userManagement.addUser(userId);
-  // Make sure we have starter (empty) state for this user
-  stateManagement.addUser(userId);
+    // Make sure we have a web socket server for this user
+    response = userManagement.addUser(userId);
+    // Make sure we have starter (empty) state for this user
+    stateManagement.addUser(userId);
 
-  res.status(200).send({
-    status: 'SUCCESS',
-    userId: userId
-  });
+    res.status(200).send({
+      status: 'SUCCESS',
+      userId: userId
+      });
+  }
 }
 
 //GET /api/v1/user

@@ -23,6 +23,8 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as messageHandler from './messageHandler.mjs';
+import {state} from './stateManagement.mjs';
+import { logger } from './logger.mjs';
 
 const user2wss = new Map();
 const user2ws  = new Map();
@@ -117,6 +119,57 @@ function heartbeat(ws) {
 }
 
 function addUser(userId) {
+  userId = "" + userId;
+  var users = getUsers();
+  let appId,user,group;
+
+  if (userId.includes("~")){
+    user = userId.split("~")[0];
+    if (userId.includes("#")){
+      appId = userId.split("#")[1];
+      group = "~"+userId.split("#")[0].split('~')[1];
+    }
+    else{
+      group = "~"+userId.split('~')[1];
+    }
+  }
+  else if (userId.includes("#")){
+    user = userId.split("#")[0];
+    appId = userId.split("#")[1];
+  }
+  else{
+    user = userId;
+  }
+
+  for(var key in users){
+    if (users[key].includes("~")){
+      if (user && users[key].split("~")[0]==user){
+          logger.info(`Cannot map user ${userId} to ws as user ${user} already exists`)
+          return false
+      }
+      else if(appId && users[key].includes("#") && users[key].split("#")[1]==appId){
+        logger.info(`Cannot map user ${userId} to ws as appId ${appId} already exists`)
+        return false
+      }
+    }
+    else if (users[key].includes("#")){
+      if (user && users[key].split("#")[0]==user){
+        logger.info(`Cannot map user ${userId} to ws as appId ${user} already exists`)
+        return false
+      }
+      else if (appId && users[key].split("#")[1]==appId){
+        logger.info(`Cannot map user ${userId} to ws as user ${appId} already exists`)
+        return false
+      }
+    }
+    else{
+      if (user && users[key] == user){
+        logger.info(`Cannot map user ${userId} to ws as user ${user} already exists`)
+        return false
+      }
+    }
+  }
+
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
   wss.on('connection', function connection(ws) {

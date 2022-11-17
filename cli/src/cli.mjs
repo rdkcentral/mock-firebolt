@@ -63,6 +63,7 @@ function url(host, port, path) {
 const knownOpts = {
   'help'            : Boolean,
   'user'            : String,
+  'addUser'         : String,
   'port'            : String,
   'quiet'           : Boolean,
   'healthcheck'     : Boolean,
@@ -85,6 +86,7 @@ const knownOpts = {
 
 const shortHands = {
   'h'   : [ '--help' ],
+  'au'  : [ '--addUser'],
   'p'   : [ '--port' ],
   'q'   : [ '--quiet' ],
   'hc'  : [ '--healthcheck' ],
@@ -137,6 +139,19 @@ if ( parsed.help ) {
 
   usage();
 
+} else if ( parsed.addUser ) {
+
+  const user = parsed.addUser;
+
+  msg(`adding user ${user}`);
+  axios.put(url(host, port, `/api/v1/user/${ encodeURIComponent(user)}`), undefined)
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      logError(error);
+    });
+
 } else if ( parsed.healthcheck ) {
 
   msg(`Performing health check...`);
@@ -148,7 +163,7 @@ if ( parsed.help ) {
       logError(error);
     });
 
-} else if ( parsed.state ) {
+}  else if ( parsed.state ) {
 
   msg(`Dumping state...`);
   axios.get(url(host, port, '/api/v1/state'), undefined)
