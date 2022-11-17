@@ -22,7 +22,7 @@ afterAll(async () => {
   console.log(await utilities.killPort(socketPort));
 });
 
-test(`MF Startup/Health Check in a different port`, async () => {
+test(`MF Startup/Health Check on a custom port`, async () => {
   let healthCheckResponse = await utilities.callApi(
     "/api/v1/healthcheck",
     "",
@@ -34,7 +34,7 @@ test(`MF Startup/Health Check in a different port`, async () => {
   expect(healthCheckResponse.status).toBe(200);
 });
 
-test(`run MF cli command to perform heath check in a different port`, async () => {
+test(`run MF cli command to perform heath check on a custom port`, async () => {
   const result = await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --health --port ${httpPort} && cd ../../functional`,
     true

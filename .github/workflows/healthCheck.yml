@@ -4,15 +4,17 @@ name: Health check
 
 on:
   schedule:
-    - cron: "*/2 * * * *"
-
+    # schedule the job to runs at 00:00 UTC every day.
+    - cron: "0 0 * * *"
+  workflow_dispatch: {}
 jobs:
   build:
-
+    # running on ubuntu latest version
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
+        # using node 16.x version
         node-version: [16.x]
 
     steps:
@@ -23,6 +25,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: Run Health Check Tests
+      # going to server and install packages and then go to functional folder 
+      # install the packages and running health check test cases
       run: |
         cd server; \
         npm install; \

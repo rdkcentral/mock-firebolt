@@ -9,11 +9,11 @@ let startMf = "npm run dev";
 const mfStarted = "Listening on HTTP port";
 const mfHost = "localhost";
 const mfUserHeader = "x-mockfirebolt-userid";
-const wsClient = "ws://localhost:9998";
+const wsClient = "ws://localhost:";
 
 /**
  * To Kill a port
- * 
+ *
  * @param {Number} portNumber to kill the particular Port
  * @returns Promise yielding success response on resolve() and error on reject()
  */
@@ -34,14 +34,23 @@ function url(host, port, path) {
   return `http://${host}:${port}${path}`;
 }
 
-async function fireboltCommand(command) {
+/**
+ * To run MF ws commands
+ *
+ * @param {String} command the command which we need to execute
+ * @param {Number} port ws port to connect
+ * @param {String} user to pass the userID
+ * @returns Promise yielding the response on resolve()
+ */
+async function fireboltCommand(command, port, user) {
   //TODO - websocket need not to be init all the time, it needs to be handled to init once and close the connection once testing completed.
   return new Promise((res) => {
     //Establish a WS connection to MF living at port 9998
     //Send the firebolt command given by "command"
     //Return the response from MF
     //TODO - wsClient is added for testing, it needs to be moved to differnt method to init WS client
-    const ws = new WebSocket(wsClient);
+    const wsClientURL = `${wsClient}${port || 9998}${user ? `/${user}` : ""}`;
+    const ws = new WebSocket(wsClientURL);
     ws.on("open", function open() {
       ws.send(command);
     });
@@ -57,10 +66,10 @@ async function fireboltCommand(command) {
  *
  * Make an HTTP call to MF using an auto-generated host:port
  *
- * @param {String} method Optional HTTP Method to use (Default is GET/POST)
  * @param {String} path The API path for MF
  * @param {String} user Optional MF User
  * @param {String} body Optional body for POST/PUT/etc requests
+ * @param {String} method Optional HTTP Method to use (Default is GET/POST)
  * @param {Number} httpPort Optional http port
  * @return Promise yielding an axios response on resolve() and error on reject()
  */
@@ -115,12 +124,18 @@ async function callApi(path, user, body, method, httpPort) {
   });
 }
 
+/**
+ * To run the cli commands
+ *
+ * @param {String} command which command to execute
+ * @param {Boolean} isWithoutPredefinedPath is user defined path exists or not
+ * @returns Promise yielding the response on resolve()
+ */
 async function callMfCli(command, isWithoutPredefinedPath = false) {
   //Send a command via cli/cli.mjs and return the response
   //Ex: callMfCli(command) should generate a call to the CLI like
   //"node cli/src/cli.mjs <command>"
   return new Promise((resolve) => {
-    // exec(`pwd`, (err, stdout, stderr) => {
     exec(
       isWithoutPredefinedPath ? command : `node ../cli/src/cli.mjs ${command}`,
       (err, stdout, stderr) => {
