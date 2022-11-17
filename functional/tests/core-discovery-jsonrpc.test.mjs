@@ -3,7 +3,7 @@
 import { expect, jest, test, afterAll, beforeAll } from "@jest/globals";
 import * as utilities from "./utilities.mjs";
 
-jest.setTimeout(30030);
+jest.setTimeout(20030);
 
 const httpPort = 3335;
 const socketPort = 9990;
@@ -22,14 +22,14 @@ afterAll(async () => {
   console.log(await utilities.killPort(socketPort));
 });
 
-test(`OPENRPC Response for discovery SDK`, async () => {
+test(`Validate firebolt response for Discovery SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "accessibility.closedCaptionsSettings",
+      method: "content.providers",
       params: {},
       id: 0,
     }),
     socketPort
   );
-  expect(response.includes('"enabled":true')).toEqual(true);
+  expect(response.includes(`"id":"NetflixApp"`)).toEqual(true);
 });

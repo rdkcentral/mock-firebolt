@@ -3,7 +3,7 @@
 import { expect, jest, test, afterAll, beforeAll } from "@jest/globals";
 import * as utilities from "./utilities.mjs";
 
-jest.setTimeout(30020);
+jest.setTimeout(20020);
 
 const httpPort = 3001;
 const socketPort = 9001;
@@ -22,7 +22,7 @@ afterAll(async () => {
   console.log(await utilities.killPort(socketPort));
 });
 
-test(`OPENRPC Response for manage SDK`, async () => {
+test(`Validate OPENRPC Response for manage SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
       method: "accessibility.closedCaptionsSettings",
