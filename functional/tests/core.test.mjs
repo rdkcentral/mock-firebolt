@@ -14,13 +14,15 @@ afterAll(async () => {
   console.log(await utilities.killPort(9998));
 });
 
+// Health check on default port with HTTP
 test(`MF Startup/Health Check`, async () => {
   let healthCheckResponse = await utilities.callApi("/api/v1/healthcheck");
   expect(healthCheckResponse).toBeDefined();
   expect(healthCheckResponse.status).toBe(200);
 });
 
-test(`OPENRPC Response for CORE SDK`, async () => {
+// JsonRpc for CORE SDK
+test(`Validate OPENRPC Response for CORE SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
       method: "accessibility.closedCaptionsSettings",
@@ -31,12 +33,14 @@ test(`OPENRPC Response for CORE SDK`, async () => {
   expect(response.includes('"enabled":true')).toEqual(true);
 });
 
-test(`run MF cli command to perform heath check`, async () => {
+// Health check through cli on default port
+test(`Run MF cli command to perform heath check on default port`, async () => {
   const result = await utilities.callMfCli("--health");
   expect(result.includes("status: 'OK',")).toBe(true);
 });
 
-test(`Add one user`, async () => {
+// Adding user
+test(`Add one user and Validate it`, async () => {
   const addUserResponse = await utilities.callApi(
     "/api/v1/user",
     "",
@@ -50,7 +54,8 @@ test(`Add one user`, async () => {
   expect(allUsers.users.indexOf(data.userId) > -1).toBe(true);
 });
 
-test(`run MF cli command to get a user's state after updating`, async () => {
+// Updating method for a particular user
+test(`Validate a user's state after updating`, async () => {
   await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --upload ../examples/closed-captions-settings-reset.json --user 123~A && cd ../../functional`,
     true
@@ -59,19 +64,22 @@ test(`run MF cli command to get a user's state after updating`, async () => {
   expect(result.includes(`"enabled": true`)).toBe(true);
 });
 
-test(`run MF cli command to dump the state for default user`, async () => {
+// Dumping state for 12345 (default) user
+test(`Dumping the state for default user`, async () => {
   const result = await utilities.callMfCli("--state");
   expect(result.includes(`"isDefaultUserState": true`)).toBe(true);
 });
 
-test(`run MF cli command to set account.id for 123~A user`, async () => {
+// Setting account.id for a particular user
+test(`Run MF cli command to set account.id for 123~A user`, async () => {
   const result = await utilities.callMfCli(
     `--method account.id --result "'111'" --user 123~A`
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
-test(`run MF cli command to upload json settings for default user`, async () => {
+// Uploading closed captions settings for default user
+test(`Run MF cli command to upload json settings for default user`, async () => {
   const result = await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --upload ../examples/closed-captions-settings-reset.json && cd ../../functional`,
     true
@@ -79,7 +87,8 @@ test(`run MF cli command to upload json settings for default user`, async () => 
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
-test(`run MF cli command to upload an invalid json settings for user 123~A`, async () => {
+// Uploading invalid settings for a particular user
+test(`Run MF cli command to upload an invalid json settings for user 123~A`, async () => {
   const result = await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --upload ../examples//accessibility-voiceGuidance-invalid1.json --user 123~A && cd ../../functional`,
     true
@@ -87,21 +96,24 @@ test(`run MF cli command to upload an invalid json settings for user 123~A`, asy
   expect(result.includes(`"errorCode": "INVALID-STATE-DATA",`)).toBe(true);
 });
 
-test(`run MF cli command to set perform Method Latency`, async () => {
+// Setting method latency
+test(`Run MF cli command to perform Method Latency`, async () => {
   const result = await utilities.callMfCli(
     `--method device.type --latency 2500 --latency 3500`
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
-test(`run MF cli command to set perform start and stop session`, async () => {
+// Performing session start/stop
+test(`Validate start and stop session`, async () => {
   const startResult = await utilities.callMfCli(`--session start`);
   expect(startResult.includes(`{ status: 'SUCCESS' }`)).toBe(true);
   const stopResult = await utilities.callMfCli(`--session stop`);
   expect(stopResult.includes(`status: 'SUCCESS'`)).toBe(true);
 });
 
-test(`run MF cli command to run send event`, async () => {
+// Send event for default user
+test(`Validate send event for default user`, async () => {
   await utilities.fireboltCommand(
     JSON.stringify({
       method: "accessibility.onVoiceGuidanceSettingsChanged",
@@ -116,7 +128,8 @@ test(`run MF cli command to run send event`, async () => {
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
-test(`run MF cli command to run broadcast event`, async () => {
+// Broadcast event for a particular user
+test(`Validate broadcast event for a user in a group and Validate that other user in that group getting that`, async () => {
   await utilities.fireboltCommand(
     JSON.stringify({
       method: "device.onNameChanged",
@@ -138,7 +151,8 @@ test(`run MF cli command to run broadcast event`, async () => {
   expect(resultTwo.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
-test(`run MF cli command to run send event without an active listener`, async () => {
+// Send event without any active listener
+test(`Validate send event without an active listener`, async () => {
   const result = await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --event ../examples/accessibility-onClosedCaptionsSettingsChanged1.event.json && cd ../../functional`,
     true

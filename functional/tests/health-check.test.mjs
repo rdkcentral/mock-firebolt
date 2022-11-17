@@ -34,7 +34,7 @@ test(`MF Startup/Health Check on a custom port`, async () => {
   expect(healthCheckResponse.status).toBe(200);
 });
 
-test(`run MF cli command to perform heath check on a custom port`, async () => {
+test(`Validate heath check on a custom port`, async () => {
   const result = await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --health --port ${httpPort} && cd ../../functional`,
     true
