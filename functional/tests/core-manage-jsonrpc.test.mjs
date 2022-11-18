@@ -25,11 +25,11 @@ afterAll(async () => {
 test(`Validate OPENRPC Response for manage SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "accessibility.closedCaptionsSettings",
+      method: "accessory.list",
       params: {},
       id: 0,
     }),
     socketPort
   );
-  expect(response.includes('"enabled":true')).toEqual(true);
+  expect(response.includes(`"protocol":"BluetoothLE"`)).toEqual(true);
 });
