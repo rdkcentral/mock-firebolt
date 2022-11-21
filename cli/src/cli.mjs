@@ -111,7 +111,7 @@ const host = HTTP_HOST;
 const port = parsed.port || HTTP_PORT;
 
 const dotConfig = loadConfig();
-const userId = ''+(parsed.user || dotConfig.userId || config.app.defaultUserId);
+const userId = ''+(parsed.user || parsed.addUser || dotConfig.userId || config.app.defaultUserId);
 console.log(`UserId: ${userId}`);
 axios.defaults.headers.common['x-mockfirebolt-userid'] = userId;
 
