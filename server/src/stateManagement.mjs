@@ -111,34 +111,34 @@ function addUser(userId) {
     if (users[key].includes("~")){
       if (user && users[key].split("~")[0]==user){
           logger.info(`Cannot add user ${userId} as user ${user} already exists`)
-          return false
+          return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
       }
       else if(appId && users[key].includes("#") && users[key].split("#")[1]==appId){
         logger.info(`Cannot add user ${userId} as appId ${appId} already exists`)
-        return false
+        return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${appId} already exists`}
       }
     }
     else if (users[key].includes("#")){
       if (user && users[key].split("#")[0]==user){
         logger.info(`Cannot add user ${userId} as appId ${user} already exists`)
-        return false
+        return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${user} already exists`}
       }
       else if (appId && users[key].split("#")[1]==appId){
         logger.info(`Cannot add user ${userId} as user ${appId} already exists`)
-        return false
+        return {isSuccess: false, msg : `Cannot add user ${userId} as user ${appId} already exists`}
       }
     }
     else{
       if (user && users[key] == user){
         logger.info(`Cannot add user ${userId} as user ${user} already exists`)
-        return false
+        return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
       }
     }
   }
 
   state[''+userId] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
   state[''+group] = JSON.parse(JSON.stringify(perUserStartState)); // Deep copy
-  return true
+  return {isSuccess:true, msg:""}
 }
 
 function addDefaultUser(userId) {

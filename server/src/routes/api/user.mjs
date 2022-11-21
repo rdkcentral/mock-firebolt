@@ -36,7 +36,7 @@ function addUser(req, res) {
     userManagement.addUser(userId);
     // Make sure we have starter (empty) state for this user
     let response = stateManagement.addUser(userId);
-    if (response){
+    if (response.isSuccess){
       res.status(200).send({
         status: 'SUCCESS',
         userId: userId
@@ -45,8 +45,8 @@ function addUser(req, res) {
     else{
       res.status(400).send({
         status: 'ERROR',
-        errorCode: 'User already exist',
-        message: `Could not add user ${userId}`
+        errorCode: 'Cannot add user',
+        message: response.msg
       });
     }
   }
@@ -55,7 +55,7 @@ function addUser(req, res) {
     userId = uuidv4();
 
     // Make sure we have a web socket server for this user
-    response = userManagement.addUser(userId);
+    userManagement.addUser(userId);
     // Make sure we have starter (empty) state for this user
     stateManagement.addUser(userId);
 
