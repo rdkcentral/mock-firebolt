@@ -1,6 +1,6 @@
 # This workflow will do a health check of MFOS overnight and run the health test cases.
 
-name: Health check
+name: Functional Health check
 
 on:
   schedule:
@@ -31,6 +31,16 @@ jobs:
         cd server; \
         npm install; \
         cp src/.mf.config.SAMPLE.json src/.mf.config.json; \
+        npm run clean; \
+        npm run build:core; \
+        npm run build:manage; \
+        npm run build:discovery; \
         cd ../functional; \
         npm install; \
-        npm run test -- ./tests/health-check.test.mjs
+        npm run test:healthCheck;
+        npm run test:core;
+        npm run test:manage;
+        npm run test:discovery;
+        npm run test:core:manage:discovery;
+        
+        
