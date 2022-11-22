@@ -5,7 +5,7 @@ name: Functional Health check
 on:
   schedule:
     # schedule the job to runs at 00:00 UTC every day.
-    - cron: "0 0 * * *"
+    - cron: "0 3 * * *"
   workflow_dispatch: {}
 jobs:
   build:
