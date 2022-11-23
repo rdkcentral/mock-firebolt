@@ -1,0 +1,25 @@
+---
+methods:
+  device.name:
+    response: |
+      function f(ctx, params) {
+        const deviceScratch = ctx.get('deviceSettings');
+        console.log("### value of ctx inside device.name of yaml",ctx)
+        console.log("*** value of device.name in yaml----",deviceScratch.name)
+        return deviceScratch.name;
+      }
+  device.setName:
+    response: |
+      function f(ctx, params) {
+        const deviceScratch = ctx.get('deviceSettings');
+        deviceScratch.name=params.value
+        console.log("### value of params",params)
+        ctx.set('deviceSettings',deviceScratch, '~A')
+        console.log("### value of ctx inside device.setName of yaml",ctx)
+        const result = ctx.get('deviceSettings');
+        const msg = 'Post trigger for device.setName';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('device.onDeviceNameChanged', result, msg);
+        return null;
+      }
