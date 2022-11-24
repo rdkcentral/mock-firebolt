@@ -1,0 +1,30 @@
+---
+methods:
+  localization.locality:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log("*** value of ccs.locality in yaml----", ccs.locality);
+        return ccs.locality;
+      }
+  localization.countryCode:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log("*** value of ccs.countryCode in yaml----", ccs.countryCode);
+        return ccs.countryCode;
+      }
+  localization.language:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log("*** value of ccs.language in yaml----", ccs.language);
+        return ccs.language;
+      }
+  localization.locale:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log("*** value of ccs.locale in yaml----", ccs.locale);
+        return ccs.locale;
+      }

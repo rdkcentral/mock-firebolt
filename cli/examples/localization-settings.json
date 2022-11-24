@@ -1,0 +1,24 @@
+{
+  "scratch": {
+    "localizationSettings": {
+      "locality": "Test locality",
+      "countryCode": "RRR",
+      "language": "Test language",
+      "locale": "Test locale"
+    }
+  },
+  "methods": {
+    "localization.setLocalilty": {
+      "result": "function f(ctx, params) {const ccs = ctx.get('localizationSettings');console.log(`Set locality params =>`, params);ccs.locality = params && params.value;ctx.set('localizationSettings', ccs, '123~A');console.log(`*** Updated the locality value for ccs locality ***`);return null;}"
+    },
+    "localization.setCountryCode": {
+      "result": "function f(ctx, params) {const ccs = ctx.get('localizationSettings');console.log(`Set country code params =>`, params);ccs.countryCode = params && params.value;ctx.set('localizationSettings', ccs, '123~A');console.log(`*** Updated the country code value for ccs country code ***`);return null;}"
+    },
+    "localization.setLanguage": {
+      "result": "function f(ctx, params) {const ccs = ctx.get('localizationSettings');console.log(`Set language params =>`, params);ccs.language = params && params.value;ctx.set('localizationSettings', ccs, '123~A');console.log(`*** Updated the language value for ccs language ***`);return null;}"
+    },
+    "localization.setLocale": {
+      "result": "function f(ctx, params) {const ccs = ctx.get('localizationSettings');console.log(`Set locale params =>`, params);ccs.locale = params && params.value;ctx.set('localizationSettings', ccs, '123~A');console.log(`*** Updated the locale value for ccs locale ***`);return null;}"
+    }
+  }
+}
