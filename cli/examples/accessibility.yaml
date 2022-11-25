@@ -1,0 +1,310 @@
+---
+methods:
+  closedcaptions.enabled:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.enabled of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.enabled in yaml----",closedCaptionsScratch.enabled)
+        return closedCaptionsScratch.enabled;
+      }
+  closedcaptions.setEnabled:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.enabled=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setEnabled of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setEnabled';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.fontFamily:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.fontFamily of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.fontFamily in yaml----",closedCaptionsScratch.styles.fontFamily)
+        return closedCaptionsScratch.styles.enabled;
+      }
+  closedcaptions.setFontFamily:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.fontFamily=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setFontFamily of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setFontFamily';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.fontSize:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.fontSize of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.fontFamily in yaml----",closedCaptionsScratch.styles.fontFamily)
+        return closedCaptionsScratch.styles.fontSize;
+      }
+  closedcaptions.setFontSize:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.fontSize=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setFontSize of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setFontSize';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.fontColor:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.fontColor of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.fontFamily in yaml----",closedCaptionsScratch.styles.fontColor)
+        return closedCaptionsScratch.styles.fontColor;
+      }
+  closedcaptions.setFontColor:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.fontColor=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setFontColor of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setFontColor';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.fontEdge:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.fontEdge of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.fontEdge in yaml----",closedCaptionsScratch.styles.fontEdge)
+        return closedCaptionsScratch.styles.fontEdge;
+      }
+  closedcaptions.setFontEdge:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.fontEdge=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setFontEdge of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setFontEdge';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.fontEdgeColor:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.fontEdgeColor of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.fontEdgeColor in yaml----",closedCaptionsScratch.styles.fontEdgeColor)
+        return closedCaptionsScratch.styles.fontEdgeColor;
+      }
+  closedcaptions.setFontEdgeColor:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.fontEdgeColor=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setFontEdgeColor of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setFontEdge';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.fontOpacity:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.fontOpacity of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.fontOpacity in yaml----",closedCaptionsScratch.styles.fontOpacity)
+        return closedCaptionsScratch.styles.fontOpacity;
+      }
+  closedcaptions.setFontOpacityr:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.fontOpacity=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setFontOpacity of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setFontOpacity';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.backgroundColor:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.backgroundColor of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.backgroundColor in yaml----",closedCaptionsScratch.styles.backgroundColor)
+        return closedCaptionsScratch.styles.backgroundColor;
+      }
+  closedcaptions.setbackgroundColor:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.backgroundColor=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setbackgroundColor of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setbackgroundColor';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.backgroundOpacity:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.backgroundOpacity of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.backgroundOpacity in yaml----",closedCaptionsScratch.styles.backgroundOpacity)
+        return closedCaptionsScratch.styles.backgroundOpacity;
+      }
+  closedcaptions.setbackgroundOpacity:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.backgroundOpacity=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setbackgroundOpacity of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setbackgroundOpacity';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.backgroundOpacity:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.backgroundOpacity of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.backgroundOpacity in yaml----",closedCaptionsScratch.styles.backgroundOpacity)
+        return closedCaptionsScratch.styles.backgroundOpacity;
+      }
+  closedcaptions.setbackgroundOpacity:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.backgroundOpacity=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.setbackgroundOpacity of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.setbackgroundOpacity';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.textAlign:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.textAlign of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.textAlign in yaml----",closedCaptionsScratch.styles.textAlign)
+        return closedCaptionsScratch.styles.textAlign;
+      }
+  closedcaptions.settextAlign:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.textAlign=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.settextAlign of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.settextAlign';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+  closedcaptions.textAlignVertical:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside closedcaptions.textAlignVertical of yaml",ctx)
+        console.log("*** value of closedCaptionsScratch.styles.textAlignVertical in yaml----",closedCaptionsScratch.styles.textAlignVertical)
+        return closedCaptionsScratch.styles.textAlignVertical;
+      }
+  closedcaptions.settextAlign:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        closedCaptionsScratch.styles.textAlignVertical=params.value
+        ctx.set('closedCaptionsSettings',closedCaptionsScratch, '~A')
+        console.log("### value of ctx inside closedcaptions.settextAlignVertical of yaml",ctx)
+        const result = ctx.get('closedCaptionsSettings');
+        const msg = 'Post trigger for closedCaptions.settextAlignVertical';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
+        return null;
+      }
+ voiceGuidance.enabled:
+    response: |
+      function f(ctx, params) {
+        const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
+        console.log("### value of ctx inside  voiceGuidance.enabled of yaml",ctx)
+        console.log("*** value of voiceGuidanceScratch.enabled in yaml----",voiceGuidanceScratch.enabled)
+        return voiceGuidanceScratch.enabled;
+      }
+  voiceGuidance.setEnabled:
+    response: |
+      function f(ctx, params) {
+        const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
+        voiceGuidanceScratch.enabled=params.value
+        ctx.set('voiceGuidanceSettings',voiceGuidanceScratch, '~A')
+        console.log("### value of ctx inside voiceGuidance.setEnabled of yaml",ctx)
+        const result = ctx.get('voiceGuidanceSettings');
+        const msg = 'Post trigger for voiceGuidance.setEnabled';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onVoiceGuidanceSettingsChanged', result, msg);
+        return null;
+      }
+  voiceGuidance.speed:
+    response: |
+      function f(ctx, params) {
+        const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
+        console.log("### value of ctx inside  voiceGuidance.speed of yaml",ctx)
+        console.log("*** value of voiceGuidanceScratch.speed in yaml----",voiceGuidanceScratch.speed)
+        return voiceGuidanceScratch.speed;
+      }
+  voiceGuidance.setSpeed:
+    response: |
+      function f(ctx, params) {
+        const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
+        voiceGuidanceScratch.speed=params.value
+        ctx.set('voiceGuidanceSettings',voiceGuidanceScratch, '~A')
+        console.log("### value of ctx inside voiceGuidance.setSpeed of yaml",ctx)
+        const result = ctx.get('voiceGuidanceSettings');
+        const msg = 'Post trigger for voiceGuidance.setSpeed';
+        console.log("value of result inside yaml ",result)
+        console.log("value of msg inside in yaml",msg)
+        ctx.sendBroadcastEvent('accessibility.onVoiceGuidanceSettingsChanged', result, msg);
+        return null;
+      }
