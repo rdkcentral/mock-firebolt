@@ -1,0 +1,9 @@
+---
+methods:
+  privacy.limitAdTracking:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('privacySettings');
+        console.log("*** value of ccs.limitAdTracking in yaml----", ccs.limitAdTracking);
+        return ccs.limitAdTracking;
+      }
