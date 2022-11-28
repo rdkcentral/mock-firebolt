@@ -65,7 +65,7 @@ Pre- and post- triggers may be defined for any Firebolt method call. See [Trigge
 ## novalidate Flag
 
 Use this flag to enable "novalidate mode", where Mock Firebolt skips certain validation steps, based on options you provide. This will be used by the certification test suite, not by normal app developer users.
-See (./DotConfig.md) for more information.
+See [DotConfig.md](./DotConfig.md) for more information.
 
 
 ## Multi-User Support
@@ -80,3 +80,7 @@ If you're interested in how this multi-user support works within the Mock Firebo
 ## System Configurations
 
 For information about various ideas for how Mock Firebolt might be configured / used, see [SystemConfigurations.md](./SystemConfigurations.md).
+
+
+## MF Scope implementation
+Use this scope to set State for a group/global/userId. This feature will allow users to share state belonging to same group. For more information, see [MFScope.md](./MFScope.md).
