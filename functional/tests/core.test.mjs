@@ -58,8 +58,8 @@ test(`Run MF cli command to perform heath check on default port`, async () => {
   const result = await utilities.callMfCli("--health");
   expect(result.includes("status: 'OK',")).toBe(true);
 });
-
-// Adding user
+// Adding a user using CLI TO-DO
+// Adding user using http call
 test(`Add one user and Validate it`, async () => {
   const addUserResponse = await utilities.callApi(
     "/api/v1/user",
@@ -77,10 +77,10 @@ test(`Add one user and Validate it`, async () => {
 // Updating method for a particular user
 test(`Validate a user's state after updating`, async () => {
   await utilities.callMfCli(
-    `cd ../cli/src/ && node cli.mjs --upload ../examples/closed-captions-settings-reset.json --user 123~A && cd ../../functional`,
+    `cd ../cli/src/ && node cli.mjs --upload ../examples/closed-captions-settings-reset.json --user 123 && cd ../../functional`,
     true
   );
-  const result = await utilities.callMfCli("--user 123~A --state");
+  const result = await utilities.callMfCli("--user 123 --state");
   expect(result.includes(`"enabled": true`)).toBe(true);
 });
 
@@ -91,11 +91,13 @@ test(`Dumping the state for default user`, async () => {
 });
 
 // Setting account.id for a particular user
-test(`Run MF cli command to set account.id for 123~A user`, async () => {
+test(`Run MF cli command to set account.id for 123 user`, async () => {
   const result = await utilities.callMfCli(
-    `--method account.id --result "'111'" --user 123~A`
+    `--method account.id --result "'111'" --user 123`
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  const response = await utilities.callMfCli("--user 123 --state");
+  expect(response.includes(`"result": "'111'"`)).toBe(true);
 });
 
 // Uploading closed captions settings for default user
@@ -105,12 +107,14 @@ test(`Run MF cli command to upload json settings for default user`, async () => 
     true
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  const response = await utilities.callMfCli("--user 12345 --state");
+  expect(response.includes(`"enabled": true`)).toBe(true);
 });
 
 // Uploading invalid settings for a particular user
-test(`Run MF cli command to upload an invalid json settings for user 123~A`, async () => {
+test(`Run MF cli command to upload an invalid json settings for user 123`, async () => {
   const result = await utilities.callMfCli(
-    `cd ../cli/src/ && node cli.mjs --upload ../examples//accessibility-voiceGuidance-invalid1.json --user 123~A && cd ../../functional`,
+    `cd ../cli/src/ && node cli.mjs --upload ../examples//accessibility-voiceGuidance-invalid1.json --user 123 && cd ../../functional`,
     true
   );
   expect(result.includes(`"errorCode": "INVALID-STATE-DATA",`)).toBe(true);
@@ -122,6 +126,9 @@ test(`Run MF cli command to perform Method Latency`, async () => {
     `--method device.type --latency 2500 --latency 3500`
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  const response = await utilities.callMfCli("--user 12345 --state");
+  expect(response.includes(`"min": 2500,`)).toBe(true);
+  expect(response.includes(`"max": 3500`)).toBe(true);
 });
 
 // Performing session start/stop
@@ -157,15 +164,15 @@ test(`Validate broadcast event for a user in a group and Validate that other use
       id: 11,
     }),
     9998,
-    "123~A"
+    "567~B"
   );
   const result = await utilities.callMfCli(
-    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 123~A && cd ../../functional`,
+    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 567~B && cd ../../functional`,
     true
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
   const resultTwo = await utilities.callMfCli(
-    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 456~A && cd ../../functional`,
+    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 978~B && cd ../../functional`,
     true
   );
   expect(resultTwo.includes(`{ status: 'SUCCESS' }`)).toBe(true);

@@ -23,20 +23,17 @@ import * as utilities from "./utilities.mjs";
 
 jest.setTimeout(20040);
 
-const httpPort = 3336;
-const socketPort = 9009;
-
 beforeAll(async () => {
   const response = await utilities.mfState(
     true,
-    ` -- --manage --discovery --httpPort ${httpPort} --socketPort ${socketPort}`
+    ` -- --manage --discovery`
   );
   expect(response).toBe("MF started successfully");
 });
 
 afterAll(async () => {
   //Stop Mock Firebolt
-  const response = await utilities.killPort(socketPort);
+  const response = await utilities.killPort(9998);
   expect(response).toBe("Port Killed");
 });
 
@@ -46,8 +43,7 @@ test(`Validate OPENRPC Response`, async () => {
       method: "accessibility.closedCaptionsSettings",
       params: {},
       id: 0,
-    }),
-    socketPort
+    })
   );
   expect(response.includes('"enabled":true')).toEqual(true);
 });

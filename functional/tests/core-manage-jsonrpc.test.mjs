@@ -23,20 +23,17 @@ import * as utilities from "./utilities.mjs";
 
 jest.setTimeout(20020);
 
-const httpPort = 3001;
-const socketPort = 9001;
-
 beforeAll(async () => {
   const response = await utilities.mfState(
     true,
-    ` -- --manage --httpPort ${httpPort} --socketPort ${socketPort}`
+    ` -- --manage`
   );
   expect(response).toBe("MF started successfully");
 });
 
 afterAll(async () => {
   //Stop Mock Firebolt
-  const response = await utilities.killPort(socketPort);
+  const response = await utilities.killPort(9998);
   expect(response).toBe("Port Killed");
 });
 
@@ -46,8 +43,7 @@ test(`Validate OPENRPC Response for manage SDK`, async () => {
       method: "accessory.list",
       params: {},
       id: 0,
-    }),
-    socketPort
+    })
   );
   expect(response.includes(`"protocol":"BluetoothLE"`)).toEqual(true);
 });

@@ -23,20 +23,17 @@ import * as utilities from "./utilities.mjs";
 
 jest.setTimeout(20030);
 
-const httpPort = 3335;
-const socketPort = 9990;
-
 beforeAll(async () => {
   const response = await utilities.mfState(
     true,
-    ` -- --discovery --httpPort ${httpPort} --socketPort ${socketPort}`
+    ` -- --discovery`
   );
   expect(response).toBe("MF started successfully");
 });
 
 afterAll(async () => {
   //Stop Mock Firebolt
-  const response = await utilities.killPort(socketPort);
+  const response = await utilities.killPort(9998);
   expect(response).toBe("Port Killed");
 });
 
@@ -46,8 +43,7 @@ test(`Validate firebolt response for Discovery SDK`, async () => {
       method: "content.providers",
       params: {},
       id: 0,
-    }),
-    socketPort
+    })
   );
   expect(response.includes(`"id":"NetflixApp"`)).toEqual(true);
 });
