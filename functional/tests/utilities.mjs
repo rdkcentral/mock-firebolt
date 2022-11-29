@@ -76,6 +76,7 @@ async function fireboltCommand(command, port, user) {
     ws.on("message", function message(data) {
       console.log("received: %s", data);
       res(data);
+      ws.close();
     });
   });
 }
@@ -163,7 +164,11 @@ async function callMfCli(command, isWithoutPredefinedPath = false) {
         } else {
           console.log(`The stdout Buffer from shell: ${stdout.toString()}`);
           console.log(`The stderr Buffer from shell: ${stderr.toString()}`);
-          resolve(stdout.toString());
+          if (!stdout && stderr) {
+            resolve(stderr.toString());
+          } else {
+            resolve(stdout.toString());
+          }
         }
       }
     );
