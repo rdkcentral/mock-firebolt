@@ -8,6 +8,13 @@ methods:
         console.log("*** value of closedCaptionsScratch.enabled in yaml----",closedCaptionsScratch.enabled)
         return closedCaptionsScratch.enabled;
       }
+  accessibility.closedCaptionsSettings:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
+        console.log("### value of ctx inside accessibility.closedCaptionsSettings of yaml -get",ctx)
+        return closedCaptionsScratch;
+      }
   closedcaptions.setEnabled:
     response: |
       function f(ctx, params) {
@@ -249,6 +256,13 @@ methods:
         console.log("### value of ctx inside  voiceGuidance.enabled of yaml",ctx)
         console.log("*** value of voiceGuidanceScratch.enabled in yaml----",voiceGuidanceScratch.enabled)
         return voiceGuidanceScratch.enabled;
+      }
+  accessibility.voiceGuidanceSettings:
+    response: |
+      function f(ctx, params) {
+        const closedCaptionsScratch = ctx.get('voiceGuidanceSettings');
+        console.log("### value of ctx inside accessibility.voiceGuidanceSettings of yaml -get",ctx)
+        return voiceGuidanceScratch;
       }
   voiceGuidance.setEnabled:
     response: |
