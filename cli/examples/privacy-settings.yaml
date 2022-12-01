@@ -7,3 +7,30 @@ methods:
         console.log("*** value of ccs.limitAdTracking in yaml----", ccs.limitAdTracking);
         return ccs.limitAdTracking;
       }
+  privacy.skipRestriction:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('privacySettings');
+        console.log("*** value of ccs.skipRestriction in yaml----", ccs.skipRestriction);
+        return ccs.skipRestriction;
+      }
+  privacy.setLimitAdTracking:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('privacySettings');
+        console.log(`Set limitAdTracking params =>`, params);
+        ccs.limitAdTracking = params && params.value;
+        ctx.set('privacySettings', ccs, '~A');
+        console.log(`*** Updated the limitAdTracking value for ccs limitAdTracking ***`);
+        return null;
+      }
+  privacy.setSkipRestriction:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('privacySettings');
+        console.log(`Set skipRestriction params =>`, params);
+        ccs.skipRestriction = params && params.value;
+        ctx.set('privacySettings', ccs, '123~A');
+        console.log(`*** Updated the skipRestriction value for ccs skipRestriction ***`);
+        return null;
+      }
