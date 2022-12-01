@@ -123,6 +123,7 @@ function addUser(userId) {
   var users = getUsers();
   let appId,user,group;
 
+  //getting user, group and appId from userId
   if (userId.includes("~")){
     user = userId.split("~")[0];
     if (userId.includes("#")){
@@ -141,6 +142,7 @@ function addUser(userId) {
     user = userId;
   }
 
+//iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
     if (users[key].includes("~")){
       if (user && users[key].split("~")[0]==user){
@@ -195,6 +197,7 @@ function addUser(userId) {
   wss.on('close', function close() {
     clearInterval(interval);
   });
+  return true;
 }
 
 function addDefaultUser(userId) {

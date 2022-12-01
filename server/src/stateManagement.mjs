@@ -84,7 +84,7 @@ function addUser(userId) {
   let appId,user,group;
   if (userId in state){
     logger.info(`Cannot add user ${userId}, already exists`);
-    return false;
+    return {isSuccess: false, msg : `Cannot add user, already exists`};
   }
 
   //getting user, group and appId from userId
@@ -137,7 +137,9 @@ function addUser(userId) {
   }
 
   state[''+userId] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
-  state[''+group] = JSON.parse(JSON.stringify(perUserStartState)); // Deep copy
+  if (!(group in state)){
+    state[''+group] = JSON.parse(JSON.stringify(perUserStartState)); // Deep copy
+  };
   return {isSuccess:true, msg:""}
 }
 
@@ -177,13 +179,15 @@ function getState(userId) {
 
   //to get the userId from given user/appId
   userId = getUserId(userId);
-
   if ( userId in state ) {
     const stateCopy = JSON.parse( JSON.stringify(state) )
     let finalState = stateCopy['global'];
     userId = '' + userId;
     if( userId.includes("~")){
       let group = "~"+userId.split("~")[1];
+      if (group.includes("#")){
+        group = group.split("#")[0];
+      }
       if (group in stateCopy){
         let groupState = stateCopy[''+group];
         resetSequenceStateValues(finalState, groupState);
@@ -721,7 +725,7 @@ export const testExports={
 }
 export {
   state,
-  addUser,
+  addUser,getUserId,
   getState,
   getAppropriateDelay,
   hasOverride, getMethodResponse,

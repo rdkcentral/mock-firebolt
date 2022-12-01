@@ -67,9 +67,38 @@ test(`userManagement.getWsForUser works properly`, () => {
 
 test(`userManagement.addUser works properly`, () => {
   const userId = "12345";
-  expect(userManagement.addUser(userId)).toBeUndefined();
+  expect(userManagement.addUser(userId)).toEqual(false);
 });
 
+test(`userManagement.addUser works properly for same user`, () => {
+  const userId = "456~A#netflix";
+  expect( userManagement.addUser(userId)).toEqual(true);
+  userManagement.addUser(userId);
+  const userId1 = "456~A#amazon";
+  const expectedResult = false;
+  const result1 = userManagement.addUser(userId1);
+  expect(result1).toEqual(expectedResult);
+});
+
+test(`userManagement.addUser works properly for same appId`, () => {
+  const userId2 = "789~A#netflix";
+  const expectedResult2 = false
+  const result2 = userManagement.addUser(userId2);
+  expect(result2).toEqual(expectedResult2);
+});
+
+test(`userManagement.addUser works properly for same user without group`, () => {
+  userManagement.addUser("111#youtube");
+  const userId3 = "111#amazon";
+  const expectedResult3 = false
+  const result3 = userManagement.addUser(userId3);
+  expect(result3).toEqual(expectedResult3);
+
+  const userId4 = "222#youtube";
+  const expectedResult4 = false
+  const result4 = userManagement.addUser(userId4);
+  expect(result4).toEqual(expectedResult4);
+});
 test(`userManagement.removeUser works properly`, () => {
   const userId = "12345";
   const spy = jest.spyOn(Map.prototype, "delete");
