@@ -160,7 +160,7 @@ curl --location --request POST 'http://localhost:3333/api/v1/state/global/latenc
 curl --location --request POST 'http://localhost:3333/api/v1/state/global/mode' \
 --header 'content-type: application/json' \
 --data-raw '{
-    "mode": "default"
+    "mode": "DEFAULT"
 }'
 ```
 
@@ -275,7 +275,7 @@ curl --location --request PUT 'http://localhost:3333/api/v1/state' \
 --data-raw '{
     "state": {
         "global": {
-            "mode": "default"
+            "mode": "DEFAULT"
         },
         "methods": {
             "account.id": {
