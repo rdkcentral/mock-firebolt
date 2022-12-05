@@ -147,7 +147,7 @@ methods:
         console.log("*** value of closedCaptionsScratch.styles.fontOpacity in yaml----",closedCaptionsScratch.styles.fontOpacity)
         return closedCaptionsScratch.styles.fontOpacity;
       }
-  closedcaptions.setFontOpacityr:
+  closedcaptions.setFontOpacity:
     response: |
       function f(ctx, params) {
         const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
@@ -169,7 +169,7 @@ methods:
         console.log("*** value of closedCaptionsScratch.styles.backgroundColor in yaml----",closedCaptionsScratch.styles.backgroundColor)
         return closedCaptionsScratch.styles.backgroundColor;
       }
-  closedcaptions.setbackgroundColor:
+  closedcaptions.setBackgroundColor:
     response: |
       function f(ctx, params) {
         const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
@@ -191,7 +191,7 @@ methods:
         console.log("*** value of closedCaptionsScratch.styles.backgroundOpacity in yaml----",closedCaptionsScratch.styles.backgroundOpacity)
         return closedCaptionsScratch.styles.backgroundOpacity;
       }
-  closedcaptions.setbackgroundOpacity:
+  closedcaptions.setBackgroundOpacity:
     response: |
       function f(ctx, params) {
         const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
@@ -213,7 +213,7 @@ methods:
         console.log("*** value of closedCaptionsScratch.styles.textAlign in yaml----",closedCaptionsScratch.styles.textAlign)
         return closedCaptionsScratch.styles.textAlign;
       }
-  closedcaptions.settextAlign:
+  closedcaptions.setTextAlign:
     response: |
       function f(ctx, params) {
         const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
@@ -235,7 +235,7 @@ methods:
         console.log("*** value of closedCaptionsScratch.styles.textAlignVertical in yaml----",closedCaptionsScratch.styles.textAlignVertical)
         return closedCaptionsScratch.styles.textAlignVertical;
       }
-  closedcaptions.settextAlignVertical:
+  closedcaptions.setTextAlignVertical:
     response: |
       function f(ctx, params) {
         const closedCaptionsScratch = ctx.get('closedCaptionsSettings');
@@ -249,7 +249,7 @@ methods:
         ctx.sendBroadcastEvent('accessibility.onClosedCaptionsSettingsChanged', result, msg);
         return null;
       }
-  voiceGuidance.enabled:
+  voiceguidance.enabled:
     response: |
       function f(ctx, params) {
         const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
@@ -260,11 +260,12 @@ methods:
   accessibility.voiceGuidanceSettings:
     response: |
       function f(ctx, params) {
-        const closedCaptionsScratch = ctx.get('voiceGuidanceSettings');
+        const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
         console.log("### value of ctx inside accessibility.voiceGuidanceSettings of yaml -get",ctx)
+        console.log("*** value of voiceGuidanceScratch in yaml----",voiceGuidanceScratch)
         return voiceGuidanceScratch;
       }
-  voiceGuidance.setEnabled:
+  voiceguidance.setEnabled:
     response: |
       function f(ctx, params) {
         const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
@@ -278,7 +279,7 @@ methods:
         ctx.sendBroadcastEvent('accessibility.onVoiceGuidanceSettingsChanged', result, msg);
         return null;
       }
-  voiceGuidance.speed:
+  voiceguidance.speed:
     response: |
       function f(ctx, params) {
         const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
@@ -286,7 +287,7 @@ methods:
         console.log("*** value of voiceGuidanceScratch.speed in yaml----",voiceGuidanceScratch.speed)
         return voiceGuidanceScratch.speed;
       }
-  voiceGuidance.setSpeed:
+  voiceguidance.setSpeed:
     response: |
       function f(ctx, params) {
         const voiceGuidanceScratch = ctx.get('voiceGuidanceSettings');
