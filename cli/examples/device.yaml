@@ -20,6 +20,6 @@ methods:
         const msg = 'Post trigger for device.setName';
         console.log("value of result inside yaml ",result)
         console.log("value of msg inside in yaml",msg)
-        ctx.sendBroadcastEvent('device.onDeviceNameChanged', result, msg);
+        ctx.sendBroadcastEvent('device.onNameChanged', result, msg);
         return null;
       }
