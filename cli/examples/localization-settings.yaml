@@ -39,7 +39,7 @@ methods:
         const result = ctx.get('localizationSettings');
         const msg = 'Post trigger for localization.setLocalilty';
         console.log("value of result inside yaml ",result)
-        ctx.sendEvent('localization.onLocaliltyChanged', result, msg);
+        ctx.sendBroadcastEvent('localization.onLocaliltyChanged', result, msg);
         return null;
       }
   localization.setCountryCode:
@@ -53,7 +53,7 @@ methods:
         const result = ctx.get('localizationSettings');
         const msg = 'Post trigger for localization.setCountryCode';
         console.log("value of result inside yaml ", result)
-        ctx.sendEvent('localization.onCountryCodeChanged', result, msg);
+        ctx.sendBroadcastEvent('localization.onCountryCodeChanged', result, msg);
         return null;
       }
   localization.setLanguage:
@@ -67,7 +67,7 @@ methods:
         const result = ctx.get('localizationSettings');
         const msg = 'Post trigger for localization.setLanguage';
         console.log("value of result inside yaml ", result)
-        ctx.sendEvent('localization.onLanguageChanged', result, msg);
+        ctx.sendBroadcastEvent('localization.onLanguageChanged', result, msg);
         return null;
       }
   localization.setLocale:
@@ -81,6 +81,6 @@ methods:
         const result = ctx.get('localizationSettings');
         const msg = 'Post trigger for localization.setLocale';
         console.log("value of result inside yaml ", result)
-        ctx.sendEvent('localization.onLocaleChanged', result, msg);
+        ctx.sendBroadcastEvent('localization.onLocaleChanged', result, msg);
         return null;
       }
