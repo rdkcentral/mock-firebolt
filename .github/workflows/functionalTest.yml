@@ -1,12 +1,16 @@
-# This workflow will do a health check of MFOS overnight and run the health test cases.
+# This workflow will do a build of MFOS and run all functional tests.
 
-name: Functional Health check
+name: Functional Tests
 
+# run all the functional tests on opening/re-opening/synchronize a PR.
 on:
-  schedule:
-    # schedule the job to runs at 03:00 UTC every day.
-    - cron: "0 3 * * *"
-  workflow_dispatch: {}
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    branches: [ main ]
+
 jobs:
   build:
     # running on ubuntu latest version
@@ -24,9 +28,9 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ matrix.node-version }}
-    - name: Run Health Check Tests
+    - name: Run Functional Tests
       # going to server and install packages and then go to functional folder 
-      # install the packages and running health check test cases
+      # install the packages and running functional test cases one by one.
       run: |
         cd server; \
         npm install; \
@@ -35,6 +39,7 @@ jobs:
         npm run build:core; \
         npm run build:manage; \
         npm run build:discovery; \
+        npm run build:mf; \
         cd ../functional; \
         npm install; \
         npm run test:healthCheck;
@@ -42,5 +47,3 @@ jobs:
         npm run test:manage;
         npm run test:discovery;
         npm run test:core:manage:discovery;
-        
-        
