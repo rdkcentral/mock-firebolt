@@ -35,6 +35,7 @@ jobs:
         cd server; \
         npm install; \
         cp src/.mf.config.SAMPLE.json src/.mf.config.json; \
+        npm update @firebolt-js/manage-sdk @firebolt-js/discovery-sdk; \
         npm run clean; \
         npm run build:core; \
         npm run build:manage; \
@@ -46,6 +47,6 @@ jobs:
         npm install; \
         npm run test:healthCheck;
         npm run test:core;
-        # npm run test:manage;
+        npm run test:manage;
         npm run test:discovery;
         npm run test:core:manage:discovery;
