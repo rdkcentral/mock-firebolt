@@ -40,6 +40,8 @@ jobs:
         npm run build:manage; \
         npm run build:discovery; \
         npm run build:mf; \
+        cd ../cli; \
+        npm install; \
         cd ../functional; \
         npm install; \
         npm run test:healthCheck;
