@@ -38,6 +38,7 @@ import nopt from 'nopt';
 import axios from 'axios';
 import { config } from './config.mjs';
 import { usage } from './usage.mjs';
+import {getWsStatus} from '../../server/src/stateManagement.mjs';
 
 function loadConfig() {
   let mfConfig;
@@ -80,7 +81,8 @@ const knownOpts = {
   'sequence'        : String,
   'session'         : String,
   'sessionOutput'   : String,
-  'sessionOutputPath' :  String
+  'sessionOutputPath' :  String,
+  'getStatus' : Boolean
 };
 
 const shortHands = {
@@ -446,7 +448,17 @@ if ( parsed.help ) {
     });    
   }
 
-} else {
+}
+  else if (parsed.getStatus){
+    axios.post(url(host, port, '/api/v1/status'), undefined)
+      .then(function (response) {
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        logError(error);
+    });
+  }
+  else {
 
   console.log('Invalid command-line arguments. No action taken.');
 

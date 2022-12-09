@@ -27,6 +27,7 @@ import * as magicDateTime from './magicDateTime.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
+import {getWssForUser,user2wss} from './userManagement.mjs';
 import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
 
 const Mode = {
@@ -622,6 +623,11 @@ function deleteScratch(userId, key, scope=""){
   }
 }
 
+function getWsStatus(userId){
+  let ws = user2wss.get(''+userId);
+  console.log(ws.readyState);
+}
+
 // --- Exports ---
 
 export const testExports={
@@ -637,5 +643,5 @@ export {
   setLatency, setLatencies,
   isLegalMode, setMode,
   setMethodResult, setMethodError,
-  setScratch, getScratch, deleteScratch
+  setScratch, getScratch, deleteScratch, getWsStatus
 };
