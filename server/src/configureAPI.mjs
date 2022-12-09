@@ -102,7 +102,7 @@ function configureAPI(app) {
     app.post('/api/v1/sequence',                        sequenceApi.sendSequence);
 
      // check status
-     app.post('/api/v1/status',                        statusApi.getStatus);
+     app.get('/api/v1/status',                        statusApi.getStatus);
 }
 
 export { configureAPI };

@@ -20,14 +20,33 @@
 
 'use strict';
 
-import {getWsStatus} from '../../stateManagement.mjs';
+import { getWsForUser } from '../../userManagement.mjs';
+import { getUserIdFromReq } from '../../util.mjs';
+import WebSocket from 'ws'
+
+const states = {
+  "0": "CONNECTING",
+  "1": "CONNECTED",
+  "2": "CLOSING",
+  "3": "CLOSED",
+}
 
 function getStatus(req,res){
     const userId = getUserIdFromReq(req);
-    getWsStatus(userId);
-    res.status(200).send({
-        status: 'SUCCESS'
-      });
+    let userWs = getWsForUser(userId);
+
+    console.log(userWs.readyState)
+
+    if (userWs) {
+      res.status(200).send({
+        status: "WS connection found",
+        readyState: states[userWs.readyState]
+      })
+    } else {
+      res.status(404).send({
+        status: "No WS connection found for user " + userId
+      })
+    }
 }
 
-export {getStatus}
+export { getStatus }
