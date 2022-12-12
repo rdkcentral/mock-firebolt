@@ -49,7 +49,7 @@ test(`MF Startup/Health Check on a custom port`, async () => {
     httpPort
   );
   expect(healthCheckResponse).toBeDefined();
-  expect(healthCheckResponse.status).toBe(200);
+  expect(healthCheckResponse.status).toBe(404);
 });
 
 test(`Validate heath check on a custom port`, async () => {
