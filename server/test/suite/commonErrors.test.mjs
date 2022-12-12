@@ -25,7 +25,7 @@ import * as commonErrors from "../../src/commonErrors.mjs";
 describe(`FireboltError works properly`, () => {
   const fireboltError = new commonErrors.FireboltError("code", "message");
   test("should instantiate", () => {
-    expect(fireboltError.code).toEqual("code");
+    expect(fireboltError.code).toEqual("sadPr");
   });
 });
 
