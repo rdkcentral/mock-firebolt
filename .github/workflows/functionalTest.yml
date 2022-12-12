@@ -1,0 +1,52 @@
+# This workflow will do a build of MFOS and run all functional tests.
+
+name: Functional Tests
+
+# run all the functional tests on opening/re-opening/synchronize a PR.
+on:
+  pull_request:
+    types:
+    - opened
+    - reopened
+    - synchronize
+    branches: [ main ]
+
+jobs:
+  functionalTests:
+    # running on ubuntu latest version
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # using node 16.x version
+        node-version: [16.x]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+    - name: Use Node.js $${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Run Functional Tests
+      # going to server and install packages and then go to functional folder 
+      # install the packages and running functional test cases one by one.
+      run: |
+        cd server; \
+        npm install; \
+        cp src/.mf.config.SAMPLE.json src/.mf.config.json; \
+        npm update @firebolt-js/manage-sdk @firebolt-js/discovery-sdk; \
+        npm run clean; \
+        npm run build:core; \
+        npm run build:manage; \
+        npm run build:discovery; \
+        npm run build:mf; \
+        cd ../cli; \
+        npm install; \
+        cd ../functional; \
+        npm install; \
+        npm run test:healthCheck;
+        npm run test:core;
+        npm run test:manage;
+        npm run test:discovery;
+        npm run test:core:manage:discovery;

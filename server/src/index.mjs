@@ -88,6 +88,8 @@ logger.info('Adding user 789...'); stateManagement.addUser('789'); userManagemen
 
 logger.info('Adding user 123~A...'); stateManagement.addUser('123~A'); userManagement.addUser('123~A');
 logger.info('Adding user 567~B...'); stateManagement.addUser('567~B'); userManagement.addUser('567~B');
+// adding one extra group B user
+logger.info('Adding user 978~B...'); stateManagement.addUser('978~B'); userManagement.addUser('978~B');
 logger.info('Adding user 456~A...'); stateManagement.addUser('456~A'); userManagement.addUser('456~A');
 logger.info('Adding user 789~A...'); stateManagement.addUser('789~A'); userManagement.addUser('789~A');
 
