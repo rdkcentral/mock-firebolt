@@ -13,6 +13,7 @@ node_modules/*
 server/node_modules/*
 cli/node_modules/*
 conduit/node_modules/*
+functional/node_modules/*
 
 server/src/.mf.config.json
 server/package.json

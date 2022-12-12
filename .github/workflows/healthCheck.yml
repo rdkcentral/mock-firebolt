@@ -1,0 +1,46 @@
+# This workflow will do a health check of MFOS overnight and run the health test cases.
+
+name: Functional Health check
+
+on:
+  schedule:
+    # schedule the job to runs at 03:00 UTC every day.
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+jobs:
+  build:
+    # running on ubuntu latest version
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # using node 16.x version
+        node-version: [16.x]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+    - name: Use Node.js $${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Run Health Check Tests
+      # going to server and install packages and then go to functional folder 
+      # install the packages and running health check test cases
+      run: |
+        cd server; \
+        npm install; \
+        cp src/.mf.config.SAMPLE.json src/.mf.config.json; \
+        npm run clean; \
+        npm run build:core; \
+        npm run build:manage; \
+        npm run build:discovery; \
+        cd ../functional; \
+        npm install; \
+        npm run test:healthCheck;
+        npm run test:core;
+        npm run test:manage;
+        npm run test:discovery;
+        npm run test:core:manage:discovery;
+        
+        
