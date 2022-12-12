@@ -159,7 +159,8 @@ async function handleMessage(message, userId, ws) {
   } else if (process.env.proxy) {
     //bypass JSON-RPC calls and hit proxy server endpoint
     //initialize websocket connection for each request, send request to proxy connection and response back to caller 
-    response = await proxyManagement.initWsAndSendRequest(JSON.stringify(oMsg))
+    response = await proxyManagement.initWsAndSendRequest(JSON.stringify(oMsg), ws)
+    return
   } else if (conduit.isConduitConnected()) {
     // When the Conduit app is connected, we'll route incoming Firebolt calls from the app under development
     // through here (Mock Firebolt) and the Conduit app on a device and back in order to get a real result.

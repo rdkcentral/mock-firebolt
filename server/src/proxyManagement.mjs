@@ -21,7 +21,7 @@
 import { parse } from 'url';
 import WebSocket from 'ws';
 
-async function initWsAndSendRequest(command) {
+async function initWsAndSendRequest(command, returnWS) {
     const url = await buildWSUrl()
     let ws = new WebSocket(url)
     try {
@@ -37,6 +37,7 @@ async function initWsAndSendRequest(command) {
         
         ws.on('message', function message(data) {
           const buf = Buffer.from(data, 'utf8');
+          returnWS.send(buf.toString())
           res(buf.toString())
         });
 
