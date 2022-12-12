@@ -38,7 +38,6 @@ import nopt from 'nopt';
 import axios from 'axios';
 import { config } from './config.mjs';
 import { usage } from './usage.mjs';
-import {getWsStatus} from '../../server/src/stateManagement.mjs';
 
 function loadConfig() {
   let mfConfig;
@@ -450,7 +449,7 @@ if ( parsed.help ) {
 
 }
   else if (parsed.getStatus){
-    axios.post(url(host, port, '/api/v1/status'), undefined)
+    axios.get(url(host, port, '/api/v1/status'), undefined)
       .then(function (response) {
         console.log(response.data);
       })

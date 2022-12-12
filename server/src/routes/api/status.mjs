@@ -35,8 +35,6 @@ function getStatus(req,res){
     const userId = getUserIdFromReq(req);
     let userWs = getWsForUser(userId);
 
-    console.log(userWs.readyState)
-
     if (userWs) {
       res.status(200).send({
         status: "WS connection found",
