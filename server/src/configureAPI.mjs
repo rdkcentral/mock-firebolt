@@ -27,7 +27,7 @@ import * as userApi from './routes/api/user.mjs';
 import * as eventApi from './routes/api/event.mjs';
 import * as sessionApi from './routes/api/session.mjs';
 import * as sequenceApi from './routes/api/sequence.mjs';
-
+import * as statusApi from './routes/api/status.mjs';
 function configureAPI(app) {
 
 	// =========================== Health Check Route =========================
@@ -100,6 +100,9 @@ function configureAPI(app) {
 
     // Send an event sequence
     app.post('/api/v1/sequence',                        sequenceApi.sendSequence);
+
+     // check status
+     app.get('/api/v1/status',                        statusApi.getStatus);
 }
 
 export { configureAPI };
