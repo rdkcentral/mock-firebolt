@@ -1,6 +1,6 @@
 ---
 methods:
-  localization.locality:
+  localization.localilty:
     response: |
       function f(ctx, params) {
         const ccs = ctx.get('localizationSettings');
