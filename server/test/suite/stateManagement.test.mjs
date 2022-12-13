@@ -41,29 +41,23 @@ test(`stateManagement.addUser works properly for same user`, () => {
   expect( stateManagement.addUser(userId).isSuccess ).toEqual(true);
   stateManagement.addUser(userId);
   const userId1 = "456~A#amazon";
-  const expectedResult = false;
-  const result1 = stateManagement.addUser(userId1);
-  expect(result1.isSuccess).toEqual(expectedResult);
+  expect(stateManagement.addUser(userId1).isSuccess).toEqual(false);
 });
 
 test(`stateManagement.addUser works properly for same appId`, () => {
   const userId2 = "789~A#netflix";
-  const expectedResult2 = false
-  const result2 = stateManagement.addUser(userId2);
-  expect(result2.isSuccess).toEqual(expectedResult2);
+  expect(stateManagement.addUser(userId2).isSuccess).toEqual(false);
 });
 
 test(`stateManagement.addUser works properly for same user without group`, () => {
   stateManagement.addUser("111#youtube");
   const userId3 = "111#amazon";
-  const expectedResult3 = false
   const result3 = stateManagement.addUser(userId3);
-  expect(result3.isSuccess).toEqual(expectedResult3);
+  expect(result3.isSuccess).toEqual(false);
 
   const userId4 = "222#youtube";
-  const expectedResult4 = false
   const result4 = stateManagement.addUser(userId4);
-  expect(result4.isSuccess).toEqual(expectedResult4);
+  expect(result4.isSuccess).toEqual(false);
 });
 
 
@@ -73,6 +67,9 @@ test(`stateManagement.getUserId works properly`, () => {
 
   const userId2 = "youtube"
   expect(stateManagement.getUserId(userId2)).toEqual("111#youtube");
+
+  const userId3 = "~A"
+  expect(stateManagement.getUserId(userId3)).toEqual("~A");
 });
 
 test(`stateManagement.getState works properly`, () => {
@@ -85,6 +82,14 @@ test(`stateManagement.getState works properly`, () => {
     isDefaultUserState: true
   }
   expect(result1).toEqual(expectedResult);
+
+});
+
+test(`stateManagement.getState for invalid user works properly`, () => {
+  const spy1 = jest.spyOn(logger, "info");
+  stateManagement.getState("101");
+  expect(spy1).toHaveBeenCalled();
+
 });
 
 test(`stateManagement.getState works properly for global and group`, () => {

@@ -30,12 +30,16 @@ import * as stateManagement from '../../stateManagement.mjs';
 // PUT /api/v1/user
 // Expected body: N/A
 function addUser(req, res) {
-  let userId = req.params.userId;
+  let userId;
+  if (req.params.userId){
+    userId = req.params.userId;
+  }
   if (userId){
-    // Make sure we have a web socket server for this user
-    userManagement.addUser(userId);
     // Make sure we have starter (empty) state for this user
     let response = stateManagement.addUser(userId);
+    // Make sure we have a web socket server for this user
+    userManagement.addUser(userId);
+
     if (response.isSuccess){
       res.status(200).send({
         status: 'SUCCESS',
@@ -54,10 +58,10 @@ function addUser(req, res) {
     // Generate a unique userId for this user (no vanity userIds, at least for now)
     userId = uuidv4();
 
-    // Make sure we have a web socket server for this user
-    userManagement.addUser(userId);
     // Make sure we have starter (empty) state for this user
     stateManagement.addUser(userId);
+    // Make sure we have a web socket server for this user
+    userManagement.addUser(userId);
 
     res.status(200).send({
       status: 'SUCCESS',
