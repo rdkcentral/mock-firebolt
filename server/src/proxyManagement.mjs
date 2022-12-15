@@ -57,7 +57,7 @@ async function initialize() {
             // connection closed, discard old websocket and create a new one in 2s
             console.log("Connection to websocket proxy server is closed.")
             ws = null
-            setProxyWSConnection(ws)
+            //setProxyWSConnection(ws)
             setTimeout(function() {
                 console.log("Reinitialize websocket proxy connection")
                 initialize();

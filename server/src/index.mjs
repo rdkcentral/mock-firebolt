@@ -70,7 +70,32 @@ server.on('upgrade', function upgrade(request, socket, head) {
     }
   }
 
-  const wss = userManagement.getWssForUser(userId);
+  let wss = new WebSocketServer({ noServer: true })
+
+  wss.on('connection', function connection(ws) {
+    ws.isAlive = true;
+    ws.on('pong', async hb => {
+      heartbeat(ws)
+    });
+    associateUserWithWs(''+userId, ws);
+    handleGroupMembership(''+userId)
+    ws.on('message', async message => {
+      messageHandler.handleMessage(message, ''+userId, ws);
+    });
+  });
+
+  const interval = setInterval(function ping() {
+    wss.clients.forEach(function each(ws) {
+      if (ws.isAlive === false) return ws.terminate();
+      ws.isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', function close() {
+    clearInterval(interval);
+  });
+
   if ( wss ) {
     wss.handleUpgrade(request, socket, head, function done(ws) {
       wss.emit('connection', ws, request);
@@ -107,6 +132,7 @@ import cors from 'cors';
 
 import * as configureAPI from './configureAPI.mjs';
 import * as configureUI from './configureUI.mjs';
+import { WebSocketServer } from 'ws';
 
 const app = express();
 

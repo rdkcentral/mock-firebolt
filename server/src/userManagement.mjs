@@ -119,29 +119,7 @@ function heartbeat(ws) {
 function addUser(userId) {
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
-  wss.on('connection', function connection(ws) {
-    ws.isAlive = true;
-    ws.on('pong', async hb => {
-      heartbeat(ws)
-    });
-    associateUserWithWs(''+userId, ws);
-    handleGroupMembership(''+userId)
-    ws.on('message', async message => {
-      messageHandler.handleMessage(message, ''+userId, ws);
-    });
-  });
-
-  const interval = setInterval(function ping() {
-    wss.clients.forEach(function each(ws) {
-      if (ws.isAlive === false) return ws.terminate();
-      ws.isAlive = false;
-      ws.ping();
-    });
-  }, 30000);
-
-  wss.on('close', function close() {
-    clearInterval(interval);
-  });
+  
 }
 
 function addDefaultUser(userId) {
