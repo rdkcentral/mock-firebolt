@@ -28,6 +28,8 @@ import { getUserIdFromReq } from './util.mjs';
 import * as userManagement from './userManagement.mjs';
 import * as stateManagement from './stateManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs';
+import * as messageHandler from './messageHandler.mjs';
+
 
 // --------------------------------------------------- Conduit ----------------------------------------------------
 
@@ -75,10 +77,10 @@ server.on('upgrade', function upgrade(request, socket, head) {
   wss.on('connection', function connection(ws) {
     ws.isAlive = true;
     ws.on('pong', async hb => {
-      heartbeat(ws)
+      ws.isAlive = true
     });
-    associateUserWithWs(''+userId, ws);
-    handleGroupMembership(''+userId)
+    //associateUserWithWs(''+userId, ws);
+    //handleGroupMembership(''+userId)
     ws.on('message', async message => {
       messageHandler.handleMessage(message, ''+userId, ws);
     });

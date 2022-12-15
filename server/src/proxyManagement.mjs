@@ -23,8 +23,9 @@ import WebSocket from 'ws';
 let websocketConnection = null;
 const setTimeoutInterval = 1000
 const connectionTimeout = 5000
+let connectionMap = {}
 
-async function initialize() {
+async function initialize(incomingWS) {
   const url = await buildWSUrl()
   console.log(url)
   if (url) {
@@ -50,18 +51,19 @@ async function initialize() {
 
         ws.onopen = function () {
           console.log("Connection to websocket proxy server established") 
-          setProxyWSConnection(ws)
+          //setProxyWSConnection(ws)
+          connectionMap[incomingWS] = ws
         }
 
         ws.onclose = function(){
             // connection closed, discard old websocket and create a new one in 2s
             console.log("Connection to websocket proxy server is closed.")
-            ws = null
+            delete connectionMap[incomingWS]
             //setProxyWSConnection(ws)
-            setTimeout(function() {
-                console.log("Reinitialize websocket proxy connection")
-                initialize();
-            }, 2000)
+            // setTimeout(function() {
+            //     console.log("Reinitialize websocket proxy connection")
+            //     initialize();
+            // }, 2000)
         }
       })
     } catch (err) {
@@ -76,13 +78,18 @@ function setProxyWSConnection(ws) {
   websocketConnection = ws
 }
 
-function getProxyWSConnection() {
-    return websocketConnection
+async function getProxyWSConnection(ws) {
+  if (connectionMap[ws]) {
+    return connectionMap[ws]
+  } else {
+    return initialize(ws)
+  }
 }
 
-function sendRequest(payload) {
+async function sendRequest(incomingWS, payload) {
+  const ws = await getProxyWSConnection(incomingWS)
+
   return new Promise((res, rej) => {
-    const ws = getProxyWSConnection()
     if ( ! ws ) {
         throw new Error("websocketConnection not established")
     }
