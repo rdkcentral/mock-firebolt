@@ -80,7 +80,8 @@ const knownOpts = {
   'sequence'        : String,
   'session'         : String,
   'sessionOutput'   : String,
-  'sessionOutputPath' :  String
+  'sessionOutputPath' :  String,
+  'getStatus' : Boolean
 };
 
 const shortHands = {
@@ -446,7 +447,17 @@ if ( parsed.help ) {
     });    
   }
 
-} else {
+}
+  else if (parsed.getStatus){
+    axios.get(url(host, port, '/api/v1/status'), undefined)
+      .then(function (response) {
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        logError(error);
+    });
+  }
+  else {
 
   console.log('Invalid command-line arguments. No action taken.');
 
