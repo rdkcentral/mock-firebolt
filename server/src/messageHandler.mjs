@@ -158,9 +158,18 @@ async function handleMessage(message, userId, ws) {
     response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
   } else if (process.env.proxy) {
     //bypass JSON-RPC calls and hit proxy server endpoint
-    //initialize websocket connection for each request, send request to proxy connection and response back to caller 
-    response = await proxyManagement.initWsAndSendRequest(JSON.stringify(oMsg), ws)
-    return
+    //init websocket connection for proxy request to be sent and use receiver client to send events back to caller.
+    try {
+      if(await proxyManagement.initialize(proxyManagement.actOnResponseObject, ws)) {
+        proxyManagement.sendRequest(JSON.stringify(oMsg))
+        response = await proxyManagement.getResponseMessageFromProxy(oMsg.id)
+      } else {
+        console.log("Websocket connection not initialized")
+      }
+    } catch (err) {
+      logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
+      process.exit(1)
+    }
   } else if (conduit.isConduitConnected()) {
     // When the Conduit app is connected, we'll route incoming Firebolt calls from the app under development
     // through here (Mock Firebolt) and the Conduit app on a device and back in order to get a real result.

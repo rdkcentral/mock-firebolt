@@ -21,33 +21,82 @@
 import { parse } from 'url';
 import WebSocket from 'ws';
 
-async function initWsAndSendRequest(command, returnWS) {
-    const url = await buildWSUrl()
-    let ws = new WebSocket(url)
-    try {
-      return new Promise((res, rej) => {
-        ws.on('open', function open() {
-          ws.send(command);
-          console.log("Request sent to proxy server: ", command);
-        });
+let ws = null
+let responseObject = {}
 
-        ws.on('close', function close() {
-          console.log('disconnected');
-        });
-        
-        ws.on('message', function message(data) {
-          const buf = Buffer.from(data, 'utf8');
-          returnWS.send(buf.toString())
-          res(buf.toString())
-        });
+async function initialize(callback, returnWS) {
+  if(ws) {
+    return true
+  }
+  const url = buildWSUrl()
+  ws = new WebSocket(url)
+  try {
+    return new Promise((res, rej) => {
+      ws.on('open', function open() {
+        console.log("Connection to websocket proxy server established")
+        res(true)
+      });
 
-        ws.on('error', function message(err) {
-          rej(err)
-        });
-      })
-    } catch (err) {
-      return err
-    }
+      ws.on('close', function close() {
+        console.log('disconnected');
+      });
+      
+      ws.on('message', function message(data) {
+        const buf = Buffer.from(data, 'utf8');
+        //send response to callback
+        callback(buf.toString(), returnWS)
+      });
+
+      ws.on('error', function message(err) {
+        rej(err)
+      });
+    })
+  } catch (err) {
+    return err
+  }
+}
+
+/* Consume response from server. In case of event, send the event to caller directly.
+In case of response for requested method, store it in responseObject array
+*/
+function actOnResponseObject(data, returnWS) {
+  const response = JSON.parse(data)
+  if(response.id === undefined) {
+    returnWS.send(data)
+  }
+  responseObject[response.id] = data
+}
+
+function sendRequest(command) {
+  if(ws) {
+    ws.send(command)
+    console.log("Request sent to proxy server: ", command);
+  } else {
+    console.log("WS Client not initialized. Unable to send request to proxy server: ", command);
+  }
+}
+
+//Poll for proxy response. Fetch response using requestId. If timedout, terminate the connection
+function getResponseMessageFromProxy(id) {
+  let timeout = 2000
+  let counter = 0
+  let interval = 100
+  return new Promise((resolve, reject) => {
+    var timer = setInterval(function() {
+      if(counter >= timeout) {
+        console.log("response not received for given id: " + id)
+        reject(false)
+      }
+      if(responseObject[id]) {
+        counter = timeout + interval
+        //clear interval if response received for given id.
+        clearInterval(timer)
+        resolve(responseObject[id])
+      }
+      counter = counter + interval
+    }, interval);
+  })
+  
 }
 
 function buildWSUrl() {
@@ -57,18 +106,12 @@ function buildWSUrl() {
   } else if ( ! proxyUrl.includes(":") ) {
     proxyUrl = proxyUrl + ":" + 9998
   }
-  return new Promise(resolve => {
-    //support ws
-    const wsUrlProtocol = 'ws://'
-    const path = '/jsonrpc'
-    const hostPort = proxyUrl
-    resolve([
-        wsUrlProtocol,
-        hostPort,
-        path,
-        process.env.MF_TOKEN ? '?token=' + process.env.MF_TOKEN : null,
-    ].join(''))
-  })
+  //support ws
+  const wsUrlProtocol = 'ws://'
+  const path = '/jsonrpc'
+  const hostPort = proxyUrl
+  return [wsUrlProtocol, hostPort, path, process.env.MF_TOKEN ? '?token=' + process.env.MF_TOKEN : null,
+  ].join('')
 }
 
 // Get token from request param or env variable
@@ -95,5 +138,5 @@ function getMFToken(request) {
 
 // --- Exports ---
 export {
-  getMFToken, initWsAndSendRequest
+  getMFToken, initialize, actOnResponseObject, getResponseMessageFromProxy, sendRequest
 };
