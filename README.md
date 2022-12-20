@@ -147,6 +147,9 @@ npm run build:mf          # Builds source code within this project
 
 # Ongoing stuff
 
+# If this is not your first time using mock-firebolt but you want to ensure you have the latest SDK files you can use
+npm run upgradeSDK
+
 # If you're only using the Firebolt Core SDK (typical for most 3rd party app developers)
 # Run in a separate terminal window/tab, or use '&' to background
 npm run dev
