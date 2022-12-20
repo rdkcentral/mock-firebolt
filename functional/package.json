@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Command-line interface for controlling the Mock Firebolt server",
   "scripts": {
+    "test": "NODE_ENV=test npx jest --config=jest.config.js --silent -i",
     "test:core": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/core.test.mjs",
     "test:healthCheck": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/health-check.test.mjs",
     "test:manage": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/core-manage-jsonrpc.test.mjs",
