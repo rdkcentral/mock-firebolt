@@ -37,3 +37,9 @@ To use user groups:
 - When launching an app, you must include a path within the websocket address you pass and ensure that the path (user id) contains both a User ID and a user group name separated by a tilde ("~"). E.g., `mf=ws%3A%2F%2Flocalhost%3A9998%2F123~A`. (Note that that's the URL encoding of "ws://localhost:9998/123~A".)
 - When using the REST API, you must specify your user id value in an `x-mockfirebolt-userid` header. To match the example above, you'd set this header to `123~A`.
 - When using the CLI, you must either use the `--user` (or `-u`) flag (e.g., `--user 123`) and/or set the `userId` value in your `.mf.config.json` file to your UserID. In this example, you'd set this to "123\~A".
+
+#AppID
+
+If a User ID value is of the form "<userId>\~<groupName>\#<appId>" or "<userId>\#<appId>, the part after "#" is treated as the appId associated with the user. For example, in "123~A#netflix" netflix is the appId.
+
+Only one user can be associated with a paticular appId (for example, if 123#nteflix exist, 456#netflix can exist).
