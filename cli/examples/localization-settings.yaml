@@ -32,10 +32,10 @@ methods:
     response: |
       function f(ctx, params) {
         const ccs = ctx.get('localizationSettings');
-        console.log(`Set locality params =>`, params, ccs, ctx);
-        ccs.locality = params && params.value;
+        console.log(`Set localilty params =>`, params, ccs, ctx);
+        ccs.localilty = params && params.value;
         ctx.set('localizationSettings', ccs, '~A');
-        console.log(`*** Updated the locality value for ccs locality ***`);
+        console.log(`*** Updated the localilty value for ccs locality ***`);
         const result = ctx.get('localizationSettings');
         const msg = 'Post trigger for localization.setLocalilty';
         console.log("value of result inside yaml ",result)
