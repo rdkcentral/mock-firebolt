@@ -2,23 +2,17 @@
 
 import { jest } from "@jest/globals";
 import * as proxyManagement from "../../src/proxyManagement.mjs";
-import WebSocket from 'ws';
 
 jest.setTimeout(80 * 1000)
 describe('sequentially run tests', () => {
 
     beforeAll(() => {
-        clearEnvs()
+        clearEnvs()     
     })
 
     afterAll(() => {
         clearEnvs()
     })
-
-    test(`proxyManagement.getProxyWSConnection works properly`, async () => {
-        const client = await proxyManagement.getProxyWSConnection()
-        expect(client).toBe(null);
-    });
 
     test(`proxyManagement.getMFToken works properly and get token from request param or from env`, async () => {
         let token = proxyManagement.getMFToken({"url": "http://abcd.com?token=test"})
@@ -35,36 +29,34 @@ describe('sequentially run tests', () => {
         expect(token.error).toBe("Unable to get token from connection param or not present in env");
     });
 
-    test(`proxyManagement.sendRequest works properly`, async () => {
-        try {
-            await proxyManagement.sendRequest(null)
-        } catch (e) {
-            expect(e.message).toBe("websocketConnection not established");
-        }
-    });
+    test(`proxyManagement.actOnResponseObject works properly with mock`, async () => {
+        const data = {"jsonrpc":"2.0","id":1,"result":{"type":"device","value":"<XACT Token>"}}
+        proxyManagement.actOnResponseObject(JSON.stringify(data), null)
+        const res = await proxyManagement.getResponseMessageFromProxy(data.id)
+        expect(res).toBe(JSON.stringify(data))
+    })
 
-    test(`proxyManagement.sendRequest works properly with mock`, async () => {
-        try {
-            let ws = new WebSocket('ws://localhost:40003');
-            proxyManagement.setProxyWSConnection(ws)
-            ws.addEventListener('error', function(event) {
-                proxyManagement.close()
-            })
-            await proxyManagement.sendRequest(null)
-        } catch (e) {
-            expect(e).toBe("Connection to proxy server timedout");
-            proxyManagement.close()
-        }
-    });
+    test(`Handle error when url not passed`, async () => {
+        delete process.env.proxyServerIP
+        proxyManagement.initialize(null, null).catch(function (err) {
+            // Only executed if rejects the promise
+            expect(err.toString()).toContain('Error: ERROR: Proxy Url not found in env')
+        });
+        
+    })
+
+    test(`proxyManagement.sendRequest works properly`, async () => {
+        proxyManagement.sendRequest(null)
+    })
 
     test(`proxyManagement.initialize works properly`, async () => {
         try {
-            process.env.proxyServerIP = "localhost:test"
-            await proxyManagement.initialize()
-            //TODO validation not performed yet. Need to mock websocket.
+            process.env.proxyServerIP = "localhost.test"
+            const response = await proxyManagement.initialize(proxyManagement.actOnResponseObject, null)
+            console.log("response: ", response)
         } catch (e) {
-            console.log("ERROR:: ", e)
-            proxyManagement.close()
+            expect(e.errno).toBe(-3008);
+            expect(e.code).toBe("ENOTFOUND");
         }
     });
 })
@@ -74,4 +66,3 @@ function clearEnvs() {
     delete process.env.proxyServerIP
     delete process.env.proxy
 }
-

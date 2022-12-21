@@ -19,7 +19,8 @@
     "start": "node build/index.mjs",
     "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
     "dev:NOTES2": "Can do 'npm run dev' (core SDK only) or 'npm run dev --manage --discovery' (all three SDKs)",
-    "dev": "npm run build:mf && npm run start --"
+    "dev": "npm run build:mf && npm run start --",
+    "upgradeSDK": "npm upgrade core; npm upgrade manage; npm upgrade discovery; npm run build:core; npm run build:manage; npm run build:discovery; npm run build:discovery; npm run build:mf"
   },
   "repository": {
     "type": "git",
