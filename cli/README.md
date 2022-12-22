@@ -61,6 +61,17 @@ To process json file containing sequence of events :
 run `node cli.mjs --sequence "path of sequence.json"`
 example : node cli.mjs --sequence ../examples/device-onDeviceNameChanged.sequence.json
 
+## Status of ws connection
+
+To get the status of web-socket connection of user :
+run `node cli.mjs --getStatus`
+
+## Adding user
+
+To add user :
+run `node cli.mjs --addUser "userId"`
+example: node cli.mjs --addUser 123~A#netflix
+
 # Developer Notes
 
 If/as you add support for new commands or alter how existing commands work, be sure to update the array of command data in `src/usage.mjs`, which is the basis for this usage/help output.

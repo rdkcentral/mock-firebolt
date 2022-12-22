@@ -520,11 +520,19 @@ curl --location --request GET 'http://localhost:3333/api/v1/user'
 curl --location --request GET 'http://localhost:3333/api/v1/status'
 ```
 
-### 200 Response:
+### 200 Response (If connection is established):
 
 ```
 {
    status": "WS connection found",
    "readyState": "CONNECTED"}
+}
+```
+
+### 404 Response (If connection not found):
+
+```
+{
+   status": "No WS connection found for user 12345"
 }
 ```

@@ -82,7 +82,7 @@ const knownOpts = {
   'session'         : String,
   'sessionOutput'   : String,
   'sessionOutputPath' :  String,
-  'getStatus' : Boolean
+  'getStatus'       :  Boolean
 };
 
 const shortHands = {
