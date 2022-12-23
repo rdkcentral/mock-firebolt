@@ -69,8 +69,8 @@ run `node cli.mjs --getStatus`
 ## Adding user
 
 To add user :
-run `node cli.mjs --addUser "userId"`
-example: node cli.mjs --addUser 123~A#netflix
+run `node cli.mjs --addUser <userId>`
+example: node cli.mjs --addUser "123~A#netflix"
 
 # Developer Notes
 
