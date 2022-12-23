@@ -42,4 +42,4 @@ To use user groups:
 
 If a User ID value is of the form "<userId>\~<groupName>\#<appId>" or "<userId>\#<appId>, the part after "#" is treated as the appId associated with the user. For example, in "123~A#netflix" netflix is the appId.
 
-Only one user can be associated with a paticular appId (for example, if 123#nteflix exist, 456#netflix can not exist).
+Only one user can be associated with an appId (for example, if 123#netflix exists, 456#netflix cannot exist).
