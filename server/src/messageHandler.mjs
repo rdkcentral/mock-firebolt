@@ -42,7 +42,11 @@ function fFatalErr() {
 }
 
 // Process given message and send any ack/reply to given web socket connection
-async function handleMessage(message, userId, ws) {
+async function handleMessage(imessage, iuserId, iws) {
+
+  const message = imessage
+  const userId = iuserId
+  const ws = iws
   let response, newResponse;
 
   logger.debug(`Received message: ${message}`);
@@ -161,12 +165,7 @@ async function handleMessage(message, userId, ws) {
     //bypass JSON-RPC calls and hit proxy server endpoint
     //init websocket connection for proxy request to be sent and use receiver client to send events back to caller.
     try {
-      if(await proxyManagement.initialize(proxyManagement.actOnResponseObject, ws)) {
-        proxyManagement.sendRequest(JSON.stringify(oMsg))
-        response = await proxyManagement.getResponseMessageFromProxy(oMsg.id)
-      } else {
-        console.log("Websocket connection not initialized")
-      }
+      response = await proxyManagement.initializeAndSendRequest(ws, JSON.stringify(oMsg))
     } catch (err) {
       logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
       process.exit(1)

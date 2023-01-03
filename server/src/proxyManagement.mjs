@@ -21,20 +21,19 @@
 import { parse } from 'url';
 import WebSocket from 'ws';
 
-let ws = null
-let responseObject = {}
+let wsConn = []
+let closeConnectionTrigger = false
 
-async function initialize(callback, returnWS) {
-  if(ws) {
-    return true
-  }
+async function initializeAndSendRequest(returnWS, command) {
   const url = buildWSUrl()
-  ws = new WebSocket(url)
+  const ws = new WebSocket(url)
   try {
     return new Promise((res, rej) => {
       ws.on('open', function open() {
-        console.log("Connection to websocket proxy server established")
-        res(true)
+        //connection established. Send incoming request to proxy
+        ws.send(command)
+        //add ws connection to list
+        wsConn.push(ws)
       });
 
       ws.on('close', function close() {
@@ -43,8 +42,18 @@ async function initialize(callback, returnWS) {
       
       ws.on('message', function message(data) {
         const buf = Buffer.from(data, 'utf8');
-        //send response to callback
-        callback(buf.toString(), returnWS)
+        const response = JSON.parse(buf.toString())
+        if(response.id === undefined) {
+          //In case of event, send the event to caller directly.
+          returnWS.send(buf.toString())
+        } else {
+          if(!closeConnectionTrigger) {
+            closeConnectionTrigger = true
+            //trigger connection close with given interval
+            closeStaleConnections()
+          }
+          res(buf.toString())
+        }
       });
 
       ws.on('error', function message(err) {
@@ -56,47 +65,26 @@ async function initialize(callback, returnWS) {
   }
 }
 
-/* Consume response from server. In case of event, send the event to caller directly.
-In case of response for requested method, store it in responseObject array
-*/
-function actOnResponseObject(data, returnWS) {
-  const response = JSON.parse(data)
-  if(response.id === undefined) {
-    returnWS.send(data)
-  }
-  responseObject[response.id] = data
-}
-
-function sendRequest(command) {
-  if(ws) {
-    ws.send(command)
-    console.log("Request sent to proxy server: ", command);
-  } else {
-    console.log("WS Client not initialized. Unable to send request to proxy server: ", command);
-  }
-}
-
-//Poll for proxy response. Fetch response using requestId. If timedout, terminate the connection
-function getResponseMessageFromProxy(id) {
-  let timeout = 2000
+function closeStaleConnections() {
+  let timeout = 1000
   let counter = 0
   let interval = 100
-  return new Promise((resolve, reject) => {
-    var timer = setInterval(function() {
-      if(counter >= timeout) {
-        console.log("response not received for given id: " + id)
-        reject(false)
-      }
-      if(responseObject[id]) {
-        counter = timeout + interval
-        //clear interval if response received for given id.
-        clearInterval(timer)
-        resolve(responseObject[id])
-      }
-      counter = counter + interval
-    }, interval);
-  })
-  
+  var timer = setInterval(function() {
+    //if all connection closed, clear interval
+    if(wsConn.length == 0) {
+      closeConnectionTrigger = false
+      clearInterval(timer)
+    }
+
+    /* Remove connection array values from beginning with given interval
+    * Note: This will wait for given interval to close connection. 
+    * Reason: Possible of getting events from proxy connection. This would avoid closing connection immediately */
+
+    if(counter >= timeout) {
+      wsConn.shift()
+    }
+    counter = counter + interval
+  }, interval);
 }
 
 function buildWSUrl() {
@@ -138,5 +126,5 @@ function getMFToken(request) {
 
 // --- Exports ---
 export {
-  getMFToken, initialize, actOnResponseObject, getResponseMessageFromProxy, sendRequest
+  getMFToken, initializeAndSendRequest
 };
