@@ -42,11 +42,7 @@ function fFatalErr() {
 }
 
 // Process given message and send any ack/reply to given web socket connection
-async function handleMessage(imessage, iuserId, iws) {
-
-  const message = imessage
-  const userId = iuserId
-  const ws = iws
+async function handleMessage(message, userId, ws) {
   let response, newResponse;
 
   logger.debug(`Received message: ${message}`);
