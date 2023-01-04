@@ -223,4 +223,32 @@ async function mfState(on, extraConfig = "") {
   });
 }
 
-export { fireboltCommand, callApi, callMfCli, mfState, killPort };
+/**
+ * 
+ *
+ * @param {String} command the command which we need to execute
+ * @param {Number} port ws port to connect
+ * @param {String} user to pass the userID
+ * @returns Promise yielding the response on resolve()
+ */
+const mfEventListener = (command, port, user) => {
+  return new Promise((resolve) => {
+    const wsClientURL = `${wsClient}${port || 9998}${user ? `/${user}` : ''}`;
+    const ws = new WebSocket(wsClientURL);
+    ws.on('open', () => {
+      ws.send(command);
+    });
+    
+    ws.on('message', (data) => {
+      console.log('DATA RECEIVED: ', data);
+      resolve(data);
+      // resolve({
+      //   data,
+      //   messageTime: `Message received at ${new Date().toJSON()}`
+      // });
+      // ws.close();
+    });
+  });
+}
+
+export { fireboltCommand, callApi, callMfCli, mfState, killPort, mfEventListener };
