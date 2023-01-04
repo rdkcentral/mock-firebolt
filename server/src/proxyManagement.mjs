@@ -69,7 +69,7 @@ function closeStaleConnections() {
   let timeout = 1000
   let counter = 0
   let interval = 100
-  var timer = setInterval(function() {
+  let timer = setInterval(function() {
     //if all connection closed, clear interval
     if(wsConn.length == 0) {
       closeConnectionTrigger = false

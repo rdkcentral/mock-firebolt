@@ -4,6 +4,7 @@ import { jest } from "@jest/globals";
 import * as proxyManagement from "../../src/proxyManagement.mjs";
 
 jest.setTimeout(80 * 1000)
+
 describe('sequentially run tests', () => {
 
     beforeAll(() => {
@@ -29,31 +30,19 @@ describe('sequentially run tests', () => {
         expect(token.error).toBe("Unable to get token from connection param or not present in env");
     });
 
-    test(`proxyManagement.actOnResponseObject works properly with mock`, async () => {
-        const data = {"jsonrpc":"2.0","id":1,"result":{"type":"device","value":"<XACT Token>"}}
-        proxyManagement.actOnResponseObject(JSON.stringify(data), null)
-        const res = await proxyManagement.getResponseMessageFromProxy(data.id)
-        expect(res).toBe(JSON.stringify(data))
-    })
-
     test(`Handle error when url not passed`, async () => {
         delete process.env.proxyServerIP
-        proxyManagement.initialize(null, null).catch(function (err) {
+        proxyManagement.initializeAndSendRequest(null, null).catch(function (err) {
             // Only executed if rejects the promise
             expect(err.toString()).toContain('Error: ERROR: Proxy Url not found in env')
         });
         
     })
 
-    test(`proxyManagement.sendRequest works properly`, async () => {
-        proxyManagement.sendRequest(null)
-    })
-
     test(`proxyManagement.initialize works properly`, async () => {
         try {
             process.env.proxyServerIP = "localhost.test"
-            const response = await proxyManagement.initialize(proxyManagement.actOnResponseObject, null)
-            console.log("response: ", response)
+            await proxyManagement.initializeAndSendRequest(null, null)
         } catch (e) {
             expect(e.errno).toBe(-3008);
             expect(e.code).toBe("ENOTFOUND");
