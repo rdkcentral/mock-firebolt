@@ -224,29 +224,42 @@ async function mfState(on, extraConfig = "") {
 }
 
 /**
- * 
- *
  * @param {String} command the command which we need to execute
  * @param {Number} port ws port to connect
  * @param {String} user to pass the userID
+ * @param {Number} eventCommands how many commands will be sent once eventListener is active
  * @returns Promise yielding the response on resolve()
  */
-const mfEventListener = (command, port, user) => {
+const mfEventListener = (command, port, user, eventCommands = 1) => {
   return new Promise((resolve) => {
     const wsClientURL = `${wsClient}${port || 9998}${user ? `/${user}` : ''}`;
     const ws = new WebSocket(wsClientURL);
-    ws.on('open', () => {
+    ws.on("open", () => {
       ws.send(command);
     });
-    
-    ws.on('message', (data) => {
-      console.log('DATA RECEIVED: ', data);
-      resolve(data);
-      // resolve({
-      //   data,
-      //   messageTime: `Message received at ${new Date().toJSON()}`
-      // });
-      // ws.close();
+
+    const eventMap = new Map();
+    let index = 0;
+
+    ws.on("message", (data) => {
+      const dataObj = JSON.parse(data);
+      const { result } = dataObj;
+
+      // If/else logic that determines what to add to map and whether we should resolve and end connection
+      if (result.listening === true) {
+        eventMap.set("listening", true)
+        eventMap.set("eventType", result.event)
+      } else {
+      // else if (index > eventCommands) {
+        eventMap.set(`event${index}`, result);
+        eventMap.set("listening", false);
+        ws.close();
+        resolve (eventMap);
+      } 
+      // else {
+      //   eventMap.set(`event${index}`, result);
+      // }
+      index++;
     });
   });
 }

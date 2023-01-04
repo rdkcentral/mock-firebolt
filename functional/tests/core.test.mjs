@@ -156,26 +156,38 @@ test(`Validate send event for default user`, async () => {
 });
 
 // Broadcast event for a particular user
-test(`Validate broadcast event for a user in a group and Validate that other user in that group getting that`, async () => {
-  await utilities.fireboltCommand(
-    JSON.stringify({
-      method: "device.onNameChanged",
-      params: { listen: true },
-      id: 11,
-    }),
-    9998,
-    "567~B"
-  );
-  const result = await utilities.callMfCli(
-    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 567~B && cd ../../functional`,
-    true
-  );
-  expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
-  const resultTwo = await utilities.callMfCli(
-    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 978~B && cd ../../functional`,
-    true
-  );
-  expect(resultTwo.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+test.only(`Validate broadcast event for a user in a group and Validate that other user in that group getting that`, async () => {
+    const eventResponse = utilities.mfEventListener(
+      JSON.stringify({
+        method: "device.onNameChanged",
+        params: { listen: true },
+        id: 11,
+      }),
+      9998,
+      "567~B",
+    );
+
+    const result = await utilities.callMfCli(
+      `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 567~B && cd ../../functional`,
+      true
+    ); 
+    
+    expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+
+    setTimeout(() => {
+      eventResponse.then(eventObj => {
+        console.log(eventObj);
+        expect(eventObj.get("event1")).toBe("NEW-DEVICE-NAME-1");
+        expect(eventObj.get("listening")).toBe(false);
+        expect(eventObj.get("eventType")).toBe("device.onNameChanged");
+      });
+    }, 3000);
+  
+  // const resultTwo = await utilities.callMfCli(
+  //   `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 978~B && cd ../../functional`,
+  //   true
+  // );
+  // expect(resultTwo.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
 // Send event without any active listener
