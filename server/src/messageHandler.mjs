@@ -131,6 +131,7 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
+          uuid: function cuuid() {return stateManagement.createUuid()},
           sendEvent: function (onMethod, result, msg) {
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod), fFatalErr.bind(this));
           },
@@ -158,17 +159,18 @@ async function handleMessage(message, userId, ws) {
     response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
   } else if (process.env.proxy) {
     //bypass JSON-RPC calls and hit proxy server endpoint
-    let wsProxy = await proxyManagement.getProxyWSConnection()
-    if (!wsProxy) {
-      //init websocket connection for proxy request to be sent and update receiver client to send request back to caller.
-      try {
-        wsProxy = await proxyManagement.initialize()
-      } catch (err) {
-        logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
-        process.exit(1)
+    //init websocket connection for proxy request to be sent and use receiver client to send events back to caller.
+    try {
+      if(await proxyManagement.initialize(proxyManagement.actOnResponseObject, ws)) {
+        proxyManagement.sendRequest(JSON.stringify(oMsg))
+        response = await proxyManagement.getResponseMessageFromProxy(oMsg.id)
+      } else {
+        console.log("Websocket connection not initialized")
       }
+    } catch (err) {
+      logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
+      process.exit(1)
     }
-    response = await proxyManagement.sendRequest(JSON.stringify(oMsg))
   } else if (conduit.isConduitConnected()) {
     // When the Conduit app is connected, we'll route incoming Firebolt calls from the app under development
     // through here (Mock Firebolt) and the Conduit app on a device and back in order to get a real result.
@@ -239,6 +241,7 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
+          uuid: function cuuid() {return stateManagement.createUuid()},
           sendEvent: function (onMethod, result, msg) {
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod), fFatalErr.bind(this));
           },

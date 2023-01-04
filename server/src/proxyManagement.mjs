@@ -20,112 +20,83 @@
 
 import { parse } from 'url';
 import WebSocket from 'ws';
-let websocketConnection = null;
-const setTimeoutInterval = 1000
-const connectionTimeout = 5000
 
-async function initialize() {
-  const url = await buildWSUrl()
-  console.log(url)
-  if (url) {
-    try {
-      let ws = new WebSocket(url)
-      return new Promise((res, rej) => {
-        let websocket = ws
-        let openCallback = function(event) {
-          websocket.removeEventListener('close', openCallback)
-          websocket.removeEventListener('error', openCallback)
-          res(event.data)
-        }
+let ws = null
+let responseObject = {}
 
-        ws.addEventListener('error', function(event) {
-          rej(event.data)
-        })
+async function initialize(callback, returnWS) {
+  if(ws) {
+    return true
+  }
+  const url = buildWSUrl()
+  ws = new WebSocket(url)
+  try {
+    return new Promise((res, rej) => {
+      ws.on('open', function open() {
+        console.log("Connection to websocket proxy server established")
+        res(true)
+      });
 
-        ws.addEventListener('close', function(event) {
-          rej(event.data)
-        })
+      ws.on('close', function close() {
+        console.log('disconnected');
+      });
+      
+      ws.on('message', function message(data) {
+        const buf = Buffer.from(data, 'utf8');
+        //send response to callback
+        callback(buf.toString(), returnWS)
+      });
 
-        ws.addEventListener('open', openCallback)
-
-        ws.onopen = function () {
-          console.log("Connection to websocket proxy server established") 
-          setProxyWSConnection(ws)
-        }
-
-        ws.onclose = function(){
-            // connection closed, discard old websocket and create a new one in 2s
-            console.log("Connection to websocket proxy server is closed.")
-            ws = null
-            setProxyWSConnection(ws)
-            setTimeout(function() {
-                console.log("Reinitialize websocket proxy connection")
-                initialize();
-            }, 2000)
-        }
-      })
-    } catch (err) {
-      return err
-    }
-  } else {
-    throw new Error("Cannot establish proxy connection. \"url\" with ws://host:port or wss://host:port required")
+      ws.on('error', function message(err) {
+        rej(err)
+      });
+    })
+  } catch (err) {
+    return err
   }
 }
 
-function setProxyWSConnection(ws) {
-  websocketConnection = ws
+/* Consume response from server. In case of event, send the event to caller directly.
+In case of response for requested method, store it in responseObject array
+*/
+function actOnResponseObject(data, returnWS) {
+  const response = JSON.parse(data)
+  if(response.id === undefined) {
+    returnWS.send(data)
+  }
+  responseObject[response.id] = data
 }
 
-function getProxyWSConnection() {
-    return websocketConnection
+function sendRequest(command) {
+  if(ws) {
+    ws.send(command)
+    console.log("Request sent to proxy server: ", command);
+  } else {
+    console.log("WS Client not initialized. Unable to send request to proxy server: ", command);
+  }
 }
 
-function sendRequest(payload) {
-  return new Promise((res, rej) => {
-    const ws = getProxyWSConnection()
-    if ( ! ws ) {
-        throw new Error("websocketConnection not established")
-    }
-    waitForSocketConnection(ws, 0, function(socket) {
-      if(socket == null) {
-        rej("Connection to proxy server timedout")
-        return
+//Poll for proxy response. Fetch response using requestId. If timedout, terminate the connection
+function getResponseMessageFromProxy(id) {
+  let timeout = 2000
+  let counter = 0
+  let interval = 100
+  return new Promise((resolve, reject) => {
+    var timer = setInterval(function() {
+      if(counter >= timeout) {
+        console.log("response not received for given id: " + id)
+        reject(false)
       }
-
-      let websocket = socket
-      let sendCallback = function(event) {
-        websocket.removeEventListener('message', sendCallback)
-        websocket.removeEventListener('error', sendCallback)
-        res(event.data)
+      if(responseObject[id]) {
+        counter = timeout + interval
+        //clear interval if response received for given id.
+        clearInterval(timer)
+        resolve(responseObject[id])
       }
-
-      socket.addEventListener('message', sendCallback)
-      socket.send(payload)
-      console.log("Request sent to proxy server: ", payload);
-    })
-  });
-}
-
-// Make the function wait until the connection is made...
-function waitForSocketConnection(socket, timeout, callback) {
-  setTimeout(
-    function () {
-      if (socket.readyState === 1) {
-          if (callback != null){
-              callback(socket);
-          }
-      } else {
-          if(getProxyWSConnection()) {
-              socket = getProxyWSConnection()
-          }
-          console.log("Wait for connection... ")
-          if(timeout >= connectionTimeout) {
-            callback(null);
-          } else {
-            waitForSocketConnection(socket, timeout + 1000, callback);
-          }
-      }
-  }, setTimeoutInterval); // wait 1 second for the connection...
+      counter = counter + interval
+    }, interval);
+  })
+  
 }
 
 function buildWSUrl() {
@@ -135,25 +106,12 @@ function buildWSUrl() {
   } else if ( ! proxyUrl.includes(":") ) {
     proxyUrl = proxyUrl + ":" + 9998
   }
-  return new Promise(resolve => {
-    //support ws
-    const wsUrlProtocol = 'ws://'
-    const path = '/jsonrpc'
-    const hostPort = proxyUrl
-    resolve([
-        wsUrlProtocol,
-        hostPort,
-        path,
-        process.env.MF_TOKEN ? '?token=' + process.env.MF_TOKEN : null,
-    ].join(''))
-  })
-}
-
-function close() {
-  if(websocketConnection) {
-    websocketConnection.close()
-    websocketConnection = null
-  }
+  //support ws
+  const wsUrlProtocol = 'ws://'
+  const path = '/jsonrpc'
+  const hostPort = proxyUrl
+  return [wsUrlProtocol, hostPort, path, process.env.MF_TOKEN ? '?token=' + process.env.MF_TOKEN : null,
+  ].join('')
 }
 
 // Get token from request param or env variable
@@ -180,5 +138,5 @@ function getMFToken(request) {
 
 // --- Exports ---
 export {
-  getMFToken, initialize, getProxyWSConnection, sendRequest, close, setProxyWSConnection
+  getMFToken, initialize, actOnResponseObject, getResponseMessageFromProxy, sendRequest
 };
