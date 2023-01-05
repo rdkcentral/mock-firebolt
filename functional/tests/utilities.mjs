@@ -230,7 +230,7 @@ async function mfState(on, extraConfig = "") {
  * @param {Number} eventCommands how many commands will be sent once eventListener is active
  * @returns Promise yielding the response on resolve()
  */
-const mfEventListener = (command, port, user, eventCommands = 1) => {
+const mfEventListener = (command, port, user) => {
   return new Promise((resolve) => {
     const wsClientURL = `${wsClient}${port || 9998}${user ? `/${user}` : ''}`;
     const ws = new WebSocket(wsClientURL);
@@ -239,7 +239,6 @@ const mfEventListener = (command, port, user, eventCommands = 1) => {
     });
 
     const eventMap = new Map();
-    let index = 0;
 
     ws.on("message", (data) => {
       const dataObj = JSON.parse(data);
@@ -248,18 +247,13 @@ const mfEventListener = (command, port, user, eventCommands = 1) => {
       // If/else logic that determines what to add to map and whether we should resolve and end connection
       if (result.listening === true) {
         eventMap.set("listening", true)
-        eventMap.set("eventType", result.event)
+        eventMap.set("type", result.event)
       } else {
-      // else if (index > eventCommands) {
-        eventMap.set(`event${index}`, result);
+        eventMap.set("response", result);
         eventMap.set("listening", false);
         ws.close();
         resolve (eventMap);
-      } 
-      // else {
-      //   eventMap.set(`event${index}`, result);
-      // }
-      index++;
+      }
     });
   });
 }

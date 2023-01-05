@@ -140,7 +140,7 @@ test(`Validate start and stop session`, async () => {
 });
 
 // Send event for default user
-test(`Validate send event for default user`, async () => {
+test(`Validate send event for default user and ensure correct repsonse is returned`, async () => {
   await utilities.fireboltCommand(
     JSON.stringify({
       method: "accessibility.onVoiceGuidanceSettingsChanged",
@@ -155,39 +155,71 @@ test(`Validate send event for default user`, async () => {
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
+test(`Validate send event for default user`, async () => {
+   const eventCall = utilities.mfEventListener(
+    JSON.stringify({
+      method: "accessibility.onVoiceGuidanceSettingsChanged",
+      params: { listen: true },
+      id: 4,
+    })
+  );
+  const cliCall = utilities.callMfCli(
+    `cd ../cli/src/ && node cli.mjs --event ../examples/accessibility-onVoiceGuidanceSettingsChanged1.event.json && cd ../../functional`,
+    true
+  );
+
+  const [eventRes, cliRes] = await Promise.all([eventCall, cliCall]);
+
+  expect(cliRes.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  expect(eventRes.get("response")).toEqual({"enabled": false, "speed": 5});
+  expect(eventRes.get("type")).toBe("accessibility.onVoiceGuidanceSettingsChanged");
+});
+
 // Broadcast event for a particular user
-test.only(`Validate broadcast event for a user in a group and Validate that other user in that group getting that`, async () => {
-    const eventResponse = utilities.mfEventListener(
-      JSON.stringify({
-        method: "device.onNameChanged",
-        params: { listen: true },
-        id: 11,
-      }),
-      9998,
-      "567~B",
-    );
+test(`Validate broadcast event for a user in a group and Validate that other user in that group getting that`, async () => {
+  await utilities.fireboltCommand(
+    JSON.stringify({
+      method: "device.onNameChanged",
+      params: { listen: true },
+      id: 11,
+    }),
+    9998,
+    "567~B"
+  );
+  const result = await utilities.callMfCli(
+    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 567~B && cd ../../functional`,
+    true
+  );
+  expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  const resultTwo = await utilities.callMfCli(
+    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 978~B && cd ../../functional`,
+    true
+  );
+  expect(resultTwo.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+});
 
-    const result = await utilities.callMfCli(
-      `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 567~B && cd ../../functional`,
-      true
-    ); 
-    
-    expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+test(`Validate broadcast event for a user in a  group and ensure correct response is returned `, async () => {
+  const eventCall = utilities.mfEventListener(
+    JSON.stringify({
+      method: "device.onNameChanged",
+      params: { listen: true },
+      id: 11,
+    }),
+    9998,
+    "567~B",
+  );
 
-    setTimeout(() => {
-      eventResponse.then(eventObj => {
-        console.log(eventObj);
-        expect(eventObj.get("event1")).toBe("NEW-DEVICE-NAME-1");
-        expect(eventObj.get("listening")).toBe(false);
-        expect(eventObj.get("eventType")).toBe("device.onNameChanged");
-      });
-    }, 3000);
-  
-  // const resultTwo = await utilities.callMfCli(
-  //   `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 978~B && cd ../../functional`,
-  //   true
-  // );
-  // expect(resultTwo.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  const cliCall =  utilities.callMfCli(
+    `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 567~B && cd ../../functional`,
+    true
+  ); 
+
+  const [eventRes, cliRes] = await Promise.all([eventCall, cliCall]);
+
+  expect(cliRes.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  expect(eventRes.get("response")).toBe("NEW-DEVICE-NAME-1");
+  expect(eventRes.get("type")).toBe("device.onNameChanged");
+
 });
 
 // Send event without any active listener
