@@ -28,6 +28,7 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
 import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
+import { v4 as uuidv4 } from 'uuid';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -288,6 +289,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         set: function ss(key, val, scope) { return setScratch(userId, key, val, scope) },
         get: function gs(key) { return getScratch(userId, key); },
         delete: function ds(key, scope) { return deleteScratch(userId, key, scope)},
+        uuid: function cuuid() {return createUuid()},
         sendEvent: function(onMethod, result, msg) {
           sendEvent(
             ws,
@@ -359,6 +361,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
         set: function ss(key, val, scope) { return setScratch(userId, key, val, scope) },
         get: function gs(key) { return getScratch(userId, key); },
         delete: function ds(key, scope) { return deleteScratch(userId, key, scope)},
+        uuid: function cuuid() {return createUuid()},
       };
       const sFcnBody = resp.result + ';' + 'return f(ctx, params);'
       const fcn = new Function('ctx', 'params', sFcnBody);
@@ -717,6 +720,11 @@ function deleteScratch(userId, key, scope=""){
   }
 }
 
+//To generate uuid
+function createUuid(){
+  return uuidv4();
+}
+
 // --- Exports ---
 
 export const testExports={
@@ -733,5 +741,5 @@ export {
   setLatency, setLatencies,
   isLegalMode, setMode,
   setMethodResult, setMethodError,
-  setScratch, getScratch, deleteScratch
+  setScratch, getScratch, deleteScratch, createUuid
 };
