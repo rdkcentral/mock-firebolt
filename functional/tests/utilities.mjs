@@ -231,29 +231,35 @@ async function mfState(on, extraConfig = "") {
  * @returns Promise yielding the response on resolve()
  */
 const mfEventListener = (command, port, user) => {
-  return new Promise((resolve) => {
-    const wsClientURL = `${wsClient}${port || 9998}${user ? `/${user}` : ''}`;
-    const ws = new WebSocket(wsClientURL);
-    ws.on("open", () => {
-      ws.send(command);
-    });
+  const wsClientURL = `${wsClient}${port || 9998}${user ? `/${user}` : ''}`;
+  const ws = new WebSocket(wsClientURL);
 
+  return new Promise((resolve) => {
     const eventMap = new Map();
 
     ws.on("message", (data) => {
-      const dataObj = JSON.parse(data);
-      const { result } = dataObj;
-
-      // If/else logic that determines what to add to map and whether we should resolve and end connection
-      if (result.listening === true) {
-        eventMap.set("listening", true)
-        eventMap.set("type", result.event)
-      } else {
-        eventMap.set("response", result);
-        eventMap.set("listening", false);
+      try {
+        const dataObj = JSON.parse(data);
+        const { result } = dataObj;
+  
+        // If/else logic that determines what to add to map and whether we should resolve and end connection
+        if (result.listening === true) {
+          eventMap.set("listening", true)
+          eventMap.set("type", result.event)
+        } else {
+          eventMap.set("response", result);
+          eventMap.set("listening", false);
+          ws.close();
+          resolve (eventMap);
+        }
+      } catch (err) {
+        console.error("An error occurred: ", err);
         ws.close();
-        resolve (eventMap);
-      }
+      } 
+    });
+
+    ws.on("open", () => {
+      ws.send(command);
     });
   });
 }
