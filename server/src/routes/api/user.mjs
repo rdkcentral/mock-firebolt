@@ -27,8 +27,10 @@ import * as stateManagement from '../../stateManagement.mjs';
 
 // --- Route Handlers ---
 
-// PUT /api/v1/user
+// PUT /api/v1/user/:userId?
+// POST /api/v1/user/:userId?
 // Expected body: N/A
+// URL Param "userId" - Optional
 function addUser(req, res) {
   let userId;
   if (req.params.userId){

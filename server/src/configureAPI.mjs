@@ -66,6 +66,7 @@ function configureAPI(app) {
     // ======================= State-Related API Routes =======================
 
     app.put('/api/v1/user/:userId?',                    userApi.addUser);
+    app.post('/api/v1/user/:userId?',                   userApi.addUser);
 
     // =======================  User-Related Routes ===========================
 

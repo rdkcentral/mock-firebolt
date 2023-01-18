@@ -44,6 +44,38 @@ function isKnownUser(userId) {
   return user2wss.has(''+userId);
 }
 
+function parseUser(userId) {
+  if (userId == null || userId == undefined) {
+    return userId
+  }
+
+  //Some shortcuts for code readability
+  let isGroupMember = userId.includes("~")
+  let hasAppId = userId.includes("#")
+  let output = {}
+
+  //Extract appId if applicable
+  if (hasAppId) {
+    let index = userId.indexOf("#")
+    output.appId = userId.substring(index + 1)
+    userId = userId.substring(0, index)
+  }
+
+  //Extract group if applicable
+  if (isGroupMember) {
+    let index = userId.indexOf("~")
+    output.group = userId.substring(index + 1)
+    userId = userId.substring(0, index)
+  }
+
+  //Whatever's left is our userId
+  if (userId.length > 0) {
+    output.user = userId
+  }
+
+  return output;
+}
+
 function getWssForUser(userId) {
   if ( user2wss.has(''+userId) ) {
     return user2wss.get(''+userId);
@@ -216,5 +248,5 @@ export const testExports={
 }
 
 export {
-  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
+  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
 };
