@@ -25,6 +25,7 @@ import { config } from './config.mjs';
 import * as messageHandler from './messageHandler.mjs';
 import {state} from './stateManagement.mjs';
 import { logger } from './logger.mjs';
+import * as util from './util.mjs'
 
 const user2wss = new Map();
 const user2ws  = new Map();
@@ -153,7 +154,11 @@ function heartbeat(ws) {
 function addUser(userId) {
   userId = "" + userId;
   var users = getUsers();
-  let appId,user,group;
+
+  let parsedUserId = parseUser(userId);
+  let user = parsedUserId.user
+  let appId = parsedUserId.appId
+  let group = parsedUserId.group
 
   //getting user, group and appId from userId
   if (userId.includes("~")){

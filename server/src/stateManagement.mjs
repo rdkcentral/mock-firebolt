@@ -29,6 +29,7 @@ import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
 import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
 import { v4 as uuidv4 } from 'uuid';
+import { parseUser } from './userManagement.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -82,11 +83,15 @@ addUser('global');
 function addUser(userId) {
   userId = "" + userId;
   var users = Object.keys(state);
-  let appId,user,group;
   if (userId in state){
     logger.info(`Cannot add user ${userId}, already exists`);
     return {isSuccess: false, msg : `Cannot add user, already exists`};
   }
+
+  let parsedUserId = parseUser(userId)
+  let user = parsedUserId.user;
+  let group = parsedUserId.group;
+  let appId = parsedUserId.appId;
 
   //getting user, group and appId from userId
   if (userId.includes("~")){
