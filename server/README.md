@@ -465,6 +465,10 @@ curl --location --request POST 'http://localhost:3333/api/v1/sequence' \
 curl --location --request PUT 'http://localhost:3333/api/v1/user'
 ```
 
+```
+curl --location --request POST 'http://localhost:3333/api/v1/user'
+```
+
 ### 200 Response:
 
 ```
@@ -479,6 +483,10 @@ curl --location --request PUT 'http://localhost:3333/api/v1/user'
 
 ```
 curl --location --request PUT 'http://localhost:3333/api/v1/user/123~A'
+```
+
+```
+curl --location --request POST 'http://localhost:3333/api/v1/user/123~A'
 ```
 
 ### 200 Response:
@@ -532,7 +540,7 @@ curl --location --request GET 'http://localhost:3333/api/v1/status'
 ```
 {
    status": "WS connection found",
-   "readyState": "CONNECTED"}
+   "readyState": "CONNECTED"
 }
 ```
 
