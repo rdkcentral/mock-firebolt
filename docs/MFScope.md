@@ -14,15 +14,15 @@ The following format will be used to determine these fields from within a userId
 | Full "userId"   | User | Group | AppId   |
 | --------------- | ---- | ----- | ------- |
 | 123             | 123  | N/A   | N/A     |
-| 123~A           | 123  | ~A    | N/A
+| 123~A           | 123  | ~A    | N/A     |
 | 123~A#netflix   | 123  | ~A    | netflix |
 | 123#netflix     | 123  | N/A   | netflix |
 
 There will also be a "global" user. This is a reserved userId representing the global state across all users and groups.
 
-All users and appId are unique:
-- Two users with same user part can not exist (if "123~A" exist, "123~B" can not exist).
-- Two users with same appId can not exist (if "123#netflix exist", "456#netflix" can not exist).
+All users and appIds are unique:
+- Two users with same user part cannot exist (if "123~A" exists, "123~B" cannot exist).
+- Two users with same appId cannot exist (if "123#netflix" exists, "456#netflix" cannot exist).
 
 # User State
 
@@ -105,7 +105,7 @@ curl --location --request PUT 'http://localhost:3333/api/v1/state' \
 ```
 curl --location --request PUT 'http://localhost:3333/api/v1/state' \
 	--header 'content-type: application/json'  \
---header 'x-mockfirebolt-userid: 123~A#netflix'  \
+	--header 'x-mockfirebolt-userid: 123~A#netflix'  \
 	--data-raw '{
 	    "state": {
 	        " ~A ": {

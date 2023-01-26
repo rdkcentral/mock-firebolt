@@ -514,7 +514,14 @@ curl --location --request GET 'http://localhost:3333/api/v1/user'
 
 ## Get ws status (returns the status of ws connection mapped to the userID)
 
-### Example cURL Command:
+### Example cURL Command (Specific user):
+
+```
+curl --location --request GET 'http://localhost:3333/api/v1/status' \
+    --header 'x-mockfirebolt-userid: sampleUserId1234'
+```
+
+### Example cURL Command (Default user):
 
 ```
 curl --location --request GET 'http://localhost:3333/api/v1/status'
