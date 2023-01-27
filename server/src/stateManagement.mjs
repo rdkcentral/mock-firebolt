@@ -70,6 +70,7 @@ let perUserStartState = {
 
 // Keys are userIds, values are state objects like the one above
 let state = {};
+let userIdArray = [];
 
 // Add default user, which will be used anytime a userId is not specified
 // in REST calls (calls without an x-mockfirebolt-userid header), regardless of whether
@@ -201,9 +202,22 @@ function getState(userId) {
       }
     }
     if (userId in stateCopy){
+      let appId, user
       const userState = stateCopy[''+userId];
-      resetSequenceStateValues(finalState, userState);
-      mergeWith(finalState, userState, mergeCustomizer);
+      user = userId.split("~")[0];
+      if (userId.includes("#")){
+        appId = userId.split("#")[1];
+      }
+      //if userId is updated via user scope(either by user/appId/full userid), it would be pushed to userIdArray when updateState() was triggered, here preference is given to userScope
+      if (userIdArray.includes(user) || userIdArray.includes(appId) || userIdArray.includes(userId) == true) {
+        resetSequenceStateValues(finalState, userState);
+        mergeWith(finalState, userState, mergeCustomizer);
+      } else {
+        //if userId is updated as part of group scope and not directly updated via user scope, it would not be pushed to userIdArray when updateState() was triggered, here preference is given to group scope
+        // else if userid was not updated at all, state would be same as global scope 
+        resetSequenceStateValues(userState, finalState);
+        mergeWith(userState, finalState, mergeCustomizer);
+      }
     }
 
     resetSequenceStateValues(state[''+userId], finalState);
@@ -570,12 +584,15 @@ function resetSequenceStateValues(oldState, newState) {
 // @TODO: Is this right? We really want/need this for "responses" arrays (sequence-of-responses values)
 //        but will this code incorrectly do the same for *all* arrays? Is this what we want???
 function mergeCustomizer(objValue, srcValue) {
-  if ( Array.isArray(objValue) ) {
-    return srcValue;
-  }
+  let mergedValue = {
+    ...objValue,
+    ...srcValue
+  };
+  return mergedValue;
 }
 
 function updateState(userId, newState, scope = "") {
+  userIdArray.push(userId)
   let userState;
 
   //If no scope is provided, considering userId as scope
