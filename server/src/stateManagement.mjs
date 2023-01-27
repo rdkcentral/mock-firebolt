@@ -208,13 +208,18 @@ function getState(userId) {
       if (userId.includes("#")){
         appId = userId.split("#")[1];
       }
-      //if userId is updated via user scope(either by user/appId/full userid), it would be pushed to userIdArray when updateState() was triggered, here preference is given to userScope
+      /**if userId is updated via user scope(either by user/appId/full userid),
+       * it would be pushed to userIdArray when updateState() was triggered, here preference is given to userScope
+       */
       if (userIdArray.includes(user) || userIdArray.includes(appId) || userIdArray.includes(userId) == true) {
         resetSequenceStateValues(finalState, userState);
         mergeWith(finalState, userState, mergeCustomizer);
       } else {
-        //if userId is updated as part of group scope and not directly updated via user scope, it would not be pushed to userIdArray when updateState() was triggered, here preference is given to group scope
-        // else if userid was not updated at all, state would be same as global scope 
+        /**
+         * if userId is updated as part of group scope and not directly updated via user scope, 
+         * it would not be pushed to userIdArray when updateState() was triggered, here preference is given to group scope
+         * else if userid was not updated at all, state would be same as global scope 
+         */
         resetSequenceStateValues(userState, finalState);
         mergeWith(userState, finalState, mergeCustomizer);
       }
