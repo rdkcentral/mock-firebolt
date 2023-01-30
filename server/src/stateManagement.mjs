@@ -70,7 +70,7 @@ let perUserStartState = {
 
 // Keys are userIds, values are state objects like the one above
 let state = {};
-let userIdArray = [];
+let trackUpdateState = [];
 
 // Add default user, which will be used anytime a userId is not specified
 // in REST calls (calls without an x-mockfirebolt-userid header), regardless of whether
@@ -186,48 +186,42 @@ function getState(userId) {
 
   //to get the userId from given user/appId
   userId = getUserId(userId);
-  if ( userId in state ) {
-    const stateCopy = JSON.parse( JSON.stringify(state) )
+  if (userId in state) {
+    let parsedUserId = parseUser(userId);
+    let user = parsedUserId.user
+    let appId = parsedUserId.appId
+    let group = "~" + parsedUserId.group
+    const stateCopy = JSON.parse(JSON.stringify(state))
     let finalState = stateCopy['global'];
     userId = '' + userId;
-    if( userId.includes("~")){
-      let group = "~"+userId.split("~")[1];
-      if (group.includes("#")){
-        group = group.split("#")[0];
-      }
-      if (group in stateCopy){
-        let groupState = stateCopy[''+group];
+    if (userId.includes("~")) {
+      if (group in stateCopy) {
+        let groupState = stateCopy['' + group];
         resetSequenceStateValues(finalState, groupState);
         mergeWith(finalState, groupState, mergeCustomizer);
       }
     }
-    if (userId in stateCopy){
-      let appId, user
-      const userState = stateCopy[''+userId];
-      user = userId.split("~")[0];
-      if (userId.includes("#")){
-        appId = userId.split("#")[1];
-      }
+    if (userId in stateCopy) {
+      const userState = stateCopy['' + userId];
       /**if userId is updated via user scope(either by user/appId/full userid),
-       * it would be pushed to userIdArray when updateState() was triggered, here preference is given to userScope
+       * it would be pushed to trackUpdateState array when updateState() was triggered, here preference is given to userScope
        */
-      if (userIdArray.includes(user) || userIdArray.includes(appId) || userIdArray.includes(userId) == true) {
+      if (trackUpdateState.includes(user) || trackUpdateState.includes(appId) || trackUpdateState.includes(userId) == true) {
         resetSequenceStateValues(finalState, userState);
         mergeWith(finalState, userState, mergeCustomizer);
       } else {
         /**
          * if userId is updated as part of group scope and not directly updated via user scope, 
-         * it would not be pushed to userIdArray when updateState() was triggered, here preference is given to group scope
+         * it would not be pushed to trackUpdateState array when updateState() was triggered, here preference is given to group scope
          * else if userid was not updated at all, state would be same as global scope 
          */
         resetSequenceStateValues(userState, finalState);
         mergeWith(userState, finalState, mergeCustomizer);
       }
     }
-
-    resetSequenceStateValues(state[''+userId], finalState);
-    mergeWith(state[''+userId], finalState, mergeCustomizer);
-    return state[''+userId];
+    resetSequenceStateValues(state['' + userId], finalState);
+    mergeWith(state['' + userId], finalState, mergeCustomizer);
+    return state['' + userId];
   }
 
   logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
@@ -589,15 +583,13 @@ function resetSequenceStateValues(oldState, newState) {
 // @TODO: Is this right? We really want/need this for "responses" arrays (sequence-of-responses values)
 //        but will this code incorrectly do the same for *all* arrays? Is this what we want???
 function mergeCustomizer(objValue, srcValue) {
-  let mergedValue = {
-    ...objValue,
-    ...srcValue
-  };
-  return mergedValue;
+  if (typeof objValue === 'object') {
+    return srcValue;
+  }
 }
 
 function updateState(userId, newState, scope = "") {
-  userIdArray.push(userId)
+  trackUpdateState.push(userId)
   let userState;
 
   //If no scope is provided, considering userId as scope
