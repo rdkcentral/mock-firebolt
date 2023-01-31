@@ -583,9 +583,7 @@ function resetSequenceStateValues(oldState, newState) {
 // @TODO: Is this right? We really want/need this for "responses" arrays (sequence-of-responses values)
 //        but will this code incorrectly do the same for *all* arrays? Is this what we want???
 function mergeCustomizer(objValue, srcValue) {
-  if (typeof objValue === 'object') {
     return srcValue;
-  }
 }
 
 function updateState(userId, newState, scope = "") {

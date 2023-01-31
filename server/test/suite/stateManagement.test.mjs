@@ -109,28 +109,28 @@ test(`stateManagement.getState works properly for global and group`, () => {
     },
     methods: {
       "account.id": {
-        result: "A222"
+        "result": "A222"
       },
       "account.uid": {
         "result": "A111-222"
-      },
+      }
     }
   };
 
   stateManagement.addUser("756~A")
   const result2 = stateManagement.getState("756~A");
   const expectedResult2 = {
-    global: { mode: 'DEFAULT', latency: { min: 0, max: 0 } },
+    global: { mode: 'DEFAULT' },
+    scratch: {},
     methods: {
       "account.id": {
-        result: "A222"
+        "result": "A222"
       },
       "account.uid": {
         "result": "A111-222"
-      },
+      }
     },
-    scratch: {},
-    sequenceState: {},
+    sequenceState: {}
   };
   expect(result2).toEqual(expectedResult2);
 });
@@ -161,9 +161,9 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
         "accessibility.closedCaptions": {
           min: 3,
           max: 3,
-        },
-      },
-    },
+        }
+      }
+    }
   };
   const output = await stateManagement.getAppropriateDelay(
     9012,
@@ -502,7 +502,9 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     name: "test"
   }, {
     name: "test"
-  }, {}];
+  }, {
+    name: "test"
+  }];
   userIdArray.forEach((userId, index) => {
     stateManagement.testExports.state[userId] = obj[userId];
     const result = stateManagement.getMethodResponse(
