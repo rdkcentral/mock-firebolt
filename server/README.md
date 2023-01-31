@@ -462,6 +462,10 @@ curl --location --request POST 'http://localhost:3333/api/v1/sequence' \
 ### Example cURL Command:
 
 ```
+curl --location --request PUT 'http://localhost:3333/api/v1/user'
+```
+
+```
 curl --location --request POST 'http://localhost:3333/api/v1/user'
 ```
 
@@ -473,6 +477,27 @@ curl --location --request POST 'http://localhost:3333/api/v1/user'
     "userId": "<uuid>"
 }
 ```
+## Create a user (registers a user with given User ID)
+
+### Example cURL Command:
+
+```
+curl --location --request PUT 'http://localhost:3333/api/v1/user/123~A'
+```
+
+```
+curl --location --request POST 'http://localhost:3333/api/v1/user/123~A'
+```
+
+### 200 Response:
+
+```
+{
+    "status": "OK",
+    "userId": "123~A"
+}
+```
+
 ## Get list of users (returns a list of all the registered users)
 
 ### Example cURL Command:
@@ -492,5 +517,37 @@ curl --location --request GET 'http://localhost:3333/api/v1/user'
         "<uuid3>",
         "<uuid4>"
     ]
+}
+```
+
+## Get ws status (returns the status of ws connection mapped to the userID)
+
+### Example cURL Command (Specific user):
+
+```
+curl --location --request GET 'http://localhost:3333/api/v1/status' \
+    --header 'x-mockfirebolt-userid: sampleUserId1234'
+```
+
+### Example cURL Command (Default user):
+
+```
+curl --location --request GET 'http://localhost:3333/api/v1/status'
+```
+
+### 200 Response (If connection is established):
+
+```
+{
+   status": "WS connection found",
+   "readyState": "CONNECTED"
+}
+```
+
+### 404 Response (If connection not found):
+
+```
+{
+   status": "No WS connection found for user 12345"
 }
 ```

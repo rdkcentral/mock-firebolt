@@ -27,21 +27,49 @@ import * as stateManagement from '../../stateManagement.mjs';
 
 // --- Route Handlers ---
 
-// POST /api/v1/user
+// PUT /api/v1/user/:userId?
+// POST /api/v1/user/:userId?
 // Expected body: N/A
+// URL Param "userId" - Optional
 function addUser(req, res) {
-  // Generate a unique userId for this user (no vanity userIds, at least for now)
-  const userId = uuidv4();
+  let userId;
+  if (req.params.userId){
+    userId = req.params.userId;
+  }
+  if (userId){
+    // Make sure we have starter (empty) state for this user
+    let response = stateManagement.addUser(userId);
+    // Make sure we have a web socket server for this user
+    userManagement.addUser(userId);
 
-  // Make sure we have a web socket server for this user
-  userManagement.addUser(userId);
-  // Make sure we have starter (empty) state for this user
-  stateManagement.addUser(userId);
+    if (response.isSuccess){
+      res.status(200).send({
+        status: 'SUCCESS',
+        userId: userId
+      });
+    }
+    else{
+      res.status(400).send({
+        status: 'ERROR',
+        errorCode: 'Cannot add user',
+        message: response.msg
+      });
+    }
+  }
+  else {
+    // Generate a unique userId for this user (no vanity userIds, at least for now)
+    userId = uuidv4();
 
-  res.status(200).send({
-    status: 'SUCCESS',
-    userId: userId
-  });
+    // Make sure we have starter (empty) state for this user
+    stateManagement.addUser(userId);
+    // Make sure we have a web socket server for this user
+    userManagement.addUser(userId);
+
+    res.status(200).send({
+      status: 'SUCCESS',
+      userId: userId
+      });
+  }
 }
 
 //GET /api/v1/user

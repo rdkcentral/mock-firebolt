@@ -65,7 +65,8 @@ function configureAPI(app) {
 
     // ======================= State-Related API Routes =======================
 
-    app.post('/api/v1/user',                            userApi.addUser);
+    app.put('/api/v1/user/:userId?',                    userApi.addUser);
+    app.post('/api/v1/user/:userId?',                   userApi.addUser);
 
     // =======================  User-Related Routes ===========================
 
@@ -101,8 +102,10 @@ function configureAPI(app) {
     // Send an event sequence
     app.post('/api/v1/sequence',                        sequenceApi.sendSequence);
 
-     // check status
-     app.get('/api/v1/status',                        statusApi.getStatus);
+     // ======================= State-Related API Routes =======================
+
+    // check status
+    app.get('/api/v1/status',                           statusApi.getStatus);
 }
 
 export { configureAPI };

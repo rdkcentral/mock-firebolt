@@ -23,6 +23,9 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as messageHandler from './messageHandler.mjs';
+import {state} from './stateManagement.mjs';
+import { logger } from './logger.mjs';
+import * as util from './util.mjs'
 
 const user2wss = new Map();
 const user2ws  = new Map();
@@ -40,6 +43,38 @@ function getUsers() {
 
 function isKnownUser(userId) {
   return user2wss.has(''+userId);
+}
+
+function parseUser(userId) {
+  if (userId == null || userId == undefined) {
+    return userId
+  }
+
+  //Some shortcuts for code readability
+  let isGroupMember = userId.includes("~")
+  let hasAppId = userId.includes("#")
+  let output = {}
+
+  //Extract appId if applicable
+  if (hasAppId) {
+    let index = userId.indexOf("#")
+    output.appId = userId.substring(index + 1)
+    userId = userId.substring(0, index)
+  }
+
+  //Extract group if applicable
+  if (isGroupMember) {
+    let index = userId.indexOf("~")
+    output.group = userId.substring(index + 1)
+    userId = userId.substring(0, index)
+  }
+
+  //Whatever's left is our userId
+  if (userId.length > 0) {
+    output.user = userId
+  }
+
+  return output;
 }
 
 function getWssForUser(userId) {
@@ -117,6 +152,63 @@ function heartbeat(ws) {
 }
 
 function addUser(userId) {
+  userId = "" + userId;
+  var users = getUsers();
+
+  let parsedUserId = parseUser(userId);
+  let user = parsedUserId.user
+  let appId = parsedUserId.appId
+  let group = parsedUserId.group
+
+  //getting user, group and appId from userId
+  if (userId.includes("~")){
+    user = userId.split("~")[0];
+    if (userId.includes("#")){
+      appId = userId.split("#")[1];
+      group = "~"+userId.split("#")[0].split('~')[1];
+    }
+    else{
+      group = "~"+userId.split('~')[1];
+    }
+  }
+  else if (userId.includes("#")){
+    user = userId.split("#")[0];
+    appId = userId.split("#")[1];
+  }
+  else{
+    user = userId;
+  }
+
+//iterating over list of users in state to ensure duplicate user/appId
+  for(var key in users){
+    if (users[key].includes("~")){
+      if (user && users[key].split("~")[0]==user){
+          logger.info(`Cannot map user ${userId} to ws as user ${user} already exists`)
+          return false
+      }
+      else if(appId && users[key].includes("#") && users[key].split("#")[1]==appId){
+        logger.info(`Cannot map user ${userId} to ws as appId ${appId} already exists`)
+        return false
+      }
+    }
+    else if (users[key].includes("#")){
+      if (user && users[key].split("#")[0]==user){
+        logger.info(`Cannot map user ${userId} to ws as appId ${user} already exists`)
+        return false
+      }
+      else if (appId && users[key].split("#")[1]==appId){
+        logger.info(`Cannot map user ${userId} to ws as user ${appId} already exists`)
+        return false
+      }
+    }
+    else{
+      if (user && users[key] == user){
+        logger.info(`Cannot map user ${userId} to ws as user ${user} already exists`)
+        return false
+      }
+    }
+  }
+
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
   wss.on('connection', function connection(ws) {
@@ -142,6 +234,7 @@ function addUser(userId) {
   wss.on('close', function close() {
     clearInterval(interval);
   });
+  return true;
 }
 
 function addDefaultUser(userId) {
@@ -160,5 +253,5 @@ export const testExports={
 }
 
 export {
-  getUsers, isKnownUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
+  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
 };

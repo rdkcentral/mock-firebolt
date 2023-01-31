@@ -31,33 +31,71 @@ import * as stateManagement from "../../src/stateManagement.mjs";
 //jest.mock('stateManagement');
 
 test(`stateManagement.addUser works properly`, () => {
-  const userId = 12345;
-  const spy = jest.spyOn(JSON, "stringify");
+  const userId = 123;
+  const result = stateManagement.addUser(userId);
+  expect(result.isSuccess).toEqual(true);
+});
+
+test(`stateManagement.addUser works properly for same user`, () => {
+  const userId = "456~A#netflix";
+  expect( stateManagement.addUser(userId).isSuccess ).toEqual(true);
   stateManagement.addUser(userId);
-  expect(spy).toHaveBeenCalled();
+  const userId1 = "456~A#amazon";
+  expect(stateManagement.addUser(userId1).isSuccess).toEqual(false);
+});
+
+test(`stateManagement.addUser works properly for same appId`, () => {
+  const userId2 = "789~A#netflix";
+  expect(stateManagement.addUser(userId2).isSuccess).toEqual(false);
+});
+
+test(`stateManagement.addUser works properly for same user without group`, () => {
+  stateManagement.addUser("111#youtube");
+  const userId3 = "111#amazon";
+  const result3 = stateManagement.addUser(userId3);
+  expect(result3.isSuccess).toEqual(false);
+
+  const userId4 = "222#youtube";
+  const result4 = stateManagement.addUser(userId4);
+  expect(result4.isSuccess).toEqual(false);
+});
+
+
+test(`stateManagement.getUserId works properly`, () => {
+  const userId = "456";
+  expect(stateManagement.getUserId(userId)).toEqual("456~A#netflix");
+
+  const userId2 = "youtube"
+  expect(stateManagement.getUserId(userId2)).toEqual("111#youtube");
+
+  const userId3 = "~A"
+  expect(stateManagement.getUserId(userId3)).toEqual("~A");
 });
 
 test(`stateManagement.getState works properly`, () => {
   const result1 = stateManagement.getState(12345);
   const expectedResult = {
-    global: {
-      latency: {
-        max: 0,
-        min: 0
-      },
-      mode: "DEFAULT"
-    },
-    methods: {},
+    global: { mode: 'DEFAULT', latency: { min: 0, max: 0 } },
     scratch: {},
+    methods: {},
     sequenceState: {},
-  };
+    isDefaultUserState: true
+  }
   expect(result1).toEqual(expectedResult);
+
+});
+
+test(`stateManagement.getState for invalid user works properly`, () => {
+  const spy1 = jest.spyOn(logger, "info");
+  stateManagement.getState("101");
+  expect(spy1).toHaveBeenCalled();
+
 });
 
 test(`stateManagement.getState works properly for global and group`, () => {
   stateManagement.testExports.state["global"] = {
     global: {
-      mode: "Default",
+      mode: "DEFAULT",
     },
     methods: {
       "account.id": {
@@ -67,7 +105,7 @@ test(`stateManagement.getState works properly for global and group`, () => {
   };
   stateManagement.testExports.state["~A"] = {
     global: {
-      mode: "Default",
+      mode: "DEFAULT",
     },
     methods: {
       "account.id": {
@@ -78,22 +116,11 @@ test(`stateManagement.getState works properly for global and group`, () => {
       },
     }
   };
-  stateManagement.testExports.state["123~A"] = {
-    global: {
-      mode: "Default",
-    },
-  };
 
-  stateManagement.addUser("123~A")
-  const result2 = stateManagement.getState("123~A");
+  stateManagement.addUser("756~A")
+  const result2 = stateManagement.getState("756~A");
   const expectedResult2 = {
-    global: {
-      latency: {
-        max: 0,
-        min: 0
-      },
-      mode: "DEFAULT"
-    },
+    global: { mode: 'DEFAULT', latency: { min: 0, max: 0 } },
     methods: {
       "account.id": {
         result: "A222"

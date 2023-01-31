@@ -63,6 +63,7 @@ function url(host, port, path) {
 const knownOpts = {
   'help'            : Boolean,
   'user'            : String,
+  'addUser'         : String,
   'port'            : String,
   'quiet'           : Boolean,
   'healthcheck'     : Boolean,
@@ -81,11 +82,12 @@ const knownOpts = {
   'session'         : String,
   'sessionOutput'   : String,
   'sessionOutputPath' :  String,
-  'getStatus' : Boolean
+  'getStatus'       :  Boolean
 };
 
 const shortHands = {
   'h'   : [ '--help' ],
+  'au'  : [ '--addUser'],
   'p'   : [ '--port' ],
   'q'   : [ '--quiet' ],
   'hc'  : [ '--healthcheck' ],
@@ -110,7 +112,7 @@ const host = HTTP_HOST;
 const port = parsed.port || HTTP_PORT;
 
 const dotConfig = loadConfig();
-const userId = ''+(parsed.user || dotConfig.userId || config.app.defaultUserId);
+const userId = ''+(parsed.user || parsed.addUser || dotConfig.userId || config.app.defaultUserId);
 console.log(`UserId: ${userId}`);
 axios.defaults.headers.common['x-mockfirebolt-userid'] = userId;
 
@@ -138,6 +140,19 @@ if ( parsed.help ) {
 
   usage();
 
+} else if ( parsed.addUser ) {
+
+  const user = parsed.addUser;
+
+  msg(`adding user ${user}`);
+  axios.put(url(host, port, `/api/v1/user/${ encodeURIComponent(user)}`), undefined)
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      logError(error);
+    });
+
 } else if ( parsed.healthcheck ) {
 
   msg(`Performing health check...`);
@@ -149,7 +164,7 @@ if ( parsed.help ) {
       logError(error);
     });
 
-} else if ( parsed.state ) {
+}  else if ( parsed.state ) {
 
   msg(`Dumping state...`);
   axios.get(url(host, port, '/api/v1/state'), undefined)
