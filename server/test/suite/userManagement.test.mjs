@@ -96,7 +96,7 @@ test(`userManagement.getWsListForUser works properly`, () => {
 
 test(`userManagement.associateUserWithWs works properly`, () => {
   userManagement.testExports.associateUserWithWs("123", "Test");
-  const result = userManagement.testExports.user2ws.get("123");
+  const result = userManagement.testExports.getWsForUser("123");
   expect(result).toBe("Test");
   userManagement.testExports.user2ws.delete("123");
 });
