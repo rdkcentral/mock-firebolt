@@ -746,7 +746,7 @@ function createUuid(){
 
 export const testExports={
   handleStaticAndDynamicError, state, validateMethodOverride, logInvalidMethodError,
-  mergeCustomizer,
+  mergeCustomizer,trackUpdateState
 }
 export {
   state,
