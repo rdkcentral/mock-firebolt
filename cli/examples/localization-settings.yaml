@@ -1,0 +1,86 @@
+---
+methods:
+  localization.localilty:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log("*** value of ccs.locality in yaml----", ccs.locality);
+        return ccs.locality;
+      }
+  localization.countryCode:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log("*** value of ccs.countryCode in yaml----", ccs.countryCode);
+        return ccs.countryCode;
+      }
+  localization.language:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log("*** value of ccs.language in yaml----", ccs.language);
+        return ccs.language;
+      }
+  localization.locale:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log("*** value of ccs.locale in yaml----", ccs.locale);
+        return ccs.locale;
+      }
+  localization.setLocalilty:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log(`Set localilty params =>`, params, ccs, ctx);
+        ccs.localilty = params && params.value;
+        ctx.set('localizationSettings', ccs, '~A');
+        console.log(`*** Updated the localilty value for ccs locality ***`);
+        const result = ctx.get('localizationSettings');
+        const msg = 'Post trigger for localization.setLocalilty';
+        console.log("value of result inside yaml ",result)
+        ctx.sendBroadcastEvent('localization.onLocaliltyChanged', result, msg);
+        return null;
+      }
+  localization.setCountryCode:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log(`Set countryCode params =>`, params, ccs);
+        ccs.countryCode = params && params.value;
+        ctx.set('localizationSettings', ccs, '~A');
+        console.log(`*** Updated the countryCode value for ccs countryCode ***`);
+        const result = ctx.get('localizationSettings');
+        const msg = 'Post trigger for localization.setCountryCode';
+        console.log("value of result inside yaml ", result)
+        ctx.sendBroadcastEvent('localization.onCountryCodeChanged', result, msg);
+        return null;
+      }
+  localization.setLanguage:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log(`Set language params =>`, params, ccs);
+        ccs.language = params && params.value;
+        ctx.set('localizationSettings', ccs, '~A');
+        console.log(`*** Updated the language value for ccs language ***`);
+        const result = ctx.get('localizationSettings');
+        const msg = 'Post trigger for localization.setLanguage';
+        console.log("value of result inside yaml ", result)
+        ctx.sendBroadcastEvent('localization.onLanguageChanged', result, msg);
+        return null;
+      }
+  localization.setLocale:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('localizationSettings');
+        console.log(`Set locale params =>`, params, ccs);
+        ccs.locale = params && params.value;
+        ctx.set('localizationSettings', ccs, '~A');
+        console.log(`*** Updated the locale value for ccs locale ***`);
+        const result = ctx.get('localizationSettings');
+        const msg = 'Post trigger for localization.setLocale';
+        console.log("value of result inside yaml ", result)
+        ctx.sendBroadcastEvent('localization.onLocaleChanged', result, msg);
+        return null;
+      }
