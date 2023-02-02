@@ -23,6 +23,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as userManagement from '../../userManagement.mjs';
 import * as stateManagement from '../../stateManagement.mjs';
+import { logger } from '../../../src/logger.mjs';
+
 
 
 // --- Route Handlers ---
@@ -47,6 +49,7 @@ function addUser(req, res) {
         status: 'SUCCESS',
         userId: userId
       });
+      logger.info(`Adding user ${userId}`);
     }
     else{
       res.status(400).send({

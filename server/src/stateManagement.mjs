@@ -68,6 +68,9 @@ let perUserStartState = {
   }
 };
 
+// To store default users while loading Mock Firebolt
+let defaultUserArray = [];
+
 // Keys are userIds, values are state objects like the one above
 let state = {};
 
@@ -146,6 +149,7 @@ function addUser(userId) {
   if (!(group in state)){
     state[''+group] = JSON.parse(JSON.stringify(perUserStartState)); // Deep copy
   };
+  defaultUserArray.push(userId)
   return {isSuccess:true, msg:""}
 }
 
@@ -738,6 +742,7 @@ export const testExports={
 }
 export {
   state,
+  defaultUserArray,
   addUser,getUserId,
   getState,
   getAppropriateDelay,
