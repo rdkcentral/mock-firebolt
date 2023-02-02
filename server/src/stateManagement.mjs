@@ -20,7 +20,7 @@
 
 'use strict';
 
-import { mergeWith } from 'lodash-es';  // Deep merge needed; Object.assign is shallow, sadly
+import { includes, mergeWith } from 'lodash-es';  // Deep merge needed; Object.assign is shallow, sadly
 import { config } from './config.mjs';
 import { logger } from './logger.mjs';
 import * as magicDateTime from './magicDateTime.mjs';
@@ -29,6 +29,7 @@ import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
 import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
 import { v4 as uuidv4 } from 'uuid';
+import { parseUser } from './userManagement.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -80,7 +81,72 @@ addDefaultUser(config.app.defaultUserId);
 addUser('global');
 
 function addUser(userId) {
+  userId = "" + userId;
+  var users = Object.keys(state);
+  if (userId in state){
+    logger.info(`Cannot add user ${userId}, already exists`);
+    return {isSuccess: false, msg : `Cannot add user, already exists`};
+  }
+
+  let parsedUserId = parseUser(userId)
+  let user = parsedUserId.user;
+  let group = parsedUserId.group;
+  let appId = parsedUserId.appId;
+
+  //getting user, group and appId from userId
+  if (userId.includes("~")){
+    user = userId.split("~")[0];
+    if (userId.includes("#")){
+      appId = userId.split("#")[1];
+      group = "~"+userId.split("#")[0].split('~')[1];
+    }
+    else{
+      group = "~"+userId.split('~')[1];
+    }
+  }
+  else if (userId.includes("#")){
+    user = userId.split("#")[0];
+    appId = userId.split("#")[1];
+  }
+  else{
+    user = userId;
+  }
+
+  //iterating over list of users in state to ensure duplicate user/appId
+  for(var key in users){
+    if (users[key].includes("~")){
+      if (user && users[key].split("~")[0]==user){
+          logger.info(`Cannot add user ${userId} as user ${user} already exists`)
+          return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
+      }
+      else if(appId && users[key].includes("#") && users[key].split("#")[1]==appId){
+        logger.info(`Cannot add user ${userId} as appId ${appId} already exists`)
+        return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${appId} already exists`}
+      }
+    }
+    else if (users[key].includes("#")){
+      if (user && users[key].split("#")[0]==user){
+        logger.info(`Cannot add user ${userId} as appId ${user} already exists`)
+        return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${user} already exists`}
+      }
+      else if (appId && users[key].split("#")[1]==appId){
+        logger.info(`Cannot add user ${userId} as user ${appId} already exists`)
+        return {isSuccess: false, msg : `Cannot add user ${userId} as user ${appId} already exists`}
+      }
+    }
+    else{
+      if (user && users[key] == user){
+        logger.info(`Cannot add user ${userId} as user ${user} already exists`)
+        return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
+      }
+    }
+  }
+
   state[''+userId] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
+  if (!(group in state)){
+    state[''+group] = JSON.parse(JSON.stringify(perUserStartState)); // Deep copy
+  };
+  return {isSuccess:true, msg:""}
 }
 
 function addDefaultUser(userId) {
@@ -88,15 +154,46 @@ function addDefaultUser(userId) {
   state[''+userId].isDefaultUserState = true;
 }
 
+//returns userId with given user/appId if present
+function getUserId(userId){
+  var users = Object.keys(state);
+
+  // //Checking if user or appId is present in state object
+  if (!(userId in state)){
+    for(var key in users){
+      if (users[key].includes("~")){
+        if (users[key].split("~")[0]==userId){
+          userId = users[key];
+        }
+        else if (users[key].includes("#") && users[key].split("#")[1]==userId){
+          userId = users[key];
+        }
+      }
+      else if (users[key].includes("#")){
+        if (users[key].split("#")[0]==userId || users[key].split("#")[1]==userId){
+          userId = users[key];
+        }
+      }
+    }
+  }
+  return userId;
+}
+
 // return state based on hierarchy (From lowest priority to highest) global->group->user
 function getState(userId) {
+  userId = "" + userId;
 
+  //to get the userId from given user/appId
+  userId = getUserId(userId);
   if ( userId in state ) {
     const stateCopy = JSON.parse( JSON.stringify(state) )
     let finalState = stateCopy['global'];
     userId = '' + userId;
     if( userId.includes("~")){
       let group = "~"+userId.split("~")[1];
+      if (group.includes("#")){
+        group = group.split("#")[0];
+      }
       if (group in stateCopy){
         let groupState = stateCopy[''+group];
         resetSequenceStateValues(finalState, groupState);
@@ -485,6 +582,9 @@ function updateState(userId, newState, scope = "") {
   if (scope === ""){
     scope = userId
   }
+  //to get the userId from given user/appId
+  scope = getUserId(scope);
+
   if ( scope in state ){
     userState = getState(scope);
   }
@@ -637,7 +737,8 @@ export const testExports={
   mergeCustomizer,
 }
 export {
-  addUser,
+  state,
+  addUser,getUserId,
   getState,
   getAppropriateDelay,
   hasOverride, getMethodResponse,

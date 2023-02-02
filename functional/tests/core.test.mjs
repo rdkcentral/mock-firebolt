@@ -65,7 +65,7 @@ test(`Add one user and Validate it`, async () => {
     "/api/v1/user",
     "",
     "",
-    "post"
+    "put"
   );
   const data = addUserResponse.data;
   expect(data.status).toBe("SUCCESS");

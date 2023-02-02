@@ -4,23 +4,32 @@ This feature allows user to share state belonging to same group.
 
 ## User
 
-A userId can contain a user, a group, or both. 
+A userId can contain a user, a group, appId or all. A full "userId" will now contain:
+- A user (required)
+- group (optional)
+- An appid (optional)
+
 The following format will be used to determine these fields from within a userId:
 
-- A user without a group will contain simply the user: "foo"
-- A user with a group will contain both a user and group separated by "~". Ex: "foo~bar" represents user "foo" who is a part of group "bar"
-- A group without a user will contain "~" before the group ID. Ex: "~bar".
-    - This example represents group "bar" only.
-    - A userId containing just "bar" will be interpreted as the user "bar" that is not a part of a group.
+| Full "userId"   | User | Group | AppId   |
+| --------------- | ---- | ----- | ------- |
+| 123             | 123  | N/A   | N/A     |
+| 123~A           | 123  | ~A    | N/A     |
+| 123~A#netflix   | 123  | ~A    | netflix |
+| 123#netflix     | 123  | N/A   | netflix |
 
 There will also be a "global" user. This is a reserved userId representing the global state across all users and groups.
+
+All users and appIds are unique:
+- Two users with same user part cannot exist (if "123~A" exists, "123~B" cannot exist).
+- Two users with same appId cannot exist (if "123#netflix" exists, "456#netflix" cannot exist).
 
 # User State
 
 MFOS will return userState as a combination of userState, groupState and globalState maintaining hierarchy (From lowest priority to highest) global->group->user. In case of conflicts, the one with higher priority will be considered.
 For example :
 - Every userId will have the global state.
-- If state for group **"~bar"** exists, every userId ("abc~bar", "xyz~bar", etc.) belonging to this group will have this state.
+- If state for group **"~bar"** exists, every userId ("abc~bar", "xyz~bar#appId",  etc.) belonging to this group will have this state.
 
 
 # Response functions
@@ -33,8 +42,11 @@ This scratch space can be accessed via the context object (ctx) can be altered u
     - If "scope" is empty it will set the key/value to the current user's scratch space
     - If "scope" contains a user and/or group, it will set the key/value to that user's scratch space
         - Ex: set(key, value, "foo~bar") will set the key/value to the scratch space of userId "foo~bar"
+		- Ex: set(key, value, "foo~bar#xyz") will set the key/value to the scratch space of userId "foo~bar#xyz"
         - Ex: set(key, value, "~bar") will set the key/value to the scratch space of group "bar"
         - Ex: set(key, value", "global") will set the key/value to the special userId "global"
+		- EX: set(key, value, "#xyz") will set the key/value to the scratch space of userId associated to that appId (if found).
+		- EX: set(key, value, "foo") will set the key/value to the scratch space of userId containing given user (if found).
 
 - **get()**
     - get() support the new hierarchy as defined above. This will return a consolidated state object (having state of user, group and global).
@@ -74,6 +86,26 @@ curl --location --request PUT 'http://localhost:3333/api/v1/state' \
 curl --location --request PUT 'http://localhost:3333/api/v1/state' \
 	--header 'content-type: application/json'  \
 --header 'x-mockfirebolt-userid: ~A'  \ 
+	--data-raw '{
+	    "state": {
+	        " ~A ": {
+	            "mode": "default"
+	        },
+	        "methods": {
+	            "account.id": {
+	                "result": "A120"
+	            }
+	        }
+	    }
+	}'
+```
+
+- **To set state for "123~A#netflix" user via HTTP, use below curl command :**
+
+```
+curl --location --request PUT 'http://localhost:3333/api/v1/state' \
+	--header 'content-type: application/json'  \
+	--header 'x-mockfirebolt-userid: 123~A#netflix'  \
 	--data-raw '{
 	    "state": {
 	        " ~A ": {

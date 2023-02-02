@@ -31,6 +31,76 @@ test(`userManagement.getUser works properly`, () => {
   expect(result).toEqual(expect.arrayContaining(expectedResult));
 });
 
+test(`userManagement.parseUser works properly (User + Group + AppId)`, () => {
+  const userId = "123~A#sampleApp"
+  const expected = {
+    user: "123",
+    group: "A",
+    appId: "sampleApp"
+  }
+
+  expect(userManagement.parseUser(userId)).toEqual(expected)
+})
+
+test(`userManagement.parseUser works properly (User + Group)`, () => {
+  const userId = "123~A"
+  const expected = {
+    user: "123",
+    group: "A"
+  }
+
+  expect(userManagement.parseUser(userId)).toEqual(expected)
+})
+
+test(`userManagement.parseUser works properly (User + AppId)`, () => {
+  const userId = "123#sampleApp"
+  const expected = {
+    user: "123",
+    appId: "sampleApp"
+  }
+
+  expect(userManagement.parseUser(userId)).toEqual(expected)
+})
+
+//Not a valid user but should still work
+test(`userManagement.parseUser works properly (Group + AppId)`, () => {
+  const userId = "~A#sampleApp"
+  const expected = {
+    group: "A",
+    appId: "sampleApp"
+  }
+
+  expect(userManagement.parseUser(userId)).toEqual(expected)
+})
+
+test(`userManagement.parseUser works properly (User)`, () => {
+  const userId = "123"
+  const expected = {
+    user: "123"
+  }
+
+  expect(userManagement.parseUser(userId)).toEqual(expected)
+})
+
+test(`userManagement.parseUser works properly (Group)`, () => {
+  const userId = "~A"
+  const expected = {
+    group: "A"
+  }
+
+  expect(userManagement.parseUser(userId)).toEqual(expected)
+})
+
+//Not a valid user but should still work
+test(`userManagement.parseUser works properly (AppId)`, () => {
+  const userId = "#sampleApp"
+  const expected = {
+    appId: "sampleApp"
+  }
+
+  expect(userManagement.parseUser(userId)).toEqual(expected)
+})
+
 test(`userManagement.isKnownUser works properly`, () => {
   const dummyArray = ["12345", "67895"];
   const expectedResult = [true, false];
@@ -67,9 +137,38 @@ test(`userManagement.getWsForUser works properly`, () => {
 
 test(`userManagement.addUser works properly`, () => {
   const userId = "12345";
-  expect(userManagement.addUser(userId)).toBeUndefined();
+  expect(userManagement.addUser(userId)).toEqual(false);
 });
 
+test(`userManagement.addUser works properly for same user`, () => {
+  const userId = "456~A#sampleApp";
+  expect( userManagement.addUser(userId)).toEqual(true);
+  userManagement.addUser(userId);
+  const userId1 = "456~A#amazon";
+  const expectedResult = false;
+  const result1 = userManagement.addUser(userId1);
+  expect(result1).toEqual(expectedResult);
+});
+
+test(`userManagement.addUser works properly for same appId`, () => {
+  const userId2 = "789~A#sampleApp";
+  const expectedResult2 = false
+  const result2 = userManagement.addUser(userId2);
+  expect(result2).toEqual(expectedResult2);
+});
+
+test(`userManagement.addUser works properly for same user without group`, () => {
+  userManagement.addUser("111#youtube");
+  const userId3 = "111#amazon";
+  const expectedResult3 = false
+  const result3 = userManagement.addUser(userId3);
+  expect(result3).toEqual(expectedResult3);
+
+  const userId4 = "222#youtube";
+  const expectedResult4 = false
+  const result4 = userManagement.addUser(userId4);
+  expect(result4).toEqual(expectedResult4);
+});
 test(`userManagement.removeUser works properly`, () => {
   const userId = "12345";
   const spy = jest.spyOn(Map.prototype, "delete");
