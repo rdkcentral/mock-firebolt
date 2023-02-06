@@ -82,10 +82,6 @@ server.on('upgrade', function upgrade(request, socket, head) {
 });
 
 // Starter user(s)
-stateManagement.addUser('123'); userManagement.addUser('123');
-stateManagement.addUser('456'); userManagement.addUser('456');
-stateManagement.addUser('789'); userManagement.addUser('789');
-
 stateManagement.addUser('123~A'); userManagement.addUser('123~A');
 stateManagement.addUser('567~B'); userManagement.addUser('567~B');
 // adding one extra group B user
@@ -139,5 +135,5 @@ app.get('*', function(req, res) {
 
 app.listen(commandLine.httpPort);
 logger.info(`Listening on HTTP port ${commandLine.httpPort}...`);
-logger.info(`Default users loaded: [ ${stateManagement.defaultUserArray} ]`);
+logger.info(`Default users loaded: [ ${userManagement.getUsers()} ]`);
 

@@ -23,7 +23,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as userManagement from '../../userManagement.mjs';
 import * as stateManagement from '../../stateManagement.mjs';
-import { logger } from '../../../src/logger.mjs';
+import { logger } from '../../logger.mjs';
 
 
 
@@ -49,7 +49,7 @@ function addUser(req, res) {
         status: 'SUCCESS',
         userId: userId
       });
-      logger.info(`Adding user ${userId}`);
+      logger.info(`Added user ${userId}`);
     }
     else{
       res.status(400).send({
