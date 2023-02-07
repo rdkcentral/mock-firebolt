@@ -82,16 +82,12 @@ server.on('upgrade', function upgrade(request, socket, head) {
 });
 
 // Starter user(s)
-logger.info('Adding user 123...'); stateManagement.addUser('123'); userManagement.addUser('123');
-logger.info('Adding user 456...'); stateManagement.addUser('456'); userManagement.addUser('456');
-logger.info('Adding user 789...'); stateManagement.addUser('789'); userManagement.addUser('789');
-
-logger.info('Adding user 123~A...'); stateManagement.addUser('123~A'); userManagement.addUser('123~A');
-logger.info('Adding user 567~B...'); stateManagement.addUser('567~B'); userManagement.addUser('567~B');
+stateManagement.addUser('123~A'); userManagement.addUser('123~A');
+stateManagement.addUser('567~B'); userManagement.addUser('567~B');
 // adding one extra group B user
-logger.info('Adding user 978~B...'); stateManagement.addUser('978~B'); userManagement.addUser('978~B');
-logger.info('Adding user 456~A...'); stateManagement.addUser('456~A'); userManagement.addUser('456~A');
-logger.info('Adding user 789~A...'); stateManagement.addUser('789~A'); userManagement.addUser('789~A');
+stateManagement.addUser('978~B'); userManagement.addUser('978~B');
+stateManagement.addUser('456~A'); userManagement.addUser('456~A');
+stateManagement.addUser('789~A'); userManagement.addUser('789~A');
 
 server.listen(commandLine.socketPort);
 logger.info(`Listening on socket port ${commandLine.socketPort}...`);
@@ -139,3 +135,5 @@ app.get('*', function(req, res) {
 
 app.listen(commandLine.httpPort);
 logger.info(`Listening on HTTP port ${commandLine.httpPort}...`);
+logger.info(`Default users loaded: [ ${userManagement.getUsers()} ]`);
+
