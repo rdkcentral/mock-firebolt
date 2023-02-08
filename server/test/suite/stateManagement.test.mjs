@@ -120,7 +120,7 @@ test(`stateManagement.getState works properly for global and group`, () => {
   stateManagement.addUser("756~A")
   const result2 = stateManagement.getState("756~A");
   const expectedResult2 = {
-    global: { mode: 'DEFAULT' },
+    global: { mode: 'DEFAULT', latency: { min: 0, max: 0 } },
     scratch: {},
     methods: {
       "account.id": {
@@ -791,6 +791,6 @@ test(`stateManagement.logInvalidMethodError works properly`, () => {
 });
 
 test(`stateManagement.mergeCustomizer works properly`, () => {
-  const result = stateManagement.testExports.mergeCustomizer([], "dummy_value");
-  expect(result).toBe("dummy_value");
+  const result = stateManagement.testExports.mergeCustomizer({"id":"1","name":"abc"},{"name":"efg"});
+  expect(JSON.stringify(result)).toBe('{"id":"1","name":"efg"}');
 });
