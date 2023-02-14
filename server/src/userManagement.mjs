@@ -132,7 +132,7 @@ function associateUserWithWss(userId, wss) {
 function associateUserWithWs(userId, ws) {
   let wsArray = [];
   if(user2ws.has(''+userId)){
-    wsArray = user2ws.get(''+userId)
+    wsArray = [user2ws.get(''+userId)]
     wsArray.push(ws);
   } else {
     wsArray.push(ws)
