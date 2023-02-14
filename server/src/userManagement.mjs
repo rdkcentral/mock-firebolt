@@ -84,19 +84,13 @@ function getWssForUser(userId) {
   return undefined;
 }
 
+//get the ws for user,if user has ws already,it will return the latest ws connection
 function getWsForUser(userId) {
   let wsArray = [];
-  console.log(`Inside get`)
-  //console.log(user2ws)
   if ( user2ws.has(''+userId) ) {
-    console.log(`User EXIST`)
     wsArray=user2ws.get(''+userId);
-    console.log(`the latest connection for ${userId}`)
-    console.log(wsArray)
-    console.log("slicing Array")
-    let lastWsConnection=wsArray[(wsArray.length-1)]
-    console.log(lastWsConnection)
-    return lastWsConnection;
+    let latestWsConnection=wsArray[(wsArray.length-1)]
+    return latestWsConnection;
   }
   return undefined;
 }
@@ -134,26 +128,16 @@ function associateUserWithWss(userId, wss) {
   user2wss.set(''+userId, wss);
 }
 
+//Associate each user with many ws connection,taking ws as an array of objects
 function associateUserWithWs(userId, ws) {
-  //let connection1=JSON.stringify(ws)
- // console.log(`User id added for ${userId} and ws ${connection1} `)
-  console.log(`User id added for ${userId} and ws ${ws} `)
-  
   let wsArray = [];
   if(user2ws.has(''+userId)){
     wsArray = user2ws.get(''+userId)
     wsArray.push(ws);
- //   console.log(`Key exist ${userId}`);
- //   console.log(wsArray)
   } else {
     wsArray.push(ws)
     user2ws.set(''+userId, wsArray);
- //   console.log(`Initialized for first time ${userId}`);
- //   console.log(wsArray)
   }
-  
-  console.log(`User List ${user2ws}`)
-  console.log(user2ws)
 }
 
 
