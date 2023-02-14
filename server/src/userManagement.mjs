@@ -85,8 +85,18 @@ function getWssForUser(userId) {
 }
 
 function getWsForUser(userId) {
+  let wsArray = [];
+  console.log(`Inside get`)
+  //console.log(user2ws)
   if ( user2ws.has(''+userId) ) {
-    return user2ws.get(''+userId);
+    console.log(`User EXIST`)
+    wsArray=user2ws.get(''+userId);
+    console.log(`the latest connection for ${userId}`)
+    console.log(wsArray)
+    console.log("slicing Array")
+    let lastWsConnection=wsArray[(wsArray.length-1)]
+    console.log(lastWsConnection)
+    return lastWsConnection;
   }
   return undefined;
 }
@@ -125,8 +135,27 @@ function associateUserWithWss(userId, wss) {
 }
 
 function associateUserWithWs(userId, ws) {
-  user2ws.set(''+userId, ws);
+  //let connection1=JSON.stringify(ws)
+ // console.log(`User id added for ${userId} and ws ${connection1} `)
+  console.log(`User id added for ${userId} and ws ${ws} `)
+  
+  let wsArray = [];
+  if(user2ws.has(''+userId)){
+    wsArray = user2ws.get(''+userId)
+    wsArray.push(ws);
+ //   console.log(`Key exist ${userId}`);
+ //   console.log(wsArray)
+  } else {
+    wsArray.push(ws)
+    user2ws.set(''+userId, wsArray);
+ //   console.log(`Initialized for first time ${userId}`);
+ //   console.log(wsArray)
+  }
+  
+  console.log(`User List ${user2ws}`)
+  console.log(user2ws)
 }
+
 
 function handleGroupMembership(userId) {
   const parts = (''+userId).split('~');
