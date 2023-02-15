@@ -86,9 +86,8 @@ function getWssForUser(userId) {
 
 //get the ws for user,if user has ws already,it will return the latest ws connection
 function getWsForUser(userId) {
-  let wsArray = [];
   if ( user2ws.has(''+userId) ) {
-    wsArray=user2ws.get(''+userId);
+    let wsArray=user2ws.get(''+userId);
     let latestWsConnection=wsArray[(wsArray.length-1)]
     return latestWsConnection;
   }
@@ -130,7 +129,7 @@ function associateUserWithWss(userId, wss) {
 
 //Associate each user with many ws connection,taking ws as an array of objects
 function associateUserWithWs(userId, ws) {
-  let wsArray = [];
+  const wsArray=[];
   if(user2ws.has(''+userId)){
     wsArray = user2ws.get(''+userId)
     wsArray.push(ws);
