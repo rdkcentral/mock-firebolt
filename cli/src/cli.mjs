@@ -144,10 +144,10 @@ if ( parsed.help ) {
 
   const user = parsed.addUser;
 
-  msg(`adding user ${user}`);
+  msg(`Adding user ${user}`);
   axios.put(url(host, port, `/api/v1/user/${ encodeURIComponent(user)}`), undefined)
     .then(function (response) {
-      console.log(response.data);
+      console.log('Response received for addUser', user, ':', response.data);
     })
     .catch(function (error) {
       logError(error);
@@ -158,7 +158,7 @@ if ( parsed.help ) {
   msg(`Performing health check...`);
   axios.get(url(host, port, '/api/v1/healthcheck'), undefined)
     .then(function (response) {
-      console.log(response.data);
+      console.log('Response received for performing health check for user', userId, ':', response.data);
     })
     .catch(function (error) {
       logError(error);
@@ -171,7 +171,7 @@ if ( parsed.help ) {
     .then(function (response) {
       // Return state directly so the output here can be imported
       // via --upload for export/import purposes
-      console.log(JSON.stringify(response.data.state, null, 4));
+      console.log('Response received for dumping state for user', userId, ':', JSON.stringify(response.data.state, null, 4));
     })
     .catch(function (error) {
       logError(error);
@@ -182,7 +182,7 @@ if ( parsed.help ) {
   msg(`Reverting state...`);
   axios.post(url(host, port, '/api/v1/state/revert'), undefined)
     .then(function (response) {
-      console.log(response.data);
+      console.log('Response received for reverting state for user', userId, ':', response.data);
     })
     .catch(function (error) {
       logError(error);
@@ -203,6 +203,7 @@ if ( parsed.help ) {
       }
     })
     .then(function (response) {
+      console.log('Response received for setting per-method latency for user', userId, ':', response.data);
       console.log(response.data);
     })
     .catch(function (error) {
@@ -221,7 +222,7 @@ if ( parsed.help ) {
       }
     })
     .then(function (response) {
-      console.log(response.data);
+      console.log('Response received for setting global latency for user', userId, ':', response.data);
     })
     .catch(function (error) {
       logError(error);
@@ -235,7 +236,7 @@ if ( parsed.help ) {
       mode: mode
     })
     .then(function (response) {
-      console.log(response.data);
+      console.log('Response received for setting mode for user', userId, ':', response.data);
     })
     .catch(function (error) {
       logError(error);
@@ -255,7 +256,7 @@ if ( parsed.help ) {
       result: result
     })
     .then(function (response) {
-      console.log(response.data);
+      console.log('Response received for setting method response for user', userId, ':', response.data);
     })
     .catch(function (error) {
       logError(error);
@@ -274,7 +275,7 @@ if ( parsed.help ) {
       }
     })
     .then(function (response) {
-      console.log(response.data);
+      console.log('Response received for setting method response to given error code and message for user', userId, ':', response.data);
     })
     .catch(function (error) {
       logError(error);
@@ -301,7 +302,7 @@ if ( parsed.help ) {
                 state: newState
               })
               .then(function (response) {
-                console.log(response.data);
+                console.log('Response received for uploading file' ,filename, 'from directory', uploadDir, 'for user', userId, ':', response.data);
               })
               .catch(function (error) {
                 logError(error);
@@ -328,7 +329,7 @@ if ( parsed.help ) {
           state: newState
         })
         .then(function (response) {
-          console.log(response.data);
+          console.log('Response received for uploading file for user', userId, ':', response.data);
         })
         .catch(function (error) {
           logError(error);
@@ -355,7 +356,7 @@ if ( parsed.help ) {
         result: event.result
       })
       .then(function (response) {
-        console.log(response.data);
+        console.log('Response received for sending event for user', userId, ':', response.data);
       })
       .catch(function (error) {
         logError(error);
@@ -381,7 +382,7 @@ if ( parsed.help ) {
         result: broadcastEvent.result
       })
       .then(function (response) {
-        console.log(response.data);
+        console.log('Response received for sending broadcast event for user', userId, ':', response.data);
       })
       .catch(function (error) {
         logError(error);
@@ -407,7 +408,7 @@ if ( parsed.help ) {
 
       axios.post(url(host, port, '/api/v1/sequence'), {seqevent : seqevent})
       .then(function (response) {
-        console.log(response.data);
+        console.log('Response received for sending sequence of events for user', userId, ':', response.data);
       })
       .catch(function (error) {
         logError(error);
@@ -423,7 +424,7 @@ if ( parsed.help ) {
     msg(`Starting session...`);
     try {
       let response = await axios.post(url(host, port, '/api/v1/session/start'), undefined);
-      console.log(response.data);
+      console.log('Response received for starting session for user', userId, ':', response.data);
     } catch (error) {
       logError(error);
     }
@@ -434,7 +435,7 @@ if ( parsed.help ) {
     msg(`Set session output to "${sessionOutput}"`);
     try {
       let response = await axios.post(url(host, port, `/api/v1/sessionoutput/${sessionOutput}`), undefined);
-      console.log(response.data);
+      console.log('Response received for setting session output for user', userId, ':', response.data);
     } catch (error) {
       logError(error);
     }
@@ -445,7 +446,7 @@ if ( parsed.help ) {
     msg(`Set session output path to: ` + sessionOutputPath);
     try {
       let response = await axios.post(url(host, port, '/api/v1/sessionoutputpath'), { path : sessionOutputPath });
-      console.log(response.data);
+      console.log('Response received for setting session output path for user', userId, ':', response.data);
     } catch (error) {
       logError(error); 
     }
@@ -455,7 +456,7 @@ if ( parsed.help ) {
     msg(`Stopping session...`);
     axios.post(url(host, port, '/api/v1/session/stop'), undefined)
     .then(function (response) {
-      console.log(response.data);
+      console.log('Response received for stopping session for user', userId, ':', response.data);
     }
     ).catch(function (error) {
       logError(error);
