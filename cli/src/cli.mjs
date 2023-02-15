@@ -204,7 +204,6 @@ if ( parsed.help ) {
     })
     .then(function (response) {
       console.log('Response received for setting per-method latency for user', userId, ':', response.data);
-      console.log(response.data);
     })
     .catch(function (error) {
       logError(error);
