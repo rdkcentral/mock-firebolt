@@ -70,6 +70,12 @@ let perUserStartState = {
 
 // Keys are userIds, values are state objects like the one above
 let state = {};
+
+// trackUpdateState array is used to track and distinguish how a userId state was updated
+// if userId state is updated via user scope,it will be pushed to trackUpdateState array 
+// else if userId state was updated as part of a group scope, it will not be pushed to trackUpdateState array
+// This was introduced to fix issues that arised as user scoping was not being honored if an override was present with group scope
+// Currently used in getState(), to help return correct state of an userId honoring scoping 
 let trackUpdateState = [];
 
 // Add default user, which will be used anytime a userId is not specified
