@@ -129,7 +129,7 @@ function associateUserWithWss(userId, wss) {
 
 //Associate each user with many ws connection,taking ws as an array of objects
 function associateUserWithWs(userId, ws) {
-  const wsArray=[];
+  let wsArray=[];
   if(user2ws.has(''+userId)){
     wsArray = user2ws.get(''+userId)
     wsArray.push(ws);
