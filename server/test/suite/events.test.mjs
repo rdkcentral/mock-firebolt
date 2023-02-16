@@ -177,7 +177,7 @@ test(`events.isEventListenerOffMessage works properly`, () => {
 test(`events.sendEventListenerAck works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
   const oMsgdummy = { method: "lifecycle.onInactive", id: 12 };
-  events.sendEventListenerAck({ send: () => {} }, oMsgdummy);
+  events.sendEventListenerAck('12345', { send: () => {} }, oMsgdummy);
   expect(spy).toHaveBeenCalled();
 });
 

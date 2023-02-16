@@ -45,7 +45,7 @@ function fFatalErr() {
 async function handleMessage(message, userId, ws) {
   let response, newResponse;
 
-  logger.debug(`Received message: ${message}`);
+  logger.debug(`Received message for user ${userId} : ${message}`);
 
   const oMsg = JSON.parse(message);
 
@@ -82,7 +82,7 @@ async function handleMessage(message, userId, ws) {
   // Handle JSON-RPC messages that are event listener enable requests
 
   if ( events.isEventListenerOnMessage(oMsg) ) {
-    events.sendEventListenerAck(ws, oMsg);
+    events.sendEventListenerAck(userId, ws, oMsg);
     events.registerEventListener(userId, oMsg);
     return;
   }

@@ -117,7 +117,7 @@ function isEventListenerOffMessage(oMsg) {
 //     {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}
 //   Send ack response:
 //     {"jsonrpc":"2.0","result":{"listening":true, "event":"lifecycle.onInactive"},"id":1}
-function sendEventListenerAck(ws, oMsg) {
+function sendEventListenerAck(userId, ws, oMsg) {
   const oAckMessage = {
     jsonrpc: '2.0',
     result: {
@@ -129,7 +129,7 @@ function sendEventListenerAck(ws, oMsg) {
   // Could do, but why?: const dly = db.getAppropriateDelay(user, method); await util.delay(dly);
   const ackMessage = JSON.stringify(oAckMessage);
   ws.send(ackMessage);
-  logger.debug(`Sent event listener ack message: ${ackMessage}`);
+  logger.debug(`Sent event listener ack message for user ${userId}: ${ackMessage}`);
   updateCallWithResponse(oMsg.method, oAckMessage.result, "result")
 }
 
