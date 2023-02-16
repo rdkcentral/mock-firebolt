@@ -132,11 +132,12 @@ function associateUserWithWs(userId, ws) {
   const wsArray=[];
   if(user2ws.has(''+userId)){
     wsArray = user2ws.get(''+userId)
-    wsArray.push(ws);
+    wsArray.push([ws]);
   } else {
-    wsArray.push(ws)
+    wsArray.push([ws])
     user2ws.set(''+userId, wsArray);
   }
+  logger.info("User have associated with ws")
 }
 
 
