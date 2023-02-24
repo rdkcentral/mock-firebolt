@@ -8,7 +8,8 @@
     "test:healthCheck": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/health-check.test.mjs",
     "test:manage": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/core-manage-jsonrpc.test.mjs",
     "test:discovery": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/core-discovery-jsonrpc.test.mjs",
-    "test:core:manage:discovery": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/core-manage-discovery-jsonrpc.test.mjs"
+    "test:core:manage:discovery": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/core-manage-discovery-jsonrpc.test.mjs",
+    "test:scope": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/scope.test.mjs"
   },
   "repository": {
     "type": "git",

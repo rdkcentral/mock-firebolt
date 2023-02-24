@@ -127,7 +127,7 @@ test(`userManagement.getWssForUser works properly`, () => {
 test(`userManagement.getWsForUser works properly`, () => {
   const userId = "12345",
     userId1 = "23456";
-  userManagement.testExports.user2ws.set("12345", "test");
+  userManagement.testExports.user2ws.set("12345", ["test"]);
   const result = userManagement.getWsForUser(userId);
   const result1 = userManagement.getWsForUser(userId1);
   expect(result).toBe("test");
@@ -180,7 +180,7 @@ test(`userManagement.getWsListForUser works properly`, () => {
   const inputArray = ["123~A", "123", "12345~B"];
   const outputArray = [undefined, "123", undefined];
   userManagement.testExports.group2user.set("A", ["123"]);
-  userManagement.testExports.user2ws.set("123", "123");
+  userManagement.testExports.user2ws.set("123", ["123"]);
   inputArray.forEach((input, index) => {
     const result = userManagement.getWsListForUser(input);
     if (typeof result === "object") {

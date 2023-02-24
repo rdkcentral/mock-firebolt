@@ -84,9 +84,12 @@ function getWssForUser(userId) {
   return undefined;
 }
 
+//get the ws for user,if user has ws already,it will return the latest ws connection
 function getWsForUser(userId) {
   if ( user2ws.has(''+userId) ) {
-    return user2ws.get(''+userId);
+    let wsArray=user2ws.get(''+userId);
+    let latestWsConnection=wsArray[(wsArray.length-1)]
+    return latestWsConnection;
   }
   return undefined;
 }
@@ -124,9 +127,18 @@ function associateUserWithWss(userId, wss) {
   user2wss.set(''+userId, wss);
 }
 
+//Associate each user with many ws connection,taking ws as an array of objects
 function associateUserWithWs(userId, ws) {
-  user2ws.set(''+userId, ws);
+  let wsArray=[];
+  if(user2ws.has(''+userId)){
+    wsArray = user2ws.get(''+userId)
+    wsArray.push(ws);
+  } else {
+    wsArray.push(ws)
+    user2ws.set(''+userId, wsArray);
+  }
 }
+
 
 function handleGroupMembership(userId) {
   const parts = (''+userId).split('~');
