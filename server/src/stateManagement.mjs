@@ -71,13 +71,6 @@ let perUserStartState = {
 // Keys are userIds, values are state objects like the one above
 let state = {};
 
-// trackUpdateState array is used to track and distinguish how a userId state was updated
-// if userId state is updated via user scope,it will be pushed to trackUpdateState array 
-// else if userId state was updated as part of a group scope, it will not be pushed to trackUpdateState array
-// This was introduced to fix issues that arised as user scoping was not being honored if an override was present with group scope
-// Currently used in getState(), to help return correct state of an userId honoring scoping 
-let trackUpdateState = [];
-
 // Add default user, which will be used anytime a userId is not specified
 // in REST calls (calls without an x-mockfirebolt-userid header), regardless of whether
 // these are calls to the API via cURL or Postman, or whether these are coming from
@@ -86,6 +79,9 @@ addDefaultUser(config.app.defaultUserId);
 
 //Adding global user while initialising mfos
 addUser('global');
+// To add users whose state is updated via user scope
+let usersUpdatedbyUserScope = []
+
 
 function addUser(userId) {
   userId = "" + userId;
@@ -192,42 +188,30 @@ function getState(userId) {
 
   //to get the userId from given user/appId
   userId = getUserId(userId);
-  if (userId in state) {
-    let parsedUserId = parseUser(userId);
-    let user = parsedUserId.user
-    let appId = parsedUserId.appId
-    let group = "~" + parsedUserId.group
-    const stateCopy = JSON.parse(JSON.stringify(state))
+  if ( userId in state ) {
+    const stateCopy = JSON.parse( JSON.stringify(state) )
     let finalState = stateCopy['global'];
     userId = '' + userId;
-    if (userId.includes("~")) {
-      if (group in stateCopy) {
-        let groupState = stateCopy['' + group];
+    if( userId.includes("~")){
+      let group = "~"+userId.split("~")[1];
+      if (group.includes("#")){
+        group = group.split("#")[0];
+      }
+      if (group in stateCopy){
+        let groupState = stateCopy[''+group];
         resetSequenceStateValues(finalState, groupState);
         mergeWith(finalState, groupState, mergeCustomizer);
       }
     }
-    if (userId in stateCopy) {
-      const userState = stateCopy['' + userId];
-      /**if userId is updated via user scope(either by user/appId/full userid),
-       * it would be pushed to trackUpdateState array when updateState() was triggered, here preference is given to userScope
-       */
-      if (trackUpdateState.includes(user) || trackUpdateState.includes(appId) || trackUpdateState.includes(userId) == true) {
-        resetSequenceStateValues(finalState, userState);
-        mergeWith(finalState, userState, mergeCustomizer);
-      } else {
-        /**
-         * if userId is updated as part of group scope and not directly updated via user scope, 
-         * it would not be pushed to trackUpdateState array when updateState() was triggered, here preference is given to group scope
-         * else if userid was not updated at all, state would be same as global scope 
-         */
-        resetSequenceStateValues(userState, finalState);
-        mergeWith(userState, finalState, mergeCustomizer);
-      }
+    if (userId in stateCopy){
+      const userState = stateCopy[''+userId];
+      resetSequenceStateValues(finalState, userState);
+      mergeWith(finalState, userState, mergeCustomizer);
     }
-    resetSequenceStateValues(state['' + userId], finalState);
-    mergeWith(state['' + userId], finalState, mergeCustomizer);
-    return state['' + userId];
+
+    resetSequenceStateValues(state[''+userId], finalState);
+    mergeWith(state[''+userId], finalState, mergeCustomizer);
+    return state[''+userId];
   }
 
   logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
@@ -597,7 +581,6 @@ function mergeCustomizer(objValue, srcValue) {
 }
 
 function updateState(userId, newState, scope = "") {
-  trackUpdateState.push(userId)
   let userState;
 
   //If no scope is provided, considering userId as scope
@@ -606,7 +589,7 @@ function updateState(userId, newState, scope = "") {
   }
   //to get the userId from given user/appId
   scope = getUserId(scope);
-
+  //get current user state
   if ( scope in state ){
     userState = getState(scope);
   }
@@ -632,11 +615,27 @@ function updateState(userId, newState, scope = "") {
       logger.info(`Updating state for user ${scope}`);
     }
   }
-
   const errors = validateNewState(newState);
-  if ( errors.length <= 0 ) {
-    resetSequenceStateValues(userState, newState);
-    mergeWith(userState, newState, mergeCustomizer);
+  if (errors.length <= 0) {
+    // State of a user can be updated via group scope or user scope
+    // updating group state and user state when overriding via group scope
+    if (scope[0] === "~") {
+      let users = Object.keys(state)
+    // Getting current users in the group
+      let usersUpdatedByGroupScope = users.filter(element => element.includes(scope))
+      // If any user in the group has its state previously updated via user scope, keep the userstate as per hierarchy (user>group>global)
+      // Update state of other users in group with group override
+      usersUpdatedByGroupScope = usersUpdatedByGroupScope.filter(item => !usersUpdatedbyUserScope.includes(item))
+      for (let i = 0; i < usersUpdatedByGroupScope.length; i++) {
+        state['' + usersUpdatedByGroupScope[i]] = newState
+      }
+    }
+    // updating user state when overriding via user scope
+    else {
+      state['' + userId] = newState
+      // usersUpdatedbyUserScope will have users updated via user scope
+      usersUpdatedbyUserScope.push(userId)
+    }
   } else {
     logger.error('Errors found when attempting to update state:');
     errors.forEach(function(errorMessage) {
@@ -756,7 +755,7 @@ function createUuid(){
 
 export const testExports={
   handleStaticAndDynamicError, state, validateMethodOverride, logInvalidMethodError,
-  mergeCustomizer,trackUpdateState
+  mergeCustomizer,
 }
 export {
   state,
