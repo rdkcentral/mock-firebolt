@@ -165,21 +165,13 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
       }
     }
   };
-  stateManagement.testExports.trackUpdateState.push("9012")
   const output = await stateManagement.getAppropriateDelay(
     9012,
     "accessibility.closedCaptions"
   );
   expect(output).toBe(3);
 
-  stateManagement.testExports.state[12345] = {
-    global: {
-      mode: "Default",
-      latency: {
-      }
-    }
-  };
-  stateManagement.testExports.trackUpdateState.push("12345")
+  
   const result = await stateManagement.getAppropriateDelay(
     12345,
     "accessibility.closedCaptions"
@@ -514,7 +506,6 @@ test(`stateManagement.getMethodResponse works properly`, () => {
   }, {}];
   userIdArray.forEach((userId, index) => {
     stateManagement.testExports.state[userId] = obj[userId];
-    stateManagement.testExports.trackUpdateState.push(userId)
     const result = stateManagement.getMethodResponse(
       userId,
       methodName,
