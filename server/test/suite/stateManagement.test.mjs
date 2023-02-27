@@ -109,11 +109,11 @@ test(`stateManagement.getState works properly for global and group`, () => {
     },
     methods: {
       "account.id": {
-        "result": "A222"
+        result: "A222"
       },
       "account.uid": {
         "result": "A111-222"
-      }
+      },
     }
   };
 
@@ -121,16 +121,16 @@ test(`stateManagement.getState works properly for global and group`, () => {
   const result2 = stateManagement.getState("756~A");
   const expectedResult2 = {
     global: { mode: 'DEFAULT', latency: { min: 0, max: 0 } },
-    scratch: {},
     methods: {
       "account.id": {
-        "result": "A222"
+        result: "A222"
       },
       "account.uid": {
         "result": "A111-222"
-      }
+      },
     },
-    sequenceState: {}
+    scratch: {},
+    sequenceState: {},
   };
   expect(result2).toEqual(expectedResult2);
 });
@@ -160,10 +160,10 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
       latency: {
         "accessibility.closedCaptions": {
           min: 3,
-          max: 3
-        }
-      }
-    }
+          max: 3,
+        },
+      },
+    },
   };
   const output = await stateManagement.getAppropriateDelay(
     9012,
@@ -171,7 +171,6 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
   );
   expect(output).toBe(3);
 
-  
   const result = await stateManagement.getAppropriateDelay(
     12345,
     "accessibility.closedCaptions"
@@ -782,6 +781,6 @@ test(`stateManagement.logInvalidMethodError works properly`, () => {
 });
 
 test(`stateManagement.mergeCustomizer works properly`, () => {
-  const result = stateManagement.testExports.mergeCustomizer({"id":"1","name":"abc"},{"name":"efg"});
-  expect(JSON.stringify(result)).toBe('{"id":"1","name":"efg"}');
+  const result = stateManagement.testExports.mergeCustomizer([], "dummy_value");
+  expect(result).toBe("dummy_value");
 });

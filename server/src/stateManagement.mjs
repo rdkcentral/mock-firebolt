@@ -79,10 +79,6 @@ addDefaultUser(config.app.defaultUserId);
 
 //Adding global user while initialising mfos
 addUser('global');
-// To add users whose state is updated via user scope
-let usersUpdatedbyUserScope = []
-
-
 function addUser(userId) {
   userId = "" + userId;
   var users = Object.keys(state);
@@ -573,11 +569,9 @@ function resetSequenceStateValues(oldState, newState) {
 // @TODO: Is this right? We really want/need this for "responses" arrays (sequence-of-responses values)
 //        but will this code incorrectly do the same for *all* arrays? Is this what we want???
 function mergeCustomizer(objValue, srcValue) {
-  let mergedValue = {
-    ...objValue,
-    ...srcValue
-  };
-  return mergedValue;
+  if (Array.isArray(objValue)) {
+    return srcValue;
+  }
 }
 
 function updateState(userId, newState, scope = "") {
@@ -618,23 +612,24 @@ function updateState(userId, newState, scope = "") {
   const errors = validateNewState(newState);
   if (errors.length <= 0) {
     // State of a user can be updated via group scope or user scope
-    // updating group state and user state when overriding via group scope
+    // updating group state and state of users in group when overriding via group scope
     if (scope[0] === "~") {
       let users = Object.keys(state)
-    // Getting current users in the group
+      // Getting current users in the group
       let usersUpdatedByGroupScope = users.filter(element => element.includes(scope))
-      // If any user in the group has its state previously updated via user scope, keep the userstate as per hierarchy (user>group>global)
-      // Update state of other users in group with group override
-      usersUpdatedByGroupScope = usersUpdatedByGroupScope.filter(item => !usersUpdatedbyUserScope.includes(item))
+      // If any user in the group has its state earlier updated via user scope (isUserUpdatedbyUserScope flag set to true), keep the userstate as per hierarchy (user>group>global)
+      // Else, update state of other users in group with group override
       for (let i = 0; i < usersUpdatedByGroupScope.length; i++) {
-        state['' + usersUpdatedByGroupScope[i]] = newState
+        if ('isUserUpdatedbyUserScope' in state['' + usersUpdatedByGroupScope[i]] === false) {
+          state['' + usersUpdatedByGroupScope[i]] = newState
+        }
       }
     }
-    // updating user state when overriding via user scope
     else {
+      // updating user state when overriding via user scope
       state['' + userId] = newState
-      // usersUpdatedbyUserScope will have users updated via user scope
-      usersUpdatedbyUserScope.push(userId)
+      // set isUserUpdatedbyUserScope flag to true
+      state['' + userId].isUserUpdatedbyUserScope = true;
     }
   } else {
     logger.error('Errors found when attempting to update state:');
