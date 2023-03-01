@@ -178,53 +178,38 @@ function getUserId(userId){
   return userId;
 }
 
-// return state based on hierarchy (From lowest priority to highest) global->group->user
+// return state based on hierarchy (From lowest priority to highest) global->group->user if mergedState=true
+//return state of the UserId if mergedState=false,to update the state
 function getState(userId,mergedState = true) {
   userId = "" + userId;
 //to get the userId from given user/appId
   userId = getUserId(userId);
-
   if(!mergedState){
-    logger.info(`Inside if where mergedState=false`)
     return state[''+userId];
-  }
-  else{
-    logger.info(`Merged state is true`)
-  if ( userId in state ) {
-    const stateCopy = JSON.parse( JSON.stringify(state) )
-    logger.info(`In getState stateCopy of user${userId} ${JSON.stringify(stateCopy)}`);
-    let finalState = stateCopy['global'];
-    logger.info(`In getState FinalState of user${userId} ${JSON.stringify(finalState)}`)
-    userId = '' + userId;
-    if( userId.includes("~")){
-      let group = "~"+userId.split("~")[1];
-      if (group.includes("#")){
-        group = group.split("#")[0];
+  }else{
+    if ( userId in state ) {
+      const stateCopy = JSON.parse( JSON.stringify(state) )
+      let finalState = stateCopy['global'];
+      userId = '' + userId;
+      if( userId.includes("~")){
+        let group = "~"+userId.split("~")[1];
+        if (group.includes("#")){
+          group = group.split("#")[0];
+        }
+        if (group in stateCopy){
+          let groupState = stateCopy[''+group];
+          resetSequenceStateValues(finalState, groupState);
+          mergeWith(finalState, groupState, mergeCustomizer);
+        }
       }
-      if (group in stateCopy){
-        let groupState = stateCopy[''+group];
-        logger.info(`Group State in grp of user${userId} ${JSON.stringify(groupState)}`);
-        resetSequenceStateValues(finalState, groupState);
-        mergeWith(finalState, groupState, mergeCustomizer);
-        logger.info(`Final state in grp of user${userId} ${JSON.stringify(finalState)}`);
+      if (userId in stateCopy){
+        const userState = stateCopy[''+userId];
+        resetSequenceStateValues(finalState, userState);
+        mergeWith(finalState, userState, mergeCustomizer);
       }
+      return finalState;
     }
-    if (userId in stateCopy){
-      const userState = stateCopy[''+userId];
-      logger.info(`User State in usr of user${userId} ${JSON.stringify(userState)}`);
-      resetSequenceStateValues(finalState, userState);
-      mergeWith(finalState, userState, mergeCustomizer);
-      logger.info(`final State in User of user${userId} ${JSON.stringify(finalState)}`);
-    }
-    logger.info(`Outside of all if`);
-    return finalState;
-    /*resetSequenceStateValues(state[''+userId], finalState);
-    mergeWith(state[''+userId], finalState, mergeCustomizer);
-    logger.info(`Outter IF merge final with userId ${userId} ${JSON.stringify(state[''+userId])}`);
-    return state[''+userId];*/
   }
-}
-
   logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
   return state[config.app.defaultUserId];
 }
@@ -598,22 +583,14 @@ function updateState(userId, newState, scope = "") {
   }
   //to get the userId from given user/appId
   scope = getUserId(scope);
-  logger.info(`Scope in the update State to get userID${scope}`)
-
   if ( scope in state ){
-    logger.info(`Scope USER ID exist in state`)
     userState = getState(scope,false);
-    logger.info(`Getting User State ${JSON.stringify(userState)}`)
   }
   else{
-    logger.info(`Scope NOT exist in state`)
     state[''+scope] = JSON.parse(JSON.stringify(perUserStartState));
-    logger.info(`State scope ${JSON.stringify(state[''+scope])}`)
     userState = getState(scope,false);
-    logger.info(`Getting User State ${JSON.stringify(userState)}`)
   }
   if ( userState.isDefaultUserState ) {
-    logger.info(`INSIDE IF for default user`)
     if ( scope === config.app.defaultUserId ) {
       logger.info(`Updating state for default user ${scope}`);
     } else {
@@ -621,7 +598,6 @@ function updateState(userId, newState, scope = "") {
     }
   }
   else {
-    logger.info(`INSIDE THE ELSE not default user`)
     if ( scope[0] === "~" ){
       logger.info(`Updating state for group ${scope}`);
     }
@@ -648,7 +624,6 @@ function updateState(userId, newState, scope = "") {
 }
 
 function revertState(userId) {
-  logger.info(`Inside revertState`)
   const userState = getState(userId);
   if ( userState.isDefaultUserState ) {
     logger.info(`State for default user ${config.app.defaultUserId} is being reverted`);
