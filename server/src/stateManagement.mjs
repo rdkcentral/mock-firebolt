@@ -28,7 +28,7 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
 import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
-import { v4 as uuidv4 } from 'uuid';
+import { parse, v4 as uuidv4 } from 'uuid';
 import { parseUser } from './userManagement.mjs';
 
 const Mode = {
@@ -190,17 +190,13 @@ function getState(userId,mergedState = true) {
     if ( userId in state ) {
       const stateCopy = JSON.parse( JSON.stringify(state) )
       let finalState = stateCopy['global'];
-      userId = '' + userId;
-      if( userId.includes("~")){
-        let group = "~"+userId.split("~")[1];
-        if (group.includes("#")){
-          group = group.split("#")[0];
-        }
-        if (group in stateCopy){
-          let groupState = stateCopy[''+group];
-          resetSequenceStateValues(finalState, groupState);
-          mergeWith(finalState, groupState, mergeCustomizer);
-        }
+      //Parsing the UserId to get group and appid
+      let parseUserId=parseUser(userId)
+      if(parseUserId.group || parseUserId.appId in stateCopy)
+      {
+        let groupORAppState = parseUserId.appId ?stateCopy['#'+parseUserId.appId]:stateCopy['~'+parseUserId.group];
+        resetSequenceStateValues(finalState, groupORAppState);
+        mergeWith(finalState, groupORAppState, mergeCustomizer);
       }
       if (userId in stateCopy){
         const userState = stateCopy[''+userId];

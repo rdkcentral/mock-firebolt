@@ -44,6 +44,14 @@ function getUsers() {
 function isKnownUser(userId) {
   return user2wss.has(''+userId);
 }
+/* 
+* @function:parseUser()
+* @Description: parsing the userId to get user,group and appId
+* @Params:userId
+* @Return: Output object
+* @Example Input: 123~A#youtube
+* Output: output{user:123 group:A appId:youtube}
+*/
 
 function parseUser(userId) {
   if (userId == null || userId == undefined) {
