@@ -196,9 +196,9 @@ function getState(userId,mergedState = true) {
       {
         if(parseUserId.group || parseUserId.appId in stateCopy)
         {
-          let groupORAppState = parseUserId.appId ? stateCopy['#'+parseUserId.appId]:stateCopy['~'+parseUserId.group];
-          resetSequenceStateValues(finalState, groupORAppState);
-          mergeWith(finalState, groupORAppState, mergeCustomizer);
+          let groupOrAppState = parseUserId.appId ? stateCopy['#'+parseUserId.appId]:stateCopy['~'+parseUserId.group];
+          resetSequenceStateValues(finalState, groupOrAppState);
+          mergeWith(finalState, groupOrAppState, mergeCustomizer);
         }
       }
       if (userId in stateCopy){
