@@ -33,12 +33,10 @@ async function initializeAndSendRequest(returnWs, command) {
    * Else, a new connection will be created.
   */
   if(oneToOneWs) {
-    console.log('INSIDE IF STATEMENT')
     ws = oneToOneWs
     // Should maybe check to make sure connection is alive otherwise delete the connection and start again?
     ws.send(command)
   } else {
-    console.log('ELSE STATEMENT')
     const url = buildWSUrl()
     ws = new WebSocket(url)
   }
