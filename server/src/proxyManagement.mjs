@@ -21,20 +21,35 @@
 import { parse } from 'url';
 import WebSocket from 'ws';
 
-let ws = null
-let responseObject = {}
+const wsMap = new Map()
+let closeConnectionTrigger = false
 
-async function initialize(callback, returnWS) {
-  if(ws) {
-    return true
+async function initializeAndSendRequest(returnWs, command) {
+  const oneToOneWs = wsMap.get(returnWs)
+  let ws = null
+
+  /* Checks to see if ws connection is in map.
+   * If connection exists, it will be used.
+   * Else, a new connection will be created.
+  */
+  if(oneToOneWs) {
+    console.log('INSIDE IF STATEMENT')
+    ws = oneToOneWs
+    // Should maybe check to make sure connection is alive otherwise delete the connection and start again?
+    ws.send(command)
+  } else {
+    console.log('ELSE STATEMENT')
+    const url = buildWSUrl()
+    ws = new WebSocket(url)
   }
-  const url = buildWSUrl()
-  ws = new WebSocket(url)
+
   try {
     return new Promise((res, rej) => {
       ws.on('open', function open() {
-        console.log("Connection to websocket proxy server established")
-        res(true)
+        console.log("Connection establised, sending incoming request to proxy.")
+        ws.send(command)
+        // Add ws connection to map
+        wsMap.set(returnWs, ws)
       });
 
       ws.on('close', function close() {
@@ -43,8 +58,19 @@ async function initialize(callback, returnWS) {
       
       ws.on('message', function message(data) {
         const buf = Buffer.from(data, 'utf8');
-        //send response to callback
-        callback(buf.toString(), returnWS)
+        const response = JSON.parse(buf.toString())
+
+        if (response.id === undefined) {
+          // In case of event, send the event directly to the caller.
+          returnWs.send(buf.toString())
+        } else {
+          // if(!closeConnectionTrigger) {
+          //   closeConnectionTrigger = true
+          //   // Close connection with given interval
+          //   closeStaleConnection(returnWs)
+          // }
+          res(buf.toString())
+        }
       });
 
       ws.on('error', function message(err) {
@@ -56,47 +82,22 @@ async function initialize(callback, returnWS) {
   }
 }
 
-/* Consume response from server. In case of event, send the event to caller directly.
-In case of response for requested method, store it in responseObject array
-*/
-function actOnResponseObject(data, returnWS) {
-  const response = JSON.parse(data)
-  if(response.id === undefined) {
-    returnWS.send(data)
-  }
-  responseObject[response.id] = data
-}
-
-function sendRequest(command) {
-  if(ws) {
-    ws.send(command)
-    console.log("Request sent to proxy server: ", command);
-  } else {
-    console.log("WS Client not initialized. Unable to send request to proxy server: ", command);
-  }
-}
-
-//Poll for proxy response. Fetch response using requestId. If timedout, terminate the connection
-function getResponseMessageFromProxy(id) {
-  let timeout = 2000
+function closeStaleConnection(mapKey) {
+  let timeout = 1000
   let counter = 0
   let interval = 100
-  return new Promise((resolve, reject) => {
-    var timer = setInterval(function() {
-      if(counter >= timeout) {
-        console.log("response not received for given id: " + id)
-        reject(false)
-      }
-      if(responseObject[id]) {
-        counter = timeout + interval
-        //clear interval if response received for given id.
-        clearInterval(timer)
-        resolve(responseObject[id])
-      }
-      counter = counter + interval
-    }, interval);
-  })
-  
+  let timer = setInterval(function() {
+  // Logic in here needs to be reworked
+  // What I think needs to be done is kill the connection
+  // if the counter >= timeout
+
+    const wsConn = wsMap.get(mapKey)
+
+    if(counter >= timeout) {
+      wsMap.set(mapKey, null)
+    }
+    counter = counter + interval
+  }, interval);
 }
 
 function buildWSUrl() {
@@ -138,5 +139,5 @@ function getMFToken(request) {
 
 // --- Exports ---
 export {
-  getMFToken, initialize, actOnResponseObject, getResponseMessageFromProxy, sendRequest
+  getMFToken, initializeAndSendRequest
 };
