@@ -77,7 +77,10 @@ const logger = {
   },
   error: function(msg) {
     _log(colors.bright + colors.fg.red + msg + colors.reset + colors.reset);
-  }
+  },
+  importantWarning: function(msg) {
+    _log(colors.bright + colors.fg.red + colors.reverse + msg + colors.reset + colors.reset);
+  },
 };
 
 // --- Exports ---

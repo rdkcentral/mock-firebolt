@@ -228,11 +228,21 @@ function addUser(userId) {
     ws.on('pong', async hb => {
       heartbeat(ws)
     });
-    associateUserWithWs(''+userId, ws);
-    handleGroupMembership(''+userId)
-    ws.on('message', async message => {
-      messageHandler.handleMessage(message, ''+userId, ws);
-    });
+    if ((config.multiUserConnections == 'allow') || (config.multiUserConnections == 'warn') || (config.multiUserConnections == 'deny' && getWsForUser(userId) == undefined)) {
+      if (config.multiUserConnections == 'warn') {
+        logger.importantWarning(`WARNING: We do not support multiple websocket connections for a single user`)
+      }
+      associateUserWithWs('' + userId, ws);
+      handleGroupMembership('' + userId)
+      ws.on('message', async message => {
+        messageHandler.handleMessage(message, '' + userId, ws);
+      });
+    }
+    if (config.multiUserConnections == 'deny' && getWsForUser(userId) !== undefined) {
+      // If there is a ws object associated with userId, deny and log second ws connection and drop the attempt
+      logger.info(`Denying second websocket connection of user ${userId}`)
+      logger.info(ws)
+    }
   });
 
   const interval = setInterval(function ping() {

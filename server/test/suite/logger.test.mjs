@@ -25,6 +25,7 @@ import { jest } from "@jest/globals";
 
 test(`logger works properly`, () => {
   const spy = jest.spyOn(console, "log");
+  logger.importantWarning("test important warning");
   logger.debug("testDebug");
   logger.err("test err");
   logger.error("test error");
@@ -32,5 +33,5 @@ test(`logger works properly`, () => {
   logger.info("test info");
   logger.warn("test warn");
   logger.warning("test warning");
-  expect(spy).toHaveBeenCalledTimes(7);
+  expect(spy).toHaveBeenCalledTimes(8);
 });

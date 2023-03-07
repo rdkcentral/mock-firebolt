@@ -48,7 +48,8 @@ const knownOpts = {
   'developerToolName'    : String,
   'triggers'             : [String, Array],
   'novalidate'           : [String, Array],
-  'proxy'                : String
+  'proxy'                : String,
+  'multiUserConnections': String
 };
 for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
   if ( oSdk.cliFlag ) {
@@ -89,6 +90,11 @@ const developerToolName = parsed.developerToolName || config.app.developerToolNa
 const proxy = parsed.proxy;
 const conduit = parsed.conduit;
 
+// Overriding multiUserConnections, if a configurartion is passed via CLI on staring MF server
+// Else default configuration 'warn' is used
+const multiUserConnections = parsed.multiUserConnections;
+config.multiUserConnections = multiUserConnections ? multiUserConnections : config.multiUserConnections
+
 // --- novalidate overrides
 config.validate = mergeArrayOfStrings(config.validate, config.dotConfig.validate, parsed.novalidate)
 
@@ -124,6 +130,6 @@ export {
   httpPort, socketPort,
   conduitSocketPort, conduitKeySocketPort,
   developerToolPort, developerToolName,
-  enabledSdkNames, enabledTriggerPaths, proxy,
+  enabledSdkNames, enabledTriggerPaths, proxy,multiUserConnections,
   conduit
 };

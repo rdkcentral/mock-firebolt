@@ -1,6 +1,8 @@
 {
     "validate": [ "method", "params", "response", "events"],
 
+    "multiUserConnections": "warn",
+
     "supportedSdks": [
 
         {
