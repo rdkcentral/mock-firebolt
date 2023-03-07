@@ -28,21 +28,19 @@ test(`config works properly`, () => {
     multiUserConnections: "warn",
     app: {
       allowMixedCase: false,
-      conduitKeySocketPort: 9996,
-      conduitSocketPort: 9997,
-      developerToolName: "Mock Firebolt",
-      developerToolPort: 9995,
       socketPort: 9998,
       httpPort: 3333,
-      defaultUserId: "12345",
-      magicDateTime: {
-        prefix: "{{",
-        suffix: "}}",
-      },
-      developerNotesTagName: "developerNotes",
+      conduitSocketPort: 9997,
+      conduitKeySocketPort: 9996,
+      developerToolPort: 9995,
+      developerToolName: 'Mock Firebolt',
+      defaultUserId: '12345',
+      magicDateTime: { prefix: '{{', suffix: '}}' },
+      developerNotesTagName: 'developerNotes'
     },
     dotConfig: {
       validate: ["method", "params", "response", "events"],
+      multiUserConnections: 'warn',
       supportedSdks: [
         {
           cliFlag: null,
