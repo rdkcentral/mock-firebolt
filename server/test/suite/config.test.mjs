@@ -24,6 +24,8 @@ import { config } from "../../src/config.mjs";
 
 test(`config works properly`, () => {
   const expectedResult = {
+    validate: ["method", "params", "response", "events"],
+    multiUserConnections: "warn",
     app: {
       allowMixedCase: false,
       conduitKeySocketPort: 9996,
@@ -40,6 +42,7 @@ test(`config works properly`, () => {
       developerNotesTagName: "developerNotes",
     },
     dotConfig: {
+      validate: ["method", "params", "response", "events"],
       supportedSdks: [
         {
           cliFlag: null,
@@ -63,9 +66,10 @@ test(`config works properly`, () => {
           name: "discovery",
         },
       ],
-      validate: ["method", "params", "response", "events"],
     },
-    validate: ["method", "params", "response", "events"],
   };
+  console.log("config")
+  console.log(config)
+
   expect(config).toEqual(expectedResult);
 });
