@@ -22,19 +22,17 @@ import { parse } from 'url';
 import WebSocket from 'ws';
 
 const wsMap = new Map()
-let closeConnectionTrigger = false
 
 async function initializeAndSendRequest(returnWs, command) {
   const oneToOneWs = wsMap.get(returnWs)
   let ws = null
 
   /* Checks to see if ws connection is in map.
-   * If connection exists, it will be used.
-   * Else, a new connection will be created.
+   * If connection exists and is active, it will be used.
+   * Else, a new connection will be created and mapped to returnWs.
   */
-  if(oneToOneWs) {
+  if(oneToOneWs && oneToOneWs?._readyState == 1) {
     ws = oneToOneWs
-    // Should maybe check to make sure connection is alive otherwise delete the connection and start again?
     ws.send(command)
   } else {
     const url = buildWSUrl()
@@ -44,8 +42,9 @@ async function initializeAndSendRequest(returnWs, command) {
   try {
     return new Promise((res, rej) => {
       ws.on('open', function open() {
-        console.log("Connection establised, sending incoming request to proxy.")
+        console.log("Connection established, sending incoming request to proxy.")
         ws.send(command)
+
         // Add ws connection to map
         wsMap.set(returnWs, ws)
       });
@@ -62,11 +61,6 @@ async function initializeAndSendRequest(returnWs, command) {
           // In case of event, send the event directly to the caller.
           returnWs.send(buf.toString())
         } else {
-          // if(!closeConnectionTrigger) {
-          //   closeConnectionTrigger = true
-          //   // Close connection with given interval
-          //   closeStaleConnection(returnWs)
-          // }
           res(buf.toString())
         }
       });
@@ -78,24 +72,6 @@ async function initializeAndSendRequest(returnWs, command) {
   } catch (err) {
     return err
   }
-}
-
-function closeStaleConnection(mapKey) {
-  let timeout = 1000
-  let counter = 0
-  let interval = 100
-  let timer = setInterval(function() {
-  // Logic in here needs to be reworked
-  // What I think needs to be done is kill the connection
-  // if the counter >= timeout
-
-    const wsConn = wsMap.get(mapKey)
-
-    if(counter >= timeout) {
-      wsMap.set(mapKey, null)
-    }
-    counter = counter + interval
-  }, interval);
 }
 
 function buildWSUrl() {
