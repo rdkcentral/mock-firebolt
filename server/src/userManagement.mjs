@@ -46,7 +46,7 @@ function isKnownUser(userId) {
 }
 /* 
 * @function:parseUser()
-* @Description: parsing the userId to get user,group and appId
+* @Description: parsing the userId to get user,group and appId1
 * @Params:userId
 * @Return: Output object
 * @Example Input: 123~A#youtube
@@ -66,7 +66,7 @@ function parseUser(userId) {
   //Extract appId if applicable
   if (hasAppId) {
     let index = userId.indexOf("#")
-    output.appId = userId.substring(index + 1)
+    output.appId1 = userId.substring(index + 1)
     userId = userId.substring(0, index)
   }
 

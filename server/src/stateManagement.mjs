@@ -28,7 +28,7 @@ import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
 import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
-import { parse, v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { parseUser } from './userManagement.mjs';
 
 const Mode = {
@@ -192,14 +192,11 @@ function getState(userId,mergedState = true) {
       let finalState = stateCopy['global'];
       //Parsing the UserId to get group and appid
       let parseUserId=parseUser(userId)
-      if(!(parseUserId.group == undefined && parseUserId.appId== undefined))
-      {
-        if(parseUserId.group || parseUserId.appId in stateCopy)
-        {
-          let groupOrAppState = parseUserId.appId ? stateCopy['#'+parseUserId.appId]:stateCopy['~'+parseUserId.group];
-          resetSequenceStateValues(finalState, groupOrAppState);
-          mergeWith(finalState, groupOrAppState, mergeCustomizer);
-        }
+      let group = '~'+parseUserId.group
+      if(group in stateCopy){
+          let groupState= stateCopy[''+group];
+          resetSequenceStateValues(finalState, groupState);
+          mergeWith(finalState, groupState, mergeCustomizer);
       }
       if (userId in stateCopy){
         const userState = stateCopy[''+userId];
