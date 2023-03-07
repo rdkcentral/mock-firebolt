@@ -66,7 +66,5 @@ test(`config works properly`, () => {
       ],
     },
   };
-  console.log(config)
-  console.log(expectedResult)
   expect(config).toEqual(expectedResult);
 });
