@@ -53,7 +53,10 @@ async function initializeAndSendRequest(returnWs, command) {
         console.log('disconnected');
       });
       
-      ws.on('message', function message(data) {
+      ws.once('message', function message(data) {
+        // Remove the message event listener after the first invocation
+        ws.off('message', message)
+
         const buf = Buffer.from(data, 'utf8');
         const response = JSON.parse(buf.toString())
 
