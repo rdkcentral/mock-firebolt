@@ -90,10 +90,12 @@ const developerToolName = parsed.developerToolName || config.app.developerToolNa
 const proxy = parsed.proxy;
 const conduit = parsed.conduit;
 
-// Overriding multiUserConnections, if a configurartion is passed via CLI on staring MF server
+// Overriding multiUserConnections, if a configurartion, eg: allow/warn/deny (case-insensitive) is passed via CLI on starting MF server
 // Else default configuration 'warn' is used
 const multiUserConnections = parsed.multiUserConnections;
-config.multiUserConnections = multiUserConnections ? multiUserConnections : config.multiUserConnections
+if(/allow/i.test(multiUserConnections) || /warn/i.test(multiUserConnections) || /deny/i.test(multiUserConnections) == true){
+  config.multiUserConnections = multiUserConnections ? multiUserConnections : config.multiUserConnections
+}
 
 // --- novalidate overrides
 config.validate = mergeArrayOfStrings(config.validate, config.dotConfig.validate, parsed.novalidate)

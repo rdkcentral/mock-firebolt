@@ -164,6 +164,7 @@ function heartbeat(ws) {
 }
 
 function addUser(userId) {
+  // logger.info(`hii adduser ${userId} `)
   userId = "" + userId;
   var users = getUsers();
 
@@ -223,25 +224,29 @@ function addUser(userId) {
 
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
+  // logger.info(`hii adduser2 ${userId} `)
+  // logger.info(getWsForUser(userId))
   wss.on('connection', function connection(ws) {
     ws.isAlive = true;
     ws.on('pong', async hb => {
       heartbeat(ws)
     });
-    if ((config.multiUserConnections == 'allow') || (config.multiUserConnections == 'warn') || (config.multiUserConnections == 'deny' && getWsForUser(userId) == undefined)) {
-      if (config.multiUserConnections == 'warn') {
-        logger.importantWarning(`WARNING: We do not support multiple websocket connections for a single user`)
+    // If multiUserConnections configuration is set as deny and there is a ws object associated with userId, deny and log second ws connection and drop the attempt
+    if (/deny/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
+      logger.info(`Denying second websocket connection of user ${userId}`)
+      logger.info(ws)
+      ws.close();
+    }
+    else {
+      // Else, If multiUserConnections configuration is set as warn, and there is a ws object associated with userId, warn and allow connection
+      if (/warn/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
+        logger.importantWarning(`WARNING: Mock Firebolt was not written to support multiple connections for a single user. Some advanced use cases may result in unexpected behaviors`)
       }
       associateUserWithWs('' + userId, ws);
       handleGroupMembership('' + userId)
       ws.on('message', async message => {
         messageHandler.handleMessage(message, '' + userId, ws);
       });
-    }
-    if (config.multiUserConnections == 'deny' && getWsForUser(userId) !== undefined) {
-      // If there is a ws object associated with userId, deny and log second ws connection and drop the attempt
-      logger.info(`Denying second websocket connection of user ${userId}`)
-      logger.info(ws)
     }
   });
 
