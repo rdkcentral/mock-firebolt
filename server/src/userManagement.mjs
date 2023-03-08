@@ -164,7 +164,6 @@ function heartbeat(ws) {
 }
 
 function addUser(userId) {
-  // logger.info(`hii adduser ${userId} `)
   userId = "" + userId;
   var users = getUsers();
 
@@ -224,8 +223,6 @@ function addUser(userId) {
 
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
-  // logger.info(`hii adduser2 ${userId} `)
-  // logger.info(getWsForUser(userId))
   wss.on('connection', function connection(ws) {
     ws.isAlive = true;
     ws.on('pong', async hb => {
