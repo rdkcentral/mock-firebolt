@@ -36,7 +36,7 @@ test(`userManagement.parseUser works properly (User + Group + AppId)`, () => {
   const expected = {
     user: "123",
     group: "A",
-    appId1: "sampleApp"
+    appId: "sampleApp"
   }
 
   expect(userManagement.parseUser(userId)).toEqual(expected)
@@ -56,7 +56,7 @@ test(`userManagement.parseUser works properly (User + AppId)`, () => {
   const userId = "123#sampleApp"
   const expected = {
     user: "123",
-    appId1: "sampleApp"
+    appId: "sampleApp"
   }
 
   expect(userManagement.parseUser(userId)).toEqual(expected)
@@ -67,7 +67,7 @@ test(`userManagement.parseUser works properly (Group + AppId)`, () => {
   const userId = "~A#sampleApp"
   const expected = {
     group: "A",
-    appId1: "sampleApp"
+    appId: "sampleApp"
   }
 
   expect(userManagement.parseUser(userId)).toEqual(expected)
@@ -95,7 +95,7 @@ test(`userManagement.parseUser works properly (Group)`, () => {
 test(`userManagement.parseUser works properly (AppId)`, () => {
   const userId = "#sampleApp"
   const expected = {
-    appId1: "sampleApp"
+    appId: "sampleApp"
   }
 
   expect(userManagement.parseUser(userId)).toEqual(expected)
