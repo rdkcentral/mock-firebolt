@@ -21,72 +21,114 @@
 import { parse } from 'url';
 import WebSocket from 'ws';
 
-const wsMap = new Map()
+const wsMap = new Map();
+const wsMsgMap = new Map();
 
 async function initializeAndSendRequest(returnWs, command) {
-  const oneToOneWs = wsMap.get(returnWs)
-  let ws = null
-
+  let outgoingWs = wsMap.get(returnWs);
   /* Checks to see if ws connection is in map.
    * If connection exists and is active, it will be used.
    * Else, a new connection will be created and mapped to returnWs.
-  */
-  if(oneToOneWs && oneToOneWs?._readyState == 1) {
-    ws = oneToOneWs
-    ws.send(command)
-  } else {
-    const url = buildWSUrl()
-    ws = new WebSocket(url)
+   */
+
+  // Set up listeners once and only once
+  if (!outgoingWs) {
+    outgoingWs = await setupOutgoingWs(returnWs);
+
+    outgoingWs.on('message', (data) => {
+      const buf = Buffer.from(data, 'utf8');
+      const response = JSON.parse(buf.toString());
+
+      if (response.id === undefined) {
+        // In case of event, send the event to caller directly.
+        returnWs.send(buf.toString());
+      } else {
+        wsMsgMap.set(returnWs, buf.toString());
+      }
+    });
   }
 
+  outgoingWs.send(command);
+
+  return new Promise(async (res, rej) => {
+    try {
+      const response = await getResponseMessageFromProxy(returnWs);
+      // Clear for next message
+      wsMsgMap.set(returnWs, null);
+      res(response);
+    } catch (err) {
+      reject('Timeout occurred');
+    }
+  });
+}
+
+function setupOutgoingWs(returnWs) {
+  const url = buildWSUrl();
+  const ws = new WebSocket(url);
   try {
     return new Promise((res, rej) => {
-      ws.on('open', function open() {
-        console.log("Connection established, sending incoming request to proxy.")
-        ws.send(command)
-
-        // Add ws connection to map
-        wsMap.set(returnWs, ws)
+      ws.on('open', async function open() {
+        console.log('connection established');
+        // add ws connection to map
+        wsMap.set(returnWs, ws);
+        res(ws);
       });
 
       ws.on('close', function close() {
         console.log('disconnected');
-      });
-      
-      ws.once('message', function message(data) {
-        const buf = Buffer.from(data, 'utf8');
-        const response = JSON.parse(buf.toString())
-
-        if (response.id === undefined) {
-          // In case of event, send the event directly to the caller.
-          returnWs.send(buf.toString())
-        } else {
-          res(buf.toString())
-        }
+        // remove closed connection from map
+        wsMap.delete(returnWs);
       });
 
       ws.on('error', function message(err) {
-        rej(err)
+        rej(err);
       });
-    })
+    });
   } catch (err) {
-    return err
+    return err;
   }
 }
 
+function getResponseMessageFromProxy(returnWs) {
+  let timeout = 10000;
+  let counter = 0;
+  let interval = 100;
+  return new Promise((resolve, reject) => {
+    var timer = setInterval(function () {
+      if (counter >= timeout) {
+        console.log('response not received for given returnWs');
+        reject(false);
+      }
+
+      const returnMsg = wsMsgMap.get(returnWs);
+      if (returnMsg) {
+        counter = timeout + interval;
+        //clear interval if response received for given returnWs.
+        clearInterval(timer);
+        resolve(returnMsg);
+      }
+      counter = counter + interval;
+    }, interval);
+  });
+}
+
 function buildWSUrl() {
-  let proxyUrl = process.env.proxyServerIP
-  if( ! proxyUrl ) {
-    throw Error('ERROR: Proxy Url not found in env')
-  } else if ( ! proxyUrl.includes(":") ) {
-    proxyUrl = proxyUrl + ":" + 9998
+  let proxyUrl = process.env.proxyServerIP;
+  if (!proxyUrl) {
+    throw Error('ERROR: Proxy Url not found in env');
+  } else if (!proxyUrl.includes(':')) {
+    proxyUrl = proxyUrl + ':' + 9998;
   }
   //support ws
-  const wsUrlProtocol = 'ws://'
-  const path = '/jsonrpc'
-  const hostPort = proxyUrl
-  return [wsUrlProtocol, hostPort, path, process.env.MF_TOKEN ? '?token=' + process.env.MF_TOKEN : null,
-  ].join('')
+  const wsUrlProtocol = 'ws://';
+  const path = '/jsonrpc';
+  const hostPort = proxyUrl;
+  return [
+    wsUrlProtocol,
+    hostPort,
+    path,
+    process.env.MF_TOKEN ? '?token=' + process.env.MF_TOKEN : null,
+  ].join('');
 }
 
 // Get token from request param or env variable
@@ -96,22 +138,20 @@ function getMFToken(request) {
     error: '',
   };
   // If token already exists, return token
-  if(process.env.MF_TOKEN) {
-    output.token = process.env.MF_TOKEN
-    return output
+  if (process.env.MF_TOKEN) {
+    output.token = process.env.MF_TOKEN;
+    return output;
   }
   const { query } = parse(request.url);
-  if(query && query.includes("token=") && query.length > 6) {
+  if (query && query.includes('token=') && query.length > 6) {
     const token = query.split('token=').pop().split('&')[0];
-    output.token = token
-    return output
+    output.token = token;
+    return output;
   } else {
-    output.error = "Unable to get token from connection param or not present in env"
-    return output
+    output.error = 'Unable to get token from connection param or not present in env';
+    return output;
   }
 }
 
 // --- Exports ---
-export {
-  getMFToken, initializeAndSendRequest
-};
+export { getMFToken, initializeAndSendRequest };
