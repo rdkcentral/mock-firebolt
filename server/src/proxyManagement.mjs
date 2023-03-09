@@ -57,7 +57,7 @@ async function initializeAndSendRequest(returnWs, command) {
       wsMsgMap.set(returnWs, null);
       res(response);
     } catch (err) {
-      reject('Timeout occurred');
+      rej('Timeout occurred');
     }
   });
 }
@@ -67,7 +67,7 @@ function setupOutgoingWs(returnWs) {
   const ws = new WebSocket(url);
   try {
     return new Promise((res, rej) => {
-      ws.on('open', async function open() {
+      ws.on('open', function open() {
         console.log('connection established');
         // add ws connection to map
         wsMap.set(returnWs, ws);
@@ -93,11 +93,11 @@ function getResponseMessageFromProxy(returnWs) {
   let timeout = 10000;
   let counter = 0;
   let interval = 100;
-  return new Promise((resolve, reject) => {
+  return new Promise((res, rej) => {
     var timer = setInterval(function () {
       if (counter >= timeout) {
         console.log('response not received for given returnWs');
-        reject(false);
+        rej(false);
       }
 
       const returnMsg = wsMsgMap.get(returnWs);
@@ -105,7 +105,7 @@ function getResponseMessageFromProxy(returnWs) {
         counter = timeout + interval;
         //clear interval if response received for given returnWs.
         clearInterval(timer);
-        resolve(returnMsg);
+        res(returnMsg);
       }
       counter = counter + interval;
     }, interval);
