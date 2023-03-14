@@ -280,7 +280,7 @@ async function handleMessage(message, userId, ws) {
 
   logger.debug(`Sending response for method ${oMsg.method}`);
   let finalResponse = (newResponse ? newResponse : response);
-  if (!process.env.proxy) {
+  if (!process.env.proxy || stateManagement.hasOverride(userId, oMsg.method)) {
     const oResponseMessage = {
       jsonrpc: '2.0',
       id: oMsg.id,
