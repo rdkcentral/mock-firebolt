@@ -26,14 +26,14 @@ describe('sequentially run tests', () => {
     test(`proxyManagement.getToken works properly and when token nor present in request param and env`, async () => {
         delete process.env.MF_TOKEN
         const token = proxyManagement.getMFToken({"url": "http://abcd.com"})
-        expect(token.error).toBe("Unable to get token from connection param or not present in env");
+        expect(token.error).toBe("Unable to get token from connection param or not present in env.");
     });
 
     test(`Handle error when url not passed`, async () => {
         delete process.env.proxyServerIP
         proxyManagement.initializeAndSendRequest(null, null).catch(function (err) {
             // Only executed if rejects the promise
-            expect(err.toString()).toContain('Error: ERROR: Proxy Url not found in env')
+            expect(err.toString()).toContain('Error: ERROR: Proxy Url not found in env.')
         });
         
     })
