@@ -57,7 +57,7 @@ async function initializeAndSendRequest(returnWs, command) {
       wsMsgMap.set(returnWs, null);
       res(response);
     } catch (err) {
-      rej('Timeout occurred');
+      rej('Timeout waiting for WS response.');
     }
   });
 }
@@ -68,14 +68,14 @@ function setupOutgoingWs(returnWs) {
   try {
     return new Promise((res, rej) => {
       ws.on('open', function open() {
-        console.log('connection established');
+        console.log('Connection to websocket proxy server established.');
         // add ws connection to map
         wsMap.set(returnWs, ws);
         res(ws);
       });
 
       ws.on('close', function close() {
-        console.log('disconnected');
+        console.log('WS disconnected.');
         // remove closed connection from map
         wsMap.delete(returnWs);
       });
@@ -96,7 +96,7 @@ function getResponseMessageFromProxy(returnWs) {
   return new Promise((res, rej) => {
     var timer = setInterval(function () {
       if (counter >= timeout) {
-        console.log('response not received for given returnWs');
+        console.log('Response not received for given returnWs.');
         rej(false);
       }
 
@@ -115,9 +115,10 @@ function getResponseMessageFromProxy(returnWs) {
 function buildWSUrl() {
   let proxyUrl = process.env.proxyServerIP;
   if (!proxyUrl) {
-    throw Error('ERROR: Proxy Url not found in env');
+    throw Error('ERROR: Proxy Url not found in env.');
   } else if (!proxyUrl.includes(':')) {
     proxyUrl = proxyUrl + ':' + 9998;
+    console.log('Using the default port of 9998.')
   }
   //support ws
   const wsUrlProtocol = 'ws://';
@@ -148,7 +149,7 @@ function getMFToken(request) {
     output.token = token;
     return output;
   } else {
-    output.error = 'Unable to get token from connection param or not present in env';
+    output.error = 'Unable to get token from connection param or not present in env.';
     return output;
   }
 }
