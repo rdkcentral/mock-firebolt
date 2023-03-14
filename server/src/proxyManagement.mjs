@@ -69,14 +69,14 @@ function setupOutgoingWs(returnWs) {
     return new Promise((res, rej) => {
       ws.on('open', function open() {
         console.log('Connection to websocket proxy server established.');
-        // add ws connection to map
+        // Add ws connection to map
         wsMap.set(returnWs, ws);
         res(ws);
       });
 
       ws.on('close', function close() {
         console.log('WS disconnected.');
-        // remove closed connection from map
+        // Remove closed connection from map
         wsMap.delete(returnWs);
       });
 
@@ -102,8 +102,7 @@ function getResponseMessageFromProxy(returnWs) {
 
       const returnMsg = wsMsgMap.get(returnWs);
       if (returnMsg) {
-        counter = timeout + interval;
-        //clear interval if response received for given returnWs.
+        // Clear interval if response received for given returnWs
         clearInterval(timer);
         res(returnMsg);
       }
@@ -120,7 +119,7 @@ function buildWSUrl() {
     proxyUrl = proxyUrl + ':' + 9998;
     console.log('Using the default port of 9998.')
   }
-  //support ws
+  // Support ws
   const wsUrlProtocol = 'ws://';
   const path = '/jsonrpc';
   const hostPort = proxyUrl;
