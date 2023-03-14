@@ -31,17 +31,17 @@ describe('sequentially run tests', () => {
 
     test(`Handle error when url not passed`, async () => {
         delete process.env.proxyServerIP
-        proxyManagement.initializeAndSendRequest(null, null).catch(function (err) {
+        proxyManagement.sendRequest(null, null).catch(function (err) {
             // Only executed if rejects the promise
             expect(err.toString()).toContain('Error: ERROR: Proxy Url not found in env.')
         });
         
     })
 
-    test(`proxyManagement.initializeAndSendRequest works properly`, async () => {
+    test(`proxyManagement.sendRequest works properly`, async () => {
         try {
             process.env.proxyServerIP = "localhost.test"
-            await proxyManagement.initializeAndSendRequest(null, null)
+            await proxyManagement.sendRequest(null, null)
         } catch (e) {
             expect(e.errno).toBe(-3008);
             expect(e.code).toBe("ENOTFOUND");

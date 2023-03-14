@@ -24,7 +24,7 @@ import WebSocket from 'ws';
 const wsMap = new Map();
 const wsMsgMap = new Map();
 
-async function initializeAndSendRequest(returnWs, command) {
+async function sendRequest(returnWs, command) {
   let outgoingWs = wsMap.get(returnWs);
   /* Checks to see if ws connection is in map.
    * If connection exists and is active, it will be used.
@@ -154,4 +154,4 @@ function getMFToken(request) {
 }
 
 // --- Exports ---
-export { getMFToken, initializeAndSendRequest };
+export { getMFToken, sendRequest };
