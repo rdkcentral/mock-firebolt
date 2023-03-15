@@ -161,12 +161,7 @@ async function handleMessage(message, userId, ws) {
     //bypass JSON-RPC calls and hit proxy server endpoint
     //init websocket connection for proxy request to be sent and use receiver client to send events back to caller.
     try {
-      if(await proxyManagement.initialize(proxyManagement.actOnResponseObject, ws)) {
-        proxyManagement.sendRequest(JSON.stringify(oMsg))
-        response = await proxyManagement.getResponseMessageFromProxy(oMsg.id)
-      } else {
-        console.log("Websocket connection not initialized")
-      }
+      response = await proxyManagement.sendRequest(ws, JSON.stringify(oMsg))
     } catch (err) {
       logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
       process.exit(1)
@@ -285,7 +280,7 @@ async function handleMessage(message, userId, ws) {
 
   logger.debug(`Sending response for method ${oMsg.method}`);
   let finalResponse = (newResponse ? newResponse : response);
-  if (!process.env.proxy) {
+  if (!process.env.proxy || stateManagement.hasOverride(userId, oMsg.method)) {
     const oResponseMessage = {
       jsonrpc: '2.0',
       id: oMsg.id,
