@@ -244,7 +244,7 @@ function addUser(userId) {
     else {
       // Else, If multiUserConnections configuration is set as warn, and there is a ws object associated with userId, warn and allow connection
       if (/warn/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
-        logger.importantWarning(`WARNING: Mock Firebolt was not written to support multiple connections for a single user. Some advanced use cases may result in unexpected behaviors`)
+        logger.importantWarning(`WARNING: Mock Firebolt was not written to support multiple connections for a single user. Some advanced use cases may result in unexpected behaviors.`)
       }
       associateUserWithWs('' + userId, ws);
       handleGroupMembership('' + userId)

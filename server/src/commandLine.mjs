@@ -93,7 +93,7 @@ const conduit = parsed.conduit;
 // Overriding multiUserConnections, if a configurartion, eg: allow/warn/deny (case-insensitive) is passed via CLI on starting MF server
 // Else default configuration 'warn' is used
 const multiUserConnections = parsed.multiUserConnections;
-if(/allow/i.test(multiUserConnections) || /warn/i.test(multiUserConnections) || /deny/i.test(multiUserConnections) == true){
+if(/allow/i.test(multiUserConnections) || /warn/i.test(multiUserConnections) || /deny/i.test(multiUserConnections)){
   config.multiUserConnections = multiUserConnections ? multiUserConnections : config.multiUserConnections
 }
 
