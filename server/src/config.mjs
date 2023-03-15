@@ -31,6 +31,7 @@ import { dotConfig } from './dotConfig.mjs';
 const config = {
 
   validate: [ "method", "params", "response", "events" ],
+  multiUserConnections: "warn",
   
   app: {
     allowMixedCase: false,

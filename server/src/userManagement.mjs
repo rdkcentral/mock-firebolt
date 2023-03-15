@@ -236,11 +236,22 @@ function addUser(userId) {
     ws.on('pong', async hb => {
       heartbeat(ws)
     });
-    associateUserWithWs(''+userId, ws);
-    handleGroupMembership(''+userId)
-    ws.on('message', async message => {
-      messageHandler.handleMessage(message, ''+userId, ws);
-    });
+    // If multiUserConnections configuration is set as deny and there is a ws object associated with userId, deny and log second ws connection and drop the attempt
+    if (/deny/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
+      logger.info(`Denying second websocket connection of user ${userId}`)
+      ws.close();
+    }
+    else {
+      // Else, If multiUserConnections configuration is set as warn, and there is a ws object associated with userId, warn and allow connection
+      if (/warn/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
+        logger.importantWarning(`WARNING: Mock Firebolt was not written to support multiple connections for a single user. Some advanced use cases may result in unexpected behaviors.`)
+      }
+      associateUserWithWs('' + userId, ws);
+      handleGroupMembership('' + userId)
+      ws.on('message', async message => {
+        messageHandler.handleMessage(message, '' + userId, ws);
+      });
+    }
   });
 
   const interval = setInterval(function ping() {
