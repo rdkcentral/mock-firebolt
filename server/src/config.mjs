@@ -42,6 +42,7 @@ const config = {
     developerToolPort: 9995,            // Port for Firebolt to connect to
     developerToolName: 'Mock Firebolt', // Used when publishing with DNS-SD
     defaultUserId: '12345',
+    defaultMerged: 'true',
     magicDateTime: {
       prefix: '{{',
       suffix: '}}'

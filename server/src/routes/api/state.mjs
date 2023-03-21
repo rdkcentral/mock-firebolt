@@ -21,7 +21,7 @@
 'use strict';
 
 import { logger } from '../../logger.mjs';
-import { getUserIdFromReq } from '../../util.mjs';
+import { getMergedFromReq, getUserIdFromReq } from '../../util.mjs';
 import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 import * as commonErrors from '../../commonErrors.mjs';
 import * as stateManagement from '../../stateManagement.mjs';
@@ -31,11 +31,16 @@ import * as events from '../../events.mjs';
 // --- Route Handlers ---
 
 function getState(req, res) {
+  logger.info(`Routing to the statemgmt file`)
   const userId = getUserIdFromReq(req);
-  const state = stateManagement.getState(userId);
+  logger.info(`User ID: ${userId}`)
+  const merged=  getMergedFromReq(req);
+  const state = stateManagement.getState(userId,merged);
+  console.log("STATE OF the USER"+JSON.stringify(state))
   res.status(200).send({
     status: 'SUCCESS',
-    state: state
+    state: state.finalState,
+    scopeLevel: state.scopeLevel
   });
 }
 

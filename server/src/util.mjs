@@ -23,6 +23,7 @@
 import * as tmp from 'tmp';
 
 import { config } from './config.mjs';
+import { logger } from './logger.mjs';
 
 // Use: await delay(2000);
 function delay(ms) {
@@ -38,6 +39,14 @@ function randomIntFromInterval(min, max) {
 function getUserIdFromReq(req) {
   const userId = req.get('x-mockfirebolt-userid') || config.app.defaultUserId;
   return userId;
+}
+
+// To get merged paramater from NodeJS Express request object for dumping state
+
+function getMergedFromReq(req) {
+  const merged = req.get('merged')|| config.app.defaultMerged;
+  logger.info(`Merged : ${merged}`)
+  return merged;
 }
 
 function createTmpFile(prefix, postfix) {
@@ -62,4 +71,4 @@ function mergeArrayOfStrings(originalFlags, overrideFlags, denyFlags) {
 
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings };
+export { delay, randomIntFromInterval, getUserIdFromReq, getMergedFromReq, createTmpFile, mergeArrayOfStrings };

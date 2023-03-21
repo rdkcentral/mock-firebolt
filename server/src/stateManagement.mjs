@@ -181,13 +181,16 @@ function getUserId(userId){
 // return state based on hierarchy (From lowest priority to highest) global->group->user if mergedState=true
 //return state of the UserId if mergedState=false,to update the state
 function getState(userId,mergedState = true) {
+
   userId = "" + userId;
 //to get the userId from given user/appId
   userId = getUserId(userId);
-  if(!mergedState){
+  if(mergedState != 'true'){
+    logger.info(`Individual State dumping where merged =false`)
     return state[''+userId];
   }else{
     if ( userId in state ) {
+      let scopeLevel ="global";
       const stateCopy = JSON.parse( JSON.stringify(state) )
       let finalState = stateCopy['global'];
       //Parsing the UserId to get group and appid
@@ -197,13 +200,17 @@ function getState(userId,mergedState = true) {
           let groupState= stateCopy[''+group];
           resetSequenceStateValues(finalState, groupState);
           mergeWith(finalState, groupState, mergeCustomizer);
+          logger.info(`Group level dumping state where merged =true`)
+          scopeLevel="group"
       }
       if (userId in stateCopy){
         const userState = stateCopy[''+userId];
         resetSequenceStateValues(finalState, userState);
         mergeWith(finalState, userState, mergeCustomizer);
+        logger.info(`User level dumping state where merged =true`)
+        scopeLevel="user"
       }
-      return finalState;
+      return {finalState,scopeLevel};
     }
   }
   logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
@@ -213,17 +220,17 @@ function getState(userId,mergedState = true) {
 async function getAppropriateDelay(userId, methodName) {
   const userState = getState(userId);
 
-  if ( ! userState.global ) { return; }
-  if ( ! userState.global.latency ) { return; }
+  if ( ! userState.finalState.global ) { return; }
+  if ( ! userState.finalState.global.latency ) { return; }
 
-  const globalMin = userState.global.latency.min || 0;
-  const globalMax = userState.global.latency.max || 0;
+  const globalMin = userState.finalState.global.latency.min || 0;
+  const globalMax = userState.finalState.global.latency.max || 0;
 
   let perMethodMin = null;
   let perMethodMax = null;
-  if ( methodName in userState.global.latency ) {
-    perMethodMin = userState.global.latency[methodName].min;
-    perMethodMax = userState.global.latency[methodName].max;
+  if ( methodName in userState.finalState.global.latency ) {
+    perMethodMin = userState.finalState.global.latency[methodName].min;
+    perMethodMax = userState.finalState.global.latency[methodName].max;
   }
 
   const min = ( perMethodMin !== null ? perMethodMin : globalMin ); // Careful of 0 values!
@@ -237,7 +244,7 @@ async function getAppropriateDelay(userId, methodName) {
 function hasOverride(userId, methodName) {
   const userState = getState(userId);
   if ( ! userState ) { return false; }
-  const resp = userState.methods[methodName];
+  const resp = userState.finalState.methods[methodName];
   if ( ! resp ) { return false; }
   if ( resp.response ) { return true; }
   if ( resp.result ) { return true; }
@@ -409,12 +416,12 @@ function getMethodResponse(userId, methodName, params, ws) {
   let resp;
   const userState = getState(userId);
 
-  if ( userState.global.mode === Mode.DEFAULT ) {
+  if ( userState.finalState.global.mode === Mode.DEFAULT ) {
     // Use mock override values, if present, else use first example value from the OpenRPC specification
     // This includes both "normal" result and error values and also results and errors specified as functions
     // Normally, an object with either a result key, an error key, or a response key
     // But see code directly below that handles sequence-of-responses (responses array values)
-    resp = userState.methods[methodName];
+    resp = userState.finalState.methods[methodName];
 
     // Handle sequence-of-responses values, which are arrays of either result, error, or response objects
     if ( resp && resp.responses ) {
@@ -621,7 +628,7 @@ function updateState(userId, newState, scope = "") {
 
 function revertState(userId) {
   const userState = getState(userId);
-  if ( userState.isDefaultUserState ) {
+  if ( userState.finalState.isDefaultUserState ) {
     logger.info(`State for default user ${config.app.defaultUserId} is being reverted`);
   }
 
@@ -699,8 +706,8 @@ function setScratch(userId, key, val, scope) {
 function getScratch(userId, key) {
   const userState = getState(userId);
 
-  if ( key in userState.scratch ) {
-    return userState.scratch[key];
+  if ( key in userState.finalState.scratch ) {
+    return userState.finalState.scratch[key];
   }
   return undefined;
 }

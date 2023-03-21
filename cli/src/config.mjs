@@ -29,7 +29,8 @@ const config = {
   app: {
     socketPort: 9998,
     httpPort: 3333,
-    defaultUserId: '12345'
+    defaultUserId: '12345',
+    defaultMerged: true
   }
 };
 

@@ -68,6 +68,7 @@ const knownOpts = {
   'quiet'           : Boolean,
   'healthcheck'     : Boolean,
   'state'           : Boolean,
+  'merged'          : String,
   'revert'          : Boolean,
   'latency'         : [ Number, Array ],
   'mode'            : [ "default", "box" ],
@@ -114,7 +115,11 @@ const port = parsed.port || HTTP_PORT;
 const dotConfig = loadConfig();
 const userId = ''+(parsed.user || parsed.addUser || dotConfig.userId || config.app.defaultUserId);
 console.log(`UserId: ${userId}`);
+const merged = parsed.merged || config.app.defaultMerged
+console.log(`Merged: ${merged}`)
 axios.defaults.headers.common['x-mockfirebolt-userid'] = userId;
+axios.defaults.headers.common['merged'] = merged;
+
 
 // Show message unless we're in quiet mode
 function msg(msg) {
@@ -171,7 +176,7 @@ if ( parsed.help ) {
     .then(function (response) {
       // Return state directly so the output here can be imported
       // via --upload for export/import purposes
-      console.log('Response received for dumping state for user', userId, ':', JSON.stringify(response.data.state, null, 4));
+      console.log('Response received for dumping state for user', userId, ':', JSON.stringify(response.data.state, null, 4), ',', JSON.stringify(response.data.scopeLevel, null, 4));
     })
     .catch(function (error) {
       logError(error);
