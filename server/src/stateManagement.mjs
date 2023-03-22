@@ -591,7 +591,7 @@ function updateState(userId, newState, scope = "") {
   if ( userState.isDefaultUserState ) {
     scopeLevel="user"
     if ( scope === config.app.defaultUserId ) {
-      logger.info(`Updating state for default user ${scope}`);
+      logger.info(`Updating state for default user ${scope} and scopeLevel ${scopeLevel}`);
     } else {
       logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
     }
@@ -599,7 +599,7 @@ function updateState(userId, newState, scope = "") {
   else {
     if ( scope[0] === "~" ){
       scopeLevel="group"
-      logger.info(`Updating state for group ${scope} and sopeLevel ${scopeLevel}`);
+      logger.info(`Updating state for group ${scope} and scopeLevel ${scopeLevel}`);
     }
     else if ( scope === "global" ){
       scopeLevel="global"
@@ -607,7 +607,7 @@ function updateState(userId, newState, scope = "") {
     }
     else{
       scopeLevel="user"
-      logger.info(`Updating state for user ${scope}`);
+      logger.info(`Updating state for user ${scope} and scopeLevel ${scopeLevel}`);
     }
   }
  
