@@ -186,7 +186,6 @@ function getState(userId,mergedState = true) {
 //to get the userId from given user/appId
   userId = getUserId(userId);
   if(mergedState != 'true'){
-    logger.info(`Individual State dumping where merged =false`)
     return state[''+userId];
   }else{
     if ( userId in state ) {
@@ -199,13 +198,11 @@ function getState(userId,mergedState = true) {
           let groupState= stateCopy[''+group];
           resetSequenceStateValues(finalState, groupState);
           mergeWith(finalState, groupState, mergeCustomizer);
-          logger.info(`Group level dumping state where merged =true`)
       }
       if (userId in stateCopy){
         const userState = stateCopy[''+userId];
         resetSequenceStateValues(finalState, userState);
-        mergeWith(finalState, userState, mergeCustomizer);
-        logger.info(`User level dumping state where merged =true`)       
+        mergeWith(finalState, userState, mergeCustomizer);      
       }
       return finalState;
     }
@@ -617,17 +614,12 @@ function updateState(userId, newState, scope = "") {
  
   const errors = validateNewState(newState);
   if ( errors.length <= 0 ) {
-    logger.info(`NewState that has added ${JSON.stringify(newState)}`)
+    //Adding the scopelevel to the state of the user
     if ( 'methods' in newState ) {
       for ( let [methodName,methodOverrideObject] of Object.entries(newState.methods) ) {
-        logger.info(`Method NAME is:${JSON.stringify(methodName)}`)
-        logger.info(`Method NAME is:${JSON.stringify(methodOverrideObject)}`)
         methodOverrideObject = Object.assign(methodOverrideObject,{"scope": scopeLevel});
-        logger.info(`Method NAME is:${JSON.stringify(methodOverrideObject)}`)
       }
-    
     }
-    logger.info(`NewState after Manipulated ${JSON.stringify(newState)}`)
     resetSequenceStateValues(userState, newState);
     mergeWith(userState, newState, mergeCustomizer);
   } else {

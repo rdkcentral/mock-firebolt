@@ -23,7 +23,7 @@
 import * as tmp from 'tmp';
 
 import { config } from './config.mjs';
-import { logger } from './logger.mjs';
+
 
 // Use: await delay(2000);
 function delay(ms) {

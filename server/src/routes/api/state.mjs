@@ -35,7 +35,7 @@ import * as events from '../../events.mjs';
 function getState(req, res) {
   const userId = getUserIdFromReq(req);
   logger.info(`User ID: ${userId}`)
-  const merged=  getMergedFromReq(req);
+  const merged =  getMergedFromReq(req);
   const state = stateManagement.getState(userId,merged);
   res.status(200).send({
     status: 'SUCCESS',
