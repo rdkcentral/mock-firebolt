@@ -23,7 +23,7 @@
 import { dotConfig } from './dotConfig.mjs';
 
 // IMPORTANT NOTES:
-// - app.defaultUserId here should match app.defaultUserId in the config.mjs file in the
+// - app.defaultUserId,app.defaultMerged here should match app.defaultUserId,app.defaultMerged in the config.mjs file in the
 //   cli directory/sub-repo and the value in the .mf-SAMPLE.config.json file also in
 //   the cli directory/sub-repo.
 

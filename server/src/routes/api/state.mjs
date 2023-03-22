@@ -30,13 +30,13 @@ import * as events from '../../events.mjs';
 
 // --- Route Handlers ---
 
+// GET /api/v1/state
+// params: userId,merged
 function getState(req, res) {
-  logger.info(`Routing to the statemgmt file`)
   const userId = getUserIdFromReq(req);
   logger.info(`User ID: ${userId}`)
   const merged=  getMergedFromReq(req);
   const state = stateManagement.getState(userId,merged);
-  console.log("STATE OF the USER"+JSON.stringify(state))
   res.status(200).send({
     status: 'SUCCESS',
     state: state

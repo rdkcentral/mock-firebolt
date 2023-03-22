@@ -96,6 +96,7 @@ const shortHands = {
   'v'   : [ '--revert' ],
   'l'   : [ '--latency' ],
   'mo'  : [ '--mode' ],
+  'mg'  : [ '--merged' ],
   'm'   : [ '--method' ],
   'r'   : [ '--result' ],
   'ec'  : [ '--errCode' ],
@@ -116,7 +117,6 @@ const dotConfig = loadConfig();
 const userId = ''+(parsed.user || parsed.addUser || dotConfig.userId || config.app.defaultUserId);
 console.log(`UserId: ${userId}`);
 const merged = parsed.merged || config.app.defaultMerged
-console.log(`Merged: ${merged}`)
 axios.defaults.headers.common['x-mockfirebolt-userid'] = userId;
 axios.defaults.headers.common['merged'] = merged;
 

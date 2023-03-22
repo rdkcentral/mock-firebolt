@@ -21,7 +21,7 @@
 'use strict';
 
 // IMPORTANT NOTES:
-// - app.defaultUserId here should match app.defaultUserId in the config.mjs file in the
+// - app.defaultUserId and app.defaultMerged here should match app.defaultUserId in the config.mjs file in the
 //   server directory/sub-repo and the value in the .mf-SAMPLE.config.json file also in
 //   this directory/sub-repo.
 
@@ -30,7 +30,7 @@ const config = {
     socketPort: 9998,
     httpPort: 3333,
     defaultUserId: '12345',
-    defaultMerged: true
+    defaultMerged: 'true'
   }
 };
 

@@ -45,7 +45,6 @@ function getUserIdFromReq(req) {
 
 function getMergedFromReq(req) {
   const merged = req.get('merged')|| config.app.defaultMerged;
-  logger.info(`Merged : ${merged}`)
   return merged;
 }
 
