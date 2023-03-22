@@ -176,7 +176,7 @@ if ( parsed.help ) {
     .then(function (response) {
       // Return state directly so the output here can be imported
       // via --upload for export/import purposes
-      console.log('Response received for dumping state for user', userId, ':', JSON.stringify(response.data.state, null, 4), ',', JSON.stringify(response.data.scopeLevel, null, 4));
+      console.log('Response received for dumping state for user', userId, ':', JSON.stringify(response.data.state, null, 4));
     })
     .catch(function (error) {
       logError(error);

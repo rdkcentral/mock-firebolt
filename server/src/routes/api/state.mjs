@@ -39,8 +39,7 @@ function getState(req, res) {
   console.log("STATE OF the USER"+JSON.stringify(state))
   res.status(200).send({
     status: 'SUCCESS',
-    state: state.finalState,
-    scopeLevel: state.scopeLevel
+    state: state
   });
 }
 
