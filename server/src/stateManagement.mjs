@@ -589,8 +589,8 @@ function updateState(userId, newState, scope = "") {
     userState = getState(scope,false);
   }
   if ( userState.isDefaultUserState ) {
+    scopeLevel="user"
     if ( scope === config.app.defaultUserId ) {
-      scopeLevel="user"
       logger.info(`Updating state for default user ${scope}`);
     } else {
       logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
@@ -608,7 +608,6 @@ function updateState(userId, newState, scope = "") {
     else{
       scopeLevel="user"
       logger.info(`Updating state for user ${scope}`);
-
     }
   }
  
