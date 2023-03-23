@@ -116,10 +116,13 @@ const port = parsed.port || HTTP_PORT;
 const dotConfig = loadConfig();
 const userId = ''+(parsed.user || parsed.addUser || dotConfig.userId || config.app.defaultUserId);
 console.log(`UserId: ${userId}`);
-const merged = parsed.merged
+const merged = parsed.merged;
 axios.defaults.headers.common['x-mockfirebolt-userid'] = userId;
-axios.defaults.headers.common['merged'] = merged;
 
+// If state has merged parameter,It will be passed in the GET request header 
+if(merged){
+  axios.defaults.headers.common['merged'] = merged;
+}
 
 // Show message unless we're in quiet mode
 function msg(msg) {
