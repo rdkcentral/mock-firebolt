@@ -195,9 +195,9 @@ function getState(userId,mergedState = 'true') {
       let parseUserId=parseUser(userId)
       let group = '~'+parseUserId.group
       if(group in stateCopy){
-          let groupState= stateCopy[''+group];
-          resetSequenceStateValues(finalState, groupState);
-          mergeWith(finalState, groupState, mergeCustomizer);
+        let groupState= stateCopy[''+group];
+        resetSequenceStateValues(finalState, groupState);
+        mergeWith(finalState, groupState, mergeCustomizer);
       }
       if (userId in stateCopy){
         const userState = stateCopy[''+userId];
