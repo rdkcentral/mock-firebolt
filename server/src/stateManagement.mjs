@@ -180,7 +180,7 @@ function getUserId(userId){
 
 // return state based on hierarchy (From lowest priority to highest) global->group->user if mergedState=true
 //return state of the UserId if mergedState=false,to update the state
-function getState(userId,mergedState = true) {
+function getState(userId,mergedState = 'true') {
 
   userId = "" + userId;
 //to get the userId from given user/appId
