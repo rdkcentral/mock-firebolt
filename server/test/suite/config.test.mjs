@@ -35,7 +35,6 @@ test(`config works properly`, () => {
       developerToolPort: 9995,
       developerToolName: 'Mock Firebolt',
       defaultUserId: '12345',
-      defaultMerged: 'true',
       magicDateTime: { prefix: '{{', suffix: '}}' },
       developerNotesTagName: 'developerNotes'
     },

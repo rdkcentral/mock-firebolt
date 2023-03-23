@@ -21,7 +21,7 @@
 'use strict';
 
 import { logger } from '../../logger.mjs';
-import { getMergedFromReq, getUserIdFromReq } from '../../util.mjs';
+import { getUserIdFromReq } from '../../util.mjs';
 import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 import * as commonErrors from '../../commonErrors.mjs';
 import * as stateManagement from '../../stateManagement.mjs';
@@ -34,7 +34,9 @@ import * as events from '../../events.mjs';
 // params: userId,merged
 function getState(req, res) {
   const userId = getUserIdFromReq(req);
-  const merged =  getMergedFromReq(req);
+  const merged = req.get('merged')== "false"?false :true;
+  logger.info(`Merged value from req:${JSON.stringify(req.get('merged'))}`)
+  logger.info(`Merged value: ${merged}`)
   const state = stateManagement.getState(userId,merged);
   res.status(200).send({
     status: 'SUCCESS',

@@ -180,12 +180,12 @@ function getUserId(userId){
 
 // return state based on hierarchy (From lowest priority to highest) global->group->user if mergedState=true
 //return state of the UserId if mergedState=false,to update the state
-function getState(userId,mergedState = 'true') {
+function getState(userId,mergedState = true) {
 
   userId = "" + userId;
 //to get the userId from given user/appId
   userId = getUserId(userId);
-  if(mergedState != 'true'){
+  if(!mergedState){
     return state[''+userId];
   }else{
     if ( userId in state ) {
@@ -591,7 +591,7 @@ function updateState(userId, newState, scope = "") {
   if ( userState.isDefaultUserState ) {
     scopeLevel="user"
     if ( scope === config.app.defaultUserId ) {
-      logger.info(`Updating state for default user ${scope} and scopeLevel ${scopeLevel}`);
+      logger.info(`Updating state for default user ${scope} }`);
     } else {
       logger.info(`Updating state for default user ${config.app.defaultUserId}, which is being used by default`);
     }
@@ -599,7 +599,7 @@ function updateState(userId, newState, scope = "") {
   else {
     if ( scope[0] === "~" ){
       scopeLevel="group"
-      logger.info(`Updating state for group ${scope} and scopeLevel ${scopeLevel}`);
+      logger.info(`Updating state for group ${scope}  `);
     }
     else if ( scope === "global" ){
       scopeLevel="global"
@@ -607,7 +607,7 @@ function updateState(userId, newState, scope = "") {
     }
     else{
       scopeLevel="user"
-      logger.info(`Updating state for user ${scope} and scopeLevel ${scopeLevel}`);
+      logger.info(`Updating state for user ${scope} `);
     }
   }
  

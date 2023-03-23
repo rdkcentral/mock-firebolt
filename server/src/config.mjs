@@ -23,7 +23,7 @@
 import { dotConfig } from './dotConfig.mjs';
 
 // IMPORTANT NOTES:
-// - app.defaultUserId,app.defaultMerged here should match app.defaultUserId,app.defaultMerged in the config.mjs file in the
+// - app.defaultUserId here should match app.defaultUserId in the config.mjs file in the
 //   cli directory/sub-repo and the value in the .mf-SAMPLE.config.json file also in
 //   the cli directory/sub-repo.
 
@@ -42,7 +42,6 @@ const config = {
     developerToolPort: 9995,            // Port for Firebolt to connect to
     developerToolName: 'Mock Firebolt', // Used when publishing with DNS-SD
     defaultUserId: '12345',
-    defaultMerged: 'true',
     magicDateTime: {
       prefix: '{{',
       suffix: '}}'

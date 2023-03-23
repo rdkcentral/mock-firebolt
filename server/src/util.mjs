@@ -41,12 +41,6 @@ function getUserIdFromReq(req) {
   return userId;
 }
 
-// To get merged paramater from NodeJS Express request object for dumping state
-
-function getMergedFromReq(req) {
-  const merged = req.get('merged')|| config.app.defaultMerged;
-  return merged;
-}
 
 function createTmpFile(prefix, postfix) {
   const tmpObj = tmp.fileSync({ mode: 0o644, prefix: prefix, postfix: postfix });
@@ -70,4 +64,4 @@ function mergeArrayOfStrings(originalFlags, overrideFlags, denyFlags) {
 
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, getMergedFromReq, createTmpFile, mergeArrayOfStrings };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings };
