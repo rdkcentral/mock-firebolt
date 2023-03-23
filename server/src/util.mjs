@@ -24,7 +24,6 @@ import * as tmp from 'tmp';
 
 import { config } from './config.mjs';
 
-
 // Use: await delay(2000);
 function delay(ms) {
   return new Promise(res => setTimeout(res, ms));
@@ -40,7 +39,6 @@ function getUserIdFromReq(req) {
   const userId = req.get('x-mockfirebolt-userid') || config.app.defaultUserId;
   return userId;
 }
-
 
 function createTmpFile(prefix, postfix) {
   const tmpObj = tmp.fileSync({ mode: 0o644, prefix: prefix, postfix: postfix });
