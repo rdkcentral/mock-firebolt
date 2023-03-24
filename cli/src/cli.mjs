@@ -68,6 +68,7 @@ const knownOpts = {
   'quiet'           : Boolean,
   'healthcheck'     : Boolean,
   'state'           : Boolean,
+  'merged'          : String,
   'revert'          : Boolean,
   'latency'         : [ Number, Array ],
   'mode'            : [ "default", "box" ],
@@ -95,6 +96,7 @@ const shortHands = {
   'v'   : [ '--revert' ],
   'l'   : [ '--latency' ],
   'mo'  : [ '--mode' ],
+  'mg'  : [ '--merged' ],
   'm'   : [ '--method' ],
   'r'   : [ '--result' ],
   'ec'  : [ '--errCode' ],
@@ -114,7 +116,13 @@ const port = parsed.port || HTTP_PORT;
 const dotConfig = loadConfig();
 const userId = ''+(parsed.user || parsed.addUser || dotConfig.userId || config.app.defaultUserId);
 console.log(`UserId: ${userId}`);
+const merged = parsed.merged;
 axios.defaults.headers.common['x-mockfirebolt-userid'] = userId;
+
+// If state has merged parameter,It will be passed in the GET request header 
+if(merged){
+  axios.defaults.headers.common['merged'] = merged;
+}
 
 // Show message unless we're in quiet mode
 function msg(msg) {

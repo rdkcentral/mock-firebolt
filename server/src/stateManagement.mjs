@@ -181,6 +181,7 @@ function getUserId(userId){
 // return state based on hierarchy (From lowest priority to highest) global->group->user if mergedState=true
 //return state of the UserId if mergedState=false,to update the state
 function getState(userId,mergedState = true) {
+
   userId = "" + userId;
 //to get the userId from given user/appId
   userId = getUserId(userId);
@@ -194,14 +195,14 @@ function getState(userId,mergedState = true) {
       let parseUserId=parseUser(userId)
       let group = '~'+parseUserId.group
       if(group in stateCopy){
-          let groupState= stateCopy[''+group];
-          resetSequenceStateValues(finalState, groupState);
-          mergeWith(finalState, groupState, mergeCustomizer);
+        let groupState= stateCopy[''+group];
+        resetSequenceStateValues(finalState, groupState);
+        mergeWith(finalState, groupState, mergeCustomizer);
       }
       if (userId in stateCopy){
         const userState = stateCopy[''+userId];
         resetSequenceStateValues(finalState, userState);
-        mergeWith(finalState, userState, mergeCustomizer);
+        mergeWith(finalState, userState, mergeCustomizer);      
       }
       return finalState;
     }
@@ -572,6 +573,7 @@ function mergeCustomizer(objValue, srcValue) {
 
 function updateState(userId, newState, scope = "") {
   let userState;
+  let scopeLevel;
 
   //If no scope is provided, considering userId as scope
   if (scope === ""){
@@ -587,6 +589,7 @@ function updateState(userId, newState, scope = "") {
     userState = getState(scope,false);
   }
   if ( userState.isDefaultUserState ) {
+    scopeLevel="user"
     if ( scope === config.app.defaultUserId ) {
       logger.info(`Updating state for default user ${scope}`);
     } else {
@@ -595,18 +598,27 @@ function updateState(userId, newState, scope = "") {
   }
   else {
     if ( scope[0] === "~" ){
+      scopeLevel="group"
       logger.info(`Updating state for group ${scope}`);
     }
     else if ( scope === "global" ){
+      scopeLevel="global"
       logger.info('Updating state globally');
     }
     else{
+      scopeLevel="user"
       logger.info(`Updating state for user ${scope}`);
     }
   }
-
+ 
   const errors = validateNewState(newState);
   if ( errors.length <= 0 ) {
+    //Adding the scopelevel to the state of the user
+    if ( 'methods' in newState ) {
+      for ( let [methodName,methodOverrideObject] of Object.entries(newState.methods) ) {
+        methodOverrideObject = Object.assign(methodOverrideObject,{"scope": scopeLevel});
+      }
+    }
     resetSequenceStateValues(userState, newState);
     mergeWith(userState, newState, mergeCustomizer);
   } else {

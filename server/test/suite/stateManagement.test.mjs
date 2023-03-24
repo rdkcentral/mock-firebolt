@@ -99,7 +99,8 @@ test(`stateManagement.getState works properly for global and group`, () => {
     },
     methods: {
       "account.id": {
-        result: "A111"
+        "result": "A111",
+        "scope" :"global"
       },
     }
   };
@@ -109,10 +110,12 @@ test(`stateManagement.getState works properly for global and group`, () => {
     },
     methods: {
       "account.id": {
-        result: "A222"
+        "result": "A222",
+        "scope": "group"
       },
       "account.uid": {
-        "result": "A111-222"
+        "result": "A111-222",
+        "scope":"group"
       },
     }
   };
@@ -123,10 +126,12 @@ test(`stateManagement.getState works properly for global and group`, () => {
     global: { mode: 'DEFAULT', latency: { min: 0, max: 0 } },
     methods: {
       "account.id": {
-        result: "A222"
+        "result": "A222",
+        "scope": "group"
       },
       "account.uid": {
-        "result": "A111-222"
+        "result": "A111-222",
+        "scope": "group"
       },
     },
     scratch: {},

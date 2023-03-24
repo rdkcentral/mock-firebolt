@@ -30,9 +30,12 @@ import * as events from '../../events.mjs';
 
 // --- Route Handlers ---
 
+// GET /api/v1/state
+// params: userId,merged
 function getState(req, res) {
   const userId = getUserIdFromReq(req);
-  const state = stateManagement.getState(userId);
+  const merged = req.get('merged')== "false" ?false :true;
+  const state = stateManagement.getState(userId,merged);
   res.status(200).send({
     status: 'SUCCESS',
     state: state

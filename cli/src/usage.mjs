@@ -23,6 +23,7 @@
 const lines = [
   { cmdInfo: "--help",                                                                    comment: "Show this helpful usage information" },
   { cmdInfo: "--user <userId> ...(see below)...",                                         comment: "Target the given user; Overrides the .mf.config.json file, if present" },
+  { cmdInfo: "--merged",                                                                  comment: "To be used with the --state command;Shows the state of the user,includes scopeLevel (global/group/user) of the user if merged true" },
   { cmdInfo: "--port 3333 ...(see below)...",                                             comment: "If running Mock Firebolt on a non-standard port" },
   { cmdInfo: "--quiet ...(see below)...",                                                 comment: "Don't emit command summary text; helpful for exporting state" },
   { cmdInfo: "--health",                                                                  comment: "Performs health check on Mock Firebolt" },
