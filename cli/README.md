@@ -72,6 +72,17 @@ To add user :
 run `node cli.mjs --addUser <userId>`
 example: node cli.mjs --addUser "123~A#netflix"
 
+## Downloading external git repository
+
+To download/clone external github repository and save repository contents in MF, below options can be used :
+`--downloadOverrides` - specify the url of a github repository to clone
+`--overrideLocation` - Specify the location relative to current working directory, in which to save the repository's contents. By default, location is set to `mock-firebolt/cli/externalOverrides`
+
+run `node cli.mjs --downloadOverrides <URL of git repository> --overrideLocation <location to save contents>`
+example: 
+node cli.mjs --downloadOverrides https://github.comcast.com/lightning-automation/firebolt-cert-test-data.git
+node cli.mjs --downloadOverrides https://github.comcast.com/lightning-automation/firebolt-cert-test-data.git --overrideLocation ../sampleDirectory
+
 # Developer Notes
 
 If/as you add support for new commands or alter how existing commands work, be sure to update the array of command data in `src/usage.mjs`, which is the basis for this usage/help output.
