@@ -38,6 +38,8 @@ import nopt from 'nopt';
 import axios from 'axios';
 import { config } from './config.mjs';
 import { usage } from './usage.mjs';
+import shell from 'shell-exec'
+import { logger } from '../../server/src/logger.mjs';
 
 function loadConfig() {
   let mfConfig;
@@ -83,7 +85,9 @@ const knownOpts = {
   'session'         : String,
   'sessionOutput'   : String,
   'sessionOutputPath' :  String,
-  'getStatus'       :  Boolean
+  'getStatus'       :  Boolean,
+  'downloadOverrides' : String,
+  'overrideLocation' : String
 };
 
 const shortHands = {
@@ -105,7 +109,9 @@ const shortHands = {
   'e'   : [ '--event' ],
   'be'  : [ '--broadcastEvent' ],
   'seq' : [ '--sequence' ],
-  'se'  : [ '--session' ]
+  'se'  : [ '--session' ],
+  'do' :  [ '--downloadOverrides' ],
+  'ol'  : [ '--overrideLocation' ]
 };
 
 const parsed = nopt(knownOpts, shortHands, process.argv, 2);
@@ -470,18 +476,49 @@ if ( parsed.help ) {
     });    
   }
 
-}
-  else if (parsed.getStatus){
-    axios.get(url(host, port, '/api/v1/status'), undefined)
-      .then(function (response) {
-        console.log(response.data);
-      })
-      .catch(function (error) {
-        logError(error);
+} else if (parsed.getStatus) {
+  axios.get(url(host, port, '/api/v1/status'), undefined)
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      logError(error);
     });
-  }
-  else {
-
+} else if (parsed.downloadOverrides) {
+  /* overrideDirectory is mock-firebolt/cli/externalOverrides by default, 
+  if overrided via CLI, will have user given location to save repository contents */
+  const overrideDirectory = parsed.overrideLocation ? parsed.overrideLocation : '../externalOverrides'
+  // git repository url to be downloaded
+  const downloadUrl = parsed.downloadOverrides;
+  // Downloading git repository, creates a clone folder with repository name, inside current working directory.
+  let urlArray = downloadUrl.split(".git");
+  urlArray.pop()
+  let cloneFolder = (urlArray[urlArray.length - 1].split("/")).pop()
+  msg(`Downloading github repository ${downloadUrl}...`);
+  // Using shell-exec node library to execute git clone
+  shell('git clone ' + downloadUrl).then((res) => {
+    if (res.code == 0) {
+      shell('rm -rf ./' + cloneFolder + '/.git').then(() => {
+        // copying file contents inside cloneFolder to overrideDirectory and removing the clone folder, once successfully copied
+        shell('cp -R ./' + cloneFolder + '/. ' + overrideDirectory).then((res) => {
+          msg(`Copying downloaded contents to ${overrideDirectory}`);
+          if (res.code == 0) {
+            shell('rm -rf ./' + cloneFolder).then((res) => {
+              msg(`Cleaning up..`);
+              if (res.code !== 0) {
+                logger.error(res.stderr)
+              }
+            })
+          } else {
+            logger.error(res.stderr)
+          }
+        })
+     })
+    } else {
+      logger.error(res.stderr)
+    }
+  })
+}
+else {
   console.log('Invalid command-line arguments. No action taken.');
-
 }
