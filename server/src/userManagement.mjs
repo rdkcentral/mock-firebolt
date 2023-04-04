@@ -174,7 +174,7 @@ function heartbeat(ws) {
 function addUser(userId) {
   userId = "" + userId;
   var users = getUsers();
-  //To check whether the user is already exist
+  //To check whether the userId already exist
   let userExist =isUserExist(users,userId)
   if(!userExist.isSuccess){
     logger.info(`Cannot map user ${userId} to ws`)

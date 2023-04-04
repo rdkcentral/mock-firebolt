@@ -86,7 +86,7 @@ function addUser(userId) {
     logger.info(`Cannot add user ${userId}, already exists`);
     return {isSuccess: false, msg : `Cannot add user, already exists`};
   }
-  //To check whether the user,appId already exist 
+  //To check whether the userId already exist 
   let userExist = isUserExist(users,userId)
   if((!userExist.isSuccess)){
     return userExist;
@@ -685,7 +685,7 @@ function deleteScratch(userId, key, scope=""){
 
 /* 
 * @function:isUserExist()
-* @Description: check whether the user/appid/group is already exist
+* @Description: check whether the userId already exist
 * @Params:userId,users
 * @Return: JSON object {isSuccess: true/false, msg : ``}
 */
