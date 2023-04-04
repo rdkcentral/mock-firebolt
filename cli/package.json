@@ -23,7 +23,8 @@
     "axios": "^0.24.0",
     "js-yaml": "^4.1.0",
     "nopt": "^5.0.0",
-    "shell-exec": "1.0.2"
+    "shell-exec": "1.0.2",
+    "tmp": "0.2.1"
   },
   "keywords": [
     "cli",

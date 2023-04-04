@@ -40,6 +40,17 @@ import { config } from './config.mjs';
 import { usage } from './usage.mjs';
 import shell from 'shell-exec'
 import { logger } from '../../server/src/logger.mjs';
+import * as tmp from 'tmp';
+
+// to get root directory of application
+function getAppRootDir () {
+  let currentDir = __dirname
+  while(!fs.existsSync(path.join(currentDir, '.gitignore'))) {
+    currentDir = path.join(currentDir, '..')
+  }
+  let rootDir = currentDir.replace(/\\/g, "/");
+  return rootDir
+}
 
 function loadConfig() {
   let mfConfig;
@@ -487,23 +498,27 @@ if ( parsed.help ) {
 } else if (parsed.downloadOverrides) {
   /* overrideDirectory is mock-firebolt/cli/externalOverrides by default, 
   if overrided via CLI, will have user given location to save repository contents */
-  const overrideDirectory = parsed.overrideLocation ? parsed.overrideLocation : '../externalOverrides'
+  const overrideDirectory = parsed.overrideLocation ? parsed.overrideLocation : getAppRootDir() + '/cli/externalOverrides'
   // git repository url to be downloaded
   const downloadUrl = parsed.downloadOverrides;
-  // Downloading git repository, creates a clone folder with repository name, inside current working directory.
-  let urlArray = downloadUrl.split(".git");
-  urlArray.pop()
-  let cloneFolder = (urlArray[urlArray.length - 1].split("/")).pop()
+
+  // cloning git repository into a temporary folder using tmp node library
   msg(`Downloading github repository ${downloadUrl}...`);
-  // Using shell-exec node library to execute git clone
-  shell('git clone ' + downloadUrl).then((res) => {
+  const tmpobj = tmp.dirSync();
+  const tmpFolder = (tmpobj.name).replace(/\\/g, "/");
+  console.log(tmpFolder)
+  shell('git -C ' + tmpFolder + ' clone ' + downloadUrl + '').then((res) => {
+
+    // copying the file contents inside temporary folder to overrideDirectory, once successfully cloned
     if (res.code == 0) {
-      shell('rm -rf ./' + cloneFolder + '/.git').then(() => {
-        // copying file contents inside cloneFolder to overrideDirectory and removing the clone folder, once successfully copied
-        shell('cp -R ./' + cloneFolder + '/. ' + overrideDirectory).then((res) => {
+      var files = fs.readdirSync(tmpobj.name)[0];
+      shell('rm -rf ' + tmpFolder + '/' + files + '/.git').then(() => {
+        shell('cp -R ' + tmpFolder + '/' + files + '/. ' + overrideDirectory).then((res) => {
           msg(`Copying downloaded contents to ${overrideDirectory}`);
+
+          // removing the temporary folder, once successfully copied
           if (res.code == 0) {
-            shell('rm -rf ./' + cloneFolder).then((res) => {
+            shell('rm -rf ' + tmpFolder).then((res) => {
               msg(`Cleaning up..`);
               if (res.code !== 0) {
                 logger.error(res.stderr)
@@ -513,7 +528,7 @@ if ( parsed.help ) {
             logger.error(res.stderr)
           }
         })
-     })
+      })
     } else {
       logger.error(res.stderr)
     }
