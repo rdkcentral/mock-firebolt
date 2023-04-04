@@ -23,7 +23,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as messageHandler from './messageHandler.mjs';
-import {state} from './stateManagement.mjs';
+import {isUserExist, state} from './stateManagement.mjs';
 import { logger } from './logger.mjs';
 import * as util from './util.mjs'
 
@@ -174,61 +174,11 @@ function heartbeat(ws) {
 function addUser(userId) {
   userId = "" + userId;
   var users = getUsers();
-
-  let parsedUserId = parseUser(userId);
-  let user = parsedUserId.user
-  let appId = parsedUserId.appId
-  let group = parsedUserId.group
-
-  //getting user, group and appId from userId
-  if (userId.includes("~")){
-    user = userId.split("~")[0];
-    if (userId.includes("#")){
-      appId = userId.split("#")[1];
-      group = "~"+userId.split("#")[0].split('~')[1];
-    }
-    else{
-      group = "~"+userId.split('~')[1];
-    }
+  //To check whether the user is already mapped to ws if user exist
+  let userExist =isUserExist(users,userId,"user")
+  if(userExist==false){
+    return userExist;
   }
-  else if (userId.includes("#")){
-    user = userId.split("#")[0];
-    appId = userId.split("#")[1];
-  }
-  else{
-    user = userId;
-  }
-
-//iterating over list of users in state to ensure duplicate user/appId
-  for(var key in users){
-    if (users[key].includes("~")){
-      if (user && users[key].split("~")[0]==user){
-          logger.info(`Cannot map user ${userId} to ws as user ${user} already exists`)
-          return false
-      }
-      else if(appId && users[key].includes("#") && users[key].split("#")[1]==appId){
-        logger.info(`Cannot map user ${userId} to ws as appId ${appId} already exists`)
-        return false
-      }
-    }
-    else if (users[key].includes("#")){
-      if (user && users[key].split("#")[0]==user){
-        logger.info(`Cannot map user ${userId} to ws as appId ${user} already exists`)
-        return false
-      }
-      else if (appId && users[key].split("#")[1]==appId){
-        logger.info(`Cannot map user ${userId} to ws as user ${appId} already exists`)
-        return false
-      }
-    }
-    else{
-      if (user && users[key] == user){
-        logger.info(`Cannot map user ${userId} to ws as user ${user} already exists`)
-        return false
-      }
-    }
-  }
-
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
   wss.on('connection', function connection(ws) {

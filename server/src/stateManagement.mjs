@@ -86,61 +86,12 @@ function addUser(userId) {
     logger.info(`Cannot add user ${userId}, already exists`);
     return {isSuccess: false, msg : `Cannot add user, already exists`};
   }
-
-  let parsedUserId = parseUser(userId)
-  let user = parsedUserId.user;
-  let group = parsedUserId.group;
-  let appId = parsedUserId.appId;
-
-  //getting user, group and appId from userId
-  if (userId.includes("~")){
-    user = userId.split("~")[0];
-    if (userId.includes("#")){
-      appId = userId.split("#")[1];
-      group = "~"+userId.split("#")[0].split('~')[1];
-    }
-    else{
-      group = "~"+userId.split('~')[1];
-    }
+  //To check whether the user,appId already exist 
+  let userExist = isUserExist(users,userId,"state")
+  if((userExist.isSuccess==false)){
+    return userExist;
   }
-  else if (userId.includes("#")){
-    user = userId.split("#")[0];
-    appId = userId.split("#")[1];
-  }
-  else{
-    user = userId;
-  }
-
-  //iterating over list of users in state to ensure duplicate user/appId
-  for(var key in users){
-    if (users[key].includes("~")){
-      if (user && users[key].split("~")[0]==user){
-          logger.info(`Cannot add user ${userId} as user ${user} already exists`)
-          return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
-      }
-      else if(appId && users[key].includes("#") && users[key].split("#")[1]==appId){
-        logger.info(`Cannot add user ${userId} as appId ${appId} already exists`)
-        return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${appId} already exists`}
-      }
-    }
-    else if (users[key].includes("#")){
-      if (user && users[key].split("#")[0]==user){
-        logger.info(`Cannot add user ${userId} as appId ${user} already exists`)
-        return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${user} already exists`}
-      }
-      else if (appId && users[key].split("#")[1]==appId){
-        logger.info(`Cannot add user ${userId} as user ${appId} already exists`)
-        return {isSuccess: false, msg : `Cannot add user ${userId} as user ${appId} already exists`}
-      }
-    }
-    else{
-      if (user && users[key] == user){
-        logger.info(`Cannot add user ${userId} as user ${user} already exists`)
-        return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
-      }
-    }
-  }
-
+  let group = userExist.group;
   state[''+userId] = JSON.parse(JSON.stringify(perUserStartState));  // Deep copy
   if (!(group in state)){
     state[''+group] = JSON.parse(JSON.stringify(perUserStartState)); // Deep copy
@@ -731,6 +682,76 @@ function deleteScratch(userId, key, scope=""){
   }
 }
 
+/* 
+* @function:isUserExist()
+* @Description: check whether the user,appid,group is already exist
+* @Params:userId,users,category(state/user)
+* @Return: JSON object/Boolean 
+*/
+
+function isUserExist(users,userId,category){
+  let parsedUserId = parseUser(userId)
+  let user = parsedUserId.user;
+  let appId = parsedUserId.appId;
+
+  //iterating over list of users in state to ensure duplicate user/appId
+  for(var key in users){
+    if (users[key].includes("~")){
+      if (user && users[key].split("~")[0]==user){
+        if(category=="state"){
+          logger.info(`Cannot add user ${userId} as user ${user} already exists`)
+          return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
+        }
+        else{
+          logger.info(`Cannot map user ${userId} to ws as user ${user} already exists`)
+          return false
+        }
+      }
+      else if(appId && users[key].includes("#") && users[key].split("#")[1]==appId){
+        if(category=="state"){
+          logger.info(`Cannot add user ${userId} as appId ${appId} already exists`)
+          return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${appId} already exists`}
+        }else{
+          logger.info(`Cannot map user ${userId} to ws as appId ${appId} already exists`)
+          return false
+        }
+      }
+    }
+    else if (users[key].includes("#")){
+      if (user && users[key].split("#")[0]==user){
+        if(category=="state"){
+          logger.info(`Cannot add user ${userId} as appId ${user} already exists`)
+          return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${user} already exists`}
+        }else{
+          logger.info(`Cannot map user ${userId} to ws as appId ${user} already exists`)
+          return false
+        }
+      }
+      else if (appId && users[key].split("#")[1]==appId){
+        if(category=="state"){
+          logger.info(`Cannot add user ${userId} as user ${appId} already exists`)
+          return {isSuccess: false, msg : `Cannot add user ${userId} as user ${appId} already exists`}
+        }else{
+          logger.info(`Cannot map user ${userId} to ws as user ${appId} already exists`)
+          return false
+        }
+      }
+    }
+    else{
+      if (user && users[key] == user){
+        if(category=="state"){
+          logger.info(`Cannot add user ${userId} as user ${user} already exists`)
+          return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
+        }else{
+          logger.info(`Cannot map user ${userId} to ws as user ${user} already exists`)
+          return false
+        }
+      }
+    }
+  }
+  return parsedUserId
+}
+
 //To generate uuid
 function createUuid(){
   return uuidv4();
@@ -752,5 +773,5 @@ export {
   setLatency, setLatencies,
   isLegalMode, setMode,
   setMethodResult, setMethodError,
-  setScratch, getScratch, deleteScratch, createUuid
+  setScratch, getScratch, deleteScratch, createUuid, isUserExist
 };
