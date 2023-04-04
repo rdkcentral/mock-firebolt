@@ -87,8 +87,8 @@ function addUser(userId) {
     return {isSuccess: false, msg : `Cannot add user, already exists`};
   }
   //To check whether the userId already exist 
-  let userExist = isUserExist(users,userId)
-  if((!userExist.isSuccess)){
+  let userExist = doesUserExist(users,userId)
+  if(userExist!=null && !userExist.isSuccess){
     return userExist;
   }
   let parsedUserId = parseUser(userId)
@@ -684,13 +684,13 @@ function deleteScratch(userId, key, scope=""){
 }
 
 /* 
-* @function:isUserExist()
-* @Description: check whether the userId already exist
+* @function:doesUserExist()
+* @Description: check if the user/appId/group exists
 * @Params:userId,users
 * @Return: JSON object {isSuccess: true/false, msg : ``}
 */
 
-function isUserExist(users,userId){
+function doesUserExist(users,userId){
   let parsedUserId = parseUser(userId)
   let user = parsedUserId.user;
   let appId = parsedUserId.appId;
@@ -748,5 +748,5 @@ export {
   setLatency, setLatencies,
   isLegalMode, setMode,
   setMethodResult, setMethodError,
-  setScratch, getScratch, deleteScratch, createUuid, isUserExist
+  setScratch, getScratch, deleteScratch, createUuid, doesUserExist
 };

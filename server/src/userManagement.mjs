@@ -23,7 +23,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as messageHandler from './messageHandler.mjs';
-import {isUserExist, state} from './stateManagement.mjs';
+import {doesUserExist, state} from './stateManagement.mjs';
 import { logger } from './logger.mjs';
 import * as util from './util.mjs'
 
@@ -175,8 +175,8 @@ function addUser(userId) {
   userId = "" + userId;
   var users = getUsers();
   //To check whether the userId already exist
-  let userExist =isUserExist(users,userId)
-  if(!userExist.isSuccess){
+  let userExist =doesUserExist(users,userId)
+  if(userExist!=null && !userExist.isSuccess){
     logger.info(`Cannot map user ${userId} to ws`)
     return userExist.isSuccess;
   }
