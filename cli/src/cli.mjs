@@ -506,7 +506,6 @@ if ( parsed.help ) {
   msg(`Downloading github repository ${downloadUrl}...`);
   const tmpobj = tmp.dirSync();
   const tmpFolder = (tmpobj.name).replace(/\\/g, "/");
-  console.log(tmpFolder)
   shell('git -C ' + tmpFolder + ' clone ' + downloadUrl + '').then((res) => {
 
     // copying the file contents inside temporary folder to overrideDirectory, once successfully cloned
