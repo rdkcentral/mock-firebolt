@@ -174,10 +174,11 @@ function heartbeat(ws) {
 function addUser(userId) {
   userId = "" + userId;
   var users = getUsers();
-  //To check whether the user is already mapped to ws if user exist
-  let userExist =isUserExist(users,userId,"user")
-  if(userExist==false){
-    return userExist;
+  //To check whether the user is already exist
+  let userExist =isUserExist(users,userId)
+  if(!userExist.isSuccess){
+    logger.info(`Cannot map user ${userId} to ws`)
+    return userExist.isSuccess;
   }
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
