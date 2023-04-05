@@ -38,6 +38,19 @@ import nopt from 'nopt';
 import axios from 'axios';
 import { config } from './config.mjs';
 import { usage } from './usage.mjs';
+import shell from 'shell-exec'
+import { logger } from '../../server/src/logger.mjs';
+import * as tmp from 'tmp';
+
+// to get root directory of application
+function getAppRootDir () {
+  let currentDir = __dirname
+  while(!fs.existsSync(path.join(currentDir, '.gitignore'))) {
+    currentDir = path.join(currentDir, '..')
+  }
+  let rootDir = currentDir.replace(/\\/g, "/");
+  return rootDir
+}
 
 function loadConfig() {
   let mfConfig;
@@ -83,7 +96,9 @@ const knownOpts = {
   'session'         : String,
   'sessionOutput'   : String,
   'sessionOutputPath' :  String,
-  'getStatus'       :  Boolean
+  'getStatus'       :  Boolean,
+  'downloadOverrides' : String,
+  'overrideLocation' : String
 };
 
 const shortHands = {
@@ -105,7 +120,9 @@ const shortHands = {
   'e'   : [ '--event' ],
   'be'  : [ '--broadcastEvent' ],
   'seq' : [ '--sequence' ],
-  'se'  : [ '--session' ]
+  'se'  : [ '--session' ],
+  'do' :  [ '--downloadOverrides' ],
+  'ol'  : [ '--overrideLocation' ]
 };
 
 const parsed = nopt(knownOpts, shortHands, process.argv, 2);
@@ -470,18 +487,53 @@ if ( parsed.help ) {
     });    
   }
 
-}
-  else if (parsed.getStatus){
-    axios.get(url(host, port, '/api/v1/status'), undefined)
-      .then(function (response) {
-        console.log(response.data);
-      })
-      .catch(function (error) {
-        logError(error);
+} else if (parsed.getStatus) {
+  axios.get(url(host, port, '/api/v1/status'), undefined)
+    .then(function (response) {
+      console.log(response.data);
+    })
+    .catch(function (error) {
+      logError(error);
     });
-  }
-  else {
+} else if (parsed.downloadOverrides) {
+  /* overrideDirectory is mock-firebolt/cli/externalOverrides by default, 
+  if overrided via CLI, will have user given location to save repository contents */
+  const overrideDirectory = parsed.overrideLocation ? parsed.overrideLocation : getAppRootDir() + '/cli/externalOverrides'
+  // git repository url to be downloaded
+  const downloadUrl = parsed.downloadOverrides;
 
+  // cloning git repository into a temporary folder using tmp node library
+  msg(`Downloading github repository ${downloadUrl}...`);
+  const tmpobj = tmp.dirSync();
+  const tmpFolder = (tmpobj.name).replace(/\\/g, "/");
+  shell('git -C ' + tmpFolder + ' clone ' + downloadUrl + '').then((res) => {
+
+    // copying the file contents inside temporary folder to overrideDirectory, once successfully cloned
+    if (res.code == 0) {
+      var files = fs.readdirSync(tmpobj.name)[0];
+      shell('rm -rf ' + tmpFolder + '/' + files + '/.git').then(() => {
+        shell('cp -R ' + tmpFolder + '/' + files + '/. ' + overrideDirectory).then((res) => {
+          msg(`Copying downloaded contents to ${overrideDirectory}`);
+
+          // removing the temporary folder
+          shell('rm -rf ' + tmpFolder).then((res) => {
+            msg(`Cleaning up..`);
+            if (res.code !== 0) {
+              logger.error(res.stderr)
+            }
+          })
+          // throw error if copying files not successful
+          if (res.code !== 0) {
+            logger.error(res.stderr)
+          }
+        })
+      })
+      // throw error if cloning repository not successful
+    } else {
+      logger.error(res.stderr)
+    }
+  })
+}
+else {
   console.log('Invalid command-line arguments. No action taken.');
-
 }
