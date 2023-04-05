@@ -515,19 +515,20 @@ if ( parsed.help ) {
         shell('cp -R ' + tmpFolder + '/' + files + '/. ' + overrideDirectory).then((res) => {
           msg(`Copying downloaded contents to ${overrideDirectory}`);
 
-          // removing the temporary folder, once successfully copied
-          if (res.code == 0) {
-            shell('rm -rf ' + tmpFolder).then((res) => {
-              msg(`Cleaning up..`);
-              if (res.code !== 0) {
-                logger.error(res.stderr)
-              }
-            })
-          } else {
+          // removing the temporary folder
+          shell('rm -rf ' + tmpFolder).then((res) => {
+            msg(`Cleaning up..`);
+            if (res.code !== 0) {
+              logger.error(res.stderr)
+            }
+          })
+          // throw error if copying files not successful
+          if (res.code !== 0) {
             logger.error(res.stderr)
           }
         })
       })
+      // throw error if cloning repository not successful
     } else {
       logger.error(res.stderr)
     }
