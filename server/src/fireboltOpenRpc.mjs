@@ -35,7 +35,7 @@ import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
 import { isSdkEnabled } from './sdkManagement.mjs';
 
-//set to true,If config.app.allowMixedCase for buildMethodMap is true 
+//set to true,If config.app.allowMixedCase for buildMethodMap() is true 
 let openRPCAllowCase=false
 
 //coverting module names to lowerCase 
