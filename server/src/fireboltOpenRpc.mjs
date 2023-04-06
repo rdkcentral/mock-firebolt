@@ -35,6 +35,9 @@ import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
 import { isSdkEnabled } from './sdkManagement.mjs';
 
+//set to true,If config.app.allowMixedCase for buildMethodMap is true 
+let openRPCAllowCase=false
+
 //coverting module names to lowerCase 
 function toLowerCase(moduleName){
   moduleName= moduleName.toLowerCase();
@@ -51,6 +54,7 @@ function buildMethodMap(sdkOpenrpc) {
     //coverting module names to lowerCase
     if(config.app.allowMixedCase){
       obj.name = toLowerCase(obj.name);
+      openRPCAllowCase=true
     }
     map[obj.name] = obj;
     return map;
@@ -70,7 +74,7 @@ function getMeta() {
 function getMethod(methodName) {
   for ( let ii = 0; ii < config.dotConfig.supportedSdks.length; ii += 1 ) {
     const sdkName = config.dotConfig.supportedSdks[ii].name;
-    if (config.app.allowMixedCase){
+    if (config.app.allowMixedCase && openRPCAllowCase){
       methodName = toLowerCase(methodName);
     }
     if ( methodMaps[sdkName] ) {
