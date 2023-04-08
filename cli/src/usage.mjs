@@ -45,6 +45,8 @@ const lines = [
   { cmdInfo: "--sessionOutput log|raw|mock-overrides  ",                                  comment: "Set the output format to; log: (paired time sequence of calls, responses)|raw: similiar to log but not paired with request|mock-overrides: a directory of mock overrides" },
   { cmdInfo: "--sessionOutputPath ../examples/path  ",                                    comment: "Specifiy the session output path. Default for 'log' format will be ./output/sessions and ./output/mocks/<START_TIME> for 'mock-overrides'." },
   { cmdInfo: "--getStatus ",                                                              comment: "Shows ws connection status of the user"},
+  { cmdInfo: "--downloadOverrides https://github.com/myOrg/myRepo.git",                   comment: "Specifies the url of a github repository to clone"},
+  { cmdInfo: "--overrideLocation ../externalOverrides",                                   comment: "Specifies a location relative to the current working directory in which to save the cloned github repository's contents"},
 ];
 
 function usage() {
