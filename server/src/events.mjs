@@ -49,11 +49,11 @@ function logFatalErr() {
 const eventListenerMap = {};
 
 // Associate this message ID with this method so if/when events are sent, we know which message ID to use
-function registerEventListener(userId, oMsg) {
+function registerEventListener(userId, oMsg, ws) {
   if ( ! eventListenerMap[userId] ) {
     eventListenerMap[userId] = {};
   }
-  eventListenerMap[userId][oMsg.method] = oMsg.id;
+  eventListenerMap[userId][oMsg.method] = { id: oMsg.id, ws: ws };
   logger.debug(`Registered event listener mapping: ${userId}:${oMsg.method}:${oMsg.id}`);
 }
 
@@ -80,12 +80,14 @@ function getRegisteredEventListener(userId, method) {
 
 // Remove mapping from event listener request method name from our map
 // Attempts to send events to this listener going forward will fail
-function deregisterEventListener(userId, oMsg) {
-  if ( ! eventListenerMap[userId] ) { return; }
-  delete eventListenerMap[userId][oMsg.method];
-  logger.debug(`Deregistered event listener for method: ${userId}:${oMsg.method}`);
+function deregisterEventListener(userId, oMsg, ws) {
+  if (!eventListenerMap[userId]) { return; }
+  
+  if ( eventListenerMap[userId] && eventListenerMap[userId][oMsg.method] && eventListenerMap[userId][oMsg.method].ws === ws ) {
+    delete eventListenerMap[userId][oMsg.method];
+    logger.debug(`Deregistered event listener mapping: ${userId}:${oMsg.method}`);
+  }
 }
-
 // Is the given (incoming) message one that enables or disables an event listener?
 // Example: {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true|false},"id":1}
 // Key: The 'on' in the unqualified method name, and (2) the params.listen parameter (regardless of true|false)
@@ -142,8 +144,13 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
 }
 
 // sending response to web-socket
-function emitResponse(ws, finalResult, msg, userId, method){
-  let id = getRegisteredEventListener(userId, method);
+function emitResponse(finalResult, msg, userId, method) {
+  const listener = getRegisteredEventListener(userId, method);
+  if (!listener) {
+    logger.debug('Event message could not be sent because a listener was not found')
+    return;
+  }
+  const { id, ws } = listener;
   const oEventMessage = {
     jsonrpc: '2.0',
     id: id,
@@ -154,6 +161,7 @@ function emitResponse(ws, finalResult, msg, userId, method){
   ws.send(eventMessage);
   logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
 }
+
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
 function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
@@ -247,7 +255,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
         // looping over each web-sockets of same group
         if ( wsUserMap && wsUserMap.size >=1 ) {
           wsUserMap.forEach ((userWithSameGroup, ww) => {
-            emitResponse(ww, finalResult, msg, userWithSameGroup, method);
+            emitResponse(finalResult, msg, userWithSameGroup, method);
           });
           fSuccess.call(null);
         } else {
@@ -256,7 +264,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
           throw new Error(msg);
         }
       } else {
-        emitResponse(ws, finalResult, msg, userId, method);
+        emitResponse(finalResult, msg, userId, method);
         fSuccess.call(null);
       }
     }
