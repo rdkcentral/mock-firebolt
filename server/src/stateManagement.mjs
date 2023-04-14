@@ -697,22 +697,25 @@ function doesUserExist(users,userId){
 
   //iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
+    let parsedExistingUserId = parseUser(users[key])
+    let existingUser = parsedExistingUserId.user;
+    let existingAppId = parsedExistingUserId.appId;
     if (users[key].includes("~")){
-      if (user && users[key].split("~")[0]==user){
+      if (user && existingUser==user){
         logger.info(`Cannot add user ${userId} as user ${user} already exists`)
         return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
       }
-      else if(appId && users[key].includes("#") && users[key].split("#")[1]==appId){
+      else if(appId && users[key].includes("#") && existingAppId==appId){
         logger.info(`Cannot add user ${userId} as appId ${appId} already exists`)
         return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${appId} already exists`}
         }
-      }
+    }
     else if (users[key].includes("#")){
-      if (user && users[key].split("#")[0]==user){
+      if (user && existingUser==user){
         logger.info(`Cannot add user ${userId} as appId ${user} already exists`)
         return {isSuccess: false, msg : ` Cannotadd user ${userId} as appId ${user} already exists`}
       }
-      else if (appId && users[key].split("#")[1]==appId){
+      else if (appId && existingAppId==appId){
         logger.info(`Cannot add user ${userId} as user ${appId} already exists`)
         return {isSuccess: false, msg : `Cannot add user ${userId} as user ${appId} already exists`}
       }
