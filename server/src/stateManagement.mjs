@@ -694,19 +694,19 @@ function doesUserExist(users,userId){
   const { user, appId } =parseUser(userId)
   //iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
-    const { existingUser, existingGroup, existingAppId } = parseUser(users[key]);
-    if (existingGroup){
+    const { existingUser, existingAppId } = parseUser(users[key]);
+    if (users[key].includes("~")){
       //UserId contains user & group  but no appId
       if (user && existingUser==user){
         logger.info(`Cannot add user ${userId} as user ${user} already exists`)
         return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
       }
-      else if(appId && existingAppId && existingAppId==appId){
+      else if(appId && users[key].includes("#") && existingAppId==appId){
         logger.info(`Cannot add user ${userId} as appId ${appId} already exists`)
         return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${appId} already exists`}
+        }
       }
-    }
-    else if (existingAppId){
+    else if (users[key].includes("#")){
       //UserId contains user & appId but no group
       if (user && existingUser==user){
         logger.info(`Cannot add user ${userId} as appId ${user} already exists`)
@@ -717,11 +717,10 @@ function doesUserExist(users,userId){
         return {isSuccess: false, msg : `Cannot add user ${userId} as user ${appId} already exists`}
       }
     }
-    else{ 
-      //UserId contains only user value no group,no appId
-      if (user && existingUser == user){
-        logger.info(`Cannot add user ${userId} as user ${user} already exists`)
-        return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
+    else{
+      if (user && users[key] == user){
+       logger.info(`Cannot add user ${userId} as user ${user} already exists`)
+       return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
       }
     }
   }
