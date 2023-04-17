@@ -707,7 +707,7 @@ else,  the full userid is used along with warning
 function setScopeForGroupKeyword(userId, scope) {
   let parseUserId = parseUser(userId)
   if (parseUserId.group == undefined || parseUserId.group == null) {
-    logger.warning("UserId does not contain a group. Using full userid for manipulating scratch")
+    logger.warning("WARNING: userId does not contain a group. Using full userId for manipulating scratch")
     scope = userId
   } else {
     scope = '~' + parseUserId.group
