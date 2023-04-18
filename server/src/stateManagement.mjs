@@ -87,7 +87,7 @@ function addUser(userId) {
     return {isSuccess: false, msg : `Cannot add user, already exists`};
   }
   //getting user, group and appId from userId
-  let {user,appId}=parseUser(userId)
+  let {user, group, appId}=parseUser(userId)
   //iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
     if (users[key].includes("~")){
