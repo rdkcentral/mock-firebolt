@@ -677,7 +677,26 @@ function setMethodError(userId, methodName, code, message) {
   });
 }
 
+/* if "group" keyword is passed for scope inside ctx functions, 
+and if userid invoking the YAML contains group, the group of the userId will be used as the "scope" for that call
+else,  the full userid is used along with warning
+*/
+function setScopeForGroupKeyword(userId, scope) {
+  let parsedUserId = parseUser(userId)
+  if (!parsedUserId.group) {
+    logger.warning("WARNING: userId does not contain a group. Using full userId for manipulating scratch")
+    scope = userId
+  } else {
+    scope = '~' + parsedUserId.group
+  }
+  return scope
+}
+
+// set scratch space of scope with the provided key-value
 function setScratch(userId, key, val, scope) {
+  if (scope === 'group') {
+    scope = setScopeForGroupKeyword(userId, scope)
+  }
   updateState(userId, {
     scratch: {
       [key]: val
@@ -685,9 +704,12 @@ function setScratch(userId, key, val, scope) {
   }, scope);
 }
 
-function getScratch(userId, key) {
+// get key from scratch space of provided scope
+function getScratch(userId, key, scope) {
+  if (scope === 'group') {
+    userId = setScopeForGroupKeyword(userId, scope)
+  }
   const userState = getState(userId);
-
   if ( key in userState.scratch ) {
     return userState.scratch[key];
   }
@@ -696,8 +718,11 @@ function getScratch(userId, key) {
 
 // delete key from scratch space of provided scope
 function deleteScratch(userId, key, scope=""){
-  if ( scope !== "" ){
-    if ( scope in state && key in state[scope].scratch ){
+  if (scope !== "") {
+    if (scope === 'group') {
+      scope = setScopeForGroupKeyword(userId, scope)
+    }
+    if (scope in state && key in state[scope].scratch) {
       delete state[scope].scratch[key];
     }
   }
