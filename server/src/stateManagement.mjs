@@ -693,7 +693,7 @@ function deleteScratch(userId, key, scope=""){
 
   //iterating over list of users in state to ensure duplicate user/appId
 function doesUserExist(users,userId){
-  const { user, appId } =parseUser(userId)
+  let { user, appId } =parseUser(userId)
   //iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
     const { existingUser, existingAppId } = parseUser(users[key]);
@@ -703,7 +703,7 @@ function doesUserExist(users,userId){
         logger.info(`Cannot add user ${userId} as user ${user} already exists`)
         return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
       }
-      else if(appId && existingAppId && existingAppId==appId){
+      else if(appId && users[key].includes("#") && existingAppId==appId){
         logger.info(`Cannot add user ${userId} as appId ${appId} already exists`)
         return {isSuccess: false, msg : `Cannot add user ${userId} as appId ${appId} already exists`}
       }
