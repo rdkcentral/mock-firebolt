@@ -87,7 +87,7 @@ function addUser(userId) {
     return {isSuccess: false, msg : `Cannot add user, already exists`};
   }
   //getting user, group and appId from userId
-  const {user,appId}=parseUser(userId)
+  let {user,appId}=parseUser(userId)
   //iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
     if (users[key].includes("~")){
@@ -137,6 +137,7 @@ function getUserId(userId){
   // //Checking if user or appId is present in state object
   if (!(userId in state)){
     for(var key in users){
+
       if (users[key].includes("~")){
         if (users[key].split("~")[0]==userId){
           userId = users[key];
