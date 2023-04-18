@@ -700,10 +700,16 @@ function doesUserExist(users,userId){
       logger.info(`Cannot add user ${userId} as user ${user} already exists`)
       return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
     }
-    if (appId && existingAppId && existingAppId==appId){
+    else if (appId && existingAppId && existingAppId==appId){
       //An attempt made to reuse existing appId value
       logger.info(`Cannot add user ${userId} since appId ${appId} already exists`)
       return {isSuccess: false, msg : ` Cannot add user ${userId} as appId ${appId} already exists`}
+    }
+    else{
+      if (user && users[key] == user){
+       logger.info(`Cannot add user ${userId} as user ${user} already exists`)
+       return {isSuccess: false, msg : `Cannot add user ${userId} as user ${user} already exists`}
+      }
     }
   }
   return {isSuccess: true, msg : `Success`}
