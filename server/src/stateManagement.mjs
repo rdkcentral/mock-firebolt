@@ -705,19 +705,19 @@ and if userid invoking the YAML contains group, the group of the userId will be 
 else,  the full userid is used along with warning
 */
 function setScopeForGroupKeyword(userId, scope) {
-  let parseUserId = parseUser(userId)
-  if (parseUserId.group == undefined || parseUserId.group == null) {
+  let parsedUserId = parseUser(userId)
+  if (!parsedUserId.group) {
     logger.warning("WARNING: userId does not contain a group. Using full userId for manipulating scratch")
     scope = userId
   } else {
-    scope = '~' + parseUserId.group
+    scope = '~' + parsedUserId.group
   }
   return scope
 }
 
 // set scratch space of scope with the provided key-value
 function setScratch(userId, key, val, scope) {
-  if (scope == 'group') {
+  if (scope === 'group') {
     scope = setScopeForGroupKeyword(userId, scope)
   }
   updateState(userId, {
@@ -729,7 +729,7 @@ function setScratch(userId, key, val, scope) {
 
 // get key from scratch space of provided scope
 function getScratch(userId, key, scope) {
-  if (scope == 'group') {
+  if (scope === 'group') {
     userId = setScopeForGroupKeyword(userId, scope)
   }
   const userState = getState(userId);
@@ -742,7 +742,7 @@ function getScratch(userId, key, scope) {
 // delete key from scratch space of provided scope
 function deleteScratch(userId, key, scope=""){
   if (scope !== "") {
-    if (scope == 'group') {
+    if (scope === 'group') {
       scope = setScopeForGroupKeyword(userId, scope)
     }
     if (scope in state && key in state[scope].scratch) {
