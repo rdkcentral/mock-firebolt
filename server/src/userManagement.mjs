@@ -178,7 +178,7 @@ function addUser(userId) {
  
 
   //getting user, group and appId from userId
- let {user, group, appId}=parseUser(userId)
+ const {user, group, appId}=parseUser(userId)
 
 //iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
