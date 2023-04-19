@@ -307,12 +307,15 @@ test(`events.sendBroadcastEvent works properly`, () => {
 
 test(`events.emitResponse works properly`, () => {
   const spy = jest.spyOn(logger, "info");
-  events.testExports.emitResponse(
-    { send: () => {} },
-    {},
-    "test_msg",
-    "12345",
-    "core"
-  );
+  const listenerObject = {
+    method: "core",
+    id: 12,
+  };
+  const dummyWebSocket = { send: () => {} };
+
+  // Register the event listener first to simulate a real-world scenario
+  events.registerEventListener("12345", listenerObject, dummyWebSocket);
+
+  events.testExports.emitResponse({}, "test_msg", "12345", "core");
   expect(spy).toHaveBeenCalled();
 });

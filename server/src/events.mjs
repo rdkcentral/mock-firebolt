@@ -50,10 +50,15 @@ const eventListenerMap = {};
 
 // Associate this message ID with this method so if/when events are sent, we know which message ID to use
 function registerEventListener(userId, oMsg, ws) {
-  if ( ! eventListenerMap[userId] ) {
+  if (!eventListenerMap[userId]) {
     eventListenerMap[userId] = {};
   }
-  eventListenerMap[userId][oMsg.method] = { id: oMsg.id, ws: ws };
+
+  if (!eventListenerMap[userId][oMsg.method]) {
+    eventListenerMap[userId][oMsg.method] = { id: oMsg.id, wsArr: [] };
+  }
+
+  eventListenerMap[userId][oMsg.method].wsArr.push(ws);
   logger.debug(`Registered event listener mapping: ${userId}:${oMsg.method}:${oMsg.id}`);
 }
 
@@ -81,11 +86,20 @@ function getRegisteredEventListener(userId, method) {
 // Remove mapping from event listener request method name from our map
 // Attempts to send events to this listener going forward will fail
 function deregisterEventListener(userId, oMsg, ws) {
-  if (!eventListenerMap[userId]) { return; }
-  
-  if ( eventListenerMap[userId] && eventListenerMap[userId][oMsg.method] && eventListenerMap[userId][oMsg.method].ws === ws ) {
-    delete eventListenerMap[userId][oMsg.method];
+  if (!eventListenerMap[userId] || !eventListenerMap[userId][oMsg.method]) {
+    return;
+  }
+
+  const wsArr = eventListenerMap[userId][oMsg.method].wsArr;
+  const wsIndex = wsArr.findIndex((item) => item === ws);
+
+  if (wsIndex !== -1) {
+    wsArr.splice(wsIndex, 1);
     logger.debug(`Deregistered event listener mapping: ${userId}:${oMsg.method}`);
+  }
+
+  if (wsArr.length === 0) {
+    delete eventListenerMap[userId][oMsg.method];
   }
 }
 // Is the given (incoming) message one that enables or disables an event listener?
@@ -147,21 +161,22 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
 function emitResponse(finalResult, msg, userId, method) {
   const listener = getRegisteredEventListener(userId, method);
   if (!listener) {
-    logger.debug('Event message could not be sent because a listener was not found')
+    logger.debug('Event message could not be sent because a listener was not found');
     return;
   }
-  const { id, ws } = listener;
+  const { id, wsArr } = listener;
   const oEventMessage = {
     jsonrpc: '2.0',
     id: id,
     result: finalResult
   };
   const eventMessage = JSON.stringify(oEventMessage);
-  // Could do, but why?: const dly = stateManagement.getAppropriateDelay(user, method); await util.delay(dly);
-  ws.send(eventMessage);
-  logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
-}
 
+  wsArr.forEach((ws) => {
+    ws.send(eventMessage);
+    logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
+  });
+}
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
 function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
