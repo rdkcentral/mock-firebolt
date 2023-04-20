@@ -58,7 +58,11 @@ function registerEventListener(userId, oMsg, ws) {
     eventListenerMap[userId][oMsg.method] = { id: oMsg.id, wsArr: [] };
   }
 
-  eventListenerMap[userId][oMsg.method].wsArr.push(ws);
+  // Check if ws is already in the wsArr before pushing
+  if (!eventListenerMap[userId][oMsg.method].wsArr.includes(ws)) {
+    eventListenerMap[userId][oMsg.method].wsArr.push(ws);
+  }
+
   logger.debug(`Registered event listener mapping: ${userId}:${oMsg.method}:${oMsg.id}`);
 }
 
