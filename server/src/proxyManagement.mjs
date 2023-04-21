@@ -20,11 +20,12 @@
 
 import { parse } from 'url';
 import WebSocket from 'ws';
+import { deleteWsOfUser } from './userManagement.mjs';
 
 const wsMap = new Map();
 const wsMsgMap = new Map();
 
-async function sendRequest(returnWs, command) {
+async function sendRequest(returnWs, command, userId) {
   let outgoingWs = wsMap.get(returnWs);
   /* Checks to see if ws connection is in map.
    * If connection exists and is active, it will be used.
@@ -33,7 +34,7 @@ async function sendRequest(returnWs, command) {
 
   // Set up listeners once and only once
   if (!outgoingWs) {
-    outgoingWs = await setupOutgoingWs(returnWs);
+    outgoingWs = await setupOutgoingWs(returnWs, userId);
 
     outgoingWs.on('message', (data) => {
       const buf = Buffer.from(data, 'utf8');
@@ -62,7 +63,7 @@ async function sendRequest(returnWs, command) {
   });
 }
 
-function setupOutgoingWs(returnWs) {
+function setupOutgoingWs(returnWs, userId) {
   const url = buildWSUrl();
   const ws = new WebSocket(url);
   try {
@@ -76,7 +77,11 @@ function setupOutgoingWs(returnWs) {
 
       ws.on('close', function close() {
         console.log('WS disconnected.');
-        // Remove closed connection from map
+        /* Remove closed connection from maps
+         Deletes the websocket object for the closed connection from the impacted user's data
+        */
+        deleteWsOfUser(returnWs, userId)
+        // Deletes the closed incoming and outgoing websocket object from map
         wsMap.delete(returnWs);
       });
 
