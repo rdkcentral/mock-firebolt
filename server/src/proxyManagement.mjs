@@ -159,4 +159,4 @@ function getMFToken(request) {
 }
 
 // --- Exports ---
-export { getMFToken, sendRequest };
+export { getMFToken, sendRequest, deleteWsOfUser };
