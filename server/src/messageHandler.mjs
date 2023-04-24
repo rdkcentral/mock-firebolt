@@ -83,14 +83,14 @@ async function handleMessage(message, userId, ws) {
 
   if ( events.isEventListenerOnMessage(oMsg) ) {
     events.sendEventListenerAck(userId, ws, oMsg);
-    events.registerEventListener(userId, oMsg);
+    events.registerEventListener(userId, oMsg, ws);
     return;
   }
 
   // Handle JSON-RPC messages that are event listener disable requests
 
   if ( events.isEventListenerOffMessage(oMsg) ) {
-    events.deregisterEventListener(userId, oMsg);
+    events.deregisterEventListener(userId, oMsg, ws);
     return;
   }
 

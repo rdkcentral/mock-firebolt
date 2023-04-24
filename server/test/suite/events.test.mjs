@@ -31,7 +31,8 @@ test(`events.registerEventListener works properly`, () => {
     method: "",
     id: 12,
   };
-  events.registerEventListener("12345", dummyObject);
+  const dummyWebSocket = { send: () => {} };
+  events.registerEventListener("12345", dummyObject, dummyWebSocket);
   expect(spy).toHaveBeenCalled();
 });
 
@@ -92,7 +93,8 @@ test(`events.getRegisteredEventListener works properly if path`, () => {
 test(`events.deregisterEventListener works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
   const oMsgdummy = { method: "lifecycle.onInactive", id: 12 };
-  events.deregisterEventListener(oMsgdummy);
+  const dummyWebSocket = { send: () => {} };
+  events.deregisterEventListener("12345", oMsgdummy.method, dummyWebSocket);
   expect(spy).toHaveBeenCalled();
 });
 
@@ -177,7 +179,8 @@ test(`events.isEventListenerOffMessage works properly`, () => {
 test(`events.sendEventListenerAck works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
   const oMsgdummy = { method: "lifecycle.onInactive", id: 12 };
-  events.sendEventListenerAck('12345', { send: () => {} }, oMsgdummy);
+  const dummyWebSocket = { send: () => {} };
+  events.sendEventListenerAck("12345", dummyWebSocket, oMsgdummy);
   expect(spy).toHaveBeenCalled();
 });
 
@@ -205,9 +208,11 @@ test(`events.sendEvent works properly`, () => {
       call: () => {},
     },
   };
-  events.registerEventListener("12345", dummyObject);
+  const dummyWebSocket = { send: () => {} };
+
+  events.registerEventListener("12345", dummyObject, dummyWebSocket);
   events.sendEvent(
-    { send: () => {} },
+    dummyWebSocket,
     "12345",
     methodName,
     result,
@@ -286,8 +291,9 @@ test(`events.isAnyRegisteredInGroup works properly with if path`, () => {
 });
 
 test(`events.sendBroadcastEvent works properly`, () => {
+  const dummyWebSocket = { send: () => {} };
   const result = events.testExports.sendBroadcastEvent(
-    { send: () => {} },
+    dummyWebSocket,
     "12345",
     "core",
     {},
@@ -301,12 +307,15 @@ test(`events.sendBroadcastEvent works properly`, () => {
 
 test(`events.emitResponse works properly`, () => {
   const spy = jest.spyOn(logger, "info");
-  events.testExports.emitResponse(
-    { send: () => {} },
-    {},
-    "test_msg",
-    "12345",
-    "core"
-  );
+  const listenerObject = {
+    method: "core",
+    id: 12,
+  };
+  const dummyWebSocket = { send: () => {} };
+
+  // Register the event listener first to simulate a real-world scenario
+  events.registerEventListener("12345", listenerObject, dummyWebSocket);
+
+  events.testExports.emitResponse({}, "test_msg", "12345", "core");
   expect(spy).toHaveBeenCalled();
 });
