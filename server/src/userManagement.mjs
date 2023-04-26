@@ -147,6 +147,17 @@ function associateUserWithWs(userId, ws) {
   }
 }
 
+// Delete websocket object associated with a userId when that websocket connection is closed by a close event
+function deleteWsOfUser(ws, userId) {
+  let wsArray = [];
+  if (user2ws.has('' + userId)) {
+    wsArray = user2ws.get('' + userId)
+    wsArray = wsArray.filter((socketObject) => socketObject !== ws);
+    user2ws.set('' + userId, wsArray);
+  } else {
+    logger.warning(`userId ${userId} does not have associated websocket mapping`)
+  }
+}
 
 function handleGroupMembership(userId) {
   const parts = (''+userId).split('~');
@@ -265,5 +276,5 @@ export const testExports={
 }
 
 export {
-  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
+  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser, deleteWsOfUser
 };

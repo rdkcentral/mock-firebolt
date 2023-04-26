@@ -161,7 +161,7 @@ async function handleMessage(message, userId, ws) {
     //bypass JSON-RPC calls and hit proxy server endpoint
     //init websocket connection for proxy request to be sent and use receiver client to send events back to caller.
     try {
-      response = await proxyManagement.sendRequest(ws, JSON.stringify(oMsg))
+      response = await proxyManagement.sendRequest(ws, JSON.stringify(oMsg), userId)
     } catch (err) {
       logger.error(`ERROR: Unable to establish proxy connection due to ${err}`)
       process.exit(1)
