@@ -186,29 +186,10 @@ function addUser(userId) {
   userId = "" + userId;
   var users = getUsers();
 
-  let parsedUserId = parseUser(userId);
-  let user = parsedUserId.user
-  let appId = parsedUserId.appId
-  let group = parsedUserId.group
+ 
 
   //getting user, group and appId from userId
-  if (userId.includes("~")){
-    user = userId.split("~")[0];
-    if (userId.includes("#")){
-      appId = userId.split("#")[1];
-      group = "~"+userId.split("#")[0].split('~')[1];
-    }
-    else{
-      group = "~"+userId.split('~')[1];
-    }
-  }
-  else if (userId.includes("#")){
-    user = userId.split("#")[0];
-    appId = userId.split("#")[1];
-  }
-  else{
-    user = userId;
-  }
+ const {user, group, appId}=parseUser(userId)
 
 //iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
