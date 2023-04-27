@@ -111,7 +111,7 @@ function deregisterEventListener(userId, metadata, ws) {
     return;
   }
 
-  const wsArr = eventListenerMap[userId][oMsg.method].wsArr;
+  const wsArr = eventListenerMap[userId][event].wsArr;
   const wsIndex = wsArr.findIndex((item) => item === ws);
 
   if (wsIndex !== -1) {
@@ -376,7 +376,10 @@ export const testExports = {
   getRegisteredEventListener,
   isAnyRegisteredInGroup,
   sendBroadcastEvent,
-  emitResponse
+  emitResponse, 
+  extractEventData,
+  isEventListenerOnMessage,
+  isEventListenerOffMessage
 }
 
 export {

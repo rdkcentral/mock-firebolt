@@ -64,6 +64,16 @@ test(`config works properly`, () => {
           name: "discovery",
         },
       ],
+      eventConfig: {
+        registrationMessage: {
+          searchRegex: "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":true.*).*\\.on\\S*",
+          method: "$.method"
+        },
+        unRegistrationMessage : {
+          searchRegex: "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":false.*).*\\.on\\S*",
+          method: "$.method"
+        }
+      }
     },
   };
   expect(config).toEqual(expectedResult);
