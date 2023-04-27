@@ -147,6 +147,17 @@ function associateUserWithWs(userId, ws) {
   }
 }
 
+// Delete websocket object associated with a userId when that websocket connection is closed by a close event
+function deleteWsOfUser(ws, userId) {
+  let wsArray = [];
+  if (user2ws.has('' + userId)) {
+    wsArray = user2ws.get('' + userId)
+    wsArray = wsArray.filter((socketObject) => socketObject !== ws);
+    user2ws.set('' + userId, wsArray);
+  } else {
+    logger.warning(`userId ${userId} does not have associated websocket mapping`)
+  }
+}
 
 function handleGroupMembership(userId) {
   const parts = (''+userId).split('~');
@@ -175,29 +186,10 @@ function addUser(userId) {
   userId = "" + userId;
   var users = getUsers();
 
-  let parsedUserId = parseUser(userId);
-  let user = parsedUserId.user
-  let appId = parsedUserId.appId
-  let group = parsedUserId.group
+ 
 
   //getting user, group and appId from userId
-  if (userId.includes("~")){
-    user = userId.split("~")[0];
-    if (userId.includes("#")){
-      appId = userId.split("#")[1];
-      group = "~"+userId.split("#")[0].split('~')[1];
-    }
-    else{
-      group = "~"+userId.split('~')[1];
-    }
-  }
-  else if (userId.includes("#")){
-    user = userId.split("#")[0];
-    appId = userId.split("#")[1];
-  }
-  else{
-    user = userId;
-  }
+ const {user, group, appId}=parseUser(userId)
 
 //iterating over list of users in state to ensure duplicate user/appId
   for(var key in users){
@@ -284,5 +276,5 @@ export const testExports={
 }
 
 export {
-  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser
+  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser, deleteWsOfUser
 };
