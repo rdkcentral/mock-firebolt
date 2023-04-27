@@ -29,5 +29,16 @@
             "enabled": false
         }
 
-    ]
+    ],
+
+    "eventConfig": {
+      "registrationMessage": {
+        "searchRegex": "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":true.*).*\\.on\\S*",
+        "method": "$.method"
+      },
+      "unRegistrationMessage" : {
+        "searchRegex": "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":false.*).*\\.on\\S*",
+        "method": "$.method"
+      }
+    }
 }
