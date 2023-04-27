@@ -30,6 +30,9 @@ import { methodTriggers } from './triggers.mjs';
 import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs';
 import * as conduit from './conduit.mjs';
+import { config } from './config.mjs';
+
+const { dotConfig: { eventConfig } } = config;
 
 function fSuccess(msg, onMethod, result) {
   logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
@@ -80,17 +83,17 @@ async function handleMessage(message, userId, ws) {
   }
 
   // Handle JSON-RPC messages that are event listener enable requests
-
   if ( events.isEventListenerOnMessage(oMsg) ) {
     events.sendEventListenerAck(userId, ws, oMsg);
-    events.registerEventListener(userId, oMsg, ws);
+    const eventMetadata = events.extractEventData(oMsg, eventConfig.registrationMessage, true);
+    events.registerEventListener(userId, eventMetadata, ws);
     return;
   }
-
+  
   // Handle JSON-RPC messages that are event listener disable requests
-
   if ( events.isEventListenerOffMessage(oMsg) ) {
-    events.deregisterEventListener(userId, oMsg, ws);
+    const eventMetadata = events.extractEventData(oMsg, eventConfig.unRegistrationMessage, false);
+    events.deregisterEventListener(userId, eventMetadata, ws);
     return;
   }
 
