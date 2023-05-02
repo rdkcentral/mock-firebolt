@@ -49,6 +49,11 @@ test(`stateManagement.addUser works properly for same appId`, () => {
   expect(stateManagement.addUser(userId2).isSuccess).toEqual(false);
 });
 
+test(`stateManagement.addUser works properly for same user same appId`, () => {
+  const userId = "456#netflix";
+  expect( stateManagement.addUser(userId).isSuccess ).toEqual(false);
+});
+
 test(`stateManagement.addUser works properly for same user without group`, () => {
   stateManagement.addUser("111#youtube");
   const userId3 = "111#amazon";
@@ -60,6 +65,20 @@ test(`stateManagement.addUser works properly for same user without group`, () =>
   expect(result4.isSuccess).toEqual(false);
 });
 
+test(`stateManagement.addUser works properly for same user same appId same group`, () => {
+  const userId = "456~A#netflix";
+  expect( stateManagement.addUser(userId).isSuccess ).toEqual(false);
+});
+
+test(`stateManagement.addUser works properly for same user same appId but different group`, () => {
+  const userId = "456~B#netflix";
+  expect( stateManagement.addUser(userId).isSuccess ).toEqual(false);
+});
+
+test(`stateManagement.addUser works properly for different user different appId but same group`, () => {
+  const userId = "999~A#hulu";
+  expect( stateManagement.addUser(userId).isSuccess ).toEqual(true);
+});
 
 test(`stateManagement.getUserId works properly`, () => {
   const userId = "456";
