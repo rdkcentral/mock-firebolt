@@ -32,18 +32,17 @@ Example:
 | 123			  | 123~A			| Not accepted|
 | 123			  | 123~A#appId		| Not accepted|
 | 123			  | 123#appId		| Not accepted|
-
+|				                                  |
 | 456			  | 123				| Accepted    |
 | 456~A		      | 123~A			| Accepted    |
-
+|                                                 |
 | 456~A#appId	  | 123~A#appId		| Not Accepted|
 | 456~B#appId	  | 123~A#appId		| Not Accepted|
 | 456~A#appId1	  | 123~A#appId		| Accepted    |
-
+|                                                 |
 | 456~A#appId	  | 123#appId		| Not Accepted|
 | 456~A#appId	  | 123#appId1		| Accepted    |
 | 456#appId		  | 123#appId1		| Accepted    |
-
 
 
 # User State
