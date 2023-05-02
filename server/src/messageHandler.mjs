@@ -83,6 +83,8 @@ async function handleMessage(message, userId, ws) {
   }
 
   // Handle JSON-RPC messages that are event listener enable requests
+  // First we extract event data from the message using the registrationMessage config
+  // Then we register the event listener for the specified user and WebSocket with the extracted metadata
   if ( events.isEventListenerOnMessage(oMsg) ) {
     events.sendEventListenerAck(userId, ws, oMsg);
     const eventMetadata = events.extractEventData(oMsg, eventConfig.registrationMessage, true);
@@ -91,6 +93,8 @@ async function handleMessage(message, userId, ws) {
   }
   
   // Handle JSON-RPC messages that are event listener disable requests
+  // First we extract event data from the message using the unRegistrationMessage config
+  // Then we deregister the event listener for the specified user and WebSocket with the extracted metadata
   if ( events.isEventListenerOffMessage(oMsg) ) {
     const eventMetadata = events.extractEventData(oMsg, eventConfig.unRegistrationMessage, false);
     events.deregisterEventListener(userId, eventMetadata, ws);

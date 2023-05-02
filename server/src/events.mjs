@@ -171,12 +171,8 @@ function extractEventData(oMsg, config, isOn) {
 function isEventListenerMessage(oMsg, config) {
   // Call extractEventData and store the result
   const eventData = extractEventData(oMsg, config);
-
-  if (eventData !== false) {
-    return true;
-  }
-
-  return false;
+  
+  return (eventData !== false);
 }
 
 /**
