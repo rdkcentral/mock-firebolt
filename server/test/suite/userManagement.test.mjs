@@ -176,6 +176,7 @@ test(`userManagement.addUser works properly for same user without group`, () => 
   const result4 = userManagement.addUser(userId4);
   expect(result4).toEqual(expectedResult4);
 });
+
 test(`userManagement.addUser works properly for same user same appId same group`, () => {
   const userId = "456~A#sampleApp";
   const expectedResult =false
@@ -196,7 +197,6 @@ test(`userManagement.addUser works properly for different user different appId b
   const result = userManagement.addUser(userId)
   expect(result).toEqual(expectedResult);
 });
-
 
 test(`userManagement.removeUser works properly`, () => {
   const userId = "12345";
