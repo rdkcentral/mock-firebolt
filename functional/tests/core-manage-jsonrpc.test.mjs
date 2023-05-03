@@ -24,6 +24,7 @@ import * as utilities from "./utilities.mjs";
 jest.setTimeout(20000);
 
 beforeAll(async () => {
+  jest.resetModules();
   const response = await utilities.mfState(
     true, 
     ` -- --manage`
