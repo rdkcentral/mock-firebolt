@@ -185,7 +185,7 @@ function getState(userId,mergedState = true) {
       return finalState;
     }
   }
-  logger.info(`Could not find state for user ${userId}; using default user ${config.app.defaultUserId}`);
+  logger.info(`Could not find state for userId ${userId}; using default user ${config.app.defaultUserId}`);
   return state[config.app.defaultUserId];
 }
 
