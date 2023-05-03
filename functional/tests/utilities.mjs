@@ -190,6 +190,7 @@ async function mfState(on, extraConfig = "") {
     if (on) {
       //MF is already running
       if (mfProcess && mfProcess.pid) {
+        console.log("Process ID"+mfProcess.pid)
         res("MF process already started. PID: " + mfProcess.pid);
       }
 
@@ -200,15 +201,18 @@ async function mfState(on, extraConfig = "") {
       process.stdout.on("data", (data) => {
         if (data.includes(mfStarted)) {
           mfProcess = process;
+          console.log("MF started")
           res("MF started successfully");
         }
       });
 
       process.on("error", (err) => {
+        console.log("MF error"+JSON.stringify(err))
         rej("x: " + JSON.stringify(err));
       });
 
       process.on("close", (code) => {
+        console.log("MF close")
         rej("MF not started. Terminated with code " + code);
       });
     } else {
