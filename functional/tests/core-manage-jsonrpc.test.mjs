@@ -26,7 +26,7 @@ jest.setTimeout(20020);
 beforeAll(async () => {
   const response = await utilities.mfState(
     true,
-    ` -- --manage`
+    `--manage`
   );
   expect(response).toBe("MF started successfully");
 });

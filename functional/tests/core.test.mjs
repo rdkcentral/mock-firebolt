@@ -30,6 +30,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   //Stop Mock Firebolt
+  console.log("Port killed inCore")
   const response = await utilities.killPort(9998);
   expect(response).toBe("Port Killed");
 });
