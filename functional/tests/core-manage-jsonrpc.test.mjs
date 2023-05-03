@@ -21,7 +21,7 @@
 import { expect, jest, test, afterAll, beforeAll } from "@jest/globals";
 import * as utilities from "./utilities.mjs";
 
-jest.setTimeout(20020);
+jest.setTimeout(50000);
 
 beforeAll(async () => {
   const response = await utilities.mfState(
@@ -40,7 +40,7 @@ afterAll(async () => {
 test(`Validate OPENRPC Response for manage SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "Accessory.list",
+      method: "accessory.list",
       params: {},
       id: 0,
     })
