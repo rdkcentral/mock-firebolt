@@ -28,7 +28,7 @@ beforeAll(async () => {
     true,
     `-- --manage`
   );
-  expect(response).toBe("MF started successfully");
+  expect(response).toBe("MF started successfullyy");
 });
 
 afterAll(async () => {
