@@ -39,6 +39,8 @@ async function killPort(portNumber) {
   return new Promise((resolve, reject) => {
     try {
       kill(portNumber, "tcp").then(() => {
+
+        console.log("Port Killed")
         resolve("Port Killed");
       });
     } catch (error) {
@@ -203,7 +205,7 @@ async function mfState(on, extraConfig = "") {
       });
 
       process.on("error", (err) => {
-        rej("MF not started successfully: " + JSON.stringify(err));
+        rej("x: " + JSON.stringify(err));
       });
 
       process.on("close", (code) => {
