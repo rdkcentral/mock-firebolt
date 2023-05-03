@@ -212,7 +212,6 @@ async function mfState(on, extraConfig = "") {
       });
 
       process.on("close", (code) => {
-        console.log("MF close")
         rej("MF not started. Terminated with code " + code);
       });
     } else {
