@@ -59,21 +59,23 @@ const eventListenerMap = {};
  * @returns {void}
 */
 function registerEventListener(userId, metadata, ws) {
-  const { registration, event } = metadata;
+  const { registration, method } = metadata;
+
   if (!eventListenerMap[userId]) {
     eventListenerMap[userId] = {};
   }
 
-  if (!eventListenerMap[userId][event]) {
-    eventListenerMap[userId][event] = { id: registration.id, wsArr: [], metadata };
+  if (!eventListenerMap[userId][method]) {
+    // id: registration.id will be removed in part 2
+    eventListenerMap[userId][method] = { id: registration.id, wsArr: [], metadata };
   }
 
   // Check if ws is already in the wsArr before pushing
-  if (!eventListenerMap[userId][event].wsArr.includes(ws)) {
-    eventListenerMap[userId][event].wsArr.push(ws);
+  if (!eventListenerMap[userId][method].wsArr.includes(ws)) {
+    eventListenerMap[userId][method].wsArr.push(ws);
   }
 
-  logger.debug(`Registered event listener mapping: ${userId}:${event}:${registration.id}`);
+  logger.debug(`Registered event listener mapping: ${userId}:${method}:${registration.id}`);
 }
 
 // Return true if at least one user in the user’s group is registered for the given method
@@ -106,21 +108,21 @@ function getRegisteredEventListener(userId, method) {
  * @returns {void}
 */
 function deregisterEventListener(userId, metadata, ws) {
-  const { event } = metadata;
-  if (!eventListenerMap[userId] || !eventListenerMap[userId][event]) {
+  const { method } = metadata;
+  if (!eventListenerMap[userId] || !eventListenerMap[userId][method]) {
     return;
   }
 
-  const wsArr = eventListenerMap[userId][event].wsArr;
+  const wsArr = eventListenerMap[userId][method].wsArr;
   const wsIndex = wsArr.findIndex((item) => item === ws);
 
   if (wsIndex !== -1) {
     wsArr.splice(wsIndex, 1);
-    logger.debug(`Deregistered event listener mapping: ${userId}:${event}`);
+    logger.debug(`Deregistered event listener mapping: ${userId}:${method}`);
   }
 
   if (wsArr.length === 0) {
-    delete eventListenerMap[userId][event];
+    delete eventListenerMap[userId][method];
   }
 }
 
@@ -147,8 +149,8 @@ function extractEventData(oMsg, config, isOn) {
   const methodName = extractedMethod[0];
   const metadata = {
     registration: {},
-    event: methodName,
     unRegistration: {},
+    method: methodName
   };
 
    // If isOn is true, add oMsg to metadata.registration
