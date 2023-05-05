@@ -21,7 +21,7 @@
 import { expect, jest, test, afterAll, beforeAll } from "@jest/globals";
 import * as utilities from "./utilities.mjs";
 
-jest.setTimeout(20040);
+//jest.setTimeout(20040);
 
 beforeAll(async () => {
   const response = await utilities.mfState(
