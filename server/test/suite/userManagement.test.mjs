@@ -157,6 +157,13 @@ test(`userManagement.addUser works properly for same appId`, () => {
   expect(result2).toEqual(expectedResult2);
 });
 
+test(`userManagement.addUser works properly for same user same appId`, () => {
+  const userId = "456#sampleApp";
+  const expectedResult =false
+  const result = userManagement.addUser(userId)
+  expect(result).toEqual(expectedResult);
+});
+
 test(`userManagement.addUser works properly for same user without group`, () => {
   userManagement.addUser("111#youtube");
   const userId3 = "111#amazon";
@@ -169,6 +176,28 @@ test(`userManagement.addUser works properly for same user without group`, () => 
   const result4 = userManagement.addUser(userId4);
   expect(result4).toEqual(expectedResult4);
 });
+
+test(`userManagement.addUser works properly for same user same appId same group`, () => {
+  const userId = "456~A#sampleApp";
+  const expectedResult =false
+  const result = userManagement.addUser(userId)
+  expect(result).toEqual(expectedResult);
+});
+
+test(`userManagement.addUser works properly for same user same appId but different group`, () => {
+  const userId = "456~B#sampleApp";
+  const expectedResult =false
+  const result = userManagement.addUser(userId)
+  expect(result).toEqual(expectedResult);
+});
+
+test(`userManagement.addUser works properly for different user different appId but same group`, () => {
+  const userId = "999~A#hulu";
+  const expectedResult =true
+  const result = userManagement.addUser(userId)
+  expect(result).toEqual(expectedResult);
+});
+
 test(`userManagement.removeUser works properly`, () => {
   const userId = "12345";
   const spy = jest.spyOn(Map.prototype, "delete");
