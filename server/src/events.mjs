@@ -75,7 +75,7 @@ function registerEventListener(userId, metadata, ws) {
     eventListenerMap[userId][method].wsArr.push(ws);
   }
 
-  logger.debug(`Registered event listener mapping: ${userId}:${method}:${registration.id}`);
+  logger.debug(`Registered event listener mapping: ${userId}:${method}`);
 }
 
 // Return true if at least one user in the user’s group is registered for the given method
@@ -134,7 +134,8 @@ function deregisterEventListener(userId, metadata, ws) {
  * @returns {object | false} - An object containing the extracted event data or false if the extraction fails.
 */
 function extractEventData(oMsg, config, isOn) {
-  const { searchRegex, method } = config;
+  const searchRegex = config.searchRegex;
+  const method = config.method || '$.method';
 
   if (!new RegExp(searchRegex).test(JSON.stringify(oMsg))) {
     return false;
@@ -163,6 +164,7 @@ function extractEventData(oMsg, config, isOn) {
 
   return metadata;
 }
+
 
 /**
  * Determines if the given object message is an event listener message.
