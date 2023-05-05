@@ -3,13 +3,13 @@
   "version": "0.0.1",
   "description": "Command-line interface for controlling the Mock Firebolt server",
   "scripts": {
-    "test": "NODE_ENV=test npx jest --config=jest.config.js --clearCache --maxWorkers=2 --silent -i",
-    "test:core": "NODE_ENV=test npx jest --config=jest.config.js --clearCache ​--maxWorkers=2 --forceExit  -- ./tests/core.test.mjs",
-    "test:healthCheck": "NODE_ENV=test npx jest --config=jest.config.js --clearCache --maxWorkers=2 --forceExit  -- ./tests/health-check.test.mjs",
-    "test:manage": "NODE_ENV=test npx jest --config=jest.config.js --clearCache  --maxWorkers=2 --forceExit  -- ./tests/core-manage-jsonrpc.test.mjs",
-    "test:discovery": "NODE_ENV=test npx jest --config=jest.config.js --clearCache ​--maxWorkers=2 --forceExit  -- ./tests/core-discovery-jsonrpc.test.mjs",
-    "test:core:manage:discovery": "NODE_ENV=test npx jest --config=jest.config.js --clearCache ​ --maxWorkers=2 --forceExit  -- ./tests/core-manage-discovery-jsonrpc.test.mjs",
-    "test:scope": "NODE_ENV=test npx jest --config=jest.config.js --clearCache​ --maxWorkers=2 --forceExit -- ./tests/scope.test.mjs"
+    "test": "NODE_ENV=test npx jest --config=jest.config.js --maxWorkers=2 --silent -i",
+    "test:core": "NODE_ENV=test npx jest --config=jest.config.js  ​--maxWorkers=2 --forceExit  -- ./tests/core.test.mjs",
+    "test:healthCheck": "NODE_ENV=test npx jest --config=jest.config.js  --maxWorkers=2 --forceExit  -- ./tests/health-check.test.mjs",
+    "test:manage": "NODE_ENV=test npx jest --config=jest.config.js   --maxWorkers=2 --forceExit  -- ./tests/core-manage-jsonrpc.test.mjs",
+    "test:discovery": "NODE_ENV=test npx jest --config=jest.config.js  ​--maxWorkers=2 --forceExit  -- ./tests/core-discovery-jsonrpc.test.mjs",
+    "test:core:manage:discovery": "NODE_ENV=test npx jest --config=jest.config.js ​ --maxWorkers=2 --forceExit  -- ./tests/core-manage-discovery-jsonrpc.test.mjs",
+    "test:scope": "NODE_ENV=test npx jest --config=jest.config.js​ --maxWorkers=2 --forceExit -- ./tests/scope.test.mjs"
   },
   "repository": {
     "type": "git",
