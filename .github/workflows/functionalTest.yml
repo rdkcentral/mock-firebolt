@@ -33,8 +33,8 @@ jobs:
       # install the packages and running functional test cases one by one.
       run: |
         cd server; \
-        npm install; \
         cp src/.mf.config.SAMPLE.json src/.mf.config.json; \
+        npm install; \
         cd ../cli; \
         npm install; \
         cd ../functional; \
