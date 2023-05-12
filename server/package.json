@@ -6,21 +6,21 @@
   "scripts": {
     "clean": "node ./scripts/clean.mjs",
     "prepare:setup": "npm run clean",
-    "build:core": "node ./scripts/copy.mjs ./node_modules/@firebolt-js/sdk/dist/firebolt-open-rpc.json ./build/firebolt-open-rpc.json",
-    "build:manage": "node ./scripts/copy.mjs ./node_modules/@firebolt-js/manage-sdk/dist/firebolt-manage-open-rpc.json ./build/firebolt-manage-open-rpc.json",
+    "build:core": "node ./scripts/copy.mjs ./node_modules/@firebolt-js/sdk/dist/firebolt-core-open-rpc.json ./build/firebolt-core-open-rpc.json",
     "build:discovery": "node ./scripts/copy.mjs ./node_modules/@firebolt-js/discovery-sdk/dist/firebolt-discovery-open-rpc.json ./build/firebolt-discovery-open-rpc.json",
     "build:openrpc:NOTES": "Only use if you are using all three Firebolt SDKs",
-    "build:openrpc": "npm run build:core && npm run build:manage && npm run build:discovery",
+    "build:openrpc": "npm run build:core && npm run build:discovery",
     "build:mf": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
     "build:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build": "npm run build:openrpc && npm run build:mf",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
-    "start:NOTES1": "Can do 'npm run start' (core SDK only) or 'npm run start --manage --discovery' (all three SDKs)",
+    "start:NOTES1": "Can do 'npm run start' (core SDK only) or 'npm run start -- --discovery'",
     "start": "node build/index.mjs",
     "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
-    "dev:NOTES2": "Can do 'npm run dev' (core SDK only) or 'npm run dev --manage --discovery' (all three SDKs)",
+    "dev:NOTES2": "Can do 'npm run dev' (core SDK only) or 'npm run dev -- --discovery'",
     "dev": "npm run build:mf && npm run start --",
-    "upgradeSDK": "npm upgrade core; npm upgrade manage; npm upgrade discovery; npm run build:core; npm run build:manage; npm run build:discovery; npm run build:discovery; npm run build:mf"
+    "upgradeSDKAndBuildMF": "npm update @firebolt-js/sdk && npm update @firebolt-js/discovery-sdk && npm run clean && npm run build:core && npm run build:discovery && npm run build:mf",
+    "postinstall": "npm run upgradeSDKAndBuildMF"
   },
   "repository": {
     "type": "git",
@@ -60,8 +60,7 @@
     "ws": "^8.2.3"
   },
   "optionalDependencies": {
-    "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git",
-    "@firebolt-js/manage-sdk": "*"
+    "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git"
   },
   "keywords": [
     "firebolt",

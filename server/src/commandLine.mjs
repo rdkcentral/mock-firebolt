@@ -33,8 +33,7 @@ import { mergeArrayOfStrings } from './util.mjs';
 //   node index.mjs --conduitKeySocketPort 9986 ...          (Use custom socket port for forwarding key presses over Conduit (default: 9996))
 //   node index.mjs --developerToolPort 9985 ...             (Use custom socket port for developer tool port (default: 9995))
 //   node index.mjs --developerToolName "My MF" ...          (Use custom developer tool name (default: "Mock Firebolt"))
-//   node index.mjs --manage ...                             (core + manage SDKs)
-//   node index.mjs --manage --discovery ...                 (core + manage + discovery SDKs)
+//   node index.mjs -- --discovery ...                       (core + discovery SDKs)
 //   node index.mjs --triggers <path1> --triggers <path2>    (Load triggers from files in these paths)
 //   node index.mjs --novalidate <opt1> --novalidate <opt2>  (does not validate options provided by user)
 

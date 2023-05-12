@@ -38,7 +38,6 @@ jobs:
         npm update @firebolt-js/discovery-sdk; \
         npm run clean; \
         npm run build:core; \
-        npm run build:manage; \
         npm run build:discovery; \
         npm run build:mf; \
         cd ../cli; \

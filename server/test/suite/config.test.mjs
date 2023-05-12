@@ -46,15 +46,8 @@ test(`config works properly`, () => {
           cliFlag: null,
           cliShortFlag: null,
           enabled: true,
-          fileName: "firebolt-open-rpc.json",
+          fileName: "firebolt-core-open-rpc.json",
           name: "core",
-        },
-        {
-          cliFlag: "manage",
-          cliShortFlag: "m",
-          enabled: false,
-          fileName: "firebolt-manage-open-rpc.json",
-          name: "manage",
         },
         {
           cliFlag: "discovery",
