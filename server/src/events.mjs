@@ -278,7 +278,6 @@ function emitResponse(finalResult, msg, userId, method) {
     result: finalResult,
     resultAsJson: JSON.stringify(finalResult)
   };
-  console.log(templateData)
 
   // If event template config does not exist, use default template which just returns the result
   const defaultEventTemplate = `{"result":{{{resultAsJson}}}{{~"}}"~}}}`;
