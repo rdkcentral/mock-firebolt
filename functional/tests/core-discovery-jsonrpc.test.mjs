@@ -40,7 +40,7 @@ afterAll(async () => {
 test(`Validate firebolt response for Discovery SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "content.providers",
+      method: "Content.providers",
       params: {},
       id: 0,
     })

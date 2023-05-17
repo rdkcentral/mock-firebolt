@@ -45,7 +45,7 @@ test(`MF Startup/Health Check`, async () => {
 test(`Validate OPENRPC Response for CORE SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "accessibility.closedCaptionsSettings",
+      method: "Accessibility.closedCaptionsSettings",
       params: {},
       id: 0,
     })
@@ -93,7 +93,7 @@ test(`Dumping the state for default user`, async () => {
 // Setting account.id for a particular user
 test(`Run MF cli command to set account.id for 123 user`, async () => {
   const result = await utilities.callMfCli(
-    `--method account.id --result "'111'" --user 123`
+    `--method Account.id --result "'111'" --user 123`
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
   const response = await utilities.callMfCli("--user 123 --state");
@@ -143,7 +143,7 @@ test(`Validate start and stop session`, async () => {
 test(`Validate send event for default user`, async () => {
   await utilities.fireboltCommand(
     JSON.stringify({
-      method: "accessibility.onVoiceGuidanceSettingsChanged",
+      method: "Accessibility.onVoiceGuidanceSettingsChanged",
       params: { listen: true },
       id: 4,
     })
@@ -159,7 +159,7 @@ test(`Validate send event for default user`, async () => {
 test(`Validate broadcast event for a user in a group and Validate that other user in that group getting that`, async () => {
   await utilities.fireboltCommand(
     JSON.stringify({
-      method: "device.onNameChanged",
+      method: "Device.onNameChanged",
       params: { listen: true },
       id: 11,
     }),

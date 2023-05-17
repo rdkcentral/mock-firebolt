@@ -39,7 +39,7 @@ afterAll(async () => {
 test(`Validate OPENRPC Response for manage SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "accessory.list",
+      method: "Accessory.list",
       params: {},
       id: 0,
     })
