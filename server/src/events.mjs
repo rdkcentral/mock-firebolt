@@ -21,6 +21,7 @@
 'use strict';
 
 import JSONPath from 'jsonpath';
+import hbs from 'handlebars';
 import * as stateManagement from './stateManagement.mjs';
 import * as userManagement from './userManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
@@ -205,26 +206,46 @@ function isEventListenerOffMessage(oMsg) {
   return true;
 }
 
-// Respond to an event listener request with an ack
-// Example:
-//   For request:
-//     {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}
-//   Send ack response:
-//     {"jsonrpc":"2.0","result":{"listening":true, "event":"lifecycle.onInactive"},"id":1}
-function sendEventListenerAck(userId, ws, oMsg) {
-  const oAckMessage = {
-    jsonrpc: '2.0',
-    result: {
-      listening: true,
-      event: oMsg.method
-    },
-    id: oMsg.id
-  };
-  // Could do, but why?: const dly = db.getAppropriateDelay(user, method); await util.delay(dly);
-  const ackMessage = JSON.stringify(oAckMessage);
+/**
+ * Respond to an event listener request with an ack
+ * @param {string} userId - The user ID for whom the ack message is sent.
+ * @param {WebSocket} ws - The WebSocket instance to which the ack message will be sent.
+ * @param {object} metadata - The metadata associated with the event listener request.
+ * @returns {void}
+ * @example
+   For request:
+   {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}
+   Send ack response:
+   {"jsonrpc":"2.0","result":{"listening":true, "event":"lifecycle.onInactive"},"id":1}
+*/
+function sendEventListenerAck(userId, ws, metadata) {
+  const template = hbs.compile(eventConfig.registrationAck);
+  const ackMessage = template(metadata);
+  const parsedAckMessage = JSON.parse(ackMessage);
+
   ws.send(ackMessage);
-  logger.debug(`Sent event listener ack message for user ${userId}: ${ackMessage}`);
-  updateCallWithResponse(oMsg.method, oAckMessage.result, "result")
+  logger.debug(`Sent registration event ack message for user ${userId}: ${ackMessage}`);
+  updateCallWithResponse(metadata.method, parsedAckMessage.result, "result")
+}
+
+/**
+ * Respond to an unregistration event with an ack
+ * @param {string} userId - The user ID for whom the ack message is sent.
+ * @param {WebSocket} ws - The WebSocket instance to which the ack message will be sent.
+ * @param {object} metadata - The metadata associated with the unregistration event.
+ * @returns {void}
+ * @example
+   For request:
+   {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}
+   Send ack response:
+   {"jsonrpc":"2.0","result":{"listening":true, "event":"lifecycle.onInactive"},"id":1}
+*/
+function sendUnRegistrationAck(userId, ws, metadata) {
+  const template = hbs.compile(eventConfig.unRegistrationAck);
+  const ackMessage = template(metadata);
+
+  ws.send(ackMessage);
+  logger.debug(`Sent unregistration event ack message for user ${userId}: ${ackMessage}`)
 }
 
 function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
@@ -235,20 +256,35 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
   coreSendEvent(true, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
 }
 
-// sending response to web-socket
+/**
+ * Emits a response to the registered event listener.
+ * @param {any} finalResult - The final result to be included in the response.
+ * @param {string} msg - The message associated with the response.
+ * @param {string} userId - The ID of the user.
+ * @param {string} method - The method associated with the event.
+ * @returns {void}
+*/
 function emitResponse(finalResult, msg, userId, method) {
   const listener = getRegisteredEventListener(userId, method);
   if (!listener) {
     logger.debug('Event message could not be sent because a listener was not found');
     return;
   }
-  const { id, wsArr } = listener;
-  const oEventMessage = {
-    jsonrpc: '2.0',
-    id: id,
-    result: finalResult
+
+  const { metadata, wsArr } = listener;
+  // Defines the data object that will be inputted into handlebars
+  const templateData = {
+    ...metadata,
+    result: finalResult,
+    resultAsJson: JSON.stringify(finalResult)
   };
-  const eventMessage = JSON.stringify(oEventMessage);
+  console.log(templateData)
+
+  // If event template config does not exist, use default template which just returns the result
+  const defaultEventTemplate = `{"result":{{{resultAsJson}}}{{~"}}"~}}}`;
+
+  const template = hbs.compile(eventConfig.event || defaultEventTemplate);
+  const eventMessage = template(templateData);
 
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
@@ -385,7 +421,7 @@ export const testExports = {
 export {
   registerEventListener, deregisterEventListener,
   isEventListenerOnMessage, isEventListenerOffMessage,
-  sendEventListenerAck,
+  sendEventListenerAck, sendUnRegistrationAck,
   sendEvent, sendBroadcastEvent, logSuccess, logErr,
   logFatalErr, extractEventData
 };

@@ -69,10 +69,13 @@ test(`config works properly`, () => {
           searchRegex: "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":true.*).*\\.on\\S*",
           method: "$.method"
         },
-        unRegistrationMessage : {
+        unRegistrationMessage: {
           searchRegex: "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":false.*).*\\.on\\S*",
           method: "$.method"
-        }
+        },
+        registrationAck: "{\"jsonrpc\":\"2.0\",\"id\":{{registration.id}},\"result\":{\"listening\":true,\"event\":\"{{method}}\"}}",
+        unRegistrationAck: "{\"jsonrpc\":\"2.0\",\"id\":{{unRegistration.id}},\"result\":{\"listening\":false,\"event\":\"{{method}}\"}}",
+        event: "{\"result\":{{{resultAsJson}}},\"id\":{{registration.id}},\"jsonrpc\":\"2.0\"}"
       }
     },
   };

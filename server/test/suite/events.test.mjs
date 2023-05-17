@@ -184,11 +184,30 @@ test(`events.isEventListenerOffMessage works properly`, () => {
 
 test(`events.sendEventListenerAck works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
-  const oMsgdummy = { method: "lifecycle.onInactive", id: 12 };
-  const dummyWebSocket = { send: () => {} };
-  events.sendEventListenerAck("12345", dummyWebSocket, oMsgdummy);
+  const wsSpy = jest.fn();
+  const dummyWebSocket = { send: wsSpy };
+  const metadataDummy = { 
+    method: "lifecycle.onInactive", 
+    registration: { id: 12 } 
+  };
+  events.sendEventListenerAck("12345", dummyWebSocket, metadataDummy);
   expect(spy).toHaveBeenCalled();
+  expect(wsSpy).toHaveBeenCalled();
 });
+
+test(`events.sendUnRegistrationAck works properly`, () => {
+  const spy = jest.spyOn(logger, "debug");
+  const wsSpy = jest.fn();
+  const dummyWebSocket = { send: wsSpy };
+  const metadataDummy = { 
+    method: "lifecycle.onInactive", 
+    unRegistration: { id: 12 } 
+  };
+  events.sendUnRegistrationAck("12345", dummyWebSocket, metadataDummy);
+  expect(spy).toHaveBeenCalled();
+  expect(wsSpy).toHaveBeenCalled();
+});
+
 
 test(`events.sendEvent works properly`, () => {
   const methodName = "test",
