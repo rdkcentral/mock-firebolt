@@ -95,7 +95,7 @@ function setupOutgoingWs(returnWs, userId) {
 }
 
 function getResponseMessageFromProxy(returnWs) {
-  let timeout = 30000;
+  let timeout = 10000;
   let counter = 0;
   let interval = 100;
   return new Promise((res, rej) => {
