@@ -144,7 +144,7 @@ test(`userManagement.addUser works properly for same user`, () => {
   const userId = "456~A#sampleApp";
   expect( userManagement.addUser(userId)).toEqual(true);
   userManagement.addUser(userId);
-  const userId1 = "456~A#amazon";
+  const userId1 = "456~A#appId3";
   const expectedResult = false;
   const result1 = userManagement.addUser(userId1);
   expect(result1).toEqual(expectedResult);
@@ -165,13 +165,13 @@ test(`userManagement.addUser works properly for same user same appId`, () => {
 });
 
 test(`userManagement.addUser works properly for same user without group`, () => {
-  userManagement.addUser("111#youtube");
-  const userId3 = "111#amazon";
+  userManagement.addUser("111#appId2");
+  const userId3 = "111#appId3";
   const expectedResult3 = false
   const result3 = userManagement.addUser(userId3);
   expect(result3).toEqual(expectedResult3);
 
-  const userId4 = "222#youtube";
+  const userId4 = "222#appId2";
   const expectedResult4 = false
   const result4 = userManagement.addUser(userId4);
   expect(result4).toEqual(expectedResult4);
@@ -192,7 +192,7 @@ test(`userManagement.addUser works properly for same user same appId but differe
 });
 
 test(`userManagement.addUser works properly for different user different appId but same group`, () => {
-  const userId = "999~A#hulu";
+  const userId = "999~A#appId4";
   const expectedResult =true
   const result = userManagement.addUser(userId)
   expect(result).toEqual(expectedResult);

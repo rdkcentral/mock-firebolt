@@ -70,7 +70,7 @@ run `node cli.mjs --getStatus`
 
 To add user :
 run `node cli.mjs --addUser <userId>`
-example: node cli.mjs --addUser "123~A#netflix"
+example: node cli.mjs --addUser "123~A#appId1"
 
 ## Downloading JSON/YAML overrides from a git repository
 
