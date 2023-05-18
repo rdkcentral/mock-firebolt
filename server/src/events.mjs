@@ -131,10 +131,10 @@ function deregisterEventListener(userId, metadata, ws) {
  * Extracts event data from a given message object based on provided configuration.
  * @param {object} oMsg - The message object to extract event data from.
  * @param {object} config - The configuration object for the event data extraction.
- * @param {boolean} isOn - Whether eventListener enable or disable request
+ * @param {boolean} isEnabled - Whether eventListener enable or disable request
  * @returns {object | false} - An object containing the extracted event data or false if the extraction fails.
 */
-function extractEventData(oMsg, config, isOn) {
+function extractEventData(oMsg, config, isEnabled) {
   const searchRegex = config.searchRegex;
   const method = config.method || '$.method';
 
@@ -145,6 +145,7 @@ function extractEventData(oMsg, config, isOn) {
   const extractedMethod = JSONPath.query(oMsg, method);
 
   if (extractedMethod.length === 0) {
+    logger.debug(`Error occurred while extracting event data: No method found in the provided message.`);
     return false;
   }
 
@@ -155,11 +156,11 @@ function extractEventData(oMsg, config, isOn) {
     method: methodName
   };
 
-   // If isOn is true, add oMsg to metadata.registration
-   if (isOn) {
+   // If isEnabled is true, add oMsg to metadata.registration
+   if (isEnabled) {
     metadata.registration = oMsg;
   } else {
-    // If isOn is false, add oMsg to metadata.unRegistration
+    // If isEnabled is false, add oMsg to metadata.unRegistration
     metadata.unRegistration = oMsg;
   }
 
@@ -187,10 +188,7 @@ function isEventListenerMessage(oMsg, config) {
  * @return {boolean} - Returns `true` if the message is intended to enable an event listener, `false` otherwise.
  */
 function isEventListenerOnMessage(oMsg) {
-  if (!isEventListenerMessage(oMsg, eventConfig.registrationMessage)) {
-    return false;
-  }
-  return true;
+  return isEventListenerMessage(oMsg, eventConfig.registrationMessage);
 }
 
 /**
@@ -200,10 +198,7 @@ function isEventListenerOnMessage(oMsg) {
  * @return {boolean} - Returns `true` if the message is intended to disable an event listener, `false` otherwise.
  */
 function isEventListenerOffMessage(oMsg) {
-  if (!isEventListenerMessage(oMsg, eventConfig.unRegistrationMessage)) {
-    return false;
-  }
-  return true;
+  return isEventListenerMessage(oMsg, eventConfig.unRegistrationMessage);
 }
 
 /**
@@ -279,11 +274,16 @@ function emitResponse(finalResult, msg, userId, method) {
     resultAsJson: JSON.stringify(finalResult)
   };
 
-  // If event template config does not exist, use default template which just returns the result
-  const defaultEventTemplate = `{"result":{{{resultAsJson}}}{{~"}}"~}}}`;
+  let eventMessage;
 
-  const template = hbs.compile(eventConfig.event || defaultEventTemplate);
-  const eventMessage = template(templateData);
+  // If event template config exists, use it
+  if (eventConfig.event) {
+    const template = hbs.compile(eventConfig.event);
+    eventMessage = template(templateData);
+  } else {
+    // If event template config does not exist, just send the raw finalResult
+    eventMessage = finalResult;
+  }
 
   wsArr.forEach((ws) => {
     ws.send(eventMessage);

@@ -368,9 +368,9 @@ test(`events.extractEventData returns correct data when searchRegex and method m
     searchRegex: /lifecycle\..*/,
     method: '$.method',
   };
-  const isOn = true;
+  const isEnabled = true;
 
-  const result = events.extractEventData(oMsg, config, isOn);
+  const result = events.extractEventData(oMsg, config, isEnabled);
 
   const expectedResult = {
     registration: oMsg,
@@ -393,9 +393,9 @@ test(`events.extractEventData returns correct data when searchRegex and method m
     searchRegex: /lifecycle\..*/,
     method: 'payload.params.method',
   };
-  const isOn = true;
+  const isEnabled = true;
 
-  const result = events.extractEventData(oMsg, config, isOn);
+  const result = events.extractEventData(oMsg, config, isEnabled);
 
   const expectedResult = {
     registration: oMsg,
@@ -416,9 +416,9 @@ test(`events.extractEventData returns false when searchRegex does not match`, ()
     searchRegex: /invalidRegex/,
     method: '$.method',
   };
-  const isOn = true;
+  const isEnabled = true;
 
-  const result = events.extractEventData(oMsg, config, isOn);
+  const result = events.extractEventData(oMsg, config, isEnabled);
 
   expect(result).toBeFalsy();
 });
@@ -434,14 +434,14 @@ test(`events.extractEventData returns false when method does not match`, () => {
     searchRegex: /lifecycle\..*/,
     method: '$.nonExistentProperty',
   };
-  const isOn = true;
+  const isEnabled = true;
 
-  const result = events.extractEventData(oMsg, config, isOn);
+  const result = events.extractEventData(oMsg, config, isEnabled);
 
   expect(result).toBeFalsy();
 });
 
-test(`events.extractEventData returns correct data when isOn is false`, () => {
+test(`events.extractEventData returns correct data when isEnabled is false`, () => {
   const oMsg = {
     method: 'lifecycle.onInactive',
     payload: {
@@ -452,9 +452,9 @@ test(`events.extractEventData returns correct data when isOn is false`, () => {
     searchRegex: /lifecycle\..*/,
     method: '$.method',
   };
-  const isOn = false;
+  const isEnabled = false;
 
-  const result = events.extractEventData(oMsg, config, isOn);
+  const result = events.extractEventData(oMsg, config, isEnabled);
 
   const expectedResult = {
     registration: {},
