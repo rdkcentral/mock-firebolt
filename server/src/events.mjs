@@ -287,7 +287,12 @@ function emitResponse(finalResult, msg, userId, method) {
 
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
-    logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
+    // Check if eventType is included in config
+    if (eventConfig.eventType) {
+      logger.info(`${msg}: Sent ${eventConfig.eventType} message to user ${userId}: ${eventMessage}`);
+    } else {
+      logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
+    }
   });
 }
 
