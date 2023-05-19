@@ -78,7 +78,6 @@ test(`events.getRegisteredEventListener works properly`, () => {
     methodName
   );
   const expectedResult = {
-    id: 12,
     metadata: {
       method: methodName,
       registration: { id: 12 },

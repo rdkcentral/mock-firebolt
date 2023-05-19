@@ -60,15 +60,14 @@ const eventListenerMap = {};
  * @returns {void}
 */
 function registerEventListener(userId, metadata, ws) {
-  const { registration, method } = metadata;
+  const { method } = metadata;
 
   if (!eventListenerMap[userId]) {
     eventListenerMap[userId] = {};
   }
 
   if (!eventListenerMap[userId][method]) {
-    // id: registration.id will be removed in part 2
-    eventListenerMap[userId][method] = { id: registration.id, wsArr: [], metadata };
+    eventListenerMap[userId][method] = { wsArr: [], metadata };
   }
 
   // Check if ws is already in the wsArr before pushing
