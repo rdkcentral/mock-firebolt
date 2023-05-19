@@ -95,6 +95,6 @@ When the event `device.onNameChanged` occurs, the server generates an event mess
 {"result": "NEW-DEVICE-NAME-1","id":7,"jsonrpc":"2.0"}
 ```
 
-In the Handlebars templates, you can access any data from the event metadata using the dot notation. For instance, you can use {{metadata.params.id}} to access the id from the params object in the metadata.
+In the Handlebars templates, you can access data from the event registration, unregistration, and the event itself, which we collectively refer to as metadata. You can use dot notation to access specific pieces of data. For instance, you can use {{registration.id}} to access the id from the registration object in the metadata. Similarly, you can access information from unregistration and event metadata objects.
 
 This example flow should give you an understanding of how to customize the event configurations to suit your needs. Remember, the placeholders in the Handlebars templates correspond to the data in the event metadata, and you can use dot notation to access nested properties.
