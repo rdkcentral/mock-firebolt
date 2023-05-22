@@ -27,19 +27,20 @@ import { eventTriggers } from "../../src/triggers.mjs";
 
 test(`events.registerEventListener works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
-  const dummyObject = {
-    method: "",
-    id: 12,
+  const metadata = {
+    registration: {},
+    unRegistration: {}
   };
   const dummyWebSocket = { send: () => {} };
-  events.registerEventListener("12345", dummyObject, dummyWebSocket);
+  events.registerEventListener("12345", metadata, dummyWebSocket);
   expect(spy).toHaveBeenCalled();
 });
 
 test(`events.isRegisteredEventListener works properly`, () => {
   const methodArray = ["lifecycle.onInactive", "ASCDFG"];
   const dummyObject = {
-    "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
+    method: "lifecycle.onInactive",
+    registration: { id: 12 },
   };
   events.registerEventListener("12345", dummyObject);
   methodArray.forEach((method) => {
@@ -47,93 +48,100 @@ test(`events.isRegisteredEventListener works properly`, () => {
       "12345",
       method
     );
-    if (method in Object.keys(dummyObject)) expect(result).toBeTruthy();
-    else expect(result).toBeFalsy();
+    const expectedResult = (method === dummyObject.method);
+    expect(result).toBe(expectedResult);
   });
 });
 
 test(`events.isRegisteredEventListener works properly if path`, () => {
   const dummyObject = {
-    "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
+    method: "lifecycle.onInactive",
+    registration: { id: 12 },
   };
   events.registerEventListener("12345", dummyObject);
   const result = events.testExports.isRegisteredEventListener(
-    "12342",
+    "12345",
     "lifecycle.onInactive"
   );
-  expect(result).toBeFalsy();
+  expect(result).toBeTruthy();
 });
 
 test(`events.getRegisteredEventListener works properly`, () => {
   const methodName = "lifecycle.onInactive";
   const dummyObject = {
-    "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
+    registration: { id: 12 },
+    method: methodName
   };
   events.registerEventListener("12345", dummyObject);
   const result = events.testExports.getRegisteredEventListener(
     "12345",
     methodName
   );
-  const expectedResult = dummyObject.methodName;
+  const expectedResult = {
+    metadata: {
+      method: methodName,
+      registration: { id: 12 },
+    },
+    wsArr: [],
+  };
   expect(result).toEqual(expectedResult);
 });
 
 test(`events.getRegisteredEventListener works properly if path`, () => {
+  const methodName = "lifecycle.onInactive";
   const dummyObject = {
-    "lifecycle.onInactive": { method: "lifecycle.onInactive", id: 12 },
+    registration: { id: 12 },
+    method: methodName
   };
   events.registerEventListener("12345", dummyObject);
   const result = events.testExports.getRegisteredEventListener(
     "12342",
-    "lifecycle.onInactive"
+    methodName
   );
   expect(result).toBeFalsy();
 });
 
 test(`events.deregisterEventListener works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
-  const oMsgdummy = { method: "lifecycle.onInactive", id: 12 };
+  const metadata = { 
+    registration: {},
+    method: "lifecycle.onInactive", 
+    unRegistration: {}
+  };
   const dummyWebSocket = { send: () => {} };
-  events.deregisterEventListener("12345", oMsgdummy.method, dummyWebSocket);
+  events.deregisterEventListener("12345", metadata, dummyWebSocket);
   expect(spy).toHaveBeenCalled();
 });
 
 test(`events.isEventListenerOnMessage works properly`, () => {
-  const dummyArray = [
+  const input = [
     {
-      jsonrpc: "2.0",
-      method: "lifecycle.onInactive",
-      params: { listen: true },
-      id: 1,
+      jsonrpc: '2.0',
+      method: 'lifecycle.onInactive',
+      params: { listen: true }
     },
     {
-      jsonrpc: "2.0",
-      method: "lifecycle.Inactive",
-      params: { listen: true },
-      id: 1,
+      jsonrpc: '2.0',
+      method: 'lifecycle.Inactive',
+      params: { listen: true }
     },
     {
-      jsonrpc: "2.0",
-      method: "lifecycle.onInactive",
-      params: { listen: false },
-      id: 1,
+      jsonrpc: '2.0',
+      method: 'lifecycle.onInactive',
+      params: { listen: false }
     },
     {
-      jsonrpc: "2.0",
-      method: "lifecycle.Inactive",
-      params: { listen: false },
-      id: 1,
-    },
+      jsonrpc: '2.0',
+      method: 'lifecycle.Inactive',
+      params: { listen: false }
+    }
   ];
 
-  dummyArray.forEach((dummyExample) => {
-    const result = events.isEventListenerOnMessage(dummyExample);
-    const methodName = dummyExample.method.substring(
-      dummyExample.method.lastIndexOf(".") + 1
-    );
-    const expectedResult =
-      dummyExample.params.listen && methodName.startsWith("on");
-    expect(result).toBe(expectedResult);
+  const expectedOutput = [true, false, false, false];
+
+  input.forEach((obj, i) => {
+    const result = events.isEventListenerOnMessage(obj);
+    expect(result).toBe(expectedOutput[i]);
   });
 });
 
@@ -165,24 +173,40 @@ test(`events.isEventListenerOffMessage works properly`, () => {
     },
   ];
 
-  dummyArray.forEach((dummyExample) => {
-    const result = events.isEventListenerOffMessage(dummyExample);
-    const methodName = dummyExample.method.substring(
-      dummyExample.method.lastIndexOf(".") + 1
-    );
-    const expectedResult =
-      !dummyExample.params.listen && methodName.startsWith("on");
-    expect(result).toBe(expectedResult);
+  const expectedOutput = [false, false, true, false];
+
+  dummyArray.forEach((obj, i) => {
+    const result = events.isEventListenerOffMessage(obj);
+    expect(result).toBe(expectedOutput[i]);
   });
 });
 
 test(`events.sendEventListenerAck works properly`, () => {
   const spy = jest.spyOn(logger, "debug");
-  const oMsgdummy = { method: "lifecycle.onInactive", id: 12 };
-  const dummyWebSocket = { send: () => {} };
-  events.sendEventListenerAck("12345", dummyWebSocket, oMsgdummy);
+  const wsSpy = jest.fn();
+  const dummyWebSocket = { send: wsSpy };
+  const metadataDummy = { 
+    method: "lifecycle.onInactive", 
+    registration: { id: 12 } 
+  };
+  events.sendEventListenerAck("12345", dummyWebSocket, metadataDummy);
   expect(spy).toHaveBeenCalled();
+  expect(wsSpy).toHaveBeenCalled();
 });
+
+test(`events.sendUnRegistrationAck works properly`, () => {
+  const spy = jest.spyOn(logger, "debug");
+  const wsSpy = jest.fn();
+  const dummyWebSocket = { send: wsSpy };
+  const metadataDummy = { 
+    method: "lifecycle.onInactive", 
+    unRegistration: { id: 12 } 
+  };
+  events.sendUnRegistrationAck("12345", dummyWebSocket, metadataDummy);
+  expect(spy).toHaveBeenCalled();
+  expect(wsSpy).toHaveBeenCalled();
+});
+
 
 test(`events.sendEvent works properly`, () => {
   const methodName = "test",
@@ -199,7 +223,10 @@ test(`events.sendEvent works properly`, () => {
   const debugSpy = jest.spyOn(logger, "debug");
   const infoSpy = jest.spyOn(logger, "info");
   const errorSpy = jest.spyOn(logger, "error");
-  const dummyObject = { method: "test", id: 12 };
+  const dummyObject = {
+    registration: { id: 12 },
+    method: methodName
+  };
   eventTriggers.test = {
     pre: {
       call: () => {},
@@ -286,7 +313,16 @@ test(`events.isAnyRegisteredInGroup works properly`, () => {
 });
 
 test(`events.isAnyRegisteredInGroup works properly with if path`, () => {
-  const result = events.testExports.isAnyRegisteredInGroup("12345", "");
+  // Register a dummy event listener for user "12345"
+  const dummyObject = {
+    method: "dummyMethod",
+    registration: { id: 1 },
+    unRegistration: {}
+  };
+  events.registerEventListener("12345", dummyObject);
+
+  // Check if there is any registered event listener for user "12345", regardless of the method
+  const result = events.testExports.isAnyRegisteredInGroup("12345", "dummyMethod");
   expect(result).toBe(true);
 });
 
@@ -307,15 +343,122 @@ test(`events.sendBroadcastEvent works properly`, () => {
 
 test(`events.emitResponse works properly`, () => {
   const spy = jest.spyOn(logger, "info");
-  const listenerObject = {
-    method: "core",
-    id: 12,
+  const dummyObject = {
+    registration: { id: 12 },
+    method: 'methodName'
   };
   const dummyWebSocket = { send: () => {} };
 
   // Register the event listener first to simulate a real-world scenario
-  events.registerEventListener("12345", listenerObject, dummyWebSocket);
+  events.registerEventListener("12345", dummyObject, dummyWebSocket);
 
-  events.testExports.emitResponse({}, "test_msg", "12345", "core");
+  events.testExports.emitResponse({}, "test_msg", "12345", "methodName");
   expect(spy).toHaveBeenCalled();
+});
+
+test(`events.extractEventData returns correct data when searchRegex and method match`, () => {
+  const oMsg = {
+    method: 'lifecycle.onInactive',
+    payload: {
+      userId: 123,
+    },
+  };
+  const config = {
+    searchRegex: /lifecycle\..*/,
+    method: '$.method',
+  };
+  const isEnabled = true;
+
+  const result = events.extractEventData(oMsg, config, isEnabled);
+
+  const expectedResult = {
+    registration: oMsg,
+    method: 'lifecycle.onInactive',
+    unRegistration: {},
+  };
+  expect(result).toEqual(expectedResult);
+});
+
+test(`events.extractEventData returns correct data when searchRegex and method match 2`, () => {
+  const oMsg = {
+    payload: {
+      userId: 123,
+      params: {
+        method: 'lifecycle.onInactive',
+      }
+    },
+  };
+  const config = {
+    searchRegex: /lifecycle\..*/,
+    method: 'payload.params.method',
+  };
+  const isEnabled = true;
+
+  const result = events.extractEventData(oMsg, config, isEnabled);
+
+  const expectedResult = {
+    registration: oMsg,
+    method: 'lifecycle.onInactive',
+    unRegistration: {},
+  };
+  expect(result).toEqual(expectedResult);
+});
+
+test(`events.extractEventData returns false when searchRegex does not match`, () => {
+  const oMsg = {
+    method: 'lifecycle.onInactive',
+    payload: {
+      userId: 123,
+    },
+  };
+  const config = {
+    searchRegex: /invalidRegex/,
+    method: '$.method',
+  };
+  const isEnabled = true;
+
+  const result = events.extractEventData(oMsg, config, isEnabled);
+
+  expect(result).toBeFalsy();
+});
+
+test(`events.extractEventData returns false when method does not match`, () => {
+  const oMsg = {
+    method: 'lifecycle.onInactive',
+    payload: {
+      userId: 123,
+    },
+  };
+  const config = {
+    searchRegex: /lifecycle\..*/,
+    method: '$.nonExistentProperty',
+  };
+  const isEnabled = true;
+
+  const result = events.extractEventData(oMsg, config, isEnabled);
+
+  expect(result).toBeFalsy();
+});
+
+test(`events.extractEventData returns correct data when isEnabled is false`, () => {
+  const oMsg = {
+    method: 'lifecycle.onInactive',
+    payload: {
+      userId: 123,
+    },
+  };
+  const config = {
+    searchRegex: /lifecycle\..*/,
+    method: '$.method',
+  };
+  const isEnabled = false;
+
+  const result = events.extractEventData(oMsg, config, isEnabled);
+
+  const expectedResult = {
+    registration: {},
+    method: 'lifecycle.onInactive',
+    unRegistration: oMsg,
+  };
+  expect(result).toEqual(expectedResult);
 });

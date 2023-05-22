@@ -20,6 +20,8 @@
 
 'use strict';
 
+import JSONPath from 'jsonpath';
+import hbs from 'handlebars';
 import * as stateManagement from './stateManagement.mjs';
 import * as userManagement from './userManagement.mjs';
 import { eventTriggers } from './triggers.mjs';
@@ -27,6 +29,8 @@ import { logger } from './logger.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import { config } from './config.mjs';
 import { updateCallWithResponse } from './sessionManagement.mjs';
+
+const { dotConfig: { eventConfig } } = config;
 
 function logSuccess(onMethod, result, msg) {
   logger.info(
@@ -48,22 +52,30 @@ function logFatalErr() {
 // name (e.g., lifecycle.onInactive) to message id (e.g., 17)
 const eventListenerMap = {};
 
-// Associate this message ID with this method so if/when events are sent, we know which message ID to use
-function registerEventListener(userId, oMsg, ws) {
+/**
+ * Associate this message ID with this method so if/when events are sent, we know which message ID to use
+ * @param {string} userId - The user ID associated with the event listener
+ * @param {Object} metadata - The metadata object containing information about the event listener registration
+ * @param {WebSocket} ws - The WebSocket object associated with the event listener
+ * @returns {void}
+*/
+function registerEventListener(userId, metadata, ws) {
+  const { method } = metadata;
+
   if (!eventListenerMap[userId]) {
     eventListenerMap[userId] = {};
   }
 
-  if (!eventListenerMap[userId][oMsg.method]) {
-    eventListenerMap[userId][oMsg.method] = { id: oMsg.id, wsArr: [] };
+  if (!eventListenerMap[userId][method]) {
+    eventListenerMap[userId][method] = { wsArr: [], metadata };
   }
 
   // Check if ws is already in the wsArr before pushing
-  if (!eventListenerMap[userId][oMsg.method].wsArr.includes(ws)) {
-    eventListenerMap[userId][oMsg.method].wsArr.push(ws);
+  if (!eventListenerMap[userId][method].wsArr.includes(ws)) {
+    eventListenerMap[userId][method].wsArr.push(ws);
   }
 
-  logger.debug(`Registered event listener mapping: ${userId}:${oMsg.method}:${oMsg.id}`);
+  logger.debug(`Registered event listener mapping: ${userId}:${method}`);
 }
 
 // Return true if at least one user in the user’s group is registered for the given method
@@ -87,70 +99,147 @@ function getRegisteredEventListener(userId, method) {
   return eventListenerMap[userId][method];
 }
 
-// Remove mapping from event listener request method name from our map
-// Attempts to send events to this listener going forward will fail
-function deregisterEventListener(userId, oMsg, ws) {
-  if (!eventListenerMap[userId] || !eventListenerMap[userId][oMsg.method]) {
+/**
+ * Removes the mapping from the event listener request method name from eventListenerMap. 
+ * Attempts to send events to this listener going forward will fail.
+ * @param {string} userId - The ID of the user.
+ * @param {Object} metadata - An object containing metadata for the event.
+ * @param {WebSocket} ws - The WebSocket object.
+ * @returns {void}
+*/
+function deregisterEventListener(userId, metadata, ws) {
+  const { method } = metadata;
+  if (!eventListenerMap[userId] || !eventListenerMap[userId][method]) {
     return;
   }
 
-  const wsArr = eventListenerMap[userId][oMsg.method].wsArr;
+  const wsArr = eventListenerMap[userId][method].wsArr;
   const wsIndex = wsArr.findIndex((item) => item === ws);
 
   if (wsIndex !== -1) {
     wsArr.splice(wsIndex, 1);
-    logger.debug(`Deregistered event listener mapping: ${userId}:${oMsg.method}`);
+    logger.debug(`Deregistered event listener mapping: ${userId}:${method}`);
   }
 
   if (wsArr.length === 0) {
-    delete eventListenerMap[userId][oMsg.method];
+    delete eventListenerMap[userId][method];
   }
 }
-// Is the given (incoming) message one that enables or disables an event listener?
-// Example: {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true|false},"id":1}
-// Key: The 'on' in the unqualified method name, and (2) the params.listen parameter (regardless of true|false)
-function isEventListenerMessage(oMsg) {
-  const fqMethodName = oMsg.method
-  const methodName = fqMethodName.substring(fqMethodName.lastIndexOf('.') + 1);
-  return ( methodName.startsWith('on') && 'listen' in oMsg.params );
-}
 
-// Is the given (incoming) message one that enables an event listener?
-// Example: {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}
-// Key: The params.listen === true value
-function isEventListenerOnMessage(oMsg) {
-  if ( ! isEventListenerMessage(oMsg) ) { return false; }
-  return ( oMsg.params && oMsg.params.listen );
-}
+/**
+ * Extracts event data from a given message object based on provided configuration.
+ * @param {object} oMsg - The message object to extract event data from.
+ * @param {object} config - The configuration object for the event data extraction.
+ * @param {boolean} isEnabled - Whether eventListener enable or disable request
+ * @returns {object | false} - An object containing the extracted event data or false if the extraction fails.
+*/
+function extractEventData(oMsg, config, isEnabled) {
+  const searchRegex = config.searchRegex;
+  const method = config.method || '$.method';
 
-// Is the given (incoming) message one that disables an event listener?
-// Example: {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":false},"id":1}
-// Key: The params.listen === true value
-function isEventListenerOffMessage(oMsg) {
-  if ( ! isEventListenerMessage(oMsg) ) { return false; }
-  return ( oMsg.params && ! oMsg.params.listen );
-}
+  if (!new RegExp(searchRegex).test(JSON.stringify(oMsg))) {
+    return false;
+  }
 
-// Respond to an event listener request with an ack
-// Example:
-//   For request:
-//     {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}
-//   Send ack response:
-//     {"jsonrpc":"2.0","result":{"listening":true, "event":"lifecycle.onInactive"},"id":1}
-function sendEventListenerAck(userId, ws, oMsg) {
-  const oAckMessage = {
-    jsonrpc: '2.0',
-    result: {
-      listening: true,
-      event: oMsg.method
-    },
-    id: oMsg.id
+  const extractedMethod = JSONPath.query(oMsg, method);
+
+  if (extractedMethod.length === 0) {
+    logger.debug(`Error occurred while extracting event data: No method found in the provided message.`);
+    return false;
+  }
+
+  const methodName = extractedMethod[0];
+  const metadata = {
+    registration: {},
+    unRegistration: {},
+    method: methodName
   };
-  // Could do, but why?: const dly = db.getAppropriateDelay(user, method); await util.delay(dly);
-  const ackMessage = JSON.stringify(oAckMessage);
+
+   // If isEnabled is true, add oMsg to metadata.registration
+   if (isEnabled) {
+    metadata.registration = oMsg;
+  } else {
+    // If isEnabled is false, add oMsg to metadata.unRegistration
+    metadata.unRegistration = oMsg;
+  }
+
+  return metadata;
+}
+
+
+/**
+ * Determines if the given object message is an event listener message.
+ * @param {object} oMsg - The object message to check.
+ * @param {object} config - The configuration object to use.
+ * @returns {boolean} - True if the message is an event listener message, false otherwise.
+*/
+function isEventListenerMessage(oMsg, config) {
+  // Call extractEventData and store the result
+  const eventData = extractEventData(oMsg, config);
+  
+  return (eventData !== false);
+}
+
+/**
+ * Determines whether the given message is intended to enable an event listener.
+ * A regex pattern and JSON path are provided in config to check whether the event listener is on.
+ * @param {Object} oMsg - The incoming message to check.
+ * @return {boolean} - Returns `true` if the message is intended to enable an event listener, `false` otherwise.
+ */
+function isEventListenerOnMessage(oMsg) {
+  return isEventListenerMessage(oMsg, eventConfig.registrationMessage);
+}
+
+/**
+ * Determines whether the given message is intended to disable an event listener.
+ * A regex pattern and JSON path are provided in config to check whether the event listener is off.
+ * @param {Object} oMsg - The incoming message to check.
+ * @return {boolean} - Returns `true` if the message is intended to disable an event listener, `false` otherwise.
+ */
+function isEventListenerOffMessage(oMsg) {
+  return isEventListenerMessage(oMsg, eventConfig.unRegistrationMessage);
+}
+
+/**
+ * Respond to an event listener request with an ack
+ * @param {string} userId - The user ID for whom the ack message is sent.
+ * @param {WebSocket} ws - The WebSocket instance to which the ack message will be sent.
+ * @param {object} metadata - The metadata associated with the event listener request.
+ * @returns {void}
+ * @example
+   For request:
+   {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}
+   Send ack response:
+   {"jsonrpc":"2.0","result":{"listening":true, "event":"lifecycle.onInactive"},"id":1}
+*/
+function sendEventListenerAck(userId, ws, metadata) {
+  const template = hbs.compile(eventConfig.registrationAck);
+  const ackMessage = template(metadata);
+  const parsedAckMessage = JSON.parse(ackMessage);
+
   ws.send(ackMessage);
-  logger.debug(`Sent event listener ack message for user ${userId}: ${ackMessage}`);
-  updateCallWithResponse(oMsg.method, oAckMessage.result, "result")
+  logger.debug(`Sent registration event ack message for user ${userId}: ${ackMessage}`);
+  updateCallWithResponse(metadata.method, parsedAckMessage.result, "result")
+}
+
+/**
+ * Respond to an unregistration event with an ack
+ * @param {string} userId - The user ID for whom the ack message is sent.
+ * @param {WebSocket} ws - The WebSocket instance to which the ack message will be sent.
+ * @param {object} metadata - The metadata associated with the unregistration event.
+ * @returns {void}
+ * @example
+   For request:
+   {"jsonrpc":"2.0","method":"lifecycle.onInactive","params":{"listen":true},"id":1}
+   Send ack response:
+   {"jsonrpc":"2.0","result":{"listening":true, "event":"lifecycle.onInactive"},"id":1}
+*/
+function sendUnRegistrationAck(userId, ws, metadata) {
+  const template = hbs.compile(eventConfig.unRegistrationAck);
+  const ackMessage = template(metadata);
+
+  ws.send(ackMessage);
+  logger.debug(`Sent unregistration event ack message for user ${userId}: ${ackMessage}`)
 }
 
 function sendEvent(ws, userId, method, result, msg, fSuccess, fErr, fFatalErr){
@@ -161,24 +250,48 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
   coreSendEvent(true, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr);
 }
 
-// sending response to web-socket
+/**
+ * Emits a response to the registered event listener.
+ * @param {any} finalResult - The final result to be included in the response.
+ * @param {string} msg - The message associated with the response.
+ * @param {string} userId - The ID of the user.
+ * @param {string} method - The method associated with the event.
+ * @returns {void}
+*/
 function emitResponse(finalResult, msg, userId, method) {
   const listener = getRegisteredEventListener(userId, method);
   if (!listener) {
     logger.debug('Event message could not be sent because a listener was not found');
     return;
   }
-  const { id, wsArr } = listener;
-  const oEventMessage = {
-    jsonrpc: '2.0',
-    id: id,
-    result: finalResult
+
+  const { metadata, wsArr } = listener;
+  // Defines the data object that will be inputted into handlebars
+  const templateData = {
+    ...metadata,
+    result: finalResult,
+    resultAsJson: JSON.stringify(finalResult)
   };
-  const eventMessage = JSON.stringify(oEventMessage);
+
+  let eventMessage;
+
+  // If event template config exists, use it
+  if (eventConfig.event) {
+    const template = hbs.compile(eventConfig.event);
+    eventMessage = template(templateData);
+  } else {
+    // If event template config does not exist, just send the raw finalResult
+    eventMessage = finalResult;
+  }
 
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
-    logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
+    // Check if eventType is included in config
+    if (eventConfig.eventType) {
+      logger.info(`${msg}: Sent ${eventConfig.eventType} message to user ${userId}: ${eventMessage}`);
+    } else {
+      logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
+    }
   });
 }
 
@@ -302,13 +415,16 @@ export const testExports = {
   getRegisteredEventListener,
   isAnyRegisteredInGroup,
   sendBroadcastEvent,
-  emitResponse
+  emitResponse, 
+  extractEventData,
+  isEventListenerOnMessage,
+  isEventListenerOffMessage
 }
 
 export {
   registerEventListener, deregisterEventListener,
   isEventListenerOnMessage, isEventListenerOffMessage,
-  sendEventListenerAck,
+  sendEventListenerAck, sendUnRegistrationAck,
   sendEvent, sendBroadcastEvent, logSuccess, logErr,
-  logFatalErr
+  logFatalErr, extractEventData
 };

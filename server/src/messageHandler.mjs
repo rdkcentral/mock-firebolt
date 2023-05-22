@@ -30,6 +30,9 @@ import { methodTriggers } from './triggers.mjs';
 import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs';
 import * as conduit from './conduit.mjs';
+import { config } from './config.mjs';
+
+const { dotConfig: { eventConfig } } = config;
 
 function fSuccess(msg, onMethod, result) {
   logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
@@ -80,18 +83,39 @@ async function handleMessage(message, userId, ws) {
   }
 
   // Handle JSON-RPC messages that are event listener enable requests
+  // First we extract event data from the message using the registrationMessage config
+  // Then we register the event listener for the specified user and WebSocket with the extracted metadata
+  if (events.isEventListenerOnMessage(oMsg)) {
+    const eventMetadata = events.extractEventData(oMsg, eventConfig.registrationMessage, true);
 
-  if ( events.isEventListenerOnMessage(oMsg) ) {
-    events.sendEventListenerAck(userId, ws, oMsg);
-    events.registerEventListener(userId, oMsg, ws);
-    return;
+    events.registerEventListener(userId, eventMetadata, ws);
+  
+    // Only perform additional actions if not in proxy mode
+    if (!process.env.proxy) {
+      // If registrationAck config is included, send ack message
+      if (eventConfig.registrationAck) {
+        events.sendEventListenerAck(userId, ws, eventMetadata);
+      }
+      return;
+    }
   }
-
+   
   // Handle JSON-RPC messages that are event listener disable requests
+  // First we extract event data from the message using the unRegistrationMessage config
+  // Then we deregister the event listener for the specified user and WebSocket with the extracted metadata
+  if (events.isEventListenerOffMessage(oMsg)) {
+    const eventMetadata = events.extractEventData(oMsg, eventConfig.unRegistrationMessage, false);
 
-  if ( events.isEventListenerOffMessage(oMsg) ) {
-    events.deregisterEventListener(userId, oMsg, ws);
-    return;
+    events.deregisterEventListener(userId, eventMetadata, ws);
+  
+    // Only perform additional actions if not in proxy mode
+    if (!process.env.proxy) {
+      // If unRegistrationAck config is included, send ack message
+      if (eventConfig.unRegistrationAck) {
+        events.sendUnRegistrationAck(userId, ws, eventMetadata);
+      }
+      return;
+    }
   }
 
   // We got a socket message representing a Firebolt method call for a method name we know about
