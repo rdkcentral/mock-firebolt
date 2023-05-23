@@ -5,7 +5,7 @@ Mock Firebolt: mf.config.json(Supported SDK's)
 Mock Firebolt supports these Firebolt SDKs: core, discovery.
 mf.config.json file contains a list of SDK's supported by Mock Firebolt, Out of which `core` is mandatory and `discovery` is optional.
 and it contains associated command-line flags you provide when you start the server.
-# If you're only using the Firebolt Core SDK (typical for most 3rd party app developers)
+# If you're using the Firebolt mono SDK
 Run Mock Firebolt server as:
 ```
 npm run dev

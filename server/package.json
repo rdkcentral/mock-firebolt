@@ -6,10 +6,9 @@
   "scripts": {
     "clean": "node ./scripts/clean.mjs",
     "prepare:setup": "npm run clean",
-    "build:core": "node ./scripts/copy.mjs ./node_modules/@firebolt-js/sdk/dist/firebolt-core-open-rpc.json ./build/firebolt-core-open-rpc.json",
     "build:discovery": "node ./scripts/copy.mjs ./node_modules/@firebolt-js/discovery-sdk/dist/firebolt-discovery-open-rpc.json ./build/firebolt-discovery-open-rpc.json",
     "build:openrpc:NOTES": "Only use if you are using all three Firebolt SDKs",
-    "build:openrpc": "npm run build:core && npm run build:discovery",
+    "build:openrpc": "npm run build:discovery",
     "build:mf": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
     "build:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build": "npm run build:openrpc && npm run build:mf",
@@ -19,7 +18,7 @@
     "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
     "dev:NOTES2": "Can do 'npm run dev' (core SDK only) or 'npm run dev -- --discovery'",
     "dev": "npm run build:mf && npm run start --",
-    "upgradeSDKAndBuildMF": "npm update @firebolt-js/sdk && npm update @firebolt-js/discovery-sdk && npm run clean && npm run build:core && npm run build:discovery && npm run build:mf",
+    "upgradeSDKAndBuildMF": "npm update @firebolt-js/discovery-sdk && npm run clean && npm run build:discovery && npm run build:mf",
     "postinstall": "npm run upgradeSDKAndBuildMF"
   },
   "repository": {
@@ -42,7 +41,6 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "@firebolt-js/sdk": "*",
     "@formschema/native": "^2.0.0-beta.6",
     "ajv": "^6.12.6",
     "body-parser": "^1.19.0",

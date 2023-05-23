@@ -26,7 +26,7 @@ import { config } from './config.mjs';
 import { mergeArrayOfStrings } from './util.mjs';
 
 // Usage:
-//   node index.mjs                                          (core SDK only, default)
+//   node index.mjs                                          (mono SDK, default)
 //   node index.mjs --httpPort 3343 ...                      (Use custom port for RESTful control API (default: 3333))
 //   node index.mjs --socketPort 9988 ...                    (Use custom socket port for Firebolt OpenRPC msgs (default: 9998))
 //   node index.mjs --conduitSocketPort 9987 ...             (Use custom socket port for Conduit msgs (default: 9997))

@@ -40,7 +40,7 @@ afterAll(async () => {
 test(`Validate OPENRPC Response`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "accessibility.closedCaptionsSettings",
+      method: "Accessibility.closedCaptionsSettings",
       params: {},
       id: 0,
     })

@@ -46,5 +46,5 @@ ENV PATH=${PATH}:/usr/src/firebolt/mock-firebolt/cli
 WORKDIR /usr/src/firebolt/mock-firebolt/server
 
 ENTRYPOINT [ "npm",  "run", "start" ]
-# By default, only the core SDK is enabled. When using 'docker run', users can pass --discovery as command-line parameter
+# By default, only the mono-sdk retrieved from HTTP is enabled. When using 'docker run', users can pass --discovery as command-line parameter
 CMD [ ]

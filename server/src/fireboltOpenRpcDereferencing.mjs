@@ -44,22 +44,47 @@ function replaceRefArr(arrWithItemWithRef, posInArrWithRef, lookedUpSchema) {
   arrWithItemWithRef[posInArrWithRef] = lookedUpSchema;
 }
 
+// To check for self-referencing schema objects that can otherwise lead to recursive loops causing maximum call stack size to exceed
+function selfReferenceSchemaCheck(schemaObj, path) {
+  if (typeof schemaObj !== 'object' || schemaObj === null) {
+    return null
+  }
+  // check if self-refernce is present in current schema object
+  if ('$ref' in schemaObj && schemaObj['$ref'] == path) {
+    return true
+  }
+  // check if self-reference is present in any nested objects
+  for (const key in schemaObj) {
+    const refValue = selfReferenceSchemaCheck(schemaObj[key], path);
+    if (refValue !== null) {
+      return true
+    }
+  }
+  return null
+}
+
 // NOTE: Doesn't handle arrays of arrays
 function replaceRefs(metaForSdk, thing, key) {
-  let lookedUpSchema;
-  if ( isObject(thing[key]) ) {
-    if ( '$ref' in thing[key] ) {
+  let lookedUpSchema, selfReference = false
+  if (isObject(thing[key])) {
+    if ('$ref' in thing[key]) {
       lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key]['$ref']));
+      if (lookedUpSchema) {
+        if (selfReferenceSchemaCheck(lookedUpSchema, thing[key]['$ref']) == true) {
+          selfReference = true
+        }
+      }
       replaceRefObj(thing, key, lookedUpSchema);
+    } if (selfReference !== true) {
+      // If no self-referencing detected, recursively replace references in nested schema objects, else skip dereferencing the object to avoid infinite loop
+      for (const key2 in thing[key]) {
+        replaceRefs(metaForSdk, thing[key], key2);
+      }
     }
-
-    for ( const key2 in thing[key] ) {
-      replaceRefs(metaForSdk, thing[key], key2);
-    }
-  } else if ( isArray(thing[key]) ) {
-    for ( let idx = 0; ii < thing[key].length; idx += 1 ) {
-      if ( isObject(thing[key][idx]) ) {
-        if ( '$ref' in thing[idx] ) {
+  } else if (isArray(thing[key])) {
+    for (let idx = 0; ii < thing[key].length; idx += 1) {
+      if (isObject(thing[key][idx])) {
+        if ('$ref' in thing[idx]) {
           lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key][idx]['$ref']));
           replaceRefArr(thing[key], idx, lookedUpSchema);
         }
@@ -77,6 +102,8 @@ function dereferenceSchemas(metaForSdk, methodName) {
   //replaceRefs(metaForSdk, result, 'schema');
   replaceRefs(metaForSdk, matchMethod, 'result');
   replaceRefs(metaForSdk, matchMethod, 'params');
+  replaceRefs(metaForSdk, matchMethod, 'tags');
+
 }
 
 function dereferenceMeta(_meta) {

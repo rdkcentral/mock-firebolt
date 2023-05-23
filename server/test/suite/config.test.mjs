@@ -46,7 +46,7 @@ test(`config works properly`, () => {
           cliFlag: null,
           cliShortFlag: null,
           enabled: true,
-          fileName: "firebolt-core-open-rpc.json",
+          "url": "https://meta.rdkcentral.com/firebolt/api/",
           name: "core",
         },
         {
