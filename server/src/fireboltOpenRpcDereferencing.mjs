@@ -44,7 +44,7 @@ function replaceRefArr(arrWithItemWithRef, posInArrWithRef, lookedUpSchema) {
   arrWithItemWithRef[posInArrWithRef] = lookedUpSchema;
 }
 
-// To check for self-referencing schema objects that can otherwise lead to recursive loops causing maximum call stack size to exceed
+// to check for self-referencing schema objects that can otherwise lead to recursive loops causing maximum call stack size to exceed
 function selfReferenceSchemaCheck(schemaObj, path) {
   if (typeof schemaObj !== 'object' || schemaObj === null) {
     return null
@@ -74,9 +74,10 @@ function replaceRefs(metaForSdk, thing, key) {
           selfReference = true
         }
       }
+      // replace reference path with the corresponding schema object
       replaceRefObj(thing, key, lookedUpSchema);
     } if (selfReference !== true) {
-      // If no self-referencing detected, recursively replace references in nested schema objects, else skip dereferencing the object to avoid infinite loop
+      // if no self-referencing detected, recursively replace references in nested schema objects, else skip dereferencing the schema object further to avoid infinite loop
       for (const key2 in thing[key]) {
         replaceRefs(metaForSdk, thing[key], key2);
       }
