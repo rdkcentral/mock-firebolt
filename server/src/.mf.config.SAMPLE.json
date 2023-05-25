@@ -6,7 +6,7 @@
     "supportedSdks": [
 
         {
-            "name": "core",
+            "name": "mono",
             "cliFlag": null,
             "cliShortFlag": null,
             "url": "https://meta.rdkcentral.com/firebolt/api/",

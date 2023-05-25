@@ -25,6 +25,7 @@ import path from "path";
 let mfProcess;
 let startMf = "npm run dev";
 const mfStarted = "Listening on HTTP port";
+const mfStartedAndSdkLoaded = "Loaded mono SDK from URL";
 const mfHost = "localhost";
 const mfUserHeader = "x-mockfirebolt-userid";
 const wsClient = "ws://localhost:";
@@ -196,7 +197,7 @@ async function mfState(on, extraConfig = "") {
 
       //Wait for "Listening on HTTP port" message for MF startup
       process.stdout.on("data", (data) => {
-        if (data.includes(mfStarted)) {
+        if (data.includes(mfStartedAndSdkLoaded)) {
           mfProcess = process;
           res("MF started successfully");
         }

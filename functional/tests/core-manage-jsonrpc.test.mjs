@@ -39,10 +39,10 @@ afterAll(async () => {
 test(`Validate OPENRPC Response for manage SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "Accessory.list",
+      method: "UserGrants.device",
       params: {},
       id: 0,
     })
   );
-  expect(response.includes(`"protocol":"BluetoothLE"`)).toEqual(true);
+  expect(response.includes(`"state":"granted"`)).toEqual(true);
 });
