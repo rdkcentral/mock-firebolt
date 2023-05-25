@@ -47,7 +47,7 @@ test(`config works properly`, () => {
           cliShortFlag: null,
           enabled: true,
           url: "https://meta.rdkcentral.com/firebolt/api/",
-          name: "mono",
+          name: "core",
         },
         {
           cliFlag: "discovery",
