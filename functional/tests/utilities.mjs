@@ -24,7 +24,6 @@ import path from "path";
 
 let mfProcess;
 let startMf = "npm run dev";
-const mfStarted = "Listening on HTTP port";
 const mfStartedAndSdkLoaded = "Loaded core SDK from URL";
 const mfHost = "localhost";
 const mfUserHeader = "x-mockfirebolt-userid";
