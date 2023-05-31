@@ -245,8 +245,8 @@ test(`messageHandler.handleMessage works properly for error scenarios`, async ()
 
 test(`messageHandler.handleMessage works properly for developerNotes`, async () => {
   fireboltOpenRpc.testExports.methodMaps["core"] = {
-    validMethodName: {
-      name: "validMethodName",
+    id: {
+      name: "id",
       summary: "Get the platform back-office account identifier",
       params: [],
       tags: [
@@ -263,7 +263,7 @@ test(`messageHandler.handleMessage works properly for developerNotes`, async () 
   };
   const spy = jest.spyOn(logger, "warning");
   const dummyMsgSix =
-    '{"jsonrpc":"2.0","method":"validMethodName","params":{"listen":true},"id":1}';
+    '{"jsonrpc":"2.0","method":"id","params":{"listen":true},"id":1}';
   const resultFour = await messageHandler.handleMessage(dummyMsgSix, "12345", {
     send: () => {},
   });
