@@ -89,7 +89,7 @@ The next two sections presume you are using the out-of-the-box `.mf.config.json`
 
 Mock Firebolt supports these Firebolt SDKs: **core**, **discovery**.
 
-By default, only the mono-sdk retrieved from HTTP is enabled
+By default, only the core sdk retrieved from HTTP is enabled
 
 This default mode is appropriate for app developers developing third-party content apps that don't need (nor get) the permissions necessary to use the other SDKs.
 
@@ -137,7 +137,7 @@ cp src/.mf.config.SAMPLE.json src/.mf.config.json
 # To install dependencies, clean/create build/ subdirectory, build and upgrade SDK, build source code within this project
 npm install
 
-# If you want support for mono SDK
+# If you want support for core SDK
 # Run in a separate terminal window/tab, or use '&' to background
 npm run dev
 
@@ -171,7 +171,7 @@ Click the "Load Unpacked" button (top left corner of browser window)
 Navigate to the directory under browser-extensions which contains a manifest.json file and click "Select"
 ```
 
-Now you can access mono-sdk from HTTP by adding `"url": "https://meta.rdkcentral.com/firebolt/api/"` in mf.config.SAMPLE.json and copying to mf.config.json,If you pass the appropriate query string parameter(s) (see [docs/UsageWithinApps.md](./docs/UsageWithinApps.md)), these SDK calls will get sent to the Mock Firebolt server and it will reply as you configure it to do so.
+Now you can access core sdk from HTTP by adding `"url": "https://meta.rdkcentral.com/firebolt/api/"` in mf.config.SAMPLE.json and copying to mf.config.json,If you pass the appropriate query string parameter(s) (see [docs/UsageWithinApps.md](./docs/UsageWithinApps.md)), these SDK calls will get sent to the Mock Firebolt server and it will reply as you configure it to do so.
 
 See the section "Important Dependency Notes" above for details about which version of SDK support Mock Firebolt.
 
@@ -192,7 +192,7 @@ docker build -f Dockerfile.allSdks . -t $MF_DOCKER_USER/mock-firebolt
 # Confirm your image was created
 docker images | grep mock-firebolt
 
-# Run the image, enabling the mono SDK (typical)
+# Run the image, enabling the core SDK (typical)
 # Change '$(pwd)' to whatever else you might want to use; this is where your MF .json files live
 # NOTE: -p <outside/host port>:<inside/container port>
 docker run -d \
