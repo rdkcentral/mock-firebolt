@@ -37,25 +37,25 @@ test(`stateManagement.addUser works properly`, () => {
 });
 
 test(`stateManagement.addUser works properly for same user`, () => {
-  const userId = "456~A#netflix";
+  const userId = "456~A#appId1";
   expect( stateManagement.addUser(userId).isSuccess ).toEqual(true);
   stateManagement.addUser(userId);
-  const userId1 = "456~A#amazon";
+  const userId1 = "456~A#appId3";
   expect(stateManagement.addUser(userId1).isSuccess).toEqual(false);
 });
 
 test(`stateManagement.addUser works properly for same appId`, () => {
-  const userId2 = "789~A#netflix";
+  const userId2 = "789~A#appId1";
   expect(stateManagement.addUser(userId2).isSuccess).toEqual(false);
 });
 
 test(`stateManagement.addUser works properly for same user without group`, () => {
-  stateManagement.addUser("111#youtube");
-  const userId3 = "111#amazon";
+  stateManagement.addUser("111#appId2");
+  const userId3 = "111#appId3";
   const result3 = stateManagement.addUser(userId3);
   expect(result3.isSuccess).toEqual(false);
 
-  const userId4 = "222#youtube";
+  const userId4 = "222#appId2";
   const result4 = stateManagement.addUser(userId4);
   expect(result4.isSuccess).toEqual(false);
 });
@@ -63,10 +63,10 @@ test(`stateManagement.addUser works properly for same user without group`, () =>
 
 test(`stateManagement.getUserId works properly`, () => {
   const userId = "456";
-  expect(stateManagement.getUserId(userId)).toEqual("456~A#netflix");
+  expect(stateManagement.getUserId(userId)).toEqual("456~A#appId1");
 
-  const userId2 = "youtube"
-  expect(stateManagement.getUserId(userId2)).toEqual("111#youtube");
+  const userId2 = "appId2"
+  expect(stateManagement.getUserId(userId2)).toEqual("111#appId2");
 
   const userId3 = "~A"
   expect(stateManagement.getUserId(userId3)).toEqual("~A");
