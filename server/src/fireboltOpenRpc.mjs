@@ -284,7 +284,7 @@ async function readSdkJsonFileIfEnabled(sdkName) {
         rawMeta[sdkName] = JSON.parse(
           await readFile(fileUrl)
         );
-        logger.info(`Loaded mono SDK from URL ${url}`);
+        logger.info(`Loaded ${sdkName} SDK from URL ${url}`);
       } else {
         logger.error(`ERROR: Either 'url' or 'fileName' must be specified for SDK ${sdkName}; Skipping`);
         return;
