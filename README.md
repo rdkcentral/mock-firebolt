@@ -25,7 +25,7 @@ Note, too, that since the SDK does not validate parameters on method calls, app 
 - Controllable Mock Firebolt server (NodeJS websocket + HTTP server)
 - Control mock method responses via control plane RESTful API, CLI, web admin UI (soon), browser extension (soon)
 - 100% OpenRPC-driven; no SDK-specific details within the implementation
-- Supports Firebolt SDKs: **core** (always), **discovery** (optional)
+- Supports Firebolt SDKs: **core** (always),  **manage** (always), **discovery** (optional)
 - Complete documentation
 - Docker support
 - Validation (based on OpenRPC specifications) of all parameters sent on method calls
@@ -87,9 +87,9 @@ The next two sections presume you are using the out-of-the-box `.mf.config.json`
 
 # Firebolt SDK Support
 
-Mock Firebolt supports these Firebolt SDKs: **core**, **discovery**.
+Mock Firebolt supports these Firebolt SDKs: **core**, **manage**, **discovery**.
 
-By default, only the core sdk retrieved from HTTP is enabled
+By default, only the core/manage OpenRPC retrieved from HTTP is enabled
 
 This default mode is appropriate for app developers developing third-party content apps that don't need (nor get) the permissions necessary to use the other SDKs.
 
@@ -104,17 +104,6 @@ Developers wishing to activate this functionality must pass the `--moneybadger` 
 
 
 # Important Dependency/Version Notes
-
-**Mock Firebolt requires that your client app import minimal versions of the various Firebolt SDKs.**
-
-| SDK                                 | Minimum Version |
-| ----------------------------------- | --------------- |
-| @firebolt-js/firebolt-discovery-sdk | 0.1.0-alpha.1   |
-
-Above version was the version for SDK when support for the socket transport layer and sensitivity to the global variable `window.__firebolt.endpoint` was added, both of which are required for the SDK to work with Mock Firebolt.
-
-If you use an older version of an SDK, no traffic will ever make it from the SDK to Mock Firebolt.
-
 
 # Usage (Local)
 
@@ -171,9 +160,7 @@ Click the "Load Unpacked" button (top left corner of browser window)
 Navigate to the directory under browser-extensions which contains a manifest.json file and click "Select"
 ```
 
-Now you can access core sdk from HTTP by adding `"url": "https://meta.rdkcentral.com/firebolt/api/"` in mf.config.SAMPLE.json and copying to mf.config.json,If you pass the appropriate query string parameter(s) (see [docs/UsageWithinApps.md](./docs/UsageWithinApps.md)), these SDK calls will get sent to the Mock Firebolt server and it will reply as you configure it to do so.
-
-See the section "Important Dependency Notes" above for details about which version of SDK support Mock Firebolt.
+Now you can access core/manage OpenRPC from HTTP by adding `"url": "https://meta.rdkcentral.com/firebolt/api/"` in mf.config.SAMPLE.json and copying to mf.config.json and can add `@firebolt-js/discovery-sdk` in your app's `package.json` file, import `@firebolt-js/discovery-sdk` optionally in your code in case to make discovery calls
 
 
 # Usage (via Docker, if you prefer)
@@ -192,7 +179,7 @@ docker build -f Dockerfile.allSdks . -t $MF_DOCKER_USER/mock-firebolt
 # Confirm your image was created
 docker images | grep mock-firebolt
 
-# Run the image, enabling the core SDK (typical)
+# Run the image, enabling the core/manage OpenRPC (typical)
 # Change '$(pwd)' to whatever else you might want to use; this is where your MF .json files live
 # NOTE: -p <outside/host port>:<inside/container port>
 docker run -d \

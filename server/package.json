@@ -13,10 +13,10 @@
     "build:NOTES": "Only use if you are using all three Firebolt SDKs",
     "build": "npm run build:openrpc && npm run build:mf",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
-    "start:NOTES1": "Can do 'npm run start' (core SDK only) or 'npm run start -- --discovery'",
+    "start:NOTES1": "Can do 'npm run start' (core/manage OpenRPC only) or 'npm run start -- --discovery'",
     "start": "node build/index.mjs",
     "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
-    "dev:NOTES2": "Can do 'npm run dev' (core SDK only) or 'npm run dev -- --discovery'",
+    "dev:NOTES2": "Can do 'npm run dev' (core/manage OpenRPC only) or 'npm run dev -- --discovery'",
     "dev": "npm run build:mf && npm run start --",
     "upgradeSDKAndBuildMF": "npm update @firebolt-js/discovery-sdk && npm run clean && npm run build:discovery && npm run build:mf",
     "postinstall": "npm run upgradeSDKAndBuildMF"
