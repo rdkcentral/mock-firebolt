@@ -26,7 +26,7 @@ jest.setTimeout(20040);
 beforeAll(async () => {
   const response = await utilities.mfState(
     true,
-    ` -- --discovery`
+    ` -- --mock`
   );
   expect(response).toBe("MF started successfully");
 });

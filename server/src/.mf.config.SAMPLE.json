@@ -19,6 +19,14 @@
             "cliShortFlag": "d",
             "fileName": "firebolt-discovery-open-rpc.json",
             "enabled": false
+        },
+
+        {
+          "name": "mock",
+          "cliFlag": "mock",
+          "cliShortFlag": "m",
+          "fileName": "../../functional/mockOpenRpc.json",
+          "enabled": false
         }
 
     ],

@@ -24,7 +24,10 @@ import * as utilities from "./utilities.mjs";
 jest.setTimeout(20000);
 
 beforeAll(async () => {
-  const response = await utilities.mfState(true);
+  const response = await utilities.mfState(
+    true,
+    ` -- --mock`
+  );
   expect(response).toBe("MF started successfully");
 });
 

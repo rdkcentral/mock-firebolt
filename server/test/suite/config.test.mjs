@@ -56,6 +56,13 @@ test(`config works properly`, () => {
           fileName: "firebolt-discovery-open-rpc.json",
           name: "discovery",
         },
+        {
+          name: "mock",
+          cliFlag: "mock",
+          cliShortFlag: "m",
+          fileName: "../../functional/mockOpenRpc.json",
+          enabled: false
+        }
       ],
       eventConfig: {
         registrationMessage: {
