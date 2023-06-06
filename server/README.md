@@ -24,7 +24,6 @@ curl --location --request GET 'http://localhost:3333/api/v1/healthcheck'
         "mockFirebolt": "<mockFireboltServerVersionNumber>",
         "sdk"
             "core": "<coreSdkVersionNumber>",
-            "manage": "<manageSdkVersionNumber>",
             "discovery": "<discoverySdkVersionNumber>",
         }
     }
@@ -61,9 +60,6 @@ curl --location --request GET 'http://localhost:3333/api/v1/meta'
             "components": [
                 { }, ...
             ]
-        },
-        "manage": {                         // Included if --manage was provided when Mock Firebolt server was started
-            <same structure as above>
         },
         "discovery": {
             <same structure as above>       // Included if --discovery was provided when Mock Firebolt server was started

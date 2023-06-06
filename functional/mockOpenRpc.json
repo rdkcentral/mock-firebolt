@@ -1,0 +1,977 @@
+{
+	"openrpc": "1.2.4",
+	"info": {
+		"title": "Firebolt S&D SDK",
+		"version": "0.1.0-alpha.1"
+	},
+	"methods": [
+        {
+			"name": "Accessibility.closedCaptionsSettings",
+			"summary": "Get the user's preferred closed-captions settings",
+			"params": [],
+			"tags": [
+				{
+					"name": "property:readonly"
+				},
+				{
+					"name": "capabilities",
+					"x-uses": [
+						"xrn:firebolt:capability:accessibility:closedcaptions"
+					]
+				}
+			],
+			"result": {
+				"name": "closedCaptionsSettings",
+				"summary": "the closed captions settings",
+				"schema": {}
+			},
+			"examples": [
+				{
+					"name": "Getting the closed captions settings",
+					"params": [],
+					"result": {
+						"name": "settings",
+						"value": {
+							"enabled": true,
+							"styles": {
+								"fontFamily": "Monospace sans-serif",
+								"fontSize": 1,
+								"fontColor": "#ffffff",
+								"fontEdge": "none",
+								"fontEdgeColor": "#7F7F7F",
+								"fontOpacity": 100,
+								"backgroundColor": "#000000",
+								"backgroundOpacity": 100,
+								"textAlign": "center",
+								"textAlignVertical": "middle"
+							}
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Account.id",
+			"summary": "Get the platform back-office account identifier",
+			"params": [],
+			"tags": [
+				{
+					"name": "property:immutable"
+				},
+				{
+					"name": "capabilities",
+					"x-uses": [
+						"xrn:firebolt:capability:account:id"
+					]
+				}
+			],
+			"result": {
+				"name": "id",
+				"summary": "the id",
+				"schema": {
+					"type": "string"
+				}
+			},
+			"examples": [
+				{
+					"name": "Default Example",
+					"params": [],
+					"result": {
+						"name": "Default Result",
+						"value": "123"
+					}
+				}
+			]
+		},
+		{
+			"name": "Accessibility.onVoiceGuidanceSettingsChanged",
+			"summary": "Get the user's preferred voice guidance settings",
+			"params": [
+				{
+					"name": "listen",
+					"required": true,
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			],
+			"tags": [
+				{
+					"name": "subscriber",
+					"x-subscriber-for": "voiceGuidanceSettings"
+				},
+				{
+					"name": "event",
+					"x-alternative": "voiceGuidanceSettings"
+				},
+				{
+					"name": "capabilities",
+					"x-uses": [
+						"xrn:firebolt:capability:accessibility:voiceguidance"
+					]
+				}
+			],
+			"result": {
+				"name": "settings",
+				"summary": "the voice guidance settings",
+				"schema": {
+					"anyOf": [
+						{},
+						{
+							"title": "VoiceGuidanceSettings",
+							"type": "object",
+							"required": [
+								"enabled",
+								"speed"
+							],
+							"properties": {
+								"enabled": {
+									"type": "boolean",
+									"description": "Whether or not voice guidance should be enabled by default"
+								},
+								"speed": {
+									"type": "number",
+									"description": "The speed at which voice guidance speech will be read back to the user"
+								}
+							}
+						}
+					]
+				}
+			},
+			"examples": [
+				{
+					"name": "Getting the voice guidance settings",
+					"params": [
+						{
+							"name": "listen",
+							"value": true
+						}
+					],
+					"result": {
+						"name": "Default Result",
+						"value": {
+							"enabled": true,
+							"speed": 5
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Device.onNameChanged",
+			"summary": "The human readable name of the device",
+			"params": [
+				{
+					"name": "listen",
+					"required": true,
+					"schema": {
+						"type": "boolean"
+					}
+				}
+			],
+			"tags": [
+				{
+					"name": "subscriber",
+					"x-subscriber-for": "name"
+				},
+				{
+					"name": "event",
+					"x-alternative": "name"
+				},
+				{
+					"name": "capabilities",
+					"x-uses": [
+						"xrn:firebolt:capability:device:name"
+					]
+				}
+			],
+			"result": {
+				"name": "value",
+				"summary": "the device friendly-name",
+				"schema": {
+					"anyOf": [
+						{},
+						{
+							"type": "string"
+						}
+					]
+				}
+			},
+			"examples": [
+				{
+					"name": "Default example #1",
+					"params": [
+						{
+							"name": "listen",
+							"value": true
+						}
+					],
+					"result": {
+						"name": "Default Result",
+						"value": "Living Room"
+					}
+				},
+				{
+					"name": "Default example #2",
+					"params": [
+						{
+							"name": "listen",
+							"value": true
+						}
+					],
+					"result": {
+						"name": "Default Result",
+						"value": "Kitchen"
+					}
+				}
+			]
+		},
+		{
+			"name": "UserGrants.device",
+			"summary": "Get all granted and denied user grants for the device",
+			"tags": [
+				{
+					"name": "capabilities",
+					"x-uses": [
+						"xrn:firebolt:capability:grants:state"
+					]
+				}
+			],
+			"params": [],
+			"result": {
+				"name": "info",
+				"summary": "The list of grants for the device",
+				"schema": {
+					"type": "array",
+					"items": {
+						"description": "Information about a grant given by a user",
+						"type": "object",
+						"properties": {
+							"app": {
+								"description": "Information about an app that a grant was for",
+								"type": "object",
+								"properties": {
+									"id": {
+										"type": "string"
+									},
+									"title": {
+										"type": "string"
+									}
+								},
+								"additionalProperties": false,
+								"required": [
+									"id"
+								]
+							},
+							"state": {
+								"description": "The state the grant is in",
+								"type": "string",
+								"enum": [
+									"granted",
+									"denied"
+								]
+							},
+							"capability": {},
+							"role": {},
+							"lifespan": {
+								"type": "string",
+								"enum": [
+									"once",
+									"forever",
+									"appActive",
+									"powerActive",
+									"seconds"
+								]
+							},
+							"expires": {
+								"type": "string",
+								"format": "date-time"
+							}
+						},
+						"additionalProperties": false,
+						"required": [
+							"state",
+							"capability",
+							"role",
+							"lifespan"
+						],
+						"examples": [
+							{
+								"app": {
+									"id": "certapp",
+									"title": "Firebolt Certification"
+								},
+								"state": "granted",
+								"capability": "xrn:firebolt:capability:data:app-usage",
+								"role": "use",
+								"lifespan": "seconds",
+								"expires": "2022-12-14T20:20:39+00:00"
+							}
+						]
+					}
+				}
+			},
+			"examples": [
+				{
+					"name": "Default Example",
+					"params": [],
+					"result": {
+						"name": "defaultResult",
+						"value": [
+							{
+								"state": "granted",
+								"capability": "xrn:firebolt:capability:localization:postal-code",
+								"role": "use",
+								"lifespan": "powerActive"
+							}
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "content.providers",
+			"summary": "Returns a list of providers and the discovery apis they support",
+			"params": [],
+			"result": {
+				"name": "providers",
+				"summary": "List of providers and the discovery apis they support",
+				"schema": {
+					"type": "array",
+					"items": {
+						"$ref": "#/components/schemas/ContentProvider"
+					}
+				}
+			},
+			"examples": [
+				{
+					"name": "Getting the list of providers and the discovery apis they support",
+					"params": [],
+					"result": {
+						"name": "Default Result",
+						"value": [
+							{
+								"id": "Vudu",
+								"apis": [
+									"purchases",
+									"entity"
+								]
+							},
+							{
+								"id": "NetflixApp",
+								"apis": [
+									"search"
+								]
+							}
+						]
+					}
+				}
+			]
+		}
+	],
+	"components": {
+		"schemas": {
+			"AppCatalogRequest": {
+				"title": "AppCatalogRequest",
+				"type": "object",
+				"description": "Parameters to customize how an app catalog is returned",
+				"properties": {
+					"pageToken": {
+						"type": "string"
+					}
+				}
+			},
+			"AppCatalogMetadata": {
+				"title": "AppCatalogMetadata",
+				"type": "object",
+				"description": "The metadata for a catalog",
+				"properties": {
+					"version": {
+						"type": "string"
+					},
+					"updated": {
+						"type": "string",
+						"format": "date-time"
+					}
+				}
+			},
+			"AppCatalogAppsPage": {
+				"title": "AppCatalogAppsPage",
+				"type": "object",
+				"description": "The list of apps",
+				"properties": {
+					"apps": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/AppCatalogItem"
+						}
+					},
+					"nextPageToken": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"apps"
+				]
+			},
+			"AppCatalogItem": {
+				"title": "AppCatalogItem",
+				"type": "object",
+				"description": "Object representing a single app in a catalog",
+				"properties": {
+					"appId": {
+						"type": "string"
+					},
+					"appSoftwareVersion": {
+						"type": "string"
+					},
+					"appReleaseKey": {
+						"type": "string"
+					},
+					"added": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updated": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"cloud": {
+						"type": "boolean"
+					},
+					"location": {
+						"type": "string"
+					},
+					"catalogHidden": {
+						"type": "boolean"
+					},
+					"title": {
+						"type": "string"
+					},
+					"icons": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/Icon"
+						}
+					}
+				},
+				"required": [
+					"appId"
+				]
+			},
+			"Icon": {
+				"title": "Icon",
+				"type": "object",
+				"description": "Icon image metadata",
+				"properties": {
+					"width": {
+						"type": "number"
+					},
+					"height": {
+						"type": "number"
+					},
+					"locale": {
+						"type": "string"
+					},
+					"format": {
+						"type": "string"
+					},
+					"uri": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"width",
+					"height",
+					"locale",
+					"format"
+				]
+			},
+			"ContentProvider": {
+				"title": "ContentProvider",
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"apis": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						}
+					}
+				},
+				"required": [
+					"id",
+					"apis"
+				],
+				"additionalProperties": false
+			},
+			"ProvidedPurchasedContentResult": {
+				"title": "ProvidedPurchasedContentResult",
+				"type": "object",
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"data": {
+						"$ref": "#/components/schemas/PurchasedContentResult"
+					}
+				},
+				"required": [
+					"provider",
+					"data"
+				],
+				"additionalProperties": false
+			},
+			"FederationOptions": {
+				"title": "FederationOptions",
+				"type": "object",
+				"properties": {
+					"timeout": {
+						"type": "number"
+					}
+				},
+				"required": [],
+				"additionalProperties": true
+			},
+			"SearchParameters": {
+				"title": "SearchParameters",
+				"type": "object",
+				"properties": {
+					"query": {
+						"type": "string"
+					},
+					"limit": {
+						"type": "number"
+					},
+					"context": {
+						"$ref": "#/components/schemas/SearchContext"
+					}
+				},
+				"required": [
+					"query"
+				],
+				"additionalProperties": true
+			},
+			"SearchContext": {
+				"title": "SearchContext",
+				"type": "object",
+				"properties": {
+					"source": {
+						"type": "string"
+					}
+				},
+				"required": [],
+				"additionalProperties": true
+			},
+			"SearchResult": {
+				"title": "SearchResult",
+				"type": "object",
+				"properties": {
+					"totalCount": {
+						"type": "number"
+					},
+					"entries": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/EntityInfo"
+						}
+					}
+				},
+				"required": [
+					"totalCount",
+					"entries"
+				],
+				"additionalProperties": false
+			},
+			"ProvidedSearchResult": {
+				"title": "ProvidedSearchResult",
+				"type": "object",
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"data": {
+						"$ref": "#/components/schemas/SearchResult"
+					}
+				},
+				"required": [
+					"provider",
+					"data"
+				],
+				"additionalProperties": false
+			},
+			"ProvidedEntityInfoResult": {
+				"title": "ProvidedEntityInfoResult",
+				"type": "object",
+				"properties": {
+					"provider": {
+						"type": "string"
+					},
+					"data": {
+						"$ref": "#/components/schemas/EntityInfoResult"
+					}
+				},
+				"required": [
+					"provider",
+					"data"
+				],
+				"additionalProperties": false
+			},
+			"EntityInfoParameters": {
+				"title": "EntityInfoParameters",
+				"type": "object",
+				"properties": {
+					"entityId": {
+						"type": "string"
+					},
+					"assetId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"entityId"
+				],
+				"additionalProperties": false,
+				"examples": [
+					{
+						"entityId": "345"
+					}
+				]
+			},
+			"PurchasedContentParameters": {
+				"title": "PurchasedContentParameters",
+				"type": "object",
+				"properties": {
+					"limit": {
+						"type": "integer",
+						"minimum": -1
+					},
+					"offeringType": {
+						"$ref": "#/components/schemas/OfferingType"
+					},
+					"programType": {
+						"$ref": "#/components/schemas/ProgramType"
+					}
+				},
+				"required": [
+					"limit"
+				],
+				"additionalProperties": false,
+				"examples": [
+					{
+						"limit": 100
+					}
+				]
+			},
+			"PurchasedContentResult": {
+				"title": "PurchasedContentResult",
+				"type": "object",
+				"properties": {
+					"expires": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"totalCount": {
+						"type": "integer",
+						"minimum": 0
+					},
+					"entries": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/EntityInfo"
+						}
+					}
+				},
+				"required": [
+					"expires",
+					"totalCount",
+					"entries"
+				],
+				"additionalProperties": false
+			},
+			"EntityInfo": {
+				"title": "EntityInfo",
+				"description": "An EntityInfo object represents an \"entity\" on the platform. Currently, only entities of type `program` are supported. `programType` must be supplied to identify the program type.\n\nAdditionally, EntityInfo objects must specify a properly formed\nContentIdentifiers object, `entityType`, and `title`.  The app should provide\nthe `synopsis` property for a good user experience if the content\nmetadata is not available another way.\n\nThe ContentIdentifiers must be sufficient for navigating the user to the\nappropriate entity or detail screen via a `detail` intent or deep link.\n\nEntityInfo objects must provide at least one WayToWatch object when returned as\npart of an `entityInfo` method and a streamable asset is available to the user.\nIt is optional for the `purchasedContent` method, but recommended because the UI\nmay use those data.",
+				"type": "object",
+				"required": [
+					"identifiers",
+					"entityType",
+					"programType",
+					"title"
+				],
+				"properties": {
+					"identifiers": {
+						"$ref": "#/components/schemas/ContentIdentifiers"
+					},
+					"title": {
+						"type": "string",
+						"description": "Title of the entity."
+					},
+					"entityType": {
+						"const": "program",
+						"description": "The type of the entity. If `program`, then `programType` must be provided."
+					},
+					"programType": {
+						"$ref": "#/components/schemas/ProgramType"
+					},
+					"synopsis": {
+						"type": "string",
+						"description": "Short description of the entity."
+					},
+					"seasonNumber": {
+						"type": "number",
+						"description": "For TV seasons, the season number. For TV episodes, the season that the episode belongs to."
+					},
+					"seasonCount": {
+						"type": "number",
+						"description": "For TV series, seasons, and episodes, the total number of seasons."
+					},
+					"episodeNumber": {
+						"type": "number",
+						"description": "For TV episodes, the episode number."
+					},
+					"episodeCount": {
+						"type": "number",
+						"description": "For TV seasons and episodes, the total number of episodes in the current season."
+					},
+					"releaseDate": {
+						"type": "string",
+						"format": "date-time",
+						"description": "The date that the program or entity was released or first aired."
+					},
+					"contentRatings": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/ContentRating"
+						},
+						"description": "A list of ContentRating objects, describing the entity's ratings in various rating schemes."
+					},
+					"waysToWatch": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/WayToWatch"
+						},
+						"description": "An array of ways a user is might watch this entity, regardless of entitlements."
+					}
+				}
+			},
+			"EntityInfoResult": {
+				"title": "EntityInfoResult",
+				"description": "The result for an `entityInfo()` push or pull.",
+				"type": "object",
+				"properties": {
+					"expires": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"entity": {
+						"$ref": "#/components/schemas/EntityInfo"
+					},
+					"related": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/EntityInfo"
+						}
+					}
+				},
+				"required": [
+					"expires",
+					"entity"
+				],
+				"additionalProperties": false
+			},
+			"OfferingType": {
+				"title": "OfferingType",
+				"type": "string",
+				"enum": [
+					"free",
+					"subscribe",
+					"buy",
+					"rent"
+				],
+				"description": "The offering type of the WayToWatch."
+			},
+			"ProgramType": {
+				"title": "ProgramType",
+				"type": "string",
+				"description": "In the case of a program `entityType`, specifies the program type.",
+				"enum": [
+					"movie",
+					"episode",
+					"season",
+					"series",
+					"other",
+					"preview",
+					"extra",
+					"concert",
+					"sportingEvent",
+					"advertisement",
+					"musicVideo",
+					"minisode"
+				]
+			},
+			"ContentIdentifiers": {
+				"title": "ContentIdentifiers",
+				"type": "object",
+				"properties": {
+					"assetId": {
+						"type": "string",
+						"description": "Identifies a particular playable asset. For example, the HD version of a particular movie separate from the UHD version."
+					},
+					"entityId": {
+						"type": "string",
+						"description": "Identifies an entity, such as a Movie, TV Series or TV Episode."
+					},
+					"seasonId": {
+						"type": "string",
+						"description": "The TV Season for a TV Episode."
+					},
+					"seriesId": {
+						"type": "string",
+						"description": "The TV Series for a TV Episode or TV Season."
+					},
+					"appContentData": {
+						"type": "string",
+						"description": "App-specific content identifiers.",
+						"maxLength": 1024
+					}
+				},
+				"description": "The ContentIdentifiers object is how the app identifies an entity or asset to\nthe Firebolt platform. These ids are used to look up metadata and deep link into\nthe app.\n\nApps do not need to provide all ids. They only need to provide the minimum\nrequired to target a playable stream or an entity detail screen via a deep link.\nIf an id isn't needed to get to those pages, it doesn't need to be included."
+			},
+			"ContentRating": {
+				"title": "ContentRating",
+				"type": "object",
+				"required": [
+					"scheme",
+					"rating"
+				],
+				"properties": {
+					"scheme": {
+						"type": "string",
+						"enum": [
+							"CA-Movie",
+							"CA-TV",
+							"CA-Movie-Fr",
+							"CA-TV-Fr",
+							"US-Movie",
+							"US-TV"
+						],
+						"description": "The rating scheme."
+					},
+					"rating": {
+						"type": "string",
+						"description": "The content rating."
+					},
+					"advisories": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Optional list of subratings or content advisories."
+					}
+				},
+				"description": "A ContentRating represents an age or content based of an entity. Supported rating schemes and associated types are below.\n\n## United States\n\n`US-Movie` (MPAA):\n\nRatings: `NR`, `G`, `PG`, `PG13`, `R`, `NC17`\n\nAdvisories: `AT`, `BN`, `SL`, `SS`, `N`, `V`\n\n`US-TV` (Vchip):\n\nRatings: `TVY`, `TVY7`, `TVG`, `TVPG`, `TV14`, `TVMA`\n\nAdvisories: `FV`, `D`, `L`, `S`, `V`\n\n## Canada\n\n`CA-Movie` (OFRB):\n\nRatings: `G`, `PG`, `14A`, `18A`, `R`, `E`\n\n`CA-TV` (AGVOT)\n\nRatings: `E`, `C`, `C8`, `G`, `PG`, `14+`, `18+`\n\nAdvisories: `C`, `C8`, `G`, `PG`, `14+`, `18+`\n\n`CA-Movie-Fr` (Canadian French language movies):\n\nRatings: `G`, `8+`, `13+`, `16+`, `18+`\n\n`CA-TV-Fr` (Canadian French language TV):\n\nRatings: `G`, `8+`, `13+`, `16+`, `18+`\n"
+			},
+			"WayToWatch": {
+				"title": "WayToWatch",
+				"type": "object",
+				"required": [
+					"identifiers",
+					"audioProfile"
+				],
+				"properties": {
+					"identifiers": {
+						"$ref": "#/components/schemas/ContentIdentifiers"
+					},
+					"expires": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Time when the WayToWatch is no longer available."
+					},
+					"entitled": {
+						"type": "boolean",
+						"description": "Specify if the user is entitled to watch the entity."
+					},
+					"entitledExpires": {
+						"type": "string",
+						"format": "date-time",
+						"description": "Time when the entity is no longer entitled."
+					},
+					"offeringType": {
+						"$ref": "#/components/schemas/OfferingType"
+					},
+					"hasAds": {
+						"type": "boolean",
+						"description": "True if the streamable asset contains ads."
+					},
+					"price": {
+						"type": "number",
+						"description": "For \"buy\" and \"rent\" WayToWatch, the price to buy or rent in the user's preferred currency."
+					},
+					"videoQuality": {
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": [
+								"SD",
+								"HD",
+								"UHD"
+							]
+						},
+						"description": "List of the video qualities available via the WayToWatch."
+					},
+					"audioProfile": {
+						"type": "array",
+						"items": {
+							"$ref": "#/components/schemas/AudioProfile"
+						},
+						"description": "List of the audio types available via the WayToWatch."
+					},
+					"audioLanguages": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "List of audio track languages available on the WayToWatch. The first is considered the primary language. Languages are expressed as ISO 639 1/2 codes."
+					},
+					"closedCaptions": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "List of languages for which closed captions are available on the WayToWatch. Languages are expressed as ISO 639 1/2 codes."
+					},
+					"subtitles": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "List of languages for which subtitles are available on the WayToWatch. Languages are expressed as ISO 639 1/2 codes."
+					},
+					"audioDescriptions": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "List of languages for which audio descriptions (DVD) as available on the WayToWatch. Languages are expressed as ISO 639 1/2 codes."
+					}
+				},
+				"description": "A WayToWatch describes a way to watch a video program. It may describe a single\nstreamable asset or a set of streamable assets. For example, an app provider may\ndescribe HD, SD, and UHD assets as individual WayToWatch objects or rolled into\na single WayToWatch.\n\nIf the WayToWatch represents a single streamable asset, the provided\nContentIdentifiers must be sufficient to play back the specific asset when sent\nvia a playback intent or deep link. If the WayToWatch represents multiple\nstreamable assets, the provided ContentIdentifiers must be sufficient to\nplayback one of the assets represented with no user action. In this scenario,\nthe app SHOULD choose the best asset for the user based on their device and\nsettings. The ContentIdentifiers MUST also be sufficient for navigating the user\nto the appropriate entity or detail screen via an entity intent.\n\nThe app should set the `entitled` property to indicate if the user can watch, or\nnot watch, the asset without making a purchase. If the entitlement is known to\nexpire at a certain time (e.g., a rental), the app should also provide the\n`entitledExpires` property. If the entitlement is not expired, the UI will use\nthe `entitled` property to display watchable assets to the user, adjust how\nassets are presented to the user, and how intents into the app are generated.\nFor example, the the Aggregated Experience could render a \"Watch\" button for an\nentitled asset versus a \"Subscribe\" button for an non-entitled asset.\n\nThe app should set the `offeringType` to define how the content may be\nauthorized. The UI will use this to adjust how content is presented to the user.\n\nA single WayToWatch cannot represent streamable assets available via multiple\npurchase paths. If, for example, an asset has both Buy, Rent and Subscription\navailability, the three different entitlement paths MUST be represented as\nmultiple WayToWatch objects.\n\n`price` should be populated for WayToWatch objects with `buy` or `rent`\n`offeringType`. If the WayToWatch represents a set of assets with various price\npoints, the `price` provided must be the lowest available price."
+			},
+			"AudioProfile": {
+				"title": "AudioProfile",
+				"type": "string",
+				"enum": [
+					"stereo",
+					"dolbyDigital5.1",
+					"dolbyDigital7.1",
+					"dolbyDigital5.1+",
+					"dolbyDigital7.1+",
+					"dolbyAtmos"
+				]
+			}
+		}
+	}
+}

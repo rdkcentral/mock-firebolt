@@ -26,7 +26,7 @@ jest.setTimeout(20020);
 beforeAll(async () => {
   const response = await utilities.mfState(
     true,
-    ` -- --manage`
+    ` -- --mock`
   );
   expect(response).toBe("MF started successfully");
 });
@@ -40,10 +40,10 @@ afterAll(async () => {
 test(`Validate OPENRPC Response for manage SDK`, async () => {
   const response = await utilities.fireboltCommand(
     JSON.stringify({
-      method: "accessory.list",
+      method: "UserGrants.device",
       params: {},
       id: 0,
     })
   );
-  expect(response.includes(`"protocol":"BluetoothLE"`)).toEqual(true);
+  expect(response.includes(`"state":"granted"`)).toEqual(true);
 });

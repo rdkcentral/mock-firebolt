@@ -33,14 +33,8 @@ jobs:
       # install the packages and running functional test cases one by one.
       run: |
         cd server; \
-        npm install; \
         cp src/.mf.config.SAMPLE.json src/.mf.config.json; \
-        npm update @firebolt-js/discovery-sdk; \
-        npm run clean; \
-        npm run build:core; \
-        npm run build:manage; \
-        npm run build:discovery; \
-        npm run build:mf; \
+        npm install; \
         cd ../cli; \
         npm install; \
         cd ../functional; \

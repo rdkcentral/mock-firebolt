@@ -25,13 +25,7 @@ WORKDIR /usr/src/firebolt/mock-firebolt/server
 # Copy over /server directory
 COPY ./server .
 
-RUN npm install && \
-    npm run clean && \
-    npm run build:core && \
-    npm run build:mf && \
-    npm run build:discovery
-
-
+RUN npm install
 
 # ----------------------------------- General ----------------------------------
 
@@ -46,5 +40,5 @@ ENV PATH=${PATH}:/usr/src/firebolt/mock-firebolt/cli
 WORKDIR /usr/src/firebolt/mock-firebolt/server
 
 ENTRYPOINT [ "npm",  "run", "start" ]
-# By default, only the core SDK is enabled. When using 'docker run', users can pass --manage --discovery as command-line parameters
+# By default, core/manage OpenRPC retrieved from HTTP is enabled. When using 'docker run', users can pass --discovery as command-line parameters
 CMD [ ]

@@ -34,7 +34,7 @@ const config = {
   multiUserConnections: "warn",
   
   app: {
-    allowMixedCase: false,
+    allowMixedCase: true,
     socketPort: 9998,
     httpPort: 3333,
     conduitSocketPort: 9997,

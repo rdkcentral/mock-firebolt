@@ -301,10 +301,15 @@ async function readSdkJsonFileIfEnabled(sdkName) {
 // NOTE: Assumes the build process has put the firebolt-xxx-sdk.json files in the same directory
 //       as the source code from the src/ directory
 async function readAllEnabledSdkJsonFiles() {
-  await Promise.all(config.dotConfig.supportedSdks.map(async (oSdk) => {
-    const sdkName = oSdk.name;
-    await readSdkJsonFileIfEnabled(sdkName);
-  }));
+  if (isSdkEnabled('mock')) {
+    await readSdkJsonFileIfEnabled('mock');
+  }
+  else {
+    await Promise.all(config.dotConfig.supportedSdks.map(async (oSdk) => {
+      const sdkName = oSdk.name;
+      await readSdkJsonFileIfEnabled(sdkName);
+    }));
+  }
 }
 
 function buildMethodMapsForAllEnabledSdks() {

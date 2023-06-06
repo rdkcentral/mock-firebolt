@@ -2,20 +2,20 @@ Mock Firebolt: mf.config.json(Supported SDK's)
 =======================
 ## Supported SDK's
 
-Mock Firebolt supports these Firebolt SDKs: core, manage, discovery.
-mf.config.json file contains a list of SDK's supported by Mock Firebolt, Out of which `core` is mandatory and other two `manage` and `discovery` are optional.
+Mock Firebolt supports these Firebolt SDKs: **core** (always),  **manage** (always), **discovery** (optional)
+mf.config.json file contains a list of OpenRPC/SDK's supported by Mock Firebolt, out of which core/manage OpenRPC is supported by default and `discovery` is optional.
 and it contains associated command-line flags you provide when you start the server.
-# If you're only using the Firebolt Core SDK (typical for most 3rd party app developers)
+# If you're only using the Firebolt Core/Manage OpenRPC
 Run Mock Firebolt server as:
 ```
 npm run dev
 ```
 
-# If you want support for the Firebolt Manage and/or Firebolt Discovery SDKs
-# Include the flag(s) you require
+# If you want support for the Firebolt Discovery SDK
+# Include the flag you require
 # Note the extra double dash!
 ```
-npm run dev -- --manage --discovery
+npm run dev -- --discovery
 ```
 
 Out of the box, Mock Firebolt contains a .mf.config.SAMPLE.json file. You should copy this file to .mf.config.json (in the same directory) and then make any changes to the new file.
