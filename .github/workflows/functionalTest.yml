@@ -40,7 +40,4 @@ jobs:
         cd ../functional; \
         npm install; \
         npm run test:healthCheck;
-        npm run test:core;
-        npm run test:manage;
-        npm run test:discovery;
-        npm run test:core:manage:discovery;
+        npm run test:openRpcCall;
