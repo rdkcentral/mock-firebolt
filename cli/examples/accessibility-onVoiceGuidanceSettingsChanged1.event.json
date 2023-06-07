@@ -1,5 +1,5 @@
 {
-  "method": "accessibility.onVoiceGuidanceSettingsChanged",
+  "method": "Accessibility.onVoiceGuidanceSettingsChanged",
   "result": {
       "enabled": false,
       "speed": 5
