@@ -51,9 +51,7 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Received message for user ${userId} : ${message}`);
 
   const oMsg = JSON.parse(message);
-  if(config.app.allowMixedCase){
-    oMsg.method = fireboltOpenRpc.testExports.toLowerCase(oMsg.method);
-  }
+
   // record the message if we are recording
   addCall(oMsg.method, oMsg.params);
 
@@ -181,7 +179,7 @@ async function handleMessage(message, userId, ws) {
 
   if (stateManagement.hasOverride(userId, oMsg.method)) {
     // Handle Firebolt Method call using our in-memory mock values
-    logger.debug(`Retrieving override mock value for user ${userId} method ${oMsg.method}`);
+    logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
     response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
   } else if (process.env.proxy) {
     //bypass JSON-RPC calls and hit proxy server endpoint
@@ -232,7 +230,7 @@ async function handleMessage(message, userId, ws) {
 
   } else {
     // Handle Firebolt Method call using default defaults (from the examples in the Open RPC specification)
-    logger.debug(`Returning default mock value for user ${userId} method ${oMsg.method}`);
+    logger.debug(`Returning default mock value for method ${oMsg.method}`);
     response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want a static response
   }
 

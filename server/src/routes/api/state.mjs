@@ -26,7 +26,6 @@ import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 import * as commonErrors from '../../commonErrors.mjs';
 import * as stateManagement from '../../stateManagement.mjs';
 import * as events from '../../events.mjs';
-import { config } from '../../config.mjs';
 
 
 // --- Route Handlers ---
@@ -141,10 +140,7 @@ function setMode(req, res) {
 // Expected body: { result: xxx }
 function setMethodResult(req, res) {
   const userId = getUserIdFromReq(req);
-  let methodName = req.params.methodName;
-  if (config.app.allowMixedCase){
-    methodName = fireboltOpenRpc.testExports.toLowerCase(methodName);
-  }
+  const methodName = req.params.methodName;
   if ( 'result' in req.body ) {
     const result = req.body.result;
     try {
@@ -183,10 +179,7 @@ function setMethodResult(req, res) {
 // Expected body: { error: { code: xxx, message: xxx } }
 function setMethodError(req, res) {
   const userId = getUserIdFromReq(req);
-  let methodName = req.params.methodName;
-  if (config.app.allowMixedCase){
-    methodName = fireboltOpenRpc.testExports.toLowerCase(methodName);
-  }
+  const methodName = req.params.methodName;
   if ( 'error' in req.body ) {
     const err = req.body.error;
     const { code, message } = err;
