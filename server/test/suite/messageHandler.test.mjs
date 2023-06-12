@@ -28,7 +28,7 @@ import { methodTriggers } from "../../src/triggers.mjs";
 
 test(`messageHandler.handleMessage works properly and return when message doesn't have any id`, async () => {
   const spy = jest.spyOn(logger, "info");
-  await messageHandler.handleMessage('{"test": "test msg"}', "12345", {
+  await messageHandler.handleMessage('{"method": "device.version"}', "12345", {
     send: () => {},
   });
   expect(spy).toHaveBeenCalled();
