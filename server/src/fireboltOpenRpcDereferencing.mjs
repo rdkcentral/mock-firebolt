@@ -28,9 +28,14 @@ function isArray(thing)  { return ( Array.isArray(thing) );    }
 function ref2schemaName(ref) {
   return ref.substring(ref.lastIndexOf('/') + 1);
 }
-function lookupSchema(metaForSdk, ref) {
+
+function lookupSchema(metaForSdk, ref, xSchema) {
   const schemaName = ref2schemaName(ref);
-  return metaForSdk.components.schemas[schemaName];
+  if (xSchema) {
+    return metaForSdk['x-schemas'][xSchema][schemaName]
+  } else {
+    return metaForSdk.components.schemas[schemaName];
+  }
 }
 
 // For { foo: { '$ref': 'xxx' } }, change to { foo: <lookedUpSchema> }
@@ -65,10 +70,18 @@ function selfReferenceSchemaCheck(schemaObj, path) {
 
 // NOTE: Doesn't handle arrays of arrays
 function replaceRefs(metaForSdk, thing, key) {
-  let lookedUpSchema, selfReference = false
+  let xSchema, lookedUpSchema, selfReference = false
   if (isObject(thing[key])) {
     if ('$ref' in thing[key]) {
-      lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key]['$ref']));
+      // If schema resides under x-schemas object in openRPC
+      if (thing[key]['$ref'].includes("x-schemas")) {
+        let xSchemaArray = thing[key]['$ref'].split("/");
+        xSchema = xSchemaArray.filter(element => element !== "#" && element !== "x-schemas")[0]
+        lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key]['$ref']), xSchema);
+      } else {
+        // else if schema resides under components object in openRPC
+        lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key]['$ref']));
+      }
       if (lookedUpSchema) {
         if (selfReferenceSchemaCheck(lookedUpSchema, thing[key]['$ref']) == true) {
           selfReference = true

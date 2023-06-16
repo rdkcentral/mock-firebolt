@@ -89,10 +89,6 @@ The next two sections presume you are using the out-of-the-box `.mf.config.json`
 
 Mock Firebolt supports these Firebolt SDKs: **core**, **manage**, **discovery**.
 
-By default, only the core/manage OpenRPC retrieved from HTTP is enabled
-
-This default mode is appropriate for app developers developing third-party content apps that don't need (nor get) the permissions necessary to use the other SDKs.
-
 For developers building "operator apps" / "search and discover apps" which need one or more of these SDKs, when running the Mock Firebolt server, you can pass flags like `--discovery` to enable the specific SDK desired. Note of course that ultimately, when running on a real device, your app will only have whatever permissions it has been given.
 
 
