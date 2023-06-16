@@ -98,9 +98,6 @@ Mock Firebolt also supports the $badger SDK for application developers migrating
 
 Developers wishing to activate this functionality must pass the `--moneybadger` command-line flag when starting Mock Firebolt. As well, you must use the `activateMockFireboltForBadger.js` script within your app and have it execute *before* your app bundle (which includes $badger) executes.
 
-
-# Important Dependency/Version Notes
-
 # Usage (Local)
 
 Note: Requires NodeJS 16+. If you're using `nvm`, do `nvm use 16` or similar.
