@@ -51,7 +51,9 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Received message for user ${userId} : ${message}`);
 
   const oMsg = JSON.parse(message);
-
+  if(config.app.allowMixedCase){
+    oMsg.method = fireboltOpenRpc.testExports.toLowerCase(oMsg.method);
+  }
   // record the message if we are recording
   addCall(oMsg.method, oMsg.params);
 

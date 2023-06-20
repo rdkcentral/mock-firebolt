@@ -27,7 +27,7 @@ test(`config works properly`, () => {
     validate: ["method", "params", "response", "events"],
     multiUserConnections: "warn",
     app: {
-      allowMixedCase: false,
+      allowMixedCase: true,
       socketPort: 9998,
       httpPort: 3333,
       conduitSocketPort: 9997,
@@ -46,15 +46,8 @@ test(`config works properly`, () => {
           cliFlag: null,
           cliShortFlag: null,
           enabled: true,
-          fileName: "firebolt-open-rpc.json",
+          url: "https://meta.rdkcentral.com/firebolt/api/",
           name: "core",
-        },
-        {
-          cliFlag: "manage",
-          cliShortFlag: "m",
-          enabled: false,
-          fileName: "firebolt-manage-open-rpc.json",
-          name: "manage",
         },
         {
           cliFlag: "discovery",
@@ -63,6 +56,13 @@ test(`config works properly`, () => {
           fileName: "firebolt-discovery-open-rpc.json",
           name: "discovery",
         },
+        {
+          name: "mock",
+          cliFlag: "mock",
+          cliShortFlag: "m",
+          fileName: "../../functional/mockOpenRpc.json",
+          enabled: false
+        }
       ],
       eventConfig: {
         registrationMessage: {

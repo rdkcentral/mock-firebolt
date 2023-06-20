@@ -9,16 +9,8 @@
             "name": "core",
             "cliFlag": null,
             "cliShortFlag": null,
-            "fileName": "firebolt-open-rpc.json",
+            "url": "https://meta.rdkcentral.com/firebolt/api/",
             "enabled": true
-        },
-
-        {
-            "name": "manage",
-            "cliFlag": "manage",
-            "cliShortFlag": "m",
-            "fileName": "firebolt-manage-open-rpc.json",
-            "enabled": false
         },
 
         {
@@ -27,6 +19,14 @@
             "cliShortFlag": "d",
             "fileName": "firebolt-discovery-open-rpc.json",
             "enabled": false
+        },
+
+        {
+          "name": "mock",
+          "cliFlag": "mock",
+          "cliShortFlag": "m",
+          "fileName": "../../functional/mockOpenRpc.json",
+          "enabled": false
         }
 
     ],

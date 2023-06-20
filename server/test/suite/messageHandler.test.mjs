@@ -28,7 +28,7 @@ import { methodTriggers } from "../../src/triggers.mjs";
 
 test(`messageHandler.handleMessage works properly and return when message doesn't have any id`, async () => {
   const spy = jest.spyOn(logger, "info");
-  await messageHandler.handleMessage('{"test": "test msg"}', "12345", {
+  await messageHandler.handleMessage('{"method": "device.version"}', "12345", {
     send: () => {},
   });
   expect(spy).toHaveBeenCalled();
@@ -245,8 +245,8 @@ test(`messageHandler.handleMessage works properly for error scenarios`, async ()
 
 test(`messageHandler.handleMessage works properly for developerNotes`, async () => {
   fireboltOpenRpc.testExports.methodMaps["core"] = {
-    validMethodName: {
-      name: "validMethodName",
+    "account.id": {
+      name: "account.id",
       summary: "Get the platform back-office account identifier",
       params: [],
       tags: [
@@ -263,7 +263,7 @@ test(`messageHandler.handleMessage works properly for developerNotes`, async () 
   };
   const spy = jest.spyOn(logger, "warning");
   const dummyMsgSix =
-    '{"jsonrpc":"2.0","method":"validMethodName","params":{"listen":true},"id":1}';
+    '{"jsonrpc":"2.0","method":"account.id","params":{"listen":true},"id":1}';
   const resultFour = await messageHandler.handleMessage(dummyMsgSix, "12345", {
     send: () => {},
   });
