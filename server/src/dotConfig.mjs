@@ -59,14 +59,14 @@ function loadDotConfig() {
 }
 
 /* 
-* @function:findCreatedAndModifiedDate
+* @function:findFileCreationAndModificationTime
 * @Description: To get creation and modification time of files
 @param {String} creationDateFileName - Name of file whose creation time needs to be retrieved in seconds
 @param {String} modificationDateFileName - Name of file whose modification time needs to be retrieved in seconds
 * @Return: Array containing creation and modification time in seconds ex: [1687860231, 1687860231]
 */
 
-function findCreatedAndModifiedDate(creationDateFileName, modificationDateFileName) {
+function findFileCreationAndModificationTime(creationDateFileName, modificationDateFileName) {
   let cFile, mFile, __dirname, __filename
   __filename = fileURLToPath(import.meta.url).replace("build", "src");
   __dirname = path.dirname(__filename);
@@ -77,8 +77,8 @@ function findCreatedAndModifiedDate(creationDateFileName, modificationDateFileNa
   return [creationTimeSec, modificationTimeSec]
 }
 
-const [creationTimeSec, modificationTimeSec] = findCreatedAndModifiedDate('.mf.config.SAMPLE.json', '.mf.config.json')
-if (creationTimeSec > modificationTimeSec) {
+const [creationTimeSec, modificationTimeSec] = findFileCreationAndModificationTime('.mf.config.SAMPLE.json', '.mf.config.json')
+if (creationTimeSec >= modificationTimeSec) {
   logger.importantWarning(`Refer release notes to check for new/modified configs. You probably want to "cp src/.mf.config.SAMPLE.json src/.mf.config.json && npm run build:mf"`)
 }
 
