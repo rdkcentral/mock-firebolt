@@ -68,8 +68,8 @@ function getMeta() {
 }
 
 function getMethod(methodName) {
-  for ( let ii = 0; ii < config.dotConfig.supportedSdks.length; ii += 1 ) {
-    const sdkName = config.dotConfig.supportedSdks[ii].name;
+  for ( let ii = 0; ii < config.dotConfig.supportedOpenRPCs.length; ii += 1 ) {
+    const sdkName = config.dotConfig.supportedOpenRPCs[ii].name;
     if (config.app.allowMixedCase){
       methodName = toLowerCase(methodName);
     }
@@ -90,8 +90,8 @@ function isMethodKnown(methodName) {
 }
 
 function getSchema(schemaName) {
-  for ( const ii = 0; ii < config.dotConfig.supportedSdks.length; ii += 1 ) {
-    const sdkName = config.dotConfig.supportedSdks[ii].name;
+  for ( const ii = 0; ii < config.dotConfig.supportedOpenRPCs.length; ii += 1 ) {
+    const sdkName = config.dotConfig.supportedOpenRPCs[ii].name;
     if ( schemaName in meta[sdkName].components.schemas ) { return meta[sdkName].components.schemas[schemaName]; }
   }
   return undefined;
@@ -263,7 +263,7 @@ async function readSdkJsonFileIfEnabled(sdkName) {
   let url, fileUrl;
   if ( isSdkEnabled(sdkName) ) {
     try {
-      const oSdk = config.dotConfig.supportedSdks.find((oSdk) => { return ( oSdk.name === sdkName ); });
+      const oSdk = config.dotConfig.supportedOpenRPCs.find((oSdk) => { return ( oSdk.name === sdkName ); });
       if ( oSdk.fileName ) {
         const openRpcFileName = oSdk.fileName;
         if ( path.isAbsolute(openRpcFileName) || openRpcFileName.startsWith('~') ) {
@@ -305,7 +305,7 @@ async function readAllEnabledSdkJsonFiles() {
     await readSdkJsonFileIfEnabled('mock');
   }
   else {
-    await Promise.all(config.dotConfig.supportedSdks.map(async (oSdk) => {
+    await Promise.all(config.dotConfig.supportedOpenRPCs.map(async (oSdk) => {
       const sdkName = oSdk.name;
       await readSdkJsonFileIfEnabled(sdkName);
     }));
@@ -314,7 +314,7 @@ async function readAllEnabledSdkJsonFiles() {
 
 function buildMethodMapsForAllEnabledSdks() {
   // Build faster-performing maps for methods (vs. openrpc.methods array)
-  config.dotConfig.supportedSdks.forEach(function(oSdk) {
+  config.dotConfig.supportedOpenRPCs.forEach(function(oSdk) {
     const sdkName = oSdk.name;
     if ( isSdkEnabled(sdkName) ) {
       methodMaps[sdkName] = buildMethodMap(meta[sdkName]);
@@ -324,14 +324,14 @@ function buildMethodMapsForAllEnabledSdks() {
 
 // --- Module-level Code ---
 
-// Will contain one key for each API enabled (See .mf.config.json::supportedSdks)
+// Will contain one key for each API enabled (See .mf.config.json::supportedOpenRPCs)
 // The value for each key will be an object containing keys: openrpc, info, methods, and components (contents of firebolt-xxx-sdk.json file)
 const rawMeta = {};
 
 // Same as above, but $refs have been dereferenced; this is the main datastructure used here
 let meta = {};
 
-// Will contain one key for each API enabled (See .mf.config.json::supportedSdks)
+// Will contain one key for each API enabled (See .mf.config.json::supportedOpenRPCs)
 // The value for each key will be an object with keys for each method
 const methodMaps = {};
 

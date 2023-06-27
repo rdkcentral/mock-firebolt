@@ -3,7 +3,7 @@
 
     "multiUserConnections": "warn",
 
-    "supportedSdks": [
+    "supportedOpenRPCs": [
 
         {
             "name": "core",

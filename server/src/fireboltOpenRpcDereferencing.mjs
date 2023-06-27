@@ -122,7 +122,7 @@ function dereferenceSchemas(metaForSdk, methodName) {
 
 function dereferenceMeta(_meta) {
   const meta = JSON.parse(JSON.stringify(_meta)); // Deep copy
-  config.dotConfig.supportedSdks.forEach(function(oSdk) {
+  config.dotConfig.supportedOpenRPCs.forEach(function(oSdk) {
     const sdkName = oSdk.name;
     if ( sdkName in meta ) {
       const metaForSdk = meta[sdkName];
