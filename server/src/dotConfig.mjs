@@ -37,18 +37,32 @@ function handleError(fileName, __dirname) {
     );
   }
 }
+/* 
+* @function:createAbsoluteFilePath
+* @Description: Create absolute filepath from given file name
+* @param {String} fileName - file name ex: .mf.config.SAMPLE.jsons
+* @Return: Absolute file path ex: D:\mock-firebolt\server\src\.mf.config.SAMPLE.json
+*/
+function createAbsoluteFilePath(fileName) {
+  let filePath, __dirname, __filename
+  __filename = fileURLToPath(import.meta.url).replace("build", "src");
+  __dirname = path.dirname(__filename);
+  filePath = path.resolve(__dirname, fileName);
+  return filePath
+}
 
 function loadDotConfig() {
-  let __filename, __dirname, fileName, dotConfig;
+  let fileName, dotConfig;
   try {
-    __filename = fileURLToPath(import.meta.url);
-    __dirname = path.dirname(__filename);
-    fileName = path.resolve(__dirname, '.mf.config.json');
+    fileName = createAbsoluteFilePath ('.mf.config.json');
 
     dotConfig = JSON.parse(
       fs.readFileSync(fileName, 'UTF-8')
     );
-
+    // For offering backward compatibility to support "supportedSDKs" 
+    if (dotConfig.hasOwnProperty("supportedSDKs")) {
+      dotConfig.supportedOpenRPCs = dotConfig.supportedSDKs
+    }
     logger.info(`Read Mock Firebolt configuration from ${fileName}`);
   } catch ( ex ) {
     handleError(fileName, __dirname);
@@ -59,27 +73,35 @@ function loadDotConfig() {
 }
 
 /* 
-* @function:findFileCreationAndModificationTime
-* @Description: To get creation and modification time of files
-@param {String} creationDateFileName - Name of file whose creation time needs to be retrieved in seconds
-@param {String} modificationDateFileName - Name of file whose modification time needs to be retrieved in seconds
-* @Return: Array containing creation and modification time in seconds ex: [1687860231, 1687860231]
+* @function:getCreationDate
+* @Description: To get creation date of file in seconds
+* @param {String} fileName - Name of file whose creation time needs to be retrieved in seconds
+* @Return: creation time in seconds ex: 1687860231
 */
 
-function findFileCreationAndModificationTime(creationDateFileName, modificationDateFileName) {
-  let cFile, mFile, __dirname, __filename
-  __filename = fileURLToPath(import.meta.url).replace("build", "src");
-  __dirname = path.dirname(__filename);
-  cFile = path.resolve(__dirname, creationDateFileName);
-  mFile = path.resolve(__dirname, modificationDateFileName);
+function getCreationDate(fileName) {
+  let cFile = createAbsoluteFilePath (fileName)
   const creationTimeSec = Math.floor(fs.statSync(cFile).birthtimeMs / 1000);
-  const modificationTimeSec = Math.floor(fs.statSync(mFile).mtimeMs / 1000);
-  return [creationTimeSec, modificationTimeSec]
+  return creationTimeSec
 }
 
-const [creationTimeSec, modificationTimeSec] = findFileCreationAndModificationTime('.mf.config.SAMPLE.json', '.mf.config.json')
+/* 
+* @function:getModificationDate
+* @Description: To get modification date of file in seconds
+* @param {String} fileName - Name of file whose modification time needs to be retrieved in seconds
+* @Return: modification time in seconds ex: 1687860232
+*/
+function  getModificationDate(fileName) {
+  let mFile = createAbsoluteFilePath (fileName)
+  const modificationTimeSec = Math.floor(fs.statSync(mFile).mtimeMs / 1000);
+  return modificationTimeSec
+}
+
+const creationTimeSec = getCreationDate('.mf.config.SAMPLE.json')
+const modificationTimeSec = getModificationDate('.mf.config.json')
+
 if (creationTimeSec >= modificationTimeSec) {
-  logger.importantWarning(`Refer release notes to check for new/modified configs. You probably want to "cp src/.mf.config.SAMPLE.json src/.mf.config.json && npm run build:mf"`)
+  logger.importantWarning("The .mf.config.SAMPLE.json file in your repo is newer than your .mf.config.json file. Changes to the config file format may have occurred since you created or edited your file, and you may need to merge your changes within the changes to the sample file. Refer to the release notes for more information.")
 }
 
 const dotConfig = loadDotConfig();
