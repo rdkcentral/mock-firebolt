@@ -21,9 +21,10 @@
 'use strict';
 
 import path from 'path';
-import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { logger } from './logger.mjs';
+import { createAbsoluteFilePath, getCreationDate, getModificationDate } from './util.mjs';
+
 
 function handleError(fileName, __dirname) {
   logger.error(
@@ -36,19 +37,6 @@ function handleError(fileName, __dirname) {
       'You probably want to "cp src/.mf.config.SAMPLE.json src/.mf.config.json && npm run build:mf"'
     );
   }
-}
-/* 
-* @function:createAbsoluteFilePath
-* @Description: Create absolute filepath from given file name
-* @param {String} fileName - file name ex: .mf.config.SAMPLE.jsons
-* @Return: Absolute file path ex: D:\mock-firebolt\server\src\.mf.config.SAMPLE.json
-*/
-function createAbsoluteFilePath(fileName) {
-  let filePath, __dirname, __filename
-  __filename = fileURLToPath(import.meta.url).replace("build", "src");
-  __dirname = path.dirname(__filename);
-  filePath = path.resolve(__dirname, fileName);
-  return filePath
 }
 
 function loadDotConfig() {
@@ -70,31 +58,6 @@ function loadDotConfig() {
     process.exit(1);
   }
   return dotConfig;
-}
-
-/* 
-* @function:getCreationDate
-* @Description: To get creation date of file in seconds
-* @param {String} fileName - Name of file whose creation time needs to be retrieved in seconds
-* @Return: creation time in seconds ex: 1687860231
-*/
-
-function getCreationDate(fileName) {
-  let cFile = createAbsoluteFilePath (fileName)
-  const creationTimeSec = Math.floor(fs.statSync(cFile).birthtimeMs / 1000);
-  return creationTimeSec
-}
-
-/* 
-* @function:getModificationDate
-* @Description: To get modification date of file in seconds
-* @param {String} fileName - Name of file whose modification time needs to be retrieved in seconds
-* @Return: modification time in seconds ex: 1687860232
-*/
-function  getModificationDate(fileName) {
-  let mFile = createAbsoluteFilePath (fileName)
-  const modificationTimeSec = Math.floor(fs.statSync(mFile).mtimeMs / 1000);
-  return modificationTimeSec
 }
 
 const creationTimeSec = getCreationDate('.mf.config.SAMPLE.json')
