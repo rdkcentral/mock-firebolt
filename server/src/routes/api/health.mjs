@@ -50,7 +50,7 @@ function healthcheck(req, res) {
     meta = fireboltOpenRpc.getMeta();
   }
 
-  config.dotConfig.supportedSdks.forEach(function(oSdk) {
+  config.dotConfig.supportedOpenRPCs.forEach(function(oSdk) {
     const sdkName = oSdk.name;
     if ( sdkManagement.isSdkEnabled(sdkName) ) {
       if ( meta[sdkName] && meta[sdkName].info ) {

@@ -24,6 +24,12 @@ import * as tmp from 'tmp';
 
 import { config } from './config.mjs';
 
+import { fileURLToPath } from 'url';
+
+import path from 'path';
+
+import fs from 'fs';
+
 // Use: await delay(2000);
 function delay(ms) {
   return new Promise(res => setTimeout(res, ms));
@@ -60,6 +66,46 @@ function mergeArrayOfStrings(originalFlags, overrideFlags, denyFlags) {
   return newFlags
 }
 
+/* 
+* @function:createAbsoluteFilePath
+* @Description: Create absolute filepath from given file name
+* @param {String} fileName - file name ex: .mf.config.SAMPLE.jsons
+* @Return: Absolute file path ex: D:\mock-firebolt\server\src\.mf.config.SAMPLE.json
+*/
+function createAbsoluteFilePath(fileName) {
+  let filePath, __dirname, __filename
+  __filename = fileURLToPath(import.meta.url).replace("build", "src");
+  __dirname = path.dirname(__filename);
+  filePath = path.resolve(__dirname, fileName);
+  return filePath
+}
+
+/* 
+* @function:getCreationDate
+* @Description: To get creation date of file in seconds
+* @param {String} fileName - Name of file whose creation time needs to be retrieved in seconds
+* @Return: creation time in seconds ex: 1687860231
+*/
+
+function getCreationDate(fileName) {
+  let cFile = createAbsoluteFilePath (fileName)
+  const creationTimeSec = Math.floor(fs.statSync(cFile).birthtimeMs / 1000);
+  return creationTimeSec
+}
+
+/* 
+* @function:getModificationDate
+* @Description: To get modification date of file in seconds
+* @param {String} fileName - Name of file whose modification time needs to be retrieved in seconds
+* @Return: modification time in seconds ex: 1687860232
+*/
+function  getModificationDate(fileName) {
+  let mFile = createAbsoluteFilePath (fileName)
+  const modificationTimeSec = Math.floor(fs.statSync(mFile).mtimeMs / 1000);
+  return modificationTimeSec
+}
+
+
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate };

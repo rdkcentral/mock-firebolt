@@ -21,9 +21,10 @@
 'use strict';
 
 import path from 'path';
-import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { logger } from './logger.mjs';
+import { createAbsoluteFilePath, getCreationDate, getModificationDate } from './util.mjs';
+
 
 function handleError(fileName, __dirname) {
   logger.error(
@@ -39,16 +40,17 @@ function handleError(fileName, __dirname) {
 }
 
 function loadDotConfig() {
-  let __filename, __dirname, fileName, dotConfig;
+  let fileName, dotConfig;
   try {
-    __filename = fileURLToPath(import.meta.url);
-    __dirname = path.dirname(__filename);
-    fileName = path.resolve(__dirname, '.mf.config.json');
+    fileName = createAbsoluteFilePath ('.mf.config.json');
 
     dotConfig = JSON.parse(
       fs.readFileSync(fileName, 'UTF-8')
     );
-
+    // For offering backward compatibility to support "supportedSDKs" 
+    if (dotConfig.hasOwnProperty("supportedSDKs")) {
+      dotConfig.supportedOpenRPCs = dotConfig.supportedSDKs
+    }
     logger.info(`Read Mock Firebolt configuration from ${fileName}`);
   } catch ( ex ) {
     handleError(fileName, __dirname);
@@ -56,6 +58,13 @@ function loadDotConfig() {
     process.exit(1);
   }
   return dotConfig;
+}
+
+const creationTimeSec = getCreationDate('.mf.config.SAMPLE.json')
+const modificationTimeSec = getModificationDate('.mf.config.json')
+
+if (creationTimeSec >= modificationTimeSec) {
+  logger.importantWarning("The .mf.config.SAMPLE.json file in your repo is newer than your .mf.config.json file. Changes to the config file format may have occurred since you created or edited your file, and you may need to merge your changes within the changes to the sample file. Refer to the release notes for more information.")
 }
 
 const dotConfig = loadDotConfig();

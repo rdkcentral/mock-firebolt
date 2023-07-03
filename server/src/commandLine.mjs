@@ -50,7 +50,7 @@ const knownOpts = {
   'proxy'                : String,
   'multiUserConnections': String
 };
-for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) {
   if ( oSdk.cliFlag ) {
     if ( ! knownOpts.hasOwnProperty(oSdk.cliFlag) ) {
       knownOpts[oSdk.cliFlag] = Boolean;
@@ -65,7 +65,7 @@ const shortHands = {
   't'     : [ '--triggers' ],
   'noval' : [ '--novalidate' ]
 };
-for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) {
   if ( oSdk.cliShortFlag ) {
     if ( ! shortHands.hasOwnProperty(oSdk.cliShortFlag) ) {
       shortHands[oSdk.cliShortFlag] = [ `--${oSdk.cliFlag}` ];
@@ -103,7 +103,7 @@ config.validate = mergeArrayOfStrings(config.validate, config.dotConfig.validate
 
 // Convert boolean flags for any SDKs into a simple map/dict/obj
 const sdks = {};
-for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedSdks) ) {
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) {
   if ( parsed[oSdk.name] || oSdk.enabled ) {
     sdks[oSdk.name] = true;
   }

@@ -25,7 +25,7 @@ import * as commandLine from './commandLine.mjs';
 
 function isSdkEnabled(sdkName) {
   // Check if sdk with given name is enabled in the .mf.config.json file
-  const oSdk = config.dotConfig.supportedSdks.find((oSdk) => { return ( oSdk.name === sdkName ); });
+  const oSdk = config.dotConfig.supportedOpenRPCs.find((oSdk) => { return ( oSdk.name === sdkName ); });
   if ( oSdk && oSdk.enabled ) {
     return true;
   }

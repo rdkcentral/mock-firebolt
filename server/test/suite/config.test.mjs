@@ -41,7 +41,7 @@ test(`config works properly`, () => {
     dotConfig: {
       validate: ["method", "params", "response", "events"],
       multiUserConnections: 'warn',
-      supportedSdks: [
+      supportedOpenRPCs: [
         {
           cliFlag: null,
           cliShortFlag: null,
