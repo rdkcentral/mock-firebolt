@@ -23,6 +23,10 @@
 import { logger } from './logger.mjs';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import WebSocket from 'ws';
+
+let sessionWebSocket = null;
+let sessionFileStream = null;
 
 class FireboltCall {
     constructor(methodCall, params) {
@@ -351,15 +355,24 @@ function startRecording(){
     sessionRecording.recordedSession = new Session();
 }
   
-function stopRecording(){
-    if (isRecording()) {
-        logger.info('Stopping recording');
-        sessionRecording.recording = false;
-        return sessionRecording.recordedSession.exportSession();
-    } else {
-        logger.warn('Trying to stop recording when not recording');
-        return null;
-    }
+function stopRecording() {
+  if (isRecording()) {
+      logger.info('Stopping recording');
+      sessionRecording.recording = false;
+      const sessionData = sessionRecording.recordedSession.exportSession();
+      if (sessionWebSocket) {
+          sessionWebSocket.close();
+          sessionWebSocket = null;
+      }
+      if (sessionFileStream) {
+          sessionFileStream.end();
+          sessionFileStream = null;
+      }
+      return sessionData;
+  } else {
+      logger.warn('Trying to stop recording when not recording');
+      return null;
+  }
 }
 
 function isRecording(){
@@ -367,10 +380,19 @@ function isRecording(){
 }
 
 function addCall(methodCall, params){
-    if(isRecording()){
+    if (isRecording()) {
         const call = new FireboltCall(methodCall, params);
-        call.sequenceId = sessionRecording.recordedSession.calls.length + 1
+        call.sequenceId = sessionRecording.recordedSession.calls.length + 1;
         sessionRecording.recordedSession.calls.push(call);
+        if (sessionRecording.recordedSession.sessionOutput === "live") {
+            const data = JSON.stringify(call);
+
+            if (sessionWebSocket) {
+                sessionWebSocket.send(data);
+            } else if (sessionFileStream) {
+                sessionFileStream.write(`${data}\n`);
+            }
+        }
     }
 }
 
@@ -383,10 +405,28 @@ function getOutputFormat(){
     return sessionRecording.recordedSession.sessionOutput;
 }
 
-function setOutputDir(dir){
-    sessionRecording.recordedSession.sessionOutputPath = dir;
-    sessionRecording.recordedSession.mockOutputPath = dir;
-    logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
+function setOutputDir(dir) {
+    const wsRegex = /^(ws(s)?):\/\//i;
+
+    if (wsRegex.test(dir)) {
+        sessionWebSocket = new WebSocket(dir);
+        sessionWebSocket.on('open', function open() {
+            logger.info("WebSocket connection opened: " + dir);
+        });
+    } else {
+        sessionRecording.recordedSession.sessionOutputPath = dir;
+        sessionRecording.recordedSession.mockOutputPath = dir;
+        logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
+        if (sessionRecording.recordedSession.sessionOutput === "live") {
+
+            if (!fs.existsSync(dir)) {
+                logger.info("Directory does not exist for: " + dir);
+                fs.mkdirSync(dir, { recursive: true});
+            }
+          
+            sessionFileStream = fs.createWriteStream(`${dir}/FireboltCalls_live.log`, { flags: 'a' });
+        }
+  }
 }
 
 function getSessionOutputDir(){
@@ -398,15 +438,23 @@ function getMockOutputDir(){
 }
 
 function updateCallWithResponse(method, result, key) {
-    if(isRecording()) {
-        const methodCalls = sessionRecording.recordedSession.calls
-        for(let i = 0; i < methodCalls.length; i++) {
-            if(methodCalls[i].methodCall == method) {
-                methodCalls[i].response = {[key]: result, timestamp: Date.now()}
-                sessionRecording.recordedSession.calls.concat(...methodCalls);
-            }
-        }
-    }
+  if (isRecording()) {
+      const methodCalls = sessionRecording.recordedSession.calls;
+      for(let i = 0; i < methodCalls.length; i++) {
+          if(methodCalls[i].methodCall == method) {
+              methodCalls[i].response = {[key]: result, timestamp: Date.now()};
+              sessionRecording.recordedSession.calls.concat(...methodCalls);
+              if (sessionRecording.recordedSession.sessionOutput === "live") {
+                  const data = JSON.stringify(methodCalls[i]);
+                  if (sessionWebSocket) {
+                      sessionWebSocket.send(data);
+                  } else if (sessionFileStream) {
+                      sessionFileStream.write(`${data}\n`);
+                  }
+              }
+          }
+      }
+  }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir};
+export { Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir };
