@@ -46,14 +46,15 @@ To change the output format of the session recording use option
 `--sessionOutput log` 
 with start, stop, or call in between starting and stopping.
 Valid output options are:
+
 - log (default): method call request and response objects ordered by the timestamp of the objects.
 - raw: list of method call objects containing both request and response in one object.
-- mock-overrides: a directory of method calls extrapolated from the raw format. This option converts the raw formats into json files or yaml files. A json file would be the response from a method call that took place when mock-firebolt processed it. Yaml files contain a function that returns a json response depending on input params. Yaml files are only generated if there were multiple of the same method call with different params. 
+- mock-overrides: a directory of method calls extrapolated from the raw format. This option converts the raw formats into json files or yaml files. A json file would be the response from a method call that took place when mock-firebolt processed it. Yaml files contain a function that returns a json response depending on input params. Yaml files are only generated if there were multiple of the same method call with different params.
+- live: This format operates similarly to the 'log' format with an added real-time feature. As each message is received, it gets immediately written to the specified output file. In addition to accepting regular file paths, the 'live' option also supports WebSocket (WS/WSS) URLs. If a WS/WSS URL is designated as the outputPath, a WebSocket connection is established with the specified URL, and the new messages are dispatched to that connection. Please note that specifying an outputPath is essential for the 'live' option. This path is necessary whether you're sending the live log to a WebSocket URL or saving a live copy of the log file to a local directory.
 
-To change the output directory of the session recording use 
-`--sessionOutputPath ./output/examples`
-with start, stop, or call in between starting and stopping.
-This will save the recording to the directory specified. Default for log|raw is server/output/sessions and for mock-overrides is server/output/mocks
+To change the output directory of the session recording, use the --sessionOutputPath option with start, stop, or call. This can be done at any time between starting and stopping the recording. For example, --sessionOutputPath ./output/examples will save the recording to the directory specified. The default paths for log and raw formats are ./output/sessions, and for mock-overrides is ./output/mocks.
+
+Please note that because of the live nature of the "live" option, there should be no expectation of valid JSON formatting. Each message is written as it is received, with a newline character after each message for file appending. For WebSocket appending, we simply write() each message as we receive it. Also, responses are printed to a file before they can be received for the messages, so we can't print responses with their original requests. It will be up to the user reading the file to match request IDs with response IDs.
 
 ## Sequence of Events
 
