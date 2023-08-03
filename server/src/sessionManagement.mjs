@@ -25,8 +25,56 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import WebSocket from 'ws';
 
-let sessionWebSocket = null;
-let sessionFileStream = null;
+class SessionWebSocket {
+  constructor() {
+    this.ws = null;
+  }
+
+  open(dir) {
+    this.ws = new WebSocket(dir);
+    this.ws.on('open', () => {
+      logger.info(`Websocket connection opened: ${dir}`);
+    })
+  }
+
+  close() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
+  }
+}
+
+class SessionFileStream {
+  constructor() {
+    this.stream = null;
+  }
+
+  open(dir) {
+    if (!fs.existsSync(dir)) {
+      logger.info("Directory does not exist for: " + dir);
+      fs.mkdirSync(dir, { recursive: true});
+    }
+    
+    this.stream = fs.createWriteStream(`${dir}/FireboltCalls_live.log`, { flags: 'a' });
+  }
+
+  write(data) {
+    if (this.stream) {
+      this.stream.write(`${data}\n`);
+    }
+  }
+
+  close() {
+    if (this.stream) {
+      this.stream.end();
+      this.stream = null;
+    }
+  }
+}
+
+let sessionWebSocket = new SessionWebSocket();
+let sessionFileStream = new SessionFileStream();
 
 class FireboltCall {
     constructor(methodCall, params) {
@@ -349,7 +397,7 @@ let sessionRecording = {
     recordedSession : new Session()
 };
 
-function startRecording(){
+function startRecording() {
     logger.info('Starting recording');
     sessionRecording.recording = true;
     sessionRecording.recordedSession = new Session();
@@ -360,13 +408,11 @@ function stopRecording() {
       logger.info('Stopping recording');
       sessionRecording.recording = false;
       const sessionData = sessionRecording.recordedSession.exportSession();
-      if (sessionWebSocket) {
+      if (sessionWebSocket.ws) {
           sessionWebSocket.close();
-          sessionWebSocket = null;
       }
-      if (sessionFileStream) {
-          sessionFileStream.end();
-          sessionFileStream = null;
+      if (sessionFileStream.stream) {
+          sessionFileStream.close();
       }
       return sessionData;
   } else {
@@ -387,10 +433,10 @@ function addCall(methodCall, params){
         if (sessionRecording.recordedSession.sessionOutput === "live") {
             const data = JSON.stringify(call);
 
-            if (sessionWebSocket) {
-                sessionWebSocket.send(data);
-            } else if (sessionFileStream) {
-                sessionFileStream.write(`${data}\n`);
+            if (sessionWebSocket.ws) {
+                sessionWebSocket.ws.send(data);
+            } else if (sessionFileStream.stream) {
+                sessionFileStream.write(data);
             }
         }
     }
@@ -409,24 +455,15 @@ function setOutputDir(dir) {
     const wsRegex = /^(ws(s)?):\/\//i;
 
     if (wsRegex.test(dir)) {
-        sessionWebSocket = new WebSocket(dir);
-        sessionWebSocket.on('open', function open() {
-            logger.info("WebSocket connection opened: " + dir);
-        });
+        sessionWebSocket.open(dir);
     } else {
         sessionRecording.recordedSession.sessionOutputPath = dir;
         sessionRecording.recordedSession.mockOutputPath = dir;
         logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
         if (sessionRecording.recordedSession.sessionOutput === "live") {
-
-            if (!fs.existsSync(dir)) {
-                logger.info("Directory does not exist for: " + dir);
-                fs.mkdirSync(dir, { recursive: true});
-            }
-          
-            sessionFileStream = fs.createWriteStream(`${dir}/FireboltCalls_live.log`, { flags: 'a' });
+          sessionFileStream.open(dir);
         }
-  }
+    }
 }
 
 function getSessionOutputDir(){
@@ -446,10 +483,10 @@ function updateCallWithResponse(method, result, key) {
               sessionRecording.recordedSession.calls.concat(...methodCalls);
               if (sessionRecording.recordedSession.sessionOutput === "live") {
                   const data = JSON.stringify(methodCalls[i]);
-                  if (sessionWebSocket) {
-                      sessionWebSocket.send(data);
-                  } else if (sessionFileStream) {
-                      sessionFileStream.write(`${data}\n`);
+                  if (sessionWebSocket.ws) {
+                      sessionWebSocket.ws.send(data);
+                  } else if (sessionFileStream.stream) {
+                      sessionFileStream.write(data);
                   }
               }
           }
