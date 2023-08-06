@@ -432,7 +432,6 @@ function addCall(methodCall, params){
         sessionRecording.recordedSession.calls.push(call);
         if (sessionRecording.recordedSession.sessionOutput === "live") {
             const data = JSON.stringify(call);
-
             if (sessionWebSocket.ws) {
                 sessionWebSocket.ws.send(data);
             } else if (sessionFileStream.stream) {
@@ -494,4 +493,25 @@ function updateCallWithResponse(method, result, key) {
   }
 }
 
-export { Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir };
+// Utility function for unit tests
+const setTestEntity = (entityName, mockEntity) => {
+  switch (entityName) {
+    case 'websocket':
+      sessionWebSocket = mockEntity;
+      break;
+    case 'filestream':
+      sessionFileStream = mockEntity;
+      break;
+    default:
+      throw new Error('Unknown entity name');
+  }
+}
+
+export const testExports = {
+  setTestEntity,
+  setOutputDir,
+  SessionFileStream,
+  SessionWebSocket
+}
+
+export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir };
