@@ -283,7 +283,7 @@ function emitResponse(finalResult, msg, userId, method) {
     // If event template config does not exist, just send the raw finalResult
     eventMessage = finalResult;
   }
-
+  updateCallWithResponse(method, eventMessage, "events")
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
     // Check if eventType is included in config

@@ -327,6 +327,13 @@ class Session {
                 }
                 recordings.push(responseJson)
             }
+            const eventJson = {
+                type: "event",
+                timestamp: sessionDataJson.calls[i].timestamp,
+                method: sessionDataJson.calls[i].methodCall,
+                events: sessionDataJson.calls[i].response
+            }
+            recordings.push(eventJson)
         }
         //sort by timestamp ascending
         recordings.sort(function(a,b) {
