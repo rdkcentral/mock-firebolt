@@ -133,90 +133,127 @@ describe(`FireboltCall`, () => {
   });
 });
 
-describe('SessionWebSocket', () => {
+describe(`SessionHandler`, () => {
   afterEach(() => {
-    jest.restoreAllMocks(); 
+    jest.restoreAllMocks();
   });
 
-  test('should initialize without a WebSocket', () => {
-    const sessionWebSocket = new sessionManagement.testExports.SessionWebSocket();
-    expect(sessionWebSocket.ws).toBeNull();
+  test(`should initialize without a WebSocket or FileStream`, () => {
+    const sessionHandler = new sessionManagement.testExports.SessionHandler();
+    expect(sessionHandler.ws).toBeNull();
+    expect(sessionHandler.stream).toBeNull();
   });
 
-  test('should open a WebSocket connection', () => {
-    const mockWsInstance = {
-      open: jest.fn(),
-      close: jest.fn(),
-      ws: {
-        open: jest.fn(),
-        close: jest.fn()
-      }
-    };
+  describe(`Websocket functionality`, () => {
+    test(`should open a WebSocket connection`, () => {
+      const mockSessionHandler = {
+        ws: {
+          open: jest.fn(),
+          send: jest.fn(),
+          close: jest.fn(),
+        },
+        stream: null,
+        close: jest.fn(() => {
+          mockSessionHandler.ws.close()
+        }),
+        write: jest.fn(() => {
+          mockSessionHandler.ws.send()
+        }),
+        open: jest.fn(() => {
+          mockSessionHandler.ws.open()
+        }),
+        mode: 'websocket'
+      };
 
-    const SessionWebSocket = jest.spyOn(sessionManagement.testExports, 'SessionWebSocket').mockImplementation(() => mockWsInstance);
-    const dir = 'ws://example.com';
-    
-    const sessionWebSocket = new SessionWebSocket();
-    sessionWebSocket.open(dir);
+      const SessionHandler = jest.spyOn(sessionManagement.testExports, 'SessionHandler')
+      .mockImplementation(() => mockSessionHandler);
+      const dir = 'ws://example.com';
 
-    expect(sessionWebSocket.ws).toBeTruthy(); 
-    expect(sessionWebSocket.open).toHaveBeenCalled();
+      const sessionHandler = new SessionHandler();
+      sessionHandler.open(dir);
+      
+      expect(sessionHandler.open).toHaveBeenCalled();
+      expect(sessionHandler.ws.open).toHaveBeenCalled();
+    });
+
+    test(`should close a WebSocket connection`, () => {
+      const mockSessionHandler = {
+        ws: {
+          open: jest.fn(),
+          send: jest.fn(),
+          close: jest.fn(),
+        },
+        stream: null,
+        close: jest.fn(() => {
+          mockSessionHandler.ws = null
+        }),
+        write: jest.fn(() => {
+          mockSessionHandler.ws.send()
+        }),
+        open: jest.fn(() => {
+          mockSessionHandler.ws.open()
+        }),
+        mode: 'websocket'
+      };
+      
+      const SessionHandler = jest.spyOn(sessionManagement.testExports, 'SessionHandler')
+      .mockImplementation(() => mockSessionHandler);
+      const dir = 'ws://example.com';
+
+    const sessionHandler = new SessionHandler();
+    sessionHandler.close(dir);
+
+    expect(sessionHandler.close).toHaveBeenCalled();
+    expect(sessionHandler.ws).toBeNull();
+    });
   });
 
-  test('should close a WebSocket connection', () => {
-    const mockWsInstance = {
-      open: jest.fn(),
-      close: jest.fn(() => {
-        mockWsInstance.ws = null;
-      }),
-      ws: {
-        open: jest.fn(),
-        close: jest.fn()
-      }
-    };
+  describe(`FileStream functionality`, () => {
+    test(`should open a file stream`, () => {
+      const dir = './some/directory/path';
 
-    const SessionWebSocket = jest.spyOn(sessionManagement.testExports, 'SessionWebSocket').mockImplementation(() => mockWsInstance);
-    const dir = 'ws://example.com';
-    
-    const sessionWebSocket = new SessionWebSocket();
-    sessionWebSocket.close(dir);
+      const sessionHandler = new sessionManagement.testExports.SessionHandler();
+      sessionHandler.open(dir);
 
-    expect(sessionWebSocket.ws).toBeNull();
-  });
-});
+      expect(sessionHandler.stream).toBeTruthy();
+    });
 
-describe(`SessionFileStream`, () => {
-  test('should initialize without a stream', () => {
-    const sessionFileStream = new sessionManagement.testExports.SessionFileStream();
-    expect(sessionFileStream.stream).toBeNull();
-  });
+    test(`should write data to the file stream`, () => {
+      const dir = './some/directory/path';
+      const data = 'test data';
 
-  test('should open a file stream', () => {
-    const sessionFileStream = new sessionManagement.testExports.SessionFileStream();
-    const dir = './some/directory/path';
+      const mockWriteStream = {
+        write: jest.fn(),
+        end: jest.fn()
+      };
 
-    sessionFileStream.open(dir);
-    
-    expect(sessionFileStream.stream).toBeTruthy();
-  });
+      jest.spyOn(fs, 'createWriteStream').mockReturnValue(mockWriteStream);
 
-  test('should write data to the file stream', () => {
-    const sessionFileStream = new sessionManagement.testExports.SessionFileStream();
-    sessionFileStream.open('./some/directory/path');
+      const sessionHandler = new sessionManagement.testExports.SessionHandler();
+      sessionHandler.open(dir);
+      sessionHandler.write(data);
 
-    const data = 'test data';
-    sessionFileStream.write(data);
+      expect(mockWriteStream.write).toHaveBeenCalledWith(`${data}\n`);
+    });
 
-    expect(() => sessionFileStream.write(data)).not.toThrow();
-  });
+    test(`should close the file stream`, () => {
+      const dir = './some/directory/path';
 
-  test('should close the file stream', () => {
-    const sessionFileStream = new sessionManagement.testExports.SessionFileStream();
-    sessionFileStream.open('./some/directory/path');
+      const mockEnd = jest.fn();
+      const mockWriteStream = {
+        write: jest.fn(),
+        end: mockEnd
+      };
 
-    sessionFileStream.close();
+      jest.spyOn(fs, 'createWriteStream').mockReturnValue(mockWriteStream);
 
-    expect(sessionFileStream.stream).toBeNull();
+      const sessionHandler = new sessionManagement.testExports.SessionHandler();
+      sessionHandler.open(dir);
+      sessionHandler.close();
+
+      expect(mockEnd).toHaveBeenCalled();
+      expect(sessionHandler.stream).toBeNull();
+    });
   });
 });
 
@@ -243,28 +280,36 @@ test(`sessionManagement.stopRecording closes the WebSocket connection`, () => {
       .mockImplementation((dir) => {
           const wsRegex = /^(ws(s)?):\/\//i;
           if (wsRegex.test(dir)) {
-              mockSessionWebSocket.ws.open();
+              mockSessionHandler.open();
           } else {
-            mockSessionFileStream.open()
+            mockSessionHandler.open()
           }
       });
 
 
-  const mockSessionWebSocket = {
-    ws: {
-      open: jest.fn(),
-      close: jest.fn()
-    }, 
-    close: jest.fn()
-  };
+    const mockSessionHandler = {
+      ws: {
+        open: jest.fn(),
+        send: jest.fn(),
+        close: jest.fn()
+      }, 
+      close: jest.fn(() => {
+        mockSessionHandler.ws.close()
+      }),
+      write: jest.fn(() => {
+        mockSessionHandler.ws.send()
+      }),
+      open: jest.fn()
+    };
     
-  sessionManagement.testExports.setTestEntity('websocket', mockSessionWebSocket);
+    
+  sessionManagement.testExports.setTestEntity(mockSessionHandler);
   sessionManagement.testExports.setOutputDir('ws://example.com');
 
   sessionManagement.startRecording();
   sessionManagement.stopRecording();
 
-  expect(mockSessionWebSocket.close).toHaveBeenCalled();
+  expect(mockSessionHandler.ws.close).toHaveBeenCalled();
 
   spySetOutputDir.mockRestore();
 });
@@ -274,26 +319,34 @@ test(`sessionManagement.stopRecording closes the FileStream connection`, () => {
       .mockImplementation((dir) => {
           const wsRegex = /^(ws(s)?):\/\//i;
           if (wsRegex.test(dir)) {
-            mockSessionWebSocket.ws.open();
+            mockSessionHandler.open();
           } else {
-            mockSessionFileStream.open()
+            mockSessionHandler.open()
           }
       });
 
-  const mockSessionFileStream = {
+  const mockSessionHandler = {
+    stream: {
+      open: jest.fn(),
+      write: jest.fn(),
+      close: jest.fn(),
+    },
+    close: jest.fn(() => {
+      mockSessionHandler.stream.close();
+    }),
+    write: jest.fn(() => {
+      mockSessionHandler.stream.write();
+    }),
     open: jest.fn(),
-    write: jest.fn(),
-    close: jest.fn(),
-    stream: {}
   };
     
-  sessionManagement.testExports.setTestEntity('filestream', mockSessionFileStream);
+  sessionManagement.testExports.setTestEntity(mockSessionHandler);
   sessionManagement.testExports.setOutputDir('./some/directory/path');
 
   sessionManagement.startRecording();
   sessionManagement.stopRecording();
 
-  expect(mockSessionFileStream.close).toHaveBeenCalled();
+  expect(mockSessionHandler.stream.close).toHaveBeenCalled();
 
   spySetOutputDir.mockRestore();
 });
@@ -315,28 +368,32 @@ test(`sessionManagement.addCall works properly`, () => {
   expect(result).toBeUndefined();
 });
 
-test(`sessionManagement.addCall calls sessionWebSocket.send`, () => {
+test(`sessionManagement.addCall calls websocket`, () => {
   const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
       .mockImplementation((dir) => {
           const wsRegex = /^(ws(s)?):\/\//i;
           if (wsRegex.test(dir)) {
-              mockSessionWebSocket.ws.open();
+              mockSessionHandler.open();
           } else {
-            mockSessionFileStream.open()
+            mockSessionHandler.open()
           }
       });
 
 
-  const mockSessionWebSocket = {
+  const mockSessionHandler = {
     ws: {
       open: jest.fn(),
       send: jest.fn(),
       close: jest.fn()
     }, 
-    close: jest.fn()
+    close: jest.fn(),
+    write: jest.fn(() => {
+      mockSessionHandler.ws.send()
+    }),
+    open: jest.fn()
   };
     
-  sessionManagement.testExports.setTestEntity('websocket', mockSessionWebSocket);
+  sessionManagement.testExports.setTestEntity(mockSessionHandler);
   sessionManagement.testExports.setOutputDir('ws://example.com');
 
   sessionManagement.startRecording();
@@ -344,31 +401,36 @@ test(`sessionManagement.addCall calls sessionWebSocket.send`, () => {
 
   sessionManagement.addCall("methodName", "Parameters");
 
-  expect(mockSessionWebSocket.ws.send).toHaveBeenCalled();
+  expect(mockSessionHandler.ws.send).toHaveBeenCalled();
 
   spySetOutputDir.mockRestore();
 });
 
-test(`sessionManagement.addCall calls sessionFileStream.write`, () => {
+test(`sessionManagement.addCall calls filestream`, () => {
   const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
       .mockImplementation((dir) => {
           const wsRegex = /^(ws(s)?):\/\//i;
           if (wsRegex.test(dir)) {
-            mockSessionWebSocket.ws.open();
+            mockSessionHandler.open();
           } else {
-            mockSessionFileStream.open()
+            mockSessionHandler.open()
           }
       });
 
-  const mockSessionFileStream = {
-    open: jest.fn(),
-    write: jest.fn(),
+  const mockSessionHandler = {
+    stream: {
+      open: jest.fn(),
+      write: jest.fn(),
+      close: jest.fn()
+    }, 
     close: jest.fn(),
-    stream: jest.fn()
+    write: jest.fn(() => {
+      mockSessionHandler.stream.write()
+    }),
+    open: jest.fn()
   };
     
-  sessionManagement.testExports.setTestEntity('filestream', mockSessionFileStream);
-  sessionManagement.testExports.setTestEntity('websocket', {}); 
+  sessionManagement.testExports.setTestEntity(mockSessionHandler);
   sessionManagement.testExports.setOutputDir('./test');
 
   sessionManagement.startRecording();
@@ -376,7 +438,7 @@ test(`sessionManagement.addCall calls sessionFileStream.write`, () => {
 
   sessionManagement.addCall("methodName", "Parameters");
 
-  expect(mockSessionFileStream.write).toHaveBeenCalled();
+  expect(mockSessionHandler.stream.write).toHaveBeenCalled();
 
   spySetOutputDir.mockRestore();
 });
