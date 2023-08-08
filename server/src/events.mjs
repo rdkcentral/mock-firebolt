@@ -219,7 +219,7 @@ function sendEventListenerAck(userId, ws, metadata) {
 
   ws.send(ackMessage);
   logger.debug(`Sent registration event ack message for user ${userId}: ${ackMessage}`);
-  updateCallWithResponse(metadata.method, parsedAckMessage.result, "result")
+  updateCallWithResponse(metadata.method, parsedAckMessage.result, "result", userId)
 }
 
 /**

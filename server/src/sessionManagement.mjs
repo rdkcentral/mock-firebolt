@@ -88,12 +88,13 @@ class Session {
     #sessionStart;
     #sessionEnd;
     
-    constructor(){
+    constructor(userId){
+        this.userId = userId;
         this.calls = [];
         this.#sessionStart = Date.now();
         this.sessionOutput = "log";
-        this.sessionOutputPath = "./output/sessions";
-        this.mockOutputPath = `./output/mocks/${this.#sessionStart}`;
+        this.sessionOutputPath = `./output/sessions/${this.userId}`;
+        this.mockOutputPath = `./output/mocks/${this.userId}/${this.#sessionStart}`;
     }
 
     exportSession() {
@@ -392,28 +393,27 @@ class Session {
     }
 }
 
-let sessionRecording = {
-    recording : false,
-    recordedSession : new Session()
-};
+let sessionRecording = {};
 
-function startRecording() {
+function startRecording(userId) {
     logger.info('Starting recording');
-    sessionRecording.recording = true;
-    sessionRecording.recordedSession = new Session();
+    sessionRecording[userId] = {
+      recording: true,
+      recordedSession: new Session(userId)
+  };
 }
   
-function stopRecording() {
-  if (isRecording()) {
+function stopRecording(userId) {
+  if (isRecording(userId)) {
       logger.info('Stopping recording');
-      sessionRecording.recording = false;
-      const sessionData = sessionRecording.recordedSession.exportSession();
+      const sessionData = sessionRecording[userId].recordedSession.exportSession();
       if (sessionWebSocket.ws) {
           sessionWebSocket.close();
       }
       if (sessionFileStream.stream) {
           sessionFileStream.close();
       }
+      delete sessionRecording[userId];
       return sessionData;
   } else {
       logger.warn('Trying to stop recording when not recording');
@@ -421,16 +421,16 @@ function stopRecording() {
   }
 }
 
-function isRecording(){
-    return sessionRecording.recording;
+function isRecording(userId) {
+  return sessionRecording[userId]?.recording;
 }
 
-function addCall(methodCall, params){
-    if (isRecording()) {
+function addCall(methodCall, params, userId) {
+    if (isRecording(userId)) {
         const call = new FireboltCall(methodCall, params);
-        call.sequenceId = sessionRecording.recordedSession.calls.length + 1;
-        sessionRecording.recordedSession.calls.push(call);
-        if (sessionRecording.recordedSession.sessionOutput === "live") {
+        call.sequenceId = sessionRecording[userId].recordedSession.calls.length + 1;
+        sessionRecording[userId].recordedSession.calls.push(call);
+        if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
             const data = JSON.stringify(call);
             if (sessionWebSocket.ws) {
                 sessionWebSocket.ws.send(data);
@@ -441,28 +441,36 @@ function addCall(methodCall, params){
     }
 }
 
-function setOutputFormat(format){
-    sessionRecording.recordedSession.sessionOutput = format;
-    logger.info("Setting output: " + sessionRecording.recordedSession.sessionOutput);
+function setOutputFormat(format, userId) {
+  if (!sessionRecording[userId]) {
+      logger.error(`No active session found for user: ${userId}`);
+      return;
+  }
+  sessionRecording[userId].recordedSession.sessionOutput = format;
+  logger.info(`Setting output format for user ${userId} to:`, sessionRecording[userId].recordedSession.sessionOutput);
 }
 
-function getOutputFormat(){
+function getOutputFormat() {
     return sessionRecording.recordedSession.sessionOutput;
 }
 
-function setOutputDir(dir) {
-    const wsRegex = /^(ws(s)?):\/\//i;
+function setOutputDir(dir, userId) {
+  if (!sessionRecording[userId]) {
+      logger.error(`No active session found for user: ${userId}`);
+      return;
+  }
+  const wsRegex = /^(ws(s)?):\/\//i;
 
-    if (wsRegex.test(dir)) {
-        sessionWebSocket.open(dir);
-    } else {
-        sessionRecording.recordedSession.sessionOutputPath = dir;
-        sessionRecording.recordedSession.mockOutputPath = dir;
-        logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
-        if (sessionRecording.recordedSession.sessionOutput === "live") {
+  if (wsRegex.test(dir)) {
+      sessionWebSocket.open(dir);
+  } else {
+      sessionRecording[userId].recordedSession.sessionOutputPath = dir;
+      sessionRecording[userId].recordedSession.mockOutputPath = dir;
+      logger.info(`Setting output path for user ${userId} to:`, sessionRecording[userId].recordedSession.mockOutputPath);
+      if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
           sessionFileStream.open(dir);
-        }
-    }
+      }
+  }
 }
 
 function getSessionOutputDir(){
@@ -473,14 +481,14 @@ function getMockOutputDir(){
     return sessionRecording.recordedSession.mockOutputPath;
 }
 
-function updateCallWithResponse(method, result, key) {
-  if (isRecording()) {
-      const methodCalls = sessionRecording.recordedSession.calls;
+function updateCallWithResponse(method, result, key, userId) {
+  if (isRecording(userId)) {
+      const methodCalls = sessionRecording[userId].recordedSession.calls;
       for(let i = 0; i < methodCalls.length; i++) {
           if(methodCalls[i].methodCall == method) {
               methodCalls[i].response = {[key]: result, timestamp: Date.now()};
-              sessionRecording.recordedSession.calls.concat(...methodCalls);
-              if (sessionRecording.recordedSession.sessionOutput === "live") {
+              sessionRecording[userId].recordedSession.calls.concat(...methodCalls);
+              if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
                   const data = JSON.stringify(methodCalls[i]);
                   if (sessionWebSocket.ws) {
                       sessionWebSocket.ws.send(data);

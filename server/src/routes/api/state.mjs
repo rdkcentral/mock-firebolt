@@ -25,6 +25,7 @@ import { getUserIdFromReq } from '../../util.mjs';
 import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 import * as commonErrors from '../../commonErrors.mjs';
 import * as stateManagement from '../../stateManagement.mjs';
+import * as sessionManagement from '../../sessionManagement.mjs';
 import * as events from '../../events.mjs';
 import { config } from '../../config.mjs';
 
@@ -279,7 +280,10 @@ function updateState(req, res) {
 // Expected body: N/A
 function revertState(req, res) {
   const userId = getUserIdFromReq(req);
-  stateManagement.revertState(userId);
+  if (sessionManagement.isRecording(userId)) {
+    sessionManagement.stopRecording(userId);
+  }
+  stateManagement.revertState(userId);  
   res.status(200).send({
     status: 'SUCCESS'
   });
