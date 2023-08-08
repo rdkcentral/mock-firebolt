@@ -25,56 +25,61 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import WebSocket from 'ws';
 
-class SessionWebSocket {
+class SessionHandler {
   constructor() {
+    this.mode = null;
     this.ws = null;
-  }
-
-  open(dir) {
-    this.ws = new WebSocket(dir);
-    this.ws.on('open', () => {
-      logger.info(`Websocket connection opened: ${dir}`);
-    })
-  }
-
-  close() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
-  }
-}
-
-class SessionFileStream {
-  constructor() {
     this.stream = null;
   }
 
-  open(dir) {
-    if (!fs.existsSync(dir)) {
-      logger.info("Directory does not exist for: " + dir);
-      fs.mkdirSync(dir, { recursive: true});
+  // Determine mode based on directory/url
+  _determineMode(dir) {
+    const wsRegex = /^(ws(s)?):\/\//i;
+    if (wsRegex.test(dir)) {
+      this.mode = 'websocket';
+    } else {
+      this.mode = 'filestream';
     }
-    
-    this.stream = fs.createWriteStream(`${dir}/FireboltCalls_live.log`, { flags: 'a' });
+  }
+
+  open(dir) {
+    this._determineMode(dir);
+
+    if (this.mode === 'websocket') {
+      this.ws = new WebSocket(dir);
+      this.ws.on('open', () => {
+        logger.info(`Websocket connection opened: ${dir}`);
+      });
+    } else {
+      if (!fs.existsSync(dir)) {
+        logger.info("Directory does not exist for: " + dir);
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      this.stream = fs.createWriteStream(`${dir}/FireboltCalls_live.log`, { flags: 'a' });
+    }
   }
 
   write(data) {
-    if (this.stream) {
+    if (this.mode === 'websocket' && this.ws) {
+      this.ws.send(data); 
+    } else if (this.stream) {
       this.stream.write(`${data}\n`);
     }
   }
 
   close() {
-    if (this.stream) {
+    if (this.mode === 'websocket' && this.ws) {
+      this.ws.close();
+      this.ws = null;
+    } else if (this.stream) {
       this.stream.end();
       this.stream = null;
     }
   }
 }
 
-let sessionWebSocket = new SessionWebSocket();
-let sessionFileStream = new SessionFileStream();
+let sessionHandler = new SessionHandler();
 
 class FireboltCall {
     constructor(methodCall, params) {
@@ -110,6 +115,10 @@ class Session {
             // const sessionStart = new Date(this.#sessionStart);
             // const sessionStartString = sessionStart.toISOString().replace(/T/, '_').replace(/\..+/, '');
             // logger.info(`${sessionStart.toISOString()}`);    
+
+            // Check if the output path is a WebSocket URL
+            const wsRegex = /^(ws(s)?):\/\//i;
+            this.sessionOutputPath = wsRegex.test(this.sessionOutputPath) ? "./sessions/output" : this.sessionOutputPath;
 
             if (!fs.existsSync(this.sessionOutputPath)) {
                 logger.info("Directory does not exist for: " + this.sessionOutputPath)
@@ -408,12 +417,7 @@ function stopRecording() {
       logger.info('Stopping recording');
       sessionRecording.recording = false;
       const sessionData = sessionRecording.recordedSession.exportSession();
-      if (sessionWebSocket.ws) {
-          sessionWebSocket.close();
-      }
-      if (sessionFileStream.stream) {
-          sessionFileStream.close();
-      }
+      sessionHandler.close();
       return sessionData;
   } else {
       logger.warn('Trying to stop recording when not recording');
@@ -432,11 +436,7 @@ function addCall(methodCall, params){
         sessionRecording.recordedSession.calls.push(call);
         if (sessionRecording.recordedSession.sessionOutput === "live") {
             const data = JSON.stringify(call);
-            if (sessionWebSocket.ws) {
-                sessionWebSocket.ws.send(data);
-            } else if (sessionFileStream.stream) {
-                sessionFileStream.write(data);
-            }
+            sessionHandler.write(data);
         }
     }
 }
@@ -451,18 +451,12 @@ function getOutputFormat(){
 }
 
 function setOutputDir(dir) {
-    const wsRegex = /^(ws(s)?):\/\//i;
-
-    if (wsRegex.test(dir)) {
-        sessionWebSocket.open(dir);
-    } else {
-        sessionRecording.recordedSession.sessionOutputPath = dir;
-        sessionRecording.recordedSession.mockOutputPath = dir;
-        logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
-        if (sessionRecording.recordedSession.sessionOutput === "live") {
-          sessionFileStream.open(dir);
-        }
-    }
+  if (sessionRecording.recordedSession.sessionOutput === "live") {
+      sessionHandler.open(dir);
+  }
+  sessionRecording.recordedSession.sessionOutputPath = dir;
+  sessionRecording.recordedSession.mockOutputPath = dir;
+  logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
 }
 
 function getSessionOutputDir(){
@@ -482,11 +476,7 @@ function updateCallWithResponse(method, result, key) {
               sessionRecording.recordedSession.calls.concat(...methodCalls);
               if (sessionRecording.recordedSession.sessionOutput === "live") {
                   const data = JSON.stringify(methodCalls[i]);
-                  if (sessionWebSocket.ws) {
-                      sessionWebSocket.ws.send(data);
-                  } else if (sessionFileStream.stream) {
-                      sessionFileStream.write(data);
-                  }
+                  sessionHandler.write(data);
               }
           }
       }
@@ -494,24 +484,14 @@ function updateCallWithResponse(method, result, key) {
 }
 
 // Utility function for unit tests
-const setTestEntity = (entityName, mockEntity) => {
-  switch (entityName) {
-    case 'websocket':
-      sessionWebSocket = mockEntity;
-      break;
-    case 'filestream':
-      sessionFileStream = mockEntity;
-      break;
-    default:
-      throw new Error('Unknown entity name');
-  }
+const setTestEntity = (mockEntity) => {
+  sessionHandler = mockEntity
 }
 
 export const testExports = {
   setTestEntity,
   setOutputDir,
-  SessionFileStream,
-  SessionWebSocket
+  SessionHandler
 }
 
 export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir };
