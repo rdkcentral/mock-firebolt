@@ -327,6 +327,13 @@ class Session {
                 }
                 recordings.push(responseJson)
             }
+            const eventJson = {
+                type: "event",
+                timestamp: sessionDataJson.calls[i].timestamp,
+                method: sessionDataJson.calls[i].methodCall,
+                events: sessionDataJson.calls[i].response
+            }
+            recordings.push(eventJson)
         }
         //sort by timestamp ascending
         recordings.sort(function(a,b) {
@@ -397,6 +404,12 @@ function getMockOutputDir(){
     return sessionRecording.recordedSession.mockOutputPath;
 }
 
+//Created to return sessionRecording object for unit testcase
+function getMockEventCall(){
+    return sessionRecording.recordedSession.calls;
+}
+
+
 function updateCallWithResponse(method, result, key) {
     if(isRecording()) {
         const methodCalls = sessionRecording.recordedSession.calls
@@ -409,4 +422,4 @@ function updateCallWithResponse(method, result, key) {
     }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir};
+export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir, getMockEventCall};

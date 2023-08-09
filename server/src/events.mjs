@@ -272,7 +272,7 @@ function emitResponse(finalResult, msg, userId, method) {
     result: finalResult,
     resultAsJson: JSON.stringify(finalResult)
   };
-
+ 
   let eventMessage;
 
   // If event template config exists, use it
@@ -283,7 +283,8 @@ function emitResponse(finalResult, msg, userId, method) {
     // If event template config does not exist, just send the raw finalResult
     eventMessage = finalResult;
   }
-
+  //Update the call with event response
+  updateCallWithResponse(method, eventMessage, "events")
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
     // Check if eventType is included in config
