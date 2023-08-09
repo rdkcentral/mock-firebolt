@@ -404,6 +404,7 @@ function getMockOutputDir(){
     return sessionRecording.recordedSession.mockOutputPath;
 }
 
+//Created to return sessionRecording object for unit testcase
 function getMockEventCall(){
     return sessionRecording.recordedSession.calls;
 }
