@@ -175,7 +175,8 @@ function emitResponse(finalResult, msg, userId, method) {
     result: finalResult
   };
   const eventMessage = JSON.stringify(oEventMessage);
-
+  //Update the call with event response
+  updateCallWithResponse(method, eventMessage, "events")
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
     logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);

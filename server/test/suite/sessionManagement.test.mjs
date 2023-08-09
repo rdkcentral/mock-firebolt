@@ -182,6 +182,19 @@ test('verify updateCallWithResponse is working', () => {
   expect(result).toBeUndefined();
 })
 
+test('verify updateCallWithResponse is working for recording Events', () => {
+  const methodCall = 'method1';
+  const eventMessage = '{"result":"NEW-DEVICE-NAME-1","id":13,"jsonrpc":"2.0"}';
+  const key = 'events';
+  sessionManagement.startRecording();
+  sessionManagement.addCall(methodCall, eventMessage);
+  sessionManagement.updateCallWithResponse(methodCall, eventMessage, key);
+  const result = sessionManagement.getMockEventCall()
+  expect(result).toMatchObject([{"methodCall" : "method1", "response":{"events":"{\"result\":\"NEW-DEVICE-NAME-1\",\"id\":13,\"jsonrpc\":\"2.0\"}" } },
+  ]);
+  sessionManagement.stopRecording();
+});
+
 test('verify a session output directory is created when it does not exist', () => {
   const session = new sessionManagement.Session();
   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => false);
