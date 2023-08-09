@@ -450,8 +450,8 @@ function setOutputFormat(format, userId) {
   logger.info(`Setting output format for user ${userId} to:`, sessionRecording[userId].recordedSession.sessionOutput);
 }
 
-function getOutputFormat() {
-    return sessionRecording.recordedSession.sessionOutput;
+function getOutputFormat(userId) {
+    return sessionRecording[userId].recordedSession.sessionOutput;
 }
 
 function setOutputDir(dir, userId) {
@@ -463,12 +463,12 @@ function setOutputDir(dir, userId) {
   logger.info(`Setting output path for user ${userId}: ${sessionRecording[userId].recordedSession.mockOutputPath}`);
 }
 
-function getSessionOutputDir(){
-    return sessionRecording.recordedSession.sessionOutputPath;
+function getSessionOutputDir(userId){
+    return sessionRecording[userId].recordedSession.sessionOutputPath;
 }
 
-function getMockOutputDir(){
-    return sessionRecording.recordedSession.mockOutputPath;
+function getMockOutputDir(userId){
+    return sessionRecording[userId].recordedSession.mockOutputPath;
 }
 
 function updateCallWithResponse(method, result, key, userId) {
@@ -488,12 +488,12 @@ function updateCallWithResponse(method, result, key, userId) {
 }
 
 // Utility function for unit tests
-const setTestEntity = (mockEntity) => {
-  sessionHandler = mockEntity
+const setTestSessionRecording = (mockRecording) => {
+  sessionRecording = mockRecording;
 }
 
 export const testExports = {
-  setTestEntity,
+  setTestSessionRecording,
   setOutputDir,
   SessionHandler
 }
