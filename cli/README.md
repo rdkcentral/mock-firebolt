@@ -54,7 +54,11 @@ Valid output options are:
 
 To change the output directory of the session recording, use the --sessionOutputPath option with start, stop, or call. This can be done at any time between starting and stopping the recording. For example, --sessionOutputPath ./output/examples will save the recording to the directory specified. The default paths for log and raw formats are ./output/sessions, and for mock-overrides is ./output/mocks.
 
-Please note that because of the live nature of the "live" option, there should be no expectation of valid JSON formatting. Each message is written as it is received, with a newline character after each message for file appending. For WebSocket appending, we simply write() each message as we receive it. Also, responses are printed to a file before they can be received for the messages, so we can't print responses with their original requests. It will be up to the user reading the file to match request IDs with response IDs.
+Please be aware that while utilizing the "live" option, the system doesn't create a singular encompassing JSON array or object. Instead, it produces individual legal JSON objects for each method call or method response that's observed. Owing to the real-time nature of this process, each message is directly written as it arrives.
+
+For file storage, a newline character is appended after every message to facilitate sequential additions. When it comes to WebSocket, the system simply employs the write() function for every incoming message.
+
+A point to consider is that responses might be written to a file before the corresponding messages are received. Consequently, the file will not correlate the responses with their initiating requests. The responsibility lies with the user to associate request IDs with the relevant response IDs when analyzing the output.
 
 ## Sequence of Events
 
