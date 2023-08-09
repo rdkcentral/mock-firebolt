@@ -25,6 +25,8 @@ import fs from 'fs';
 import yaml from 'js-yaml';
 import WebSocket from 'ws';
 
+const wsRegex = /^(ws(s)?):\/\//i;
+
 class SessionHandler {
   constructor() {
     this.mode = null;
@@ -34,7 +36,6 @@ class SessionHandler {
 
   // Determine mode based on directory/url
   _determineMode(dir) {
-    const wsRegex = /^(ws(s)?):\/\//i;
     if (wsRegex.test(dir)) {
       this.mode = 'websocket';
     } else {
@@ -117,7 +118,6 @@ class Session {
             // logger.info(`${sessionStart.toISOString()}`);    
 
             // Check if the output path is a WebSocket URL
-            const wsRegex = /^(ws(s)?):\/\//i;
             this.sessionOutputPath = wsRegex.test(this.sessionOutputPath) ? "./sessions/output" : this.sessionOutputPath;
 
             if (!fs.existsSync(this.sessionOutputPath)) {
