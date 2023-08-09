@@ -80,8 +80,6 @@ class SessionHandler {
   }
 }
 
-let sessionHandler = new SessionHandler();
-
 class FireboltCall {
     constructor(methodCall, params) {
         this.methodCall = methodCall;
@@ -101,6 +99,7 @@ class Session {
         this.sessionOutput = "log";
         this.sessionOutputPath = `./output/sessions/${this.userId}`;
         this.mockOutputPath = `./output/mocks/${this.userId}/${this.#sessionStart}`;
+        this.sessionHandler = new SessionHandler();
     }
 
     exportSession() {
@@ -405,19 +404,19 @@ class Session {
 let sessionRecording = {};
 
 function startRecording(userId) {
-    logger.info('Starting recording');
-    sessionRecording[userId] = {
-      recording: true,
-      recordedSession: new Session(userId)
+  logger.info(`Starting recording for user: ${userId}`);
+  sessionRecording[userId] = {
+    recording: true,
+    recordedSession: new Session(userId)
   };
 }
   
 function stopRecording(userId) {
   if (isRecording(userId)) {
-      logger.info('Stopping recording');
+      logger.info(`Stopping recording for user: ${userId}`);
       sessionRecording[userId].recording = false;
       const sessionData = sessionRecording[userId].recordedSession.exportSession();
-      sessionHandler.close();
+      sessionRecording[userId].recordedSession.sessionHandler.close();
       delete sessionRecording[userId];
       return sessionData;
   } else {
@@ -437,7 +436,7 @@ function addCall(methodCall, params, userId) {
         sessionRecording[userId].recordedSession.calls.push(call);
         if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
             const data = JSON.stringify(call);
-            sessionHandler.write(data);
+            sessionRecording[userId].recordedSession.sessionHandler.write(data);
         }
     }
 }
@@ -457,11 +456,11 @@ function getOutputFormat() {
 
 function setOutputDir(dir, userId) {
   if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
-      sessionHandler.open(dir);
+      sessionRecording[userId].recordedSession.sessionHandler.open(dir);
   }
   sessionRecording[userId].recordedSession.sessionOutputPath = dir;
   sessionRecording[userId].recordedSession.mockOutputPath = dir;
-  logger.info("Setting output path: " + sessionRecording[userId].recordedSession.mockOutputPath);
+  logger.info(`Setting output path for user ${userId}: ${sessionRecording[userId].recordedSession.mockOutputPath}`);
 }
 
 function getSessionOutputDir(){
@@ -481,7 +480,7 @@ function updateCallWithResponse(method, result, key, userId) {
               sessionRecording[userId].recordedSession.calls.concat(...methodCalls);
               if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
                   const data = JSON.stringify(methodCalls[i]);
-                  sessionHandler.write(data);
+                  sessionRecording[userId].recordedSession.sessionHandler.write(data);
               }
           }
       }
