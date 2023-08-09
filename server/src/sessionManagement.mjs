@@ -404,6 +404,10 @@ function getMockOutputDir(){
     return sessionRecording.recordedSession.mockOutputPath;
 }
 
+function getMockEventCall(){
+    return sessionRecording.recordedSession.calls;
+}
+
 function updateCallWithResponse(method, result, key) {
     if(isRecording()) {
         const methodCalls = sessionRecording.recordedSession.calls
@@ -416,4 +420,4 @@ function updateCallWithResponse(method, result, key) {
     }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir};
+export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir, getMockEventCall};
