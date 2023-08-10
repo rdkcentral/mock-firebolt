@@ -43,7 +43,7 @@ class SessionHandler {
     }
   }
 
-  open(dir) {
+  open(dir, userId) {
     this._determineMode(dir);
 
     if (this.mode === 'websocket') {
@@ -57,7 +57,7 @@ class SessionHandler {
         fs.mkdirSync(dir, { recursive: true });
       }
 
-      this.stream = fs.createWriteStream(`${dir}/FireboltCalls_live.log`, { flags: 'a' });
+      this.stream = fs.createWriteStream(`${dir}/FireboltCalls_${userId}_live.log`, { flags: 'a' });
     }
   }
 
@@ -388,6 +388,13 @@ class Session {
                 }
                 recordings.push(responseJson)
             }
+            const eventJson = {
+              type: "event",
+              timestamp: sessionDataJson.calls[i].timestamp,
+              method: sessionDataJson.calls[i].methodCall,
+              events: sessionDataJson.calls[i].response
+          }
+          recordings.push(eventJson)
         }
         //sort by timestamp ascending
         recordings.sort(function(a,b) {
@@ -456,7 +463,7 @@ function getOutputFormat(userId) {
 
 function setOutputDir(dir, userId) {
   if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
-      sessionRecording[userId].recordedSession.sessionHandler.open(dir);
+      sessionRecording[userId].recordedSession.sessionHandler.open(dir, userId);
   }
   sessionRecording[userId].recordedSession.sessionOutputPath = dir;
   sessionRecording[userId].recordedSession.mockOutputPath = dir;
@@ -487,14 +494,20 @@ function updateCallWithResponse(method, result, key, userId) {
   }
 }
 
+// Created to return sessionRecording object for unit testcase
+function getMockEventCall(userId){
+  return sessionRecording[userId].recordedSession.calls;
+}
+
 // Utility function for unit tests
-const setTestSessionRecording = (mockRecording) => {
+function setTestSessionRecording (mockRecording) {
   sessionRecording = mockRecording;
 }
 
 export const testExports = {
   setTestSessionRecording,
   setOutputDir,
+  getMockEventCall,
   SessionHandler
 }
 

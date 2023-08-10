@@ -422,7 +422,36 @@ test('verify updateCallWithResponse is working', () => {
   sessionManagement.addCall("testing", {});
   const result = sessionManagement.updateCallWithResponse("testing", "testing_session", "result", userId);
   expect(result).toBeUndefined();
-})
+});
+
+test('verify updateCallWithResponse is working for recording Events', () => {
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'log',
+        sessionOutputPath: './output/sessions',
+        mockOutputPath: './output/sessions',
+        sessionHandler: jest.fn(),
+        exportSession: jest.fn()
+      }
+    }
+  };
+  const methodCall = 'method1';
+  const eventMessage = '{"result":"NEW-DEVICE-NAME-1","id":13,"jsonrpc":"2.0"}';
+  const key = 'events';
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording);
+
+  sessionManagement.startRecording();
+  sessionManagement.addCall(methodCall, eventMessage, userId);
+  sessionManagement.updateCallWithResponse(methodCall, eventMessage, key, userId);
+  const result = sessionManagement.testExports.getMockEventCall(userId);
+  expect(result).toMatchObject([{"methodCall" : "method1", "response":{"events":"{\"result\":\"NEW-DEVICE-NAME-1\",\"id\":13,\"jsonrpc\":\"2.0\"}" } },
+  ]);
+  sessionManagement.stopRecording();
+});
 
 test('verify a session output directory is created when it does not exist', () => {
   const session = new sessionManagement.Session();
