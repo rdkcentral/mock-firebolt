@@ -133,6 +133,130 @@ describe(`FireboltCall`, () => {
   });
 });
 
+describe(`SessionHandler`, () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  test(`should initialize without a WebSocket or FileStream`, () => {
+    const sessionHandler = new sessionManagement.testExports.SessionHandler();
+    expect(sessionHandler.ws).toBeNull();
+    expect(sessionHandler.stream).toBeNull();
+  });
+
+  describe(`Websocket functionality`, () => {
+    test(`should open a WebSocket connection`, () => {
+      const mockSessionHandler = {
+        ws: {
+          open: jest.fn(),
+          send: jest.fn(),
+          close: jest.fn(),
+        },
+        stream: null,
+        close: jest.fn(() => {
+          mockSessionHandler.ws.close()
+        }),
+        write: jest.fn(() => {
+          mockSessionHandler.ws.send()
+        }),
+        open: jest.fn(() => {
+          mockSessionHandler.ws.open()
+        }),
+        mode: 'websocket'
+      };
+
+      const SessionHandler = jest.spyOn(sessionManagement.testExports, 'SessionHandler')
+      .mockImplementation(() => mockSessionHandler);
+      const dir = 'ws://example.com';
+
+      const sessionHandler = new SessionHandler();
+      sessionHandler.open(dir);
+      
+      expect(sessionHandler.open).toHaveBeenCalled();
+      expect(sessionHandler.ws.open).toHaveBeenCalled();
+    });
+
+    test(`should close a WebSocket connection`, () => {
+      const mockSessionHandler = {
+        ws: {
+          open: jest.fn(),
+          send: jest.fn(),
+          close: jest.fn(),
+        },
+        stream: null,
+        close: jest.fn(() => {
+          mockSessionHandler.ws = null
+        }),
+        write: jest.fn(() => {
+          mockSessionHandler.ws.send()
+        }),
+        open: jest.fn(() => {
+          mockSessionHandler.ws.open()
+        }),
+        mode: 'websocket'
+      };
+      
+      const SessionHandler = jest.spyOn(sessionManagement.testExports, 'SessionHandler')
+      .mockImplementation(() => mockSessionHandler);
+      const dir = 'ws://example.com';
+
+    const sessionHandler = new SessionHandler();
+    sessionHandler.close(dir);
+
+    expect(sessionHandler.close).toHaveBeenCalled();
+    expect(sessionHandler.ws).toBeNull();
+    });
+  });
+
+  describe(`FileStream functionality`, () => {
+    test(`should open a file stream`, () => {
+      const dir = './some/directory/path';
+
+      const sessionHandler = new sessionManagement.testExports.SessionHandler();
+      sessionHandler.open(dir);
+
+      expect(sessionHandler.stream).toBeTruthy();
+    });
+
+    test(`should write data to the file stream`, () => {
+      const dir = './some/directory/path';
+      const data = 'test data';
+
+      const mockWriteStream = {
+        write: jest.fn(),
+        end: jest.fn()
+      };
+
+      jest.spyOn(fs, 'createWriteStream').mockReturnValue(mockWriteStream);
+
+      const sessionHandler = new sessionManagement.testExports.SessionHandler();
+      sessionHandler.open(dir);
+      sessionHandler.write(data);
+
+      expect(mockWriteStream.write).toHaveBeenCalledWith(`${data}\n`);
+    });
+
+    test(`should close the file stream`, () => {
+      const dir = './some/directory/path';
+
+      const mockEnd = jest.fn();
+      const mockWriteStream = {
+        write: jest.fn(),
+        end: mockEnd
+      };
+
+      jest.spyOn(fs, 'createWriteStream').mockReturnValue(mockWriteStream);
+
+      const sessionHandler = new sessionManagement.testExports.SessionHandler();
+      sessionHandler.open(dir);
+      sessionHandler.close();
+
+      expect(mockEnd).toHaveBeenCalled();
+      expect(sessionHandler.stream).toBeNull();
+    });
+  });
+});
+
 test(`sessionManagement.startRecording works properly`, () => {
   const spy = jest.spyOn(logger, "info");
   sessionManagement.startRecording();
@@ -151,6 +275,82 @@ test(`sessionManagement.stopRecording works properly for else path`, () => {
   expect(result).toBe(null);
 });
 
+test(`sessionManagement.stopRecording closes the WebSocket connection`, () => {
+  const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
+      .mockImplementation((dir) => {
+          const wsRegex = /^(ws(s)?):\/\//i;
+          if (wsRegex.test(dir)) {
+              mockSessionHandler.open();
+          } else {
+            mockSessionHandler.open()
+          }
+      });
+
+
+    const mockSessionHandler = {
+      ws: {
+        open: jest.fn(),
+        send: jest.fn(),
+        close: jest.fn()
+      }, 
+      close: jest.fn(() => {
+        mockSessionHandler.ws.close()
+      }),
+      write: jest.fn(() => {
+        mockSessionHandler.ws.send()
+      }),
+      open: jest.fn()
+    };
+    
+    
+  sessionManagement.testExports.setTestEntity(mockSessionHandler);
+  sessionManagement.testExports.setOutputDir('ws://example.com');
+
+  sessionManagement.startRecording();
+  sessionManagement.stopRecording();
+
+  expect(mockSessionHandler.ws.close).toHaveBeenCalled();
+
+  spySetOutputDir.mockRestore();
+});
+
+test(`sessionManagement.stopRecording closes the FileStream connection`, () => {
+  const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
+      .mockImplementation((dir) => {
+          const wsRegex = /^(ws(s)?):\/\//i;
+          if (wsRegex.test(dir)) {
+            mockSessionHandler.open();
+          } else {
+            mockSessionHandler.open()
+          }
+      });
+
+  const mockSessionHandler = {
+    stream: {
+      open: jest.fn(),
+      write: jest.fn(),
+      close: jest.fn(),
+    },
+    close: jest.fn(() => {
+      mockSessionHandler.stream.close();
+    }),
+    write: jest.fn(() => {
+      mockSessionHandler.stream.write();
+    }),
+    open: jest.fn(),
+  };
+    
+  sessionManagement.testExports.setTestEntity(mockSessionHandler);
+  sessionManagement.testExports.setOutputDir('./some/directory/path');
+
+  sessionManagement.startRecording();
+  sessionManagement.stopRecording();
+
+  expect(mockSessionHandler.stream.close).toHaveBeenCalled();
+
+  spySetOutputDir.mockRestore();
+});
+
 test(`sessionManagement.isRecording works properly`, () => {
   if (true) {
     sessionManagement.startRecording();
@@ -166,6 +366,81 @@ test(`sessionManagement.addCall works properly`, () => {
   sessionManagement.startRecording();
   const result = sessionManagement.addCall("methodName", "Parameters");
   expect(result).toBeUndefined();
+});
+
+test(`sessionManagement.addCall calls websocket`, () => {
+  const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
+      .mockImplementation((dir) => {
+          const wsRegex = /^(ws(s)?):\/\//i;
+          if (wsRegex.test(dir)) {
+              mockSessionHandler.open();
+          } else {
+            mockSessionHandler.open()
+          }
+      });
+
+
+  const mockSessionHandler = {
+    ws: {
+      open: jest.fn(),
+      send: jest.fn(),
+      close: jest.fn()
+    }, 
+    close: jest.fn(),
+    write: jest.fn(() => {
+      mockSessionHandler.ws.send()
+    }),
+    open: jest.fn()
+  };
+    
+  sessionManagement.testExports.setTestEntity(mockSessionHandler);
+  sessionManagement.testExports.setOutputDir('ws://example.com');
+
+  sessionManagement.startRecording();
+  sessionManagement.setOutputFormat('live');
+
+  sessionManagement.addCall("methodName", "Parameters");
+
+  expect(mockSessionHandler.ws.send).toHaveBeenCalled();
+
+  spySetOutputDir.mockRestore();
+});
+
+test(`sessionManagement.addCall calls filestream`, () => {
+  const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
+      .mockImplementation((dir) => {
+          const wsRegex = /^(ws(s)?):\/\//i;
+          if (wsRegex.test(dir)) {
+            mockSessionHandler.open();
+          } else {
+            mockSessionHandler.open()
+          }
+      });
+
+  const mockSessionHandler = {
+    stream: {
+      open: jest.fn(),
+      write: jest.fn(),
+      close: jest.fn()
+    }, 
+    close: jest.fn(),
+    write: jest.fn(() => {
+      mockSessionHandler.stream.write()
+    }),
+    open: jest.fn()
+  };
+    
+  sessionManagement.testExports.setTestEntity(mockSessionHandler);
+  sessionManagement.testExports.setOutputDir('./test');
+
+  sessionManagement.startRecording();
+  sessionManagement.setOutputFormat('live');
+
+  sessionManagement.addCall("methodName", "Parameters");
+
+  expect(mockSessionHandler.stream.write).toHaveBeenCalled();
+
+  spySetOutputDir.mockRestore();
 });
 
 test(`verify sortJsonByTime method is working`, () => {
@@ -217,7 +492,7 @@ test('verify a session output mock-overrides calls conversion method', () => {
 
 
 test('sessionManagement.setOutputDir works properly', () => {
-  sessionManagement.setOutputDir('./test');
+  sessionManagement.testExports.setOutputDir('./test');
   const sessionOutputPath = sessionManagement.getSessionOutputDir()
   const mockOutputPath = sessionManagement.getMockOutputDir()
   expect(sessionOutputPath).toBe('./test');

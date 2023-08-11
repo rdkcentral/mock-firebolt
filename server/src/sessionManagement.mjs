@@ -23,6 +23,64 @@
 import { logger } from './logger.mjs';
 import fs from 'fs';
 import yaml from 'js-yaml';
+import WebSocket from 'ws';
+
+const wsRegex = /^(ws(s)?):\/\//i;
+
+class SessionHandler {
+  constructor() {
+    this.mode = null;
+    this.ws = null;
+    this.stream = null;
+  }
+
+  // Determine mode based on directory/url
+  _determineMode(dir) {
+    if (wsRegex.test(dir)) {
+      this.mode = 'websocket';
+    } else {
+      this.mode = 'filestream';
+    }
+  }
+
+  open(dir) {
+    this._determineMode(dir);
+
+    if (this.mode === 'websocket') {
+      this.ws = new WebSocket(dir);
+      this.ws.on('open', () => {
+        logger.info(`Websocket connection opened: ${dir}`);
+      });
+    } else {
+      if (!fs.existsSync(dir)) {
+        logger.info("Directory does not exist for: " + dir);
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      this.stream = fs.createWriteStream(`${dir}/FireboltCalls_live.log`, { flags: 'a' });
+    }
+  }
+
+  write(data) {
+    if (this.mode === 'websocket' && this.ws) {
+      this.ws.send(data); 
+    } else if (this.stream) {
+      this.stream.write(`${data}\n`);
+    }
+  }
+
+  close() {
+    if (this.mode === 'websocket' && this.ws) {
+      this.ws.close();
+      this.ws = null;
+    } else if (this.stream) {
+      this.stream.end();
+      this.stream = null;
+    }
+  }
+}
+
+let sessionHandler = new SessionHandler();
 
 class FireboltCall {
     constructor(methodCall, params) {
@@ -58,6 +116,9 @@ class Session {
             // const sessionStart = new Date(this.#sessionStart);
             // const sessionStartString = sessionStart.toISOString().replace(/T/, '_').replace(/\..+/, '');
             // logger.info(`${sessionStart.toISOString()}`);    
+
+            // Check if the output path is a WebSocket URL
+            this.sessionOutputPath = wsRegex.test(this.sessionOutputPath) ? "./sessions/output" : this.sessionOutputPath;
 
             if (!fs.existsSync(this.sessionOutputPath)) {
                 logger.info("Directory does not exist for: " + this.sessionOutputPath)
@@ -345,21 +406,23 @@ let sessionRecording = {
     recordedSession : new Session()
 };
 
-function startRecording(){
+function startRecording() {
     logger.info('Starting recording');
     sessionRecording.recording = true;
     sessionRecording.recordedSession = new Session();
 }
   
-function stopRecording(){
-    if (isRecording()) {
-        logger.info('Stopping recording');
-        sessionRecording.recording = false;
-        return sessionRecording.recordedSession.exportSession();
-    } else {
-        logger.warn('Trying to stop recording when not recording');
-        return null;
-    }
+function stopRecording() {
+  if (isRecording()) {
+      logger.info('Stopping recording');
+      sessionRecording.recording = false;
+      const sessionData = sessionRecording.recordedSession.exportSession();
+      sessionHandler.close();
+      return sessionData;
+  } else {
+      logger.warn('Trying to stop recording when not recording');
+      return null;
+  }
 }
 
 function isRecording(){
@@ -367,10 +430,14 @@ function isRecording(){
 }
 
 function addCall(methodCall, params){
-    if(isRecording()){
+    if (isRecording()) {
         const call = new FireboltCall(methodCall, params);
-        call.sequenceId = sessionRecording.recordedSession.calls.length + 1
+        call.sequenceId = sessionRecording.recordedSession.calls.length + 1;
         sessionRecording.recordedSession.calls.push(call);
+        if (sessionRecording.recordedSession.sessionOutput === "live") {
+            const data = JSON.stringify(call);
+            sessionHandler.write(data);
+        }
     }
 }
 
@@ -383,10 +450,13 @@ function getOutputFormat(){
     return sessionRecording.recordedSession.sessionOutput;
 }
 
-function setOutputDir(dir){
-    sessionRecording.recordedSession.sessionOutputPath = dir;
-    sessionRecording.recordedSession.mockOutputPath = dir;
-    logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
+function setOutputDir(dir) {
+  if (sessionRecording.recordedSession.sessionOutput === "live") {
+      sessionHandler.open(dir);
+  }
+  sessionRecording.recordedSession.sessionOutputPath = dir;
+  sessionRecording.recordedSession.mockOutputPath = dir;
+  logger.info("Setting output path: " + sessionRecording.recordedSession.mockOutputPath);
 }
 
 function getSessionOutputDir(){
@@ -398,15 +468,30 @@ function getMockOutputDir(){
 }
 
 function updateCallWithResponse(method, result, key) {
-    if(isRecording()) {
-        const methodCalls = sessionRecording.recordedSession.calls
-        for(let i = 0; i < methodCalls.length; i++) {
-            if(methodCalls[i].methodCall == method) {
-                methodCalls[i].response = {[key]: result, timestamp: Date.now()}
-                sessionRecording.recordedSession.calls.concat(...methodCalls);
-            }
-        }
-    }
+  if (isRecording()) {
+      const methodCalls = sessionRecording.recordedSession.calls;
+      for(let i = 0; i < methodCalls.length; i++) {
+          if(methodCalls[i].methodCall == method) {
+              methodCalls[i].response = {[key]: result, timestamp: Date.now()};
+              sessionRecording.recordedSession.calls.concat(...methodCalls);
+              if (sessionRecording.recordedSession.sessionOutput === "live") {
+                  const data = JSON.stringify(methodCalls[i]);
+                  sessionHandler.write(data);
+              }
+          }
+      }
+  }
 }
 
-export {Session, FireboltCall, startRecording, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, setOutputDir, getSessionOutputDir, getMockOutputDir};
+// Utility function for unit tests
+const setTestEntity = (mockEntity) => {
+  sessionHandler = mockEntity
+}
+
+export const testExports = {
+  setTestEntity,
+  setOutputDir,
+  SessionHandler
+}
+
+export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir };
