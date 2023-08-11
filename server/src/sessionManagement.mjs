@@ -508,7 +508,6 @@ export const testExports = {
   setTestSessionRecording,
   setOutputDir,
   getMockEventCall,
-  SessionHandler
 }
 
 export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir };

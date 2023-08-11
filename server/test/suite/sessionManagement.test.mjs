@@ -507,6 +507,7 @@ test('sessionManagement.setOutputDir works properly', () => {
   
   const sessionOutputPath = sessionManagement.getSessionOutputDir(userId)
   const mockOutputPath = sessionManagement.getMockOutputDir(userId)
+
   expect(sessionOutputPath).toBe('./test');
   expect(mockOutputPath).toBe('./test');
 })
