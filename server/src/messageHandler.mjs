@@ -55,7 +55,7 @@ async function handleMessage(message, userId, ws) {
     oMsg.method = fireboltOpenRpc.testExports.toLowerCase(oMsg.method);
   }
   // record the message if we are recording
-  addCall(oMsg.method, oMsg.params);
+  addCall(oMsg.method, oMsg.params, userId);
 
   // Handle JSON-RPC notifications (w/ no id in request)
   // - Don't send reply message over socket back to SDK
@@ -80,7 +80,7 @@ async function handleMessage(message, userId, ws) {
     // No delay
     ws.send(responseMessage);
     logger.info(`Sent "method not found" message: ${responseMessage}`);
-    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error")
+    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error", userId)
     return;
   }
 
@@ -143,7 +143,7 @@ async function handleMessage(message, userId, ws) {
     // No delay
     ws.send(responseMessage);
     logger.info(`Sent "invalid params" message: ${responseMessage}`);
-    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error")
+    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error", userId)
   }
 
   // Fire pre trigger if there is one for this method  
@@ -318,7 +318,7 @@ async function handleMessage(message, userId, ws) {
   await util.delay(dly);
   ws.send(finalResponse);
   logger.debug(`Sent message for user ${userId}: ${finalResponse}`);
-  updateCallWithResponse(oMsg.method, JSON.parse(finalResponse).result, "result")
+  updateCallWithResponse(oMsg.method, JSON.parse(finalResponse).result, "result", userId)
 }
 
 // --- Exports ---
