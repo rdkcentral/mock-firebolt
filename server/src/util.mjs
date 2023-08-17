@@ -105,7 +105,28 @@ function  getModificationDate(fileName) {
   return modificationTimeSec
 }
 
+/* 
+* @function:searchJSONforParam
+* @Description: To recursively search if any of the keys in JSON object is equal to the param passed  
+* @param {Object} obj - JSON object
+* @param {String} param - parameter/name against which search is performed
+* @Return: If search successful, return true. Else return false
+*/
+function searchJSONforParam(obj, param) {
+  for (const key in obj) {
+    if (typeof obj[key] === 'object') {
+      if (key === param || searchJSONforParam(obj[key], param)) {
+        return true;
+      }
+    } else {
+      if (key === param) {
+        return true;
+      }
+    }
+  }
+  return false
+}
 
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchJSONforParam };

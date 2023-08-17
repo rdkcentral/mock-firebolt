@@ -1,0 +1,15 @@
+{
+    "new": [
+        {
+            "name": "",
+            "readme": ""
+        }
+    ],
+    "changed": [
+        {
+            "oldName": "supportedSDKs",
+            "newName": "supportedOpenRPCs",
+            "readme": "README.md"
+        }
+    ]
+}

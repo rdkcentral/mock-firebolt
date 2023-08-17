@@ -20,7 +20,10 @@
 
 'use strict';
 
+import fs from 'fs';
 import { dotConfig } from './dotConfig.mjs';
+import { searchJSONforParam, createAbsoluteFilePath } from './util.mjs';
+import { logger } from './logger.mjs';
 
 // IMPORTANT NOTES:
 // - app.defaultUserId here should match app.defaultUserId in the config.mjs file in the
@@ -52,6 +55,33 @@ const config = {
 
 // Layer in configuration specified via .mf.config.json file
 config.dotConfig = dotConfig;
+
+/* 
+* @function:compareConfigs
+* @Description: To compare changed and original config files 
+* @param {Object} changedConfig - config that contains updates/additions wrt original config objects
+* @param {Object} loadedConfig - original config
+*/
+function compareConfigs(changedConfig, loadedConfig) {
+  // Iterate through new config array in changedConfig
+  for (const newObj of changedConfig.new) {
+    const newNameToCheck = newObj.name;
+    if (newNameToCheck && !searchJSONforParam(loadedConfig, newNameToCheck)) {
+      logger.warn(`WARNING: There is an unused config ${newObj.name}. Refer ${newObj.readme} for more info `);
+
+    }
+  }
+  // Iterate through changed config array in changedConfig
+  for (const changedObj of changedConfig.changed) {
+    const oldNameToCheck = changedObj.oldName;
+    if (oldNameToCheck && searchJSONforParam(loadedConfig, oldNameToCheck)) {
+      logger.warn(`WARNING: The config ${changedObj.oldName} has been renamed to ${changedObj.newName}. Refer ${changedObj.readme} for more info `);
+    }
+  }
+}
+
+const changedConfig = JSON.parse(fs.readFileSync(createAbsoluteFilePath('changedConfigs.json'), 'utf8'));
+compareConfigs(changedConfig, config)
 
 // --- Exports ---
 
