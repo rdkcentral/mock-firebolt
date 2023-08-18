@@ -25,6 +25,7 @@ import { jest } from "@jest/globals";
 import { logger } from "../../src/logger.mjs";
 import * as sessionManagement from "../../src/sessionManagement.mjs";
 
+const userId = '12345';
 const singleExampleArray =  [
   {
     methodCall: 'accessibility.closedCaptionsSettings',
@@ -108,7 +109,7 @@ test(`sessionManagement.stopRecording works properly in case of throwing error`,
 });
 
 describe(`Session`, () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
 
   test(`should return null`, () => {
     const result = session.exportSession();
@@ -142,6 +143,22 @@ describe(`SessionHandler`, () => {
     const sessionHandler = new sessionManagement.testExports.SessionHandler();
     expect(sessionHandler.ws).toBeNull();
     expect(sessionHandler.stream).toBeNull();
+  });
+
+  test(`_determineMode sets mode to 'websocket' for a WebSocket directory`, () => {
+    const dir = 'ws://example.com';
+    const sessionHandler = new sessionManagement.testExports.SessionHandler();
+  
+    sessionHandler._determineMode(dir);
+    expect(sessionHandler.mode).toBe('websocket');
+  });
+  
+  test(`_determineMode sets mode to 'filestream' for a non-WebSocket directory`, () => {
+    const dir = './some/directory/path';
+    const sessionHandler = new sessionManagement.testExports.SessionHandler();
+  
+    sessionHandler._determineMode(dir);
+    expect(sessionHandler.mode).toBe('filestream');
   });
 
   describe(`Websocket functionality`, () => {
@@ -254,6 +271,22 @@ describe(`SessionHandler`, () => {
       expect(mockEnd).toHaveBeenCalled();
       expect(sessionHandler.stream).toBeNull();
     });
+
+    test(`should create directory if it does not exist`, () => {
+      const dir = './some/non/existent/path';
+    
+      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      const mockMkdirSync = jest.spyOn(fs, 'mkdirSync').mockImplementation(jest.fn());
+      jest.spyOn(fs, 'createWriteStream').mockReturnValue({
+        write: jest.fn(),
+        end: jest.fn()
+      });
+    
+      const sessionHandler = new sessionManagement.testExports.SessionHandler();
+      sessionHandler.open(dir);
+    
+      expect(mockMkdirSync).toHaveBeenCalled();
+    });
   });
 });
 
@@ -275,176 +308,93 @@ test(`sessionManagement.stopRecording works properly for else path`, () => {
   expect(result).toBe(null);
 });
 
-test(`sessionManagement.stopRecording closes the WebSocket connection`, () => {
-  const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
-      .mockImplementation((dir) => {
-          const wsRegex = /^(ws(s)?):\/\//i;
-          if (wsRegex.test(dir)) {
-              mockSessionHandler.open();
-          } else {
-            mockSessionHandler.open()
-          }
-      });
-
-
-    const mockSessionHandler = {
-      ws: {
-        open: jest.fn(),
-        send: jest.fn(),
-        close: jest.fn()
-      }, 
-      close: jest.fn(() => {
-        mockSessionHandler.ws.close()
-      }),
-      write: jest.fn(() => {
-        mockSessionHandler.ws.send()
-      }),
-      open: jest.fn()
-    };
-    
-    
-  sessionManagement.testExports.setTestEntity(mockSessionHandler);
-  sessionManagement.testExports.setOutputDir('ws://example.com');
-
-  sessionManagement.startRecording();
-  sessionManagement.stopRecording();
-
-  expect(mockSessionHandler.ws.close).toHaveBeenCalled();
-
-  spySetOutputDir.mockRestore();
-});
-
-test(`sessionManagement.stopRecording closes the FileStream connection`, () => {
-  const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
-      .mockImplementation((dir) => {
-          const wsRegex = /^(ws(s)?):\/\//i;
-          if (wsRegex.test(dir)) {
-            mockSessionHandler.open();
-          } else {
-            mockSessionHandler.open()
-          }
-      });
-
-  const mockSessionHandler = {
-    stream: {
-      open: jest.fn(),
-      write: jest.fn(),
-      close: jest.fn(),
-    },
-    close: jest.fn(() => {
-      mockSessionHandler.stream.close();
-    }),
-    write: jest.fn(() => {
-      mockSessionHandler.stream.write();
-    }),
-    open: jest.fn(),
-  };
-    
-  sessionManagement.testExports.setTestEntity(mockSessionHandler);
-  sessionManagement.testExports.setOutputDir('./some/directory/path');
-
-  sessionManagement.startRecording();
-  sessionManagement.stopRecording();
-
-  expect(mockSessionHandler.stream.close).toHaveBeenCalled();
-
-  spySetOutputDir.mockRestore();
-});
-
-test(`sessionManagement.isRecording works properly`, () => {
-  if (true) {
-    sessionManagement.startRecording();
-    const result = sessionManagement.isRecording();
-    expect(result).toBeTruthy();
-    sessionManagement.stopRecording();
-  }
-  const result = sessionManagement.isRecording();
-  expect(result).toBeFalsy();
-});
-
-test(`sessionManagement.addCall works properly`, () => {
-  sessionManagement.startRecording();
-  const result = sessionManagement.addCall("methodName", "Parameters");
-  expect(result).toBeUndefined();
-});
-
-test(`sessionManagement.addCall calls websocket`, () => {
-  const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
-      .mockImplementation((dir) => {
-          const wsRegex = /^(ws(s)?):\/\//i;
-          if (wsRegex.test(dir)) {
-              mockSessionHandler.open();
-          } else {
-            mockSessionHandler.open()
-          }
-      });
-
-
+test(`sessionManagement.stopRecording cleans up user session data`, () => {
   const mockSessionHandler = {
     ws: {
       open: jest.fn(),
       send: jest.fn(),
       close: jest.fn()
     }, 
-    close: jest.fn(),
+    close: jest.fn(() => {
+      mockSessionHandler.ws.close()
+    }),
     write: jest.fn(() => {
       mockSessionHandler.ws.send()
     }),
     open: jest.fn()
   };
-    
-  sessionManagement.testExports.setTestEntity(mockSessionHandler);
-  sessionManagement.testExports.setOutputDir('ws://example.com');
+  
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'log',
+        sessionOutputPath: 'ws://example.com',
+        mockOutputPath: 'ws://example.com',
+        sessionHandler: mockSessionHandler,
+        exportSession: jest.fn()
+      }
+    }
+  };
 
-  sessionManagement.startRecording();
-  sessionManagement.setOutputFormat('live');
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording);
 
-  sessionManagement.addCall("methodName", "Parameters");
+  sessionManagement.startRecording(userId);
+  sessionManagement.stopRecording(userId);
 
-  expect(mockSessionHandler.ws.send).toHaveBeenCalled();
-
-  spySetOutputDir.mockRestore();
+  expect(mockSessionRecording['12345']).toBeUndefined();
 });
 
-test(`sessionManagement.addCall calls filestream`, () => {
-  const spySetOutputDir = jest.spyOn(sessionManagement.testExports, 'setOutputDir')
-      .mockImplementation((dir) => {
-          const wsRegex = /^(ws(s)?):\/\//i;
-          if (wsRegex.test(dir)) {
-            mockSessionHandler.open();
-          } else {
-            mockSessionHandler.open()
-          }
-      });
+test(`sessionManagement.isRecording works properly`, () => {
+  if (true) {
+    sessionManagement.startRecording(userId);
+    const result = sessionManagement.isRecording(userId);
+    expect(result).toBeTruthy();
+    sessionManagement.stopRecording(userId);
+  }
+  const result = sessionManagement.isRecording(userId);
+  expect(result).toBeFalsy();
+});
 
+test(`sessionManagement.addCall works properly`, () => {
+  sessionManagement.startRecording(userId);
+  const result = sessionManagement.addCall("methodName", "Parameters");
+  expect(result).toBeUndefined();
+});
+
+test(`sessionManagement.addCall calls sessionHandler.write`, () => {
   const mockSessionHandler = {
-    stream: {
-      open: jest.fn(),
-      write: jest.fn(),
-      close: jest.fn()
-    }, 
     close: jest.fn(),
-    write: jest.fn(() => {
-      mockSessionHandler.stream.write()
-    }),
+    write: jest.fn(),
     open: jest.fn()
   };
+  
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'live',
+        sessionOutputPath: 'ws://example.com',
+        mockOutputPath: 'ws://example.com',
+        sessionHandler: mockSessionHandler,
+        exportSession: jest.fn()
+      }
+    }
+  };
     
-  sessionManagement.testExports.setTestEntity(mockSessionHandler);
-  sessionManagement.testExports.setOutputDir('./test');
+  sessionManagement.startRecording('12345');
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording);
+  sessionManagement.addCall("methodName", "Parameters", userId);
 
-  sessionManagement.startRecording();
-  sessionManagement.setOutputFormat('live');
-
-  sessionManagement.addCall("methodName", "Parameters");
-
-  expect(mockSessionHandler.stream.write).toHaveBeenCalled();
-
-  spySetOutputDir.mockRestore();
+  expect(mockSessionRecording['12345'].recordedSession.sessionHandler.write).toHaveBeenCalled();
 });
 
 test(`verify sortJsonByTime method is working`, () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const spy = jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
   session.sortJsonByTime({ "sessionStart": 1660644687500, "sessionEnd": 1660644699862, "calls": [ { "methodCall": "moneybadger.logMoneyBadgerLoaded", "params": { "startTime": 1660644697447, "version": "4.10.0-7e1cc95" }, "timestamp": 1660644697456, "sequenceId": 1 }, { "methodCall": "lifecycle.onInactive", "params": { "listen": true }, "timestamp": 1660644697795, "sequenceId": 2, "response": { "result": { "listening": true, "event": "lifecycle.onInactive" }, "timestamp": 1660644697796 } }]});
   expect(spy).toHaveBeenCalled();
@@ -452,10 +402,56 @@ test(`verify sortJsonByTime method is working`, () => {
 });
 
 test('verify updateCallWithResponse is working', () => {
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'live',
+        sessionOutputPath: 'ws://example.com',
+        mockOutputPath: 'ws://example.com',
+        sessionHandler: jest.fn(),
+        exportSession: jest.fn()
+      }
+    }
+  };
+
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording);
+
   sessionManagement.addCall("testing", {});
-  const result = sessionManagement.updateCallWithResponse("testing", "testing_session", "result")
+  const result = sessionManagement.updateCallWithResponse("testing", "testing_session", "result", userId);
   expect(result).toBeUndefined();
-})
+});
+
+test('verify updateCallWithResponse is working for recording Events', () => {
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'log',
+        sessionOutputPath: './output/sessions',
+        mockOutputPath: './output/sessions',
+        sessionHandler: jest.fn(),
+        exportSession: jest.fn()
+      }
+    }
+  };
+  const methodCall = 'method1';
+  const eventMessage = '{"result":"NEW-DEVICE-NAME-1","id":13,"jsonrpc":"2.0"}';
+  const key = 'events';
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording);
+
+  sessionManagement.startRecording();
+  sessionManagement.addCall(methodCall, eventMessage, userId);
+  sessionManagement.updateCallWithResponse(methodCall, eventMessage, key, userId);
+  const result = sessionManagement.testExports.getMockEventCall(userId);
+  expect(result).toMatchObject([{"methodCall" : "method1", "response":{"events":"{\"result\":\"NEW-DEVICE-NAME-1\",\"id\":13,\"jsonrpc\":\"2.0\"}" } },
+  ]);
+  sessionManagement.stopRecording();
+});
 
 test('verify a session output directory is created when it does not exist', () => {
   const session = new sessionManagement.Session();
@@ -470,7 +466,7 @@ test('verify a session output directory is created when it does not exist', () =
 })
 
 test('verify a session output raw wrties raw output', () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   session.sessionOutput = 'raw';
   const spy = jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
   const result = session.exportSession();
@@ -481,7 +477,7 @@ test('verify a session output raw wrties raw output', () => {
 })
 
 test('verify a session output mock-overrides calls conversion method', () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   session.sessionOutput = 'mock-overrides';
   const spy = jest.spyOn(session, "convertJsonToYml").mockImplementation(() => {});
   const result = session.exportSession();
@@ -490,23 +486,92 @@ test('verify a session output mock-overrides calls conversion method', () => {
   spy.mockClear();
 })
 
-
 test('sessionManagement.setOutputDir works properly', () => {
-  sessionManagement.testExports.setOutputDir('./test');
-  const sessionOutputPath = sessionManagement.getSessionOutputDir()
-  const mockOutputPath = sessionManagement.getMockOutputDir()
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'log',
+        sessionOutputPath: './output/sessions/12345',
+        mockOutputPath: './output/mocks/12345/1691598208828',
+        sessionHandler: jest.fn(),
+        exportSession: jest.fn()
+      }
+    }
+  };
+
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording)
+  sessionManagement.testExports.setOutputDir('./test', userId);
+  
+  const sessionOutputPath = sessionManagement.getSessionOutputDir(userId)
+  const mockOutputPath = sessionManagement.getMockOutputDir(userId)
+
   expect(sessionOutputPath).toBe('./test');
   expect(mockOutputPath).toBe('./test');
 })
 
+test('sessionManagement.setOutputDir calls sessionHandler.open', () => {
+  const mockSessionHandler = {
+    close: jest.fn(),
+    write: jest.fn(),
+    open: jest.fn()
+  };
+
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'live',
+        sessionOutputPath: './output/sessions/12345',
+        mockOutputPath: './output/mocks/12345/1691598208828',
+        sessionHandler: mockSessionHandler,
+        exportSession: jest.fn()
+      }
+    }
+  };
+
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording)
+  sessionManagement.testExports.setOutputDir('ws://example.com', userId);
+  
+  expect(mockSessionRecording['12345'].recordedSession.sessionHandler.open).toHaveBeenCalled();
+})
+
 test('sessionManagement.setOutputFormat works properly', () => {
-  sessionManagement.setOutputFormat('test');
-  const format = sessionManagement.getOutputFormat();
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'log',
+        sessionOutputPath: './output/sessions/12345',
+        mockOutputPath: './output/mocks/12345/1691598208828',
+        sessionHandler: jest.fn(),
+        exportSession: jest.fn()
+      }
+    }
+  };
+
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording)
+  sessionManagement.setOutputFormat('test', userId);
+  const format = sessionManagement.getOutputFormat(userId);
   expect(format).toBe('test');
 })
 
+test('sessionManagement.setOutputFormat throws error when no user is passed', () => {
+  const spy = jest.spyOn(logger, "error");
+  sessionManagement.setOutputFormat('test');
+  const format = sessionManagement.getOutputFormat(userId);
+  expect(spy).toHaveBeenCalled();
+  spy.mockRestore();
+})
+
 test('verify check params finds repetition', () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const array = [
     {
       paramDetails: {
@@ -678,7 +743,7 @@ test('verify check params does not find repetition', () => {
       }
     }
   }
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const result = session.checkParams(array, object);
   expect(result).toBeFalsy;
 })
@@ -770,7 +835,7 @@ test('verify handleMultipleExampleMethod with multiple types of params', () => {
       }
     }, 
   ]
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const result = session.handleMultipleExampleMethod(method, array);
   expect(result).toMatch('function (ctx,params){');
   expect(result).toMatch('if(JSON.stringify(params.anotherParam)  ===  \"true\" && JSON.stringify(params.options)  ===  \'{\"environment\":\"prod\",\"authenticationEntity\":\"MVPD\"}\'){');
@@ -831,7 +896,7 @@ test('verify handleMultipleExampleMethod using a default param', () => {
       }
     }
   ]
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const result = session.handleMultipleExampleMethod(method, array);
   expect(result).toMatch('function (ctx,params){');
   expect(result).toMatch('if(JSON.stringify(params.options)  ===  \'{\"environment\":\"prod\",\"authenticationEntity\":\"MVPD\"}\'){');
@@ -842,7 +907,7 @@ test('verify handleSingleExampleMethod works for call with result object', () =>
   let staticObject = {};
   staticObject["methods"] = 'accessibility.closedCaptionsSettings';
   let obj;
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const result = session.handleSingleExampleMethod(singleExampleArray, staticObject, 'accessibility.closedCaptionsSettings', obj, 0);
   expect(JSON.stringify(result)).toMatch('{\"methods\":{\"accessibility.closedCaptionsSettings\":{\"result\":{\"enabled\":true,\"styles\":{\"fontFamily\":\"Monospace sans-serif\",\"fontSize\":1,\"fontColor\":\"#ffffff\",\"fontEdge\":\"none\",\"fontEdgeColor\":\"#7F7F7F\",\"fontOpacity\":100,\"backgroundColor\":\"#000000\",\"backgroundOpacity\":100,\"textAlign\":\"center\",\"textAlignVertical\":\"middle\"}}}}}');
 })
@@ -851,7 +916,7 @@ test('verify handleSingleExampleMethod works for call with error in response', (
   let staticObject = {};
   staticObject["methods"] = 'appcatalog.apps';
   let obj;
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const result = session.handleSingleExampleMethod(singleExampleArray, staticObject, 'appcatalog.apps', obj, 1);
   expect(JSON.stringify(result)).toMatch('{\"methods\":{\"appcatalog.apps\":{\"result\":{\"error\":{\"code\":-32601,\"message\":\"Method not found\"},\"timestamp\":1663091851797}}}}');
 })
@@ -860,7 +925,7 @@ test('verify handleSingleExampleMethod works for missing Response', () => {
   let staticObject = {};
   staticObject["methods"] = 'discovery.policy';
   let obj;
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const result = session.handleSingleExampleMethod(singleExampleArray, staticObject, 'discovery.policy', obj, 2);
   expect(JSON.stringify(result)).toMatch('{\"methods\":{\"discovery.policy\":{}}}');
 })
@@ -870,7 +935,7 @@ test('verify handleSingleExampleMethod works for false result', () => {
   let staticObject = {};
   staticObject["methods"] = 'discovery.policy';
   let obj;
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const result = session.handleSingleExampleMethod(singleExampleArray, staticObject, 'discovery.policy', obj, 3);
   expect(JSON.stringify(result)).toMatch('{\"methods\":{\"discovery.policy\":{\"result\":false}}}');
 })
@@ -879,13 +944,13 @@ test('verify handleSingleExampleMethod works for Cert Error', () => {
   let staticObject = {};
   staticObject["methods"] = 'authentication.token';
   let obj;
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const result = session.handleSingleExampleMethod(singleExampleArray, staticObject, 'authentication.token', obj, 4);
   expect(JSON.stringify(result)).toMatch('{\"methods\":{\"authentication.token\":{\"result\":null}}}');
 })
 
 test('verify convertJsonToYml works for multiple method calls', () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const input = '{"sessionStart":1663165159924,"sessionEnd":1663165214534,"calls":[{"methodCall":"advertising.config","params":{"options":{"environment":"prod","authenticationEntity":"MVPD"}},"timestamp":1663165186358,"sequenceId":5,"response":{"result":{"adServerUrl":"http://demo.v.fwmrm.net/ad/p/1","adServerUrlTemplate":"http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D","adNetworkId":"519178","adProfileId":"12345:caf_allinone_profile","adSiteSectionId":"caf_allinone_profile_section","adOptOut":true,"privacyData":"ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K","ifaValue":"01234567-89AB-CDEF-GH01-23456789ABCD","ifa":"ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==","appName":"FutureToday","appBundleId":"FutureToday.comcast","distributorAppId":"1001","deviceAdAttributes":"ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=","coppa":0,"authenticationEntity":"60f72475281cfba3852413bd53e957f6"},"timestamp":1663165189721}},{"methodCall":"advertising.config","params":{"options":{"coppa":false,"environment":"prod","authenticationEntity":"MVPD"}},"timestamp":1663165187952,"sequenceId":6,"error":{"code":"CertError","message":"Received response as undefined"}},{"methodCall":"advertising.config","params":{"options":{"coppa":true,"environment":"prod","authenticationEntity":"MVPD"}},"timestamp":1663165189718,"sequenceId":7,"response":{"result":{"adServerUrl":"http://demo.v.fwmrm.net/ad/p/1","adServerUrlTemplate":"http://demo.v.fwmrm.net/ad/p/1?flag=+sltp+exvt+slcb+emcr+amcb+aeti&prof=12345:caf_allinone_profile &nw=12345&mode=live&vdur=123&caid=a110523018&asnw=372464&csid=gmott_ios_tablet_watch_live_ESPNU&ssnw=372464&vip=198.205.92.1&resp=vmap1&metr=1031&pvrn=12345&vprn=12345&vcid=1X0Ce7L3xRWlTeNhc7br8Q%3D%3D","adNetworkId":"519178","adProfileId":"12345:caf_allinone_profile","adSiteSectionId":"caf_allinone_profile_section","adOptOut":true,"privacyData":"ew0KICAicGR0IjogImdkcDp2MSIsDQogICJ1c19wcml2YWN5IjogIjEtTi0iLA0KICAibG10IjogIjEiIA0KfQ0K","ifaValue":"01234567-89AB-CDEF-GH01-23456789ABCD","ifa":"ewogICJ2YWx1ZSI6ICIwMTIzNDU2Ny04OUFCLUNERUYtR0gwMS0yMzQ1Njc4OUFCQ0QiLAogICJpZmFfdHlwZSI6ICJzc3BpZCIsCiAgImxtdCI6ICIwIgp9Cg==","appName":"FutureToday","appBundleId":"FutureToday.comcast","distributorAppId":"1001","deviceAdAttributes":"ewogICJib0F0dHJpYnV0ZXNGb3JSZXZTaGFyZUlkIjogIjEyMzQiCn0=","coppa":0,"authenticationEntity":"60f72475281cfba3852413bd53e957f6"},"timestamp":1663165189721}},{"methodCall":"advertising.config","params":{"options":{"coppa":true,"environment":"prod","authenticationEntity":"MVPD","anotherParam":true}},"timestamp":1663165189718,"sequenceId":7,"response":{"error":{"code":-32601,"message":"Method not found"},"timestamp":1663165189721}}]}';
   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => false);
   const spy2 = jest.spyOn(fs, "mkdirSync").mockImplementation(() => {});
@@ -907,7 +972,7 @@ test('verify convertJsonToYml works for multiple method calls', () => {
 })
 
 test('verify convertJsonToYml handles write exception for multiple method calls', () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const input = '{"sessionStart":1663165159924,"sessionEnd":1663165214534,"calls":[{"methodCall":"advertising.config","params":{"options":{"coppa":false,"environment":"prod","authenticationEntity":"MVPD"}},"timestamp":1663165187952,"sequenceId":6,"error":{"code":"CertError","message":"Received response as undefined"}},{"methodCall":"advertising.config","params":{"options":{"coppa":true,"environment":"prod","authenticationEntity":"MVPD","anotherParam":true}},"timestamp":1663165189718,"sequenceId":7,"response":{"error":{"code":-32601,"message":"Method not found"},"timestamp":1663165189721}}]}';  
   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => false);
   const spy2 = jest.spyOn(fs, "mkdirSync").mockImplementation(() => {});
@@ -929,7 +994,7 @@ test('verify convertJsonToYml handles write exception for multiple method calls'
 })
 
 test('verify convertJsonToYml handles only duplicate method calls', () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const input = '{"sessionStart":1663165159924,"sessionEnd":1663165214534,"calls":[{"methodCall":"advertising.config","params":{"options":{"coppa":true,"environment":"prod","authenticationEntity":"MVPD","anotherParam":true}},"timestamp":1663165189718,"sequenceId":7,"response":{"error":{"code":-32601,"message":"Method not found"},"timestamp":1663165189721}},{"methodCall":"advertising.config","params":{"options":{"coppa":false,"environment":"prod","authenticationEntity":"MVPD"}},"timestamp":1663165187952,"sequenceId":6,"error":{"code":"CertError","message":"Received response as undefined"}}]}';
   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => false);
   const spy2 = jest.spyOn(fs, "mkdirSync").mockImplementation(() => {});
@@ -951,7 +1016,7 @@ test('verify convertJsonToYml handles only duplicate method calls', () => {
 })
 
 test('verify convertJsonToYml handles invalid inputs', () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const input = 'Invalid Input';
   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => true);
   const result = session.convertJsonToYml(input);
@@ -961,7 +1026,7 @@ test('verify convertJsonToYml handles invalid inputs', () => {
 })
 
 test('verify convertJsonToYml handles invalid inputs to skip', () => {
-  const session = new sessionManagement.Session();
+  const session = new sessionManagement.Session(userId);
   const input = '{"sessionStart":1663165159924,"sessionEnd":1663165214534,"calls":[{"methodCall":"advertising.onChanged","params":{"options":{"coppa":true,"environment":"prod","authenticationEntity":"MVPD","anotherParam":true}},"timestamp":1663165189718,"sequenceId":7,"response":{"error":{"code":-32601,"message":"Method not found"},"timestamp":1663165189721}}]}';
   const spy = jest.spyOn(fs, "existsSync").mockImplementation(() => true);
   const result = session.convertJsonToYml(input);

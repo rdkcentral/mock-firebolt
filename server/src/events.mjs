@@ -219,7 +219,7 @@ function sendEventListenerAck(userId, ws, metadata) {
 
   ws.send(ackMessage);
   logger.debug(`Sent registration event ack message for user ${userId}: ${ackMessage}`);
-  updateCallWithResponse(metadata.method, parsedAckMessage.result, "result")
+  updateCallWithResponse(metadata.method, parsedAckMessage.result, "result", userId)
 }
 
 /**
@@ -283,7 +283,8 @@ function emitResponse(finalResult, msg, userId, method) {
     // If event template config does not exist, just send the raw finalResult
     eventMessage = finalResult;
   }
-
+  //Update the call with event response
+  updateCallWithResponse(method, eventMessage, "events", userId);
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
     // Check if eventType is included in config
