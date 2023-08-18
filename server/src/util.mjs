@@ -127,6 +127,32 @@ function searchJSONforParam(obj, param) {
   return false
 }
 
+/* 
+* @function:replaceKeyInJSON
+* @Description: To replace old key with new key by iterating recursively through json
+* @param {Object} obj - JSON object
+* @param {String} oldKey - old key to be replaced
+* @param {String} newKey - new replaced key
+* @Return: Return json object with updated keys
+*/
+function replaceKeyInJSON(obj, oldKey, newKey) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => replaceKeyInJSON(item, oldKey, newKey));
+  }
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      obj[key === oldKey ? newKey : key] = replaceKeyInJSON(obj[key], oldKey, newKey);
+      if (key == oldKey) {
+        delete obj[oldKey]
+      }
+    }
+  }
+  return obj;
+}
+
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchJSONforParam };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchJSONforParam, replaceKeyInJSON };

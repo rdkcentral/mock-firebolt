@@ -22,7 +22,7 @@
 
 import fs from 'fs';
 import { dotConfig } from './dotConfig.mjs';
-import { searchJSONforParam, createAbsoluteFilePath } from './util.mjs';
+import { searchJSONforParam, createAbsoluteFilePath, replaceKeyInJSON } from './util.mjs';
 import { logger } from './logger.mjs';
 
 // IMPORTANT NOTES:
@@ -58,7 +58,7 @@ config.dotConfig = dotConfig;
 
 /* 
 * @function:compareConfigs
-* @Description: To compare changed and original config files 
+* @Description: To compare changed and original config files and perform dynamic config updates
 * @param {Object} changedConfig - config that contains updates/additions wrt original config objects
 * @param {Object} loadedConfig - original config
 */
@@ -66,17 +66,28 @@ function compareConfigs(changedConfig, loadedConfig) {
   // Iterate through new config array in changedConfig
   for (const newObj of changedConfig.new) {
     const newNameToCheck = newObj.name;
+    const readme = newObj.readme;
     if (newNameToCheck && !searchJSONforParam(loadedConfig, newNameToCheck)) {
-      logger.warn(`WARNING: There is an unused config ${newObj.name}. Refer ${newObj.readme} for more info `);
-
+      if (readme) {
+        logger.warn(`WARNING: There is an unused config ${newObj.name}. Refer ${readme} for more info `);
+      } else {
+        logger.warn(`WARNING: There is an unused config ${newObj.name}`);
+      }
     }
   }
   // Iterate through changed config array in changedConfig
   for (const changedObj of changedConfig.changed) {
     const oldNameToCheck = changedObj.oldName;
+    const readme = changedObj.readme;
     if (oldNameToCheck && searchJSONforParam(loadedConfig, oldNameToCheck)) {
-      logger.warn(`WARNING: The config ${changedObj.oldName} has been renamed to ${changedObj.newName}. Refer ${changedObj.readme} for more info `);
+      if (readme) {
+        logger.warn(`WARNING: The config ${changedObj.oldName} has been renamed to ${changedObj.newName}. Refer ${readme} for more info `);
+      } else {
+        logger.warn(`WARNING: The config ${changedObj.oldName} has been renamed to ${changedObj.newName}`);
+      }
     }
+    // For performing dynamic config updates and offering backward compatibility
+     replaceKeyInJSON(config, changedObj.oldName, changedObj.newName);
   }
 }
 
