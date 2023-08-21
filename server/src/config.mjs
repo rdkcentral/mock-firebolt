@@ -63,31 +63,32 @@ config.dotConfig = dotConfig;
 * @param {Object} loadedConfig - original config
 */
 function compareConfigs(changedConfig, loadedConfig) {
-  // Iterate through new config array in changedConfig
-  for (const newObj of changedConfig.new) {
-    const newNameToCheck = newObj.name;
-    const readme = newObj.readme;
-    if (newNameToCheck && !searchJSONforParam(loadedConfig, newNameToCheck)) {
-      if (readme) {
-        logger.warn(`WARNING: There is an unused config ${newObj.name}. Refer ${readme} for more info `);
-      } else {
-        logger.warn(`WARNING: There is an unused config ${newObj.name}`);
+  // Iterate through new and changed config objects in changedConfig
+  for (const obj of changedConfig) {
+    if (obj.type == 'new') {
+      const newNameToCheck = obj.name;
+      const readme = obj.readme;
+      if (newNameToCheck && !searchJSONforParam(loadedConfig, newNameToCheck)) {
+        if (readme) {
+          logger.warn(`WARNING: There is an unused config ${obj.name}. Refer ${readme} for more info `);
+        } else {
+          logger.warn(`WARNING: There is an unused config ${obj.name}`);
+        }
       }
     }
-  }
-  // Iterate through changed config array in changedConfig
-  for (const changedObj of changedConfig.changed) {
-    const oldNameToCheck = changedObj.oldName;
-    const readme = changedObj.readme;
-    if (oldNameToCheck && searchJSONforParam(loadedConfig, oldNameToCheck)) {
-      if (readme) {
-        logger.warn(`WARNING: The config ${changedObj.oldName} has been renamed to ${changedObj.newName}. Refer ${readme} for more info `);
-      } else {
-        logger.warn(`WARNING: The config ${changedObj.oldName} has been renamed to ${changedObj.newName}`);
+    else {
+      const oldNameToCheck = obj.oldName;
+      const readme = obj.readme;
+      if (oldNameToCheck && searchJSONforParam(loadedConfig, oldNameToCheck)) {
+        if (readme) {
+          logger.warn(`WARNING: The config ${obj.oldName} has been renamed to ${obj.newName}. Refer ${readme} for more info `);
+        } else {
+          logger.warn(`WARNING: The config ${obj.oldName} has been renamed to ${obj.newName}`);
+        }
       }
+      // For performing dynamic config updates and offering backward compatibility
+      replaceKeyInJSON(config, obj.oldName, obj.newName);
     }
-    // For performing dynamic config updates and offering backward compatibility
-     replaceKeyInJSON(config, changedObj.oldName, changedObj.newName);
   }
 }
 

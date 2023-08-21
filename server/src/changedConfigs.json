@@ -1,15 +1,13 @@
-{
-    "new": [
-        {
-            "name": "",
-            "readme": ""
-        }
-    ],
-    "changed": [
-        {
-            "oldName": "supportedSDKs",
-            "newName": "supportedOpenRPCs",
-            "readme": "README.md"
-        }
-    ]
-}
+[
+    {
+        "type": "new",
+        "name": "",
+        "readme": ""
+    },
+    {
+        "type": "changed",
+        "oldName": "supportedSDKs",
+        "newName": "supportedOpenRPCs",
+        "readme": "README.md"
+    }
+]
