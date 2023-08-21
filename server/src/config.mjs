@@ -70,7 +70,7 @@ function compareConfigs(changedConfig, loadedConfig) {
       const readme = obj.readme;
       if (newNameToCheck && !searchJSONforParam(loadedConfig, newNameToCheck)) {
         if (readme) {
-          logger.warn(`WARNING: There is an unused config ${obj.name}. Refer ${readme} for more info `);
+          logger.warn(`WARNING: There is an unused config ${obj.name}. Click on ${readme} for more info `);
         } else {
           logger.warn(`WARNING: There is an unused config ${obj.name}`);
         }
@@ -81,7 +81,7 @@ function compareConfigs(changedConfig, loadedConfig) {
       const readme = obj.readme;
       if (oldNameToCheck && searchJSONforParam(loadedConfig, oldNameToCheck)) {
         if (readme) {
-          logger.warn(`WARNING: The config ${obj.oldName} has been renamed to ${obj.newName}. Refer ${readme} for more info `);
+          logger.warn(`WARNING: The config ${obj.oldName} has been renamed to ${obj.newName}. Click on ${readme} for more info `);
         } else {
           logger.warn(`WARNING: The config ${obj.oldName} has been renamed to ${obj.newName}`);
         }
