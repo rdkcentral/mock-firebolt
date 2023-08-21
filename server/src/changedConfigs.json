@@ -1,8 +1,8 @@
 [
     {
         "type": "new",
-        "name": "",
-        "readme": ""
+        "name": "eventConfig",
+        "readme": "Events.md"
     },
     {
         "type": "changed",
