@@ -22,7 +22,7 @@
 
 import fs from 'fs';
 import { dotConfig } from './dotConfig.mjs';
-import { searchJSONforParam, createAbsoluteFilePath, replaceKeyInJSON } from './util.mjs';
+import { searchObjectForKey, createAbsoluteFilePath, replaceKeyInObject } from './util.mjs';
 import { logger } from './logger.mjs';
 
 // IMPORTANT NOTES:
@@ -65,10 +65,10 @@ config.dotConfig = dotConfig;
 function compareConfigs(changedConfig, loadedConfig) {
   // Iterate through new and changed config objects in changedConfig
   for (const obj of changedConfig) {
-    if (obj.type == 'new') {
+    if (obj.type === 'new') {
       const newNameToCheck = obj.name;
       const readme = obj.readme;
-      if (newNameToCheck && !searchJSONforParam(loadedConfig, newNameToCheck)) {
+      if (newNameToCheck && !searchObjectForKey(loadedConfig, newNameToCheck)) {
         if (readme) {
           logger.warn(`WARNING: There is an unused config ${obj.name}. Click on ${readme} for more info `);
         } else {
@@ -79,7 +79,7 @@ function compareConfigs(changedConfig, loadedConfig) {
     else {
       const oldNameToCheck = obj.oldName;
       const readme = obj.readme;
-      if (oldNameToCheck && searchJSONforParam(loadedConfig, oldNameToCheck)) {
+      if (oldNameToCheck && searchObjectForKey(loadedConfig, oldNameToCheck)) {
         if (readme) {
           logger.warn(`WARNING: The config ${obj.oldName} has been renamed to ${obj.newName}. Click on ${readme} for more info `);
         } else {
@@ -87,7 +87,7 @@ function compareConfigs(changedConfig, loadedConfig) {
         }
       }
       // For performing dynamic config updates and offering backward compatibility
-      replaceKeyInJSON(config, obj.oldName, obj.newName);
+      replaceKeyInObject(config, obj.oldName, obj.newName);
     }
   }
 }
