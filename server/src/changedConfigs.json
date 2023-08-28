@@ -1,0 +1,13 @@
+[
+    {
+        "type": "new",
+        "name": "eventConfig",
+        "readme": "Events.md"
+    },
+    {
+        "type": "changed",
+        "oldName": "supportedSDKs",
+        "newName": "supportedOpenRPCs",
+        "readme": "README.md"
+    }
+]

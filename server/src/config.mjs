@@ -20,7 +20,10 @@
 
 'use strict';
 
+import fs from 'fs';
 import { dotConfig } from './dotConfig.mjs';
+import { searchObjectForKey, createAbsoluteFilePath, replaceKeyInObject } from './util.mjs';
+import { logger } from './logger.mjs';
 
 // IMPORTANT NOTES:
 // - app.defaultUserId here should match app.defaultUserId in the config.mjs file in the
@@ -52,6 +55,45 @@ const config = {
 
 // Layer in configuration specified via .mf.config.json file
 config.dotConfig = dotConfig;
+
+/* 
+* @function:compareConfigs
+* @Description: To compare changed and original config files and perform dynamic config updates
+* @param {Object} changedConfig - config that contains updates/additions wrt original config objects
+* @param {Object} loadedConfig - original config
+*/
+function compareConfigs(changedConfig, loadedConfig) {
+  // Iterate through new and changed config objects in changedConfig
+  for (const obj of changedConfig) {
+    if (obj.type === 'new') {
+      const newNameToCheck = obj.name;
+      const readme = obj.readme;
+      if (newNameToCheck && !searchObjectForKey(loadedConfig, newNameToCheck)) {
+        if (readme) {
+          logger.warn(`WARNING: There is an unused config ${obj.name}. Click on ${readme} for more info `);
+        } else {
+          logger.warn(`WARNING: There is an unused config ${obj.name}`);
+        }
+      }
+    }
+    else {
+      const oldNameToCheck = obj.oldName;
+      const readme = obj.readme;
+      if (oldNameToCheck && searchObjectForKey(loadedConfig, oldNameToCheck)) {
+        if (readme) {
+          logger.warn(`WARNING: The config ${obj.oldName} has been renamed to ${obj.newName}. Click on ${readme} for more info `);
+        } else {
+          logger.warn(`WARNING: The config ${obj.oldName} has been renamed to ${obj.newName}`);
+        }
+      }
+      // For performing dynamic config updates and offering backward compatibility
+      replaceKeyInObject(config, obj.oldName, obj.newName);
+    }
+  }
+}
+
+const changedConfig = JSON.parse(fs.readFileSync(createAbsoluteFilePath('changedConfigs.json'), 'utf8'));
+compareConfigs(changedConfig, config)
 
 // --- Exports ---
 

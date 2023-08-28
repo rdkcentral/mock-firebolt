@@ -47,10 +47,6 @@ function loadDotConfig() {
     dotConfig = JSON.parse(
       fs.readFileSync(fileName, 'UTF-8')
     );
-    // For offering backward compatibility to support "supportedSDKs" 
-    if (dotConfig.hasOwnProperty("supportedSDKs")) {
-      dotConfig.supportedOpenRPCs = dotConfig.supportedSDKs
-    }
     logger.info(`Read Mock Firebolt configuration from ${fileName}`);
   } catch ( ex ) {
     handleError(fileName, __dirname);

@@ -105,7 +105,54 @@ function  getModificationDate(fileName) {
   return modificationTimeSec
 }
 
+/* 
+* @function:searchObjectForKey
+* @Description: To recursively search if any of the keys in JSON object is equal to the param passed  
+* @param {Object} obj - JSON object
+* @param {String} param - parameter/name against which search is performed
+* @Return: If search successful, return true. Else return false
+*/
+function searchObjectForKey(obj, param) {
+  for (const key in obj) {
+    if (typeof obj[key] === 'object') {
+      if (key === param || searchObjectForKey(obj[key], param)) {
+        return true;
+      }
+    } else {
+      if (key === param) {
+        return true;
+      }
+    }
+  }
+  return false
+}
+
+/* 
+* @function:replaceKeyInObject
+* @Description: To replace old key with new key by iterating recursively through json
+* @param {Object} obj - JSON object
+* @param {String} oldKey - old key to be replaced
+* @param {String} newKey - new replaced key
+* @Return: Return json object with updated keys
+*/
+function replaceKeyInObject(obj, oldKey, newKey) {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => replaceKeyInObject(item, oldKey, newKey));
+  }
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      obj[key === oldKey ? newKey : key] = replaceKeyInObject(obj[key], oldKey, newKey);
+      if (key == oldKey) {
+        delete obj[oldKey]
+      }
+    }
+  }
+  return obj;
+}
 
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject };
