@@ -228,6 +228,12 @@ describe(`SessionHandler`, () => {
   describe(`FileStream functionality`, () => {
     test(`should open a file stream`, () => {
       const dir = './some/directory/path';
+      const mockWriteStream = {
+        write: jest.fn(),
+        end: jest.fn()
+      };
+
+      jest.spyOn(fs, 'createWriteStream').mockReturnValue(mockWriteStream);
 
       const sessionHandler = new sessionManagement.testExports.SessionHandler();
       sessionHandler.open(dir);
@@ -245,6 +251,7 @@ describe(`SessionHandler`, () => {
       };
 
       jest.spyOn(fs, 'createWriteStream').mockReturnValue(mockWriteStream);
+      jest.spyOn(fs, 'mkdirSync').mockReturnValue(() => jest.fn());
 
       const sessionHandler = new sessionManagement.testExports.SessionHandler();
       sessionHandler.open(dir);
