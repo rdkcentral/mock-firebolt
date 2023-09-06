@@ -437,7 +437,13 @@ function stopRecording(userId) {
       logger.info(`Stopping recording for user: ${userId}`);
       sessionRecording[userId].recording = false;
       const sessionData = sessionRecording[userId].recordedSession.exportSession();
+      
+      // Close the session handler
       sessionRecording[userId].recordedSession.sessionHandler.close();
+      
+      // Close the WebSocket connection to server
+      closeSessionWsConnection(userId);
+      
       delete sessionRecording[userId];
       return sessionData;
   } else {
@@ -460,6 +466,18 @@ function removeUserFromSessionWsMap(userId) {
 
 function getWsfromSessionMap(userId) {
   return userSessionWsMap.get(userId) || null;
+}
+
+function closeSessionWsConnection(userId) {
+  const ws = getWsfromSessionMap(userId);
+  if (ws === null) return;
+
+  try {
+    ws.close();
+    logger.info(`Closed Session WS for userId: ${userId}`);
+  } catch (err) {
+    logger.error(`Failed to close Session WS for userId: ${userId}. Error: ${err}`);
+  }
 }
 
 function sendMessageToMatchingSessions(data, userId) {
@@ -552,4 +570,4 @@ export const testExports = {
 }
 
 export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir, associateUserWithSessionWsMap, removeUserFromSessionWsMap, getWsfromSessionMap,
-sendMessageToMatchingSessions };
+sendMessageToMatchingSessions, closeSessionWsConnection };
