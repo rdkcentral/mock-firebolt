@@ -458,6 +458,10 @@ function removeUserFromSessionWsMap(userId) {
   userSessionWsMap.delete(userId);
 }
 
+function getWsfromSessionMap(userId) {
+  return userSessionWsMap.get(userId) || null;
+}
+
 function sendMessageToMatchingSessions(data, userId) {
   userSessionWsMap.forEach((ws, key) => {
     if (key === userId || uuidValidate(key)) {
@@ -547,5 +551,5 @@ export const testExports = {
   SessionHandler
 }
 
-export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir,
-associateUserWithSessionWsMap, removeUserFromSessionWsMap };
+export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir, associateUserWithSessionWsMap, removeUserFromSessionWsMap, getWsfromSessionMap,
+sendMessageToMatchingSessions };

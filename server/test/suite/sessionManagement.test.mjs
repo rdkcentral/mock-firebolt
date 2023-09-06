@@ -297,6 +297,53 @@ describe(`SessionHandler`, () => {
   });
 });
 
+describe(`Session ws server functions`, () => {
+  
+  let mockWs1, mockWs2, mockWs3;
+
+  beforeEach(() => {
+    // Mock WebSocket objects
+    mockWs1 = { send: jest.fn() };
+    mockWs2 = { send: jest.fn() };
+    mockWs3 = { send: jest.fn() };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test(`should associate user with WebSocket`, () => {
+    sessionManagement.associateUserWithSessionWsMap('user1', mockWs1);
+
+    const ws = sessionManagement.getWsfromSessionMap('user1')
+    expect(ws).toBe(mockWs1);
+  });
+
+  test(`should remove user from WebSocket mapping`, () => {
+    sessionManagement.associateUserWithSessionWsMap('user1', mockWs1);
+    sessionManagement.removeUserFromSessionWsMap('user1');
+
+    const ws = sessionManagement.getWsfromSessionMap('user1')
+    expect(ws).toBeNull();
+  });
+
+  test(`should send message to matching sessions`, () => {
+    const uuid = '20318aab-ea53-4a65-8d97-09f74bbf5b0b';
+    const userId = 'user1';
+    const data = 'test message';
+
+    sessionManagement.associateUserWithSessionWsMap(userId, mockWs1);
+    sessionManagement.associateUserWithSessionWsMap('user2', mockWs2);
+    sessionManagement.associateUserWithSessionWsMap(uuid, mockWs3);
+
+    sessionManagement.sendMessageToMatchingSessions(data, userId);
+
+    expect(mockWs1.send).toHaveBeenCalledWith(data);
+    expect(mockWs2.send).not.toHaveBeenCalled();
+    expect(mockWs3.send).toHaveBeenCalledWith(data);
+  });
+});
+
 test(`sessionManagement.startRecording works properly`, () => {
   const spy = jest.spyOn(logger, "info");
   sessionManagement.startRecording();
