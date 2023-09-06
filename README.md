@@ -129,7 +129,7 @@ npm run dev
 npm run dev -- --discovery
 
 # If you need to use non-standard ports for any reason:
-npm run dev -- --httpPort 3456 --socketPort 9876
+npm run dev -- --httpPort 3456 --socketPort 9876 --wsSessionServerPort 1234
 
 #If you wish to enable conduit functionality*
 npm run dev -- --conduit

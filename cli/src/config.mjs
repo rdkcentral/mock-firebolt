@@ -29,6 +29,7 @@ const config = {
   app: {
     socketPort: 9998,
     httpPort: 3333,
+    wsSessionServerPort: 9999,
     defaultUserId: '12345'
   }
 };
