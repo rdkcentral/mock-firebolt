@@ -24,7 +24,7 @@ import { logger } from './logger.mjs';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import WebSocket from 'ws';
-import { isUuid } from 'uuidv4';
+import { validate as uuidValidate } from 'uuid';
 
 const wsRegex = /^(ws(s)?):\/\//i;
 
@@ -460,7 +460,7 @@ function removeUserFromSessionWsMap(userId) {
 
 function sendMessageToMatchingSessions(data, userId) {
   userSessionWsMap.forEach((ws, key) => {
-    if (key === userId || isUuid(key)) {
+    if (key === userId || uuidValidate(key)) {
       ws.send(data);
     }
   });
