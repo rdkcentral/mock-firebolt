@@ -20,6 +20,7 @@
 
 'use strict';
 
+import { jest } from "@jest/globals";
 import * as index from "../../src/index.mjs";
 
 test(`index works properly`, () => {
@@ -28,4 +29,30 @@ test(`index works properly`, () => {
   // creating dummy test to execute the module.
 
   expect(1).toBe(1);
+});
+
+describe('Session WSS', () => {
+  let mockWs;
+  let mockReq;
+
+  beforeEach(() => {
+    // Mocking WebSocket object
+    mockWs = {
+      send: jest.fn(),
+      on: jest.fn(),
+    };
+    // Mocking Request object
+    mockReq = {
+      url: '/12345',
+    };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should send welcome message on connection', () => {
+    index.wss.emit('connection', mockWs, mockReq);
+    expect(mockWs.send).toHaveBeenCalledWith(expect.stringContaining('You have successfully connected to the MF Session Websocket Server.'));
+  });
 });

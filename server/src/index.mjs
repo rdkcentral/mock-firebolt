@@ -143,7 +143,7 @@ logger.info(`Default users loaded: [ ${userManagement.getUsers()} ]`);
 import { WebSocketServer } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 
-const wss = new WebSocketServer({ port: commandLine.wsSessionServerPort });
+export const wss = new WebSocketServer({ port: commandLine.wsSessionServerPort });
 
 logger.info(`Listening on session server port ${commandLine.wsSessionServerPort}...`);
 
@@ -158,7 +158,6 @@ wss.on('connection', (ws, req) => {
       logger.info(`Websocket connection established to listen to all available user sessions while recording`);
     }
 
-  // WIP
   sessionManagement.associateUserWithSessionWsMap(userId, ws);
 
   ws.send(`You have successfully connected to the MF Session Websocket Server. Please make sure you start a session to begin receving messages.`)
