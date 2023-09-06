@@ -298,7 +298,6 @@ describe(`SessionHandler`, () => {
 });
 
 describe(`Session ws server functions`, () => {
-  
   let mockWs1, mockWs2, mockWs3;
 
   beforeEach(() => {
@@ -447,6 +446,35 @@ test(`sessionManagement.addCall calls sessionHandler.write`, () => {
   expect(mockSessionRecording['12345'].recordedSession.sessionHandler.write).toHaveBeenCalled();
 });
 
+test(`sessionManagement.addCall does not call sessionHandler.write if sessionOutput equals server`, () => {  
+  const mockSessionHandler = {
+    close: jest.fn(),
+    write: jest.fn(),
+    open: jest.fn()
+  };
+  
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [],
+        sessionOutput: 'server',
+        sessionOutputPath: 'ws://example.com',
+        mockOutputPath: 'ws://example.com',
+        sessionHandler: mockSessionHandler,
+        exportSession: jest.fn()
+      }
+    }
+  };
+  
+  sessionManagement.startRecording('12345');
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording);
+  sessionManagement.addCall('methodName', 'Parameters', '12345');
+
+  expect(mockSessionRecording['12345'].recordedSession.sessionHandler.write).not.toHaveBeenCalled();
+});
+
 test(`verify sortJsonByTime method is working`, () => {
   const session = new sessionManagement.Session(userId);
   const spy = jest.spyOn(fs, "writeFileSync").mockImplementation(() => {});
@@ -456,16 +484,29 @@ test(`verify sortJsonByTime method is working`, () => {
 });
 
 test('verify updateCallWithResponse is working', () => {
+  const mockSessionHandler = {
+    close: jest.fn(),
+    write: jest.fn(),
+    open: jest.fn()
+  };
+
   const mockSessionRecording = {
     '12345': {
       recording: true,
       recordedSession: {
         userId: '12345',
-        calls: [],
+        calls: [
+          {
+            methodCall: 'device.id',
+            params: {},
+            timestamp: 1694024718139,
+            sequenceId: 11
+          }
+        ],
         sessionOutput: 'live',
         sessionOutputPath: 'ws://example.com',
         mockOutputPath: 'ws://example.com',
-        sessionHandler: jest.fn(),
+        sessionHandler: mockSessionHandler,
         exportSession: jest.fn()
       }
     }
@@ -473,8 +514,42 @@ test('verify updateCallWithResponse is working', () => {
 
   sessionManagement.testExports.setTestSessionRecording(mockSessionRecording);
 
-  sessionManagement.addCall("testing", {});
-  const result = sessionManagement.updateCallWithResponse("testing", "testing_session", "result", userId);
+  const result = sessionManagement.updateCallWithResponse("device.id", "testing_session", "device.id", userId);
+  expect(result).toBeUndefined();
+});
+
+test('verify updateCallWithResponse is working for server sessionOutput', () => {
+  const mockSessionHandler = {
+    close: jest.fn(),
+    write: jest.fn(),
+    open: jest.fn()
+  };
+
+  const mockSessionRecording = {
+    '12345': {
+      recording: true,
+      recordedSession: {
+        userId: '12345',
+        calls: [
+          {
+            methodCall: 'device.id',
+            params: {},
+            timestamp: 1694024718139,
+            sequenceId: 11
+          }
+        ],
+        sessionOutput: 'server',
+        sessionOutputPath: 'ws://example.com',
+        mockOutputPath: 'ws://example.com',
+        sessionHandler: mockSessionHandler,
+        exportSession: jest.fn()
+      }
+    }
+  };
+
+  sessionManagement.testExports.setTestSessionRecording(mockSessionRecording);
+
+  const result = sessionManagement.updateCallWithResponse("device.id", "testing_session", "device.id", userId);
   expect(result).toBeUndefined();
 });
 
