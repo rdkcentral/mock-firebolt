@@ -487,7 +487,7 @@ function setOutputFormat(format, userId) {
       return;
   }
   sessionRecording[userId].recordedSession.sessionOutput = format;
-  logger.info(`Setting output format for user ${userId} to:`, sessionRecording[userId].recordedSession.sessionOutput);
+  logger.info(`Setting output format for user ${userId} to: ${sessionRecording[userId].recordedSession.sessionOutput}`);
 }
 
 function getOutputFormat(userId) {
