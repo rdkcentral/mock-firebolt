@@ -24,6 +24,7 @@ import { logger } from './logger.mjs';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import WebSocket from 'ws';
+import { validate as uuidValidate } from 'uuid';
 
 const wsRegex = /^(ws(s)?):\/\//i;
 
@@ -47,10 +48,22 @@ class SessionHandler {
     this._determineMode(dir);
 
     if (this.mode === 'websocket') {
-      this.ws = new WebSocket(dir);
-      this.ws.on('open', () => {
-        logger.info(`Websocket connection opened: ${dir}`);
-      });
+      try {
+        this.ws = new WebSocket(dir);
+
+        this.ws.on('open', () => {
+          logger.info(`Websocket connection opened: ${dir}`);
+        });
+
+        // Handle connection errors without killing the entire Node application
+        this.ws.on('error', (error) => {
+          logger.error(`Failed to connect to Websocket server at ${dir}: ${error}`);
+          this.ws = null;
+        });
+      } catch (err) {
+        logger.error(`Failed to initialize Websocket: ${error}`);
+      }
+     
     } else {
       if (!fs.existsSync(dir)) {
         logger.info("Directory does not exist for: " + dir);
@@ -409,6 +422,7 @@ class Session {
 }
 
 let sessionRecording = {};
+const userSessionWsMap = new Map();
 
 function startRecording(userId) {
   logger.info(`Starting recording for user: ${userId}`);
@@ -423,7 +437,13 @@ function stopRecording(userId) {
       logger.info(`Stopping recording for user: ${userId}`);
       sessionRecording[userId].recording = false;
       const sessionData = sessionRecording[userId].recordedSession.exportSession();
+      
+      // Close the session handler
       sessionRecording[userId].recordedSession.sessionHandler.close();
+      
+      // Close the WebSocket connection to server
+      closeSessionWsConnection(userId);
+      
       delete sessionRecording[userId];
       return sessionData;
   } else {
@@ -436,14 +456,49 @@ function isRecording(userId) {
   return sessionRecording[userId]?.recording;
 }
 
+function associateUserWithSessionWsMap(userId, ws) {
+  userSessionWsMap.set(userId, ws);
+}
+
+function removeUserFromSessionWsMap(userId) {
+  userSessionWsMap.delete(userId);
+}
+
+function getWsfromSessionMap(userId) {
+  return userSessionWsMap.get(userId) || null;
+}
+
+function closeSessionWsConnection(userId) {
+  const ws = getWsfromSessionMap(userId);
+  if (ws === null) return;
+
+  try {
+    ws.close();
+    logger.info(`Closed Session WS for userId: ${userId}`);
+  } catch (err) {
+    logger.error(`Failed to close Session WS for userId: ${userId}. Error: ${err}`);
+  }
+}
+
+function sendMessageToMatchingSessions(data, userId) {
+  userSessionWsMap.forEach((ws, key) => {
+    if (key === userId || uuidValidate(key)) {
+      ws.send(data);
+    }
+  });
+}
+
 function addCall(methodCall, params, userId) {
     if (isRecording(userId)) {
         const call = new FireboltCall(methodCall, params);
         call.sequenceId = sessionRecording[userId].recordedSession.calls.length + 1;
         sessionRecording[userId].recordedSession.calls.push(call);
+        const data = JSON.stringify(call);
         if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
-            const data = JSON.stringify(call);
             sessionRecording[userId].recordedSession.sessionHandler.write(data);
+        }
+        if (sessionRecording[userId].recordedSession.sessionOutput === "server") {
+          sendMessageToMatchingSessions(data, userId);
         }
     }
 }
@@ -454,7 +509,7 @@ function setOutputFormat(format, userId) {
       return;
   }
   sessionRecording[userId].recordedSession.sessionOutput = format;
-  logger.info(`Setting output format for user ${userId} to:`, sessionRecording[userId].recordedSession.sessionOutput);
+  logger.info(`Setting output format for user ${userId} to: ${sessionRecording[userId].recordedSession.sessionOutput}`);
 }
 
 function getOutputFormat(userId) {
@@ -485,9 +540,12 @@ function updateCallWithResponse(method, result, key, userId) {
           if(methodCalls[i].methodCall == method) {
               methodCalls[i].response = {[key]: result, timestamp: Date.now()};
               sessionRecording[userId].recordedSession.calls.concat(...methodCalls);
+              const data = JSON.stringify(methodCalls[i]);
               if (sessionRecording[userId].recordedSession.sessionOutput === "live") {
-                  const data = JSON.stringify(methodCalls[i]);
                   sessionRecording[userId].recordedSession.sessionHandler.write(data);
+              }
+              if (sessionRecording[userId].recordedSession.sessionOutput === "server") {
+                  sendMessageToMatchingSessions(data, userId);
               }
           }
       }
@@ -511,4 +569,5 @@ export const testExports = {
   SessionHandler
 }
 
-export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir };
+export { Session, FireboltCall, startRecording, setOutputDir, stopRecording, addCall, isRecording, updateCallWithResponse, setOutputFormat, getOutputFormat, getSessionOutputDir, getMockOutputDir, associateUserWithSessionWsMap, removeUserFromSessionWsMap, getWsfromSessionMap,
+sendMessageToMatchingSessions, closeSessionWsConnection };

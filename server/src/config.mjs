@@ -40,6 +40,7 @@ const config = {
     allowMixedCase: true,
     socketPort: 9998,
     httpPort: 3333,
+    wsSessionServerPort: 9999,
     conduitSocketPort: 9997,
     conduitKeySocketPort: 9996,         // Key forwarding from Conduit
     developerToolPort: 9995,            // Port for Firebolt to connect to

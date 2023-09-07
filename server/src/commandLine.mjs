@@ -40,6 +40,7 @@ import { mergeArrayOfStrings } from './util.mjs';
 const knownOpts = {
   'httpPort'             : Number,
   'socketPort'           : Number,
+  'wsSessionServerPort'  : Number,
   'conduit'              : Boolean,
   'conduitSocketPort'    : Number,
   'conduitKeySocketPort' : Number,
@@ -82,6 +83,7 @@ const parsed = nopt(knownOpts, shortHands, process.argv, 2);
 
 const httpPort = parsed.httpPort || config.app.httpPort;
 const socketPort = parsed.socketPort || config.app.socketPort;
+const wsSessionServerPort = parsed.wsSessionServerPort || config.app.wsSessionServerPort;
 const conduitSocketPort = parsed.conduitSocketPort || config.app.conduitSocketPort;
 const conduitKeySocketPort = parsed.conduitKeySocketPort || config.app.conduitKeySocketPort;
 const developerToolPort = parsed.developerToolPort || config.app.developerToolPort;
@@ -128,7 +130,7 @@ if ( enabledTriggerPaths.length > 0 ) {
 // --- Exports ---
 
 export {
-  httpPort, socketPort,
+  httpPort, socketPort, wsSessionServerPort,
   conduitSocketPort, conduitKeySocketPort,
   developerToolPort, developerToolName,
   enabledSdkNames, enabledTriggerPaths, proxy,multiUserConnections,
