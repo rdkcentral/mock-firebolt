@@ -47,7 +47,8 @@ test(`config works properly`, () => {
           cliFlag: null,
           cliShortFlag: null,
           enabled: true,
-          url: "https://meta.rdkcentral.com/firebolt/api/",
+          theBelowUrl: "Can be changed to test different versions of the firebolt-open-rpc",
+          url: "https://rdkcentral.github.io/firebolt/requirements/latest/specifications/firebolt-open-rpc.json",
           name: "core",
         },
         {
