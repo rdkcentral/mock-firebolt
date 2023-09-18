@@ -153,7 +153,7 @@ Click the "Load Unpacked" button (top left corner of browser window)
 Navigate to the directory under browser-extensions which contains a manifest.json file and click "Select"
 ```
 
-Now you can access core/manage OpenRPC from HTTP by adding `"url": "https://meta.rdkcentral.com/firebolt/api/"` in mf.config.SAMPLE.json and copying to mf.config.json and can add `@firebolt-js/discovery-sdk` in your app's `package.json` file, import `@firebolt-js/discovery-sdk` optionally in your code in case to make discovery calls
+Now you can access core/manage OpenRPC from HTTP by adding `"url": "https://rdkcentral.github.io/firebolt/requirements/latest/specifications/firebolt-open-rpc.json"` in mf.config.SAMPLE.json and copying to mf.config.json and can add `@firebolt-js/discovery-sdk` in your app's `package.json` file, import `@firebolt-js/discovery-sdk` optionally in your code in case to make discovery calls
 
 
 # Usage (via Docker, if you prefer)
