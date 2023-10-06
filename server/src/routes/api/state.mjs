@@ -144,7 +144,7 @@ function setMethodResult(req, res) {
   const userId = getUserIdFromReq(req);
   let methodName = req.params.methodName;
   if (config.app.allowMixedCase){
-    methodName = fireboltOpenRpc.testExports.toLowerCase(methodName);
+    methodName = methodName.toLowerCase();
   }
   if ( 'result' in req.body ) {
     const result = req.body.result;
@@ -186,7 +186,7 @@ function setMethodError(req, res) {
   const userId = getUserIdFromReq(req);
   let methodName = req.params.methodName;
   if (config.app.allowMixedCase){
-    methodName = fireboltOpenRpc.testExports.toLowerCase(methodName);
+    methodName = methodName.toLowerCase();
   }
   if ( 'error' in req.body ) {
     const err = req.body.error;

@@ -51,9 +51,23 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Received message for user ${userId} : ${message}`);
 
   const oMsg = JSON.parse(message);
-  if(config.app.allowMixedCase){
-    oMsg.method = fireboltOpenRpc.testExports.toLowerCase(oMsg.method);
+  if (oMsg.method && config.app.allowMixedCase) {
+    oMsg.method = (oMsg.method).toLowerCase();
+  } else if (!oMsg.method) {
+    logger.error(`ERROR: Missing method field in message. Mock Firebolt expects incoming request to have a method field in the format <module.method>`);
+    const oResponseMessage = {
+      jsonrpc: '2.0',
+      id: oMsg.id,
+      error: {
+        message: 'ERROR: Missing method field in message. Mock Firebolt expects incoming request to have a method field in the format <module.method>'
+      }
+    };
+    const responseMessage = JSON.stringify(oResponseMessage);
+    ws.send(responseMessage);
+    logger.debug(`Sent message for user ${userId}: ${responseMessage}`);
+    return;
   }
+  
   // record the message if we are recording
   addCall(oMsg.method, oMsg.params, userId);
 

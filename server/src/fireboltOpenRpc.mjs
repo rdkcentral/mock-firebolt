@@ -35,12 +35,6 @@ import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
 import { isSdkEnabled } from './sdkManagement.mjs';
 
-//coverting module names to lowerCase 
-function toLowerCase(moduleName){
-  moduleName= moduleName.toLowerCase();
-  return moduleName;
-}
-
 // Build a method map for a single SDK (given by an object read from firebolt-xxx-sdk.json file)
 function buildMethodMap(sdkOpenrpc) {
   if ( ! sdkOpenrpc || ! isObject(sdkOpenrpc) ) { return {}; }
@@ -50,7 +44,7 @@ function buildMethodMap(sdkOpenrpc) {
   var result = sdkOpenrpc.methods.reduce(function(map, obj) {
     //coverting module names to lowerCase
     if(config.app.allowMixedCase){
-      obj.name = toLowerCase(obj.name);
+      obj.name = (obj.name).toLowerCase();
     }
     map[obj.name] = obj;
     return map;
@@ -71,7 +65,7 @@ function getMethod(methodName) {
   for ( let ii = 0; ii < config.dotConfig.supportedOpenRPCs.length; ii += 1 ) {
     const sdkName = config.dotConfig.supportedOpenRPCs[ii].name;
     if (config.app.allowMixedCase){
-      methodName = toLowerCase(methodName);
+      methodName = methodName.toLowerCase();
     }
     if ( methodMaps[sdkName] ) {
       if ( methodName in methodMaps[sdkName] ) { return methodMaps[sdkName][methodName]; }
@@ -344,8 +338,7 @@ readAllEnabledSdkJsonFiles()
 
 // --- Exports ---
 export const testExports={
-  rawMeta, meta, methodMaps, buildMethodMapsForAllEnabledSdks,
-  toLowerCase, buildMethodMap, downloadOpenRpcJsonFile
+  rawMeta, meta, methodMaps, buildMethodMapsForAllEnabledSdks, buildMethodMap, downloadOpenRpcJsonFile
 }
 export {
   getRawMeta, getMeta,

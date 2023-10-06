@@ -25,11 +25,6 @@ import { logger } from "../../src/logger.mjs";
 import * as fireboltOpenRpc from "../../src/fireboltOpenRpc.mjs";
 import { config } from "../../src/config.mjs";
 
-test(`fireboltOpenRpc.toLowerCase works properly`, () => {
-  const result = fireboltOpenRpc.testExports.toLowerCase("TEST");
-  expect(result).toBe("test");
-});
-
 test(`fireboltOpenRpc.getRawMeta works properly`, () => {
   const expectedResult = {
     core: {
