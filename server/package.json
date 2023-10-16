@@ -47,9 +47,6 @@
     "uuid": "^8.3.2",
     "ws": "^8.2.3"
   },
-  "optionalDependencies": {
-    "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git"
-  },
   "keywords": [
     "firebolt",
     "mock"

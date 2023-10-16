@@ -52,13 +52,6 @@ test(`config works properly`, () => {
           name: "core",
         },
         {
-          cliFlag: "discovery",
-          cliShortFlag: "d",
-          enabled: false,
-          fileName: "firebolt-discovery-open-rpc.json",
-          name: "discovery",
-        },
-        {
           name: "mock",
           cliFlag: "mock",
           cliShortFlag: "m",

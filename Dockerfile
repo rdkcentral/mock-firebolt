@@ -40,5 +40,5 @@ ENV PATH=${PATH}:/usr/src/firebolt/mock-firebolt/cli
 WORKDIR /usr/src/firebolt/mock-firebolt/server
 
 ENTRYPOINT [ "npm",  "run", "start" ]
-# By default, core/manage OpenRPC retrieved from HTTP is enabled. When using 'docker run', users can pass --discovery as command-line parameters
+# By default, core/manage OpenRPC retrieved from HTTP is enabled.
 CMD [ ]
