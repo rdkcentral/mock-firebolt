@@ -7,7 +7,8 @@
     "clean": "node ./scripts/clean.mjs",
     "build": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
-    "start": "npm run build && node build/index.mjs"
+    "start": "npm run build && node build/index.mjs",
+    "dev": "echo 'WARNING: \"npm run dev\" is DEPRECATED and may be removed in a future release. Use \"npm start\" instead.' && npm start"
   },  
   "repository": {
     "type": "git",
