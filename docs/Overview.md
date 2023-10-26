@@ -170,13 +170,13 @@ node cli.mjs --sequence ../examples/device-onDeviceNameChanged.sequence.json
 
 See `server/src/triggers/lifecycle.ready/post.mjs`, etc.
 
-Run Mock Firebolt like: `npm run dev -- --triggers ./src/triggers`
+Run Mock Firebolt like: `npm start -- --triggers ./src/triggers`
 
 #### novalidate Flag
 
 By default, Mock Firebolt will validate incoming method names and parameters and outgoing events. If you want to prevent some or all of these validation checks, you must either set the value of validate in mf.config.json to a subset of the default values (["method", "params", "response", "event"]) or pass one or more --novalidate command line arguments when you start Mock Firebolt.
 
-Run Mock Firebolt like: `npm run dev -- --novalidate response --novalidate params`
+Run Mock Firebolt like: `npm start -- --novalidate response --novalidate params`
 
 ### Web Admin UI
 ```
