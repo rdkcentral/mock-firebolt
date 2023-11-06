@@ -69,46 +69,70 @@ function selfReferenceSchemaCheck(schemaObj, path) {
 }
 
 // NOTE: Doesn't handle arrays of arrays
-function replaceRefs(metaForSdk, thing, key) {
-  let xSchema, lookedUpSchema, selfReference = false
+function replaceRefs(metaForSdk, thing, key, depth = 0) {
+  let xSchema, lookedUpSchema;
   if (isObject(thing[key])) {
     if ('$ref' in thing[key]) {
+      // If the current depth has reached or exceeded maxDereferenceDepth, remove the key to prevent a circular reference
+      if (depth >= config.dotConfig.maxDereferenceDepth) {
+        delete thing[key]['$ref'];
+        return;
+      }
+
       // If schema resides under x-schemas object in openRPC
       if (thing[key]['$ref'].includes("x-schemas")) {
         let xSchemaArray = thing[key]['$ref'].split("/");
-        xSchema = xSchemaArray.filter(element => element !== "#" && element !== "x-schemas")[0]
+        xSchema = xSchemaArray.filter(element => element !== "#" && element !== "x-schemas")[0];
         lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key]['$ref']), xSchema);
       } else {
         // else if schema resides under components object in openRPC
         lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key]['$ref']));
       }
+
       if (lookedUpSchema) {
-        if (selfReferenceSchemaCheck(lookedUpSchema, thing[key]['$ref']) == true) {
-          selfReference = true
+        // Check for self-reference and skip if present
+        if (selfReferenceSchemaCheck(lookedUpSchema, thing[key]['$ref'])) {
+          delete thing[key]['$ref']; // Remove self-referencing ref
+          return;
         }
-      }
-      // replace reference path with the corresponding schema object
-      replaceRefObj(thing, key, lookedUpSchema);
-    } if (selfReference !== true) {
-      // if no self-referencing detected, recursively replace references in nested schema objects, else skip dereferencing the schema object further to avoid infinite loop
-      for (const key2 in thing[key]) {
-        replaceRefs(metaForSdk, thing[key], key2);
+        replaceRefObj(thing, key, lookedUpSchema); // Replace the $ref
       }
     }
+
+    // Increment depth when diving into nested objects
+    const newDepth = depth + 1;
+    for (const key2 in thing[key]) {
+      replaceRefs(metaForSdk, thing[key], key2, newDepth);
+    }
   } else if (isArray(thing[key])) {
-    for (let idx = 0; ii < thing[key].length; idx += 1) {
+    for (let idx = 0; idx < thing[key].length; idx++) {
       if (isObject(thing[key][idx])) {
-        if ('$ref' in thing[idx]) {
+        if ('$ref' in thing[key][idx]) {
+          // If the current depth has reached or exceeded maxDereferenceDepth, remove the item with the circular reference
+          if (depth >= config.dotConfig.maxDereferenceDepth) {
+            delete thing[key][idx]['$ref'];
+            continue;
+          }
+
           lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key][idx]['$ref']));
-          replaceRefArr(thing[key], idx, lookedUpSchema);
+          if (lookedUpSchema) {
+            // Check for self-reference and skip if present
+            if (selfReferenceSchemaCheck(lookedUpSchema, thing[key][idx]['$ref'])) {
+              delete thing[key][idx]['$ref']; // Remove self-referencing ref
+              continue;
+            }
+            replaceRefArr(thing[key], idx, lookedUpSchema); // Replace the $ref
+          }
         }
+        // Increment depth when diving into nested objects
+        const newDepth = depth + 1;
+        replaceRefs(metaForSdk, thing[key], idx, newDepth);
       }
     }
   }
 }
 
 function dereferenceSchemas(metaForSdk, methodName) {
-  let newSchema;
   const methods = metaForSdk.methods;
   const matchMethods = methods.filter(function(method) { return method.name === methodName; });
   const matchMethod = matchMethods[0];
@@ -117,7 +141,6 @@ function dereferenceSchemas(metaForSdk, methodName) {
   replaceRefs(metaForSdk, matchMethod, 'result');
   replaceRefs(metaForSdk, matchMethod, 'params');
   replaceRefs(metaForSdk, matchMethod, 'tags');
-
 }
 
 function dereferenceMeta(_meta) {
@@ -137,11 +160,16 @@ function dereferenceMeta(_meta) {
   return meta;
 }
 
-
 // --- Exports ---
-
 export const testExports = {
-  replaceRefArr
+  replaceRefArr,
+  replaceRefObj,
+  isObject,
+  isArray,
+  ref2schemaName,
+  lookupSchema,
+  selfReferenceSchemaCheck,
+  replaceRefs
 };
 
 export {

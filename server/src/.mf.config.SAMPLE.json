@@ -3,6 +3,8 @@
 
     "multiUserConnections": "warn",
 
+    "maxDereferenceDepth": 3,
+
     "supportedOpenRPCs": [
 
         {
