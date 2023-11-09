@@ -49,95 +49,93 @@ function replaceRefArr(arrWithItemWithRef, posInArrWithRef, lookedUpSchema) {
   arrWithItemWithRef[posInArrWithRef] = lookedUpSchema;
 }
 
-// to check for self-referencing schema objects that can otherwise lead to recursive loops causing maximum call stack size to exceed
+/**
+ * Recursively searches through the provided schema object to detect self-referencing schemas by comparing $ref values against a provided path.
+ * 
+ * @param {object} schemaObj - The schema object to be checked for self-referencing.
+ * @param {string} path - The reference path to compare against for self-referencing.
+ * @returns {boolean} Returns true if a self-reference is detected, false otherwise.
+ */
 function selfReferenceSchemaCheck(schemaObj, path) {
   if (typeof schemaObj !== 'object' || schemaObj === null) {
-    return null
+    return false;
   }
   // check if self-refernce is present in current schema object
   if ('$ref' in schemaObj && schemaObj['$ref'] == path) {
-    return true
+    return true;
   }
   // check if self-reference is present in any nested objects
   for (const key in schemaObj) {
     const refValue = selfReferenceSchemaCheck(schemaObj[key], path);
-    if (refValue !== null) {
-      return true
+    if (refValue === true) {
+      return true;
     }
   }
-  return null
+  return false;
 }
 
-// NOTE: Doesn't handle arrays of arrays
-function replaceRefs(metaForSdk, thing, key, depth = 0) {
+/**
+ * Recursively replaces $ref keys in an object with their corresponding schemas to resolve references.
+ * It avoids infinite recursion by tracking replaced references using a set. This function handles nested
+ * objects and arrays but does not handle arrays of arrays. It also accounts for schemas defined under
+ * "x-schemas" and "components" in the OpenRPC.
+ * 
+ * @param {object} metaForSdk - The metadata object which may contain the schemas for replacement.
+ * @param {object|array} thing - The object or array where the replacement should occur.
+ * @param {string|number} key - The key in the 'thing' object that needs to be checked and potentially replaced.
+ * @param {Set} [replacedRefs] - A set to keep track of replaced references to prevent recursion. Defaults to a new Set.
+ * @returns {void} This function does not return a value. It mutates the 'thing' object by reference.
+ */
+function replaceRefs(metaForSdk, thing, key, replacedRefs = new Set()) {
   let xSchema, lookedUpSchema;
+
   if (isObject(thing[key])) {
-    if ('$ref' in thing[key]) {
-      // If the current depth has reached or exceeded maxDereferenceDepth, remove the key to prevent a circular reference
-      if (depth >= config.dotConfig.maxDereferenceDepth) {
+    const refKey = thing[key]['$ref'];
+
+    if (refKey) {
+      // Check if this reference was already replaced to prevent recursion.
+      if (replacedRefs.has(refKey)) {
+        // If already replaced, remove the $ref to avoid recursion.
         delete thing[key]['$ref'];
-        return;
-      }
-
-      // If schema resides under x-schemas object in openRPC
-      if (thing[key]['$ref'].includes("x-schemas")) {
-        let xSchemaArray = thing[key]['$ref'].split("/");
-        xSchema = xSchemaArray.filter(element => element !== "#" && element !== "x-schemas")[0];
-        lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key]['$ref']), xSchema);
       } else {
-        // else if schema resides under components object in openRPC
-        lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key]['$ref']));
-      }
-
-      if (lookedUpSchema) {
-        // Check for self-reference and skip if present
-        if (selfReferenceSchemaCheck(lookedUpSchema, thing[key]['$ref'])) {
-          delete thing[key]['$ref']; // Remove self-referencing ref
-          return;
+        // If schema resides under x-schemas object in openRPC.
+        if (refKey.includes("x-schemas")) {
+          let xSchemaArray = refKey.split("/");
+          xSchema = xSchemaArray.filter(element => element !== "#" && element !== "x-schemas")[0];
+          lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(refKey), xSchema);
+        } else {
+          // Else if schema resides under components object in openRPC.
+          lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(refKey));
         }
-        replaceRefObj(thing, key, lookedUpSchema); // Replace the $ref
+
+        if (lookedUpSchema && selfReferenceSchemaCheck(lookedUpSchema, refKey)) {
+          // If it's a self-reference, mark it as replaced.
+          replacedRefs.add(refKey);
+        }
+
+        // Replace the reference with the actual schema.
+        thing[key] = lookedUpSchema || thing[key];
       }
     }
 
-    // Increment depth when diving into nested objects
-    const newDepth = depth + 1;
-    for (const key2 in thing[key]) {
-      replaceRefs(metaForSdk, thing[key], key2, newDepth);
-    }
+    // Recursively call replaceRefs on nested objects, passing the replacedRefs set forward.
+    Object.keys(thing[key]).forEach((nestedKey) => {
+      replaceRefs(metaForSdk, thing[key], nestedKey, replacedRefs);
+    });
   } else if (isArray(thing[key])) {
-    for (let idx = 0; idx < thing[key].length; idx++) {
-      if (isObject(thing[key][idx])) {
-        if ('$ref' in thing[key][idx]) {
-          // If the current depth has reached or exceeded maxDereferenceDepth, remove the item with the circular reference
-          if (depth >= config.dotConfig.maxDereferenceDepth) {
-            delete thing[key][idx]['$ref'];
-            continue;
-          }
-
-          lookedUpSchema = lookupSchema(metaForSdk, ref2schemaName(thing[key][idx]['$ref']));
-          if (lookedUpSchema) {
-            // Check for self-reference and skip if present
-            if (selfReferenceSchemaCheck(lookedUpSchema, thing[key][idx]['$ref'])) {
-              delete thing[key][idx]['$ref']; // Remove self-referencing ref
-              continue;
-            }
-            replaceRefArr(thing[key], idx, lookedUpSchema); // Replace the $ref
-          }
-        }
-        // Increment depth when diving into nested objects
-        const newDepth = depth + 1;
-        replaceRefs(metaForSdk, thing[key], idx, newDepth);
+    thing[key].forEach((item, idx) => {
+      if (isObject(item)) {
+        replaceRefs(metaForSdk, thing[key], idx, replacedRefs);
       }
-    }
+    });
   }
 }
 
 function dereferenceSchemas(metaForSdk, methodName) {
   const methods = metaForSdk.methods;
-  const matchMethods = methods.filter(function(method) { return method.name === methodName; });
+  const matchMethods = methods.filter((method) => method.name === methodName);
   const matchMethod = matchMethods[0];
-  const result = matchMethod.result;
-  //replaceRefs(metaForSdk, result, 'schema');
+ 
   replaceRefs(metaForSdk, matchMethod, 'result');
   replaceRefs(metaForSdk, matchMethod, 'params');
   replaceRefs(metaForSdk, matchMethod, 'tags');
@@ -145,7 +143,7 @@ function dereferenceSchemas(metaForSdk, methodName) {
 
 function dereferenceMeta(_meta) {
   const meta = JSON.parse(JSON.stringify(_meta)); // Deep copy
-  config.dotConfig.supportedOpenRPCs.forEach(function(oSdk) {
+  config.dotConfig.supportedOpenRPCs.forEach((oSdk) => {
     const sdkName = oSdk.name;
     if ( sdkName in meta ) {
       const metaForSdk = meta[sdkName];
