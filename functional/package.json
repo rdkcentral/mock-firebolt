@@ -1,6 +1,6 @@
 {
   "name": "@firebolt-js/mock-firebolt-functional-tests",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Command-line interface for controlling the Mock Firebolt server",
   "scripts": {
     "test": "NODE_ENV=test npx jest --config=jest.config.js --silent -i",
