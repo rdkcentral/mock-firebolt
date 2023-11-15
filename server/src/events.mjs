@@ -298,19 +298,23 @@ function emitResponse(finalResult, msg, userId, method) {
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
 function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
+    let methodName = method;
+    if (config.app.allowMixedCase) {
+        methodName = method.toLowerCase();
+    }
   try {
-    if (  ! isBroadcast && !isRegisteredEventListener(userId, method) ) {
-      logger.info(`${method} event not registered`);
-      fErr.call(null, method);
+    if (  ! isBroadcast && !isRegisteredEventListener(userId, methodName) ) {
+      logger.info(`${methodName} event not registered`);
+      fErr.call(null, methodName);
 
-    } else if ( isBroadcast && !isAnyRegisteredInGroup(userId, method) ){
-      logger.info(`${method} event not registered`);
-      fErr.call(null, method);
+    } else if ( isBroadcast && !isAnyRegisteredInGroup(userId, methodName) ){
+      logger.info(`${methodName} event not registered`);
+      fErr.call(null, methodName);
 
     } else {
        // Fire pre trigger if there is one for this method
-       if ( method in eventTriggers ) {
-        if ( 'pre' in eventTriggers[method] ) {
+       if ( methodName in eventTriggers ) {
+        if ( 'pre' in eventTriggers[methodName] ) {
           try {
             const ctx = {
               logger: logger,
@@ -320,17 +324,17 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
               uuid: function cuuid() {return stateManagement.createUuid()},
-              sendEvent: function(method, result, msg) {
-                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
+              sendEvent: function(methodName, result, msg) {
+                sendEvent( ws, userId, methodName, result, msg, logSuccess.bind(this, methodName, result, msg), logErr.bind(this, methodName), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
                 sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
               }
             };
-            logger.debug(`Calling pre trigger for event ${method}`);
-            eventTriggers[method].pre.call(null,ctx);
+            logger.debug(`Calling pre trigger for event ${methodName}`);
+            eventTriggers[methodName].pre.call(null,ctx);
           } catch ( ex ) {
-            logger.error(`ERROR: Exception occurred while executing pre-trigger for ${method}; continuing`);
+            logger.error(`ERROR: Exception occurred while executing pre-trigger for ${methodName}; continuing`);
           }
         }
       }
@@ -338,9 +342,9 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       const response = {result : result};
       let postResult;
       
-      // Fire post trigger if there is one for this method
-      if ( method in eventTriggers ) {
-        if ( 'post' in eventTriggers[method] ) {
+      // Fire post trigger if there is one for this methodName
+      if ( methodName in eventTriggers ) {
+        if ( 'post' in eventTriggers[methodName] ) {
           try {
             const ctx = {
               logger: logger,
@@ -350,20 +354,20 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
               uuid: function cuuid() {return stateManagement.createUuid()},
-              sendEvent: function(method, result, msg) {
-                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
+              sendEvent: function(methodName, result, msg) {
+                sendEvent( ws, userId, methodName, result, msg, logSuccess.bind(this, methodName, result, msg), logErr.bind(this, methodName), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
                 sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
               },
               ...response
             };
-            logger.debug(`Calling post trigger for event ${method}`);
+            logger.debug(`Calling post trigger for event ${methodName}`);
             // post trigger can return undefined to leave as-is or can return a new result object
-            postResult = eventTriggers[method].post.call(null, ctx);
+            postResult = eventTriggers[methodName].post.call(null, ctx);
           } catch ( ex ) {
             {
-              logger.error(`ERROR: Exception occurred while executing post-trigger for ${method}`);
+              logger.error(`ERROR: Exception occurred while executing post-trigger for ${methodName}`);
               logger.error(ex);
             }
           }
@@ -373,9 +377,9 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       const finalResult = ( postResult ? postResult : result );
       // Error to be logged in "novalidate mode" if result validation failed
       if( config.validate.includes("events") ) {
-        const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
+        const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, methodName);
         if ( resultErrors && resultErrors.length > 0 ) {
-          fErr.call(null, method);
+          fErr.call(null, methodName);
           return
         }
       }
@@ -388,7 +392,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
         // looping over each web-sockets of same group
         if ( wsUserMap && wsUserMap.size >=1 ) {
           wsUserMap.forEach ((userWithSameGroup, ww) => {
-            emitResponse(finalResult, msg, userWithSameGroup, method);
+            emitResponse(finalResult, msg, userWithSameGroup, methodName);
           });
           fSuccess.call(null);
         } else {
@@ -397,7 +401,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
           throw new Error(msg);
         }
       } else {
-        emitResponse(finalResult, msg, userId, method);
+        emitResponse(finalResult, msg, userId, methodName);
         fSuccess.call(null);
       }
     }
