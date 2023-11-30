@@ -39,10 +39,13 @@ function sendEvent(req, res) {
   }
 
   function fErr(method) {
+    const errorCode = (events.eventErrorType === 'validationError') ? 'EVENT-VALIDATION-FAILED' : 'NO-EVENT-HANDLER-REGISTERED';
     res.status(400).send({
       status: 'ERROR',
-      errorCode: 'NO-EVENT-HANDLER-REGISTERED',
-      message: `Could not send ${method} event because no listener is active`
+      errorCode: errorCode,
+      message: (errorCode === 'EVENT-VALIDATION-FAILED') ?
+        `Event validation failed for ${method}. Please ensure the event data meets the required format and try again.` :
+        `${method} event not registered`
     });
   }
 
@@ -72,10 +75,13 @@ function sendBroadcastEvent(req, res) {
   }
 
   function fErr(method) {
+    const errorCode = (events.eventErrorType === 'validationError') ? 'EVENT-VALIDATION-FAILED' : 'NO-EVENT-HANDLER-REGISTERED';
     res.status(400).send({
       status: 'ERROR',
-      errorCode: 'NO-EVENT-HANDLER-REGISTERED',
-      message: `Could not send ${method} event because no listener is active`
+      errorCode: errorCode,
+      message: (errorCode === 'EVENT-VALIDATION-FAILED') ?
+        `Event validation failed for ${method}. Please ensure the event data meets the required format and try again.` :
+        `${method} event not registered`
     });
   }
 

@@ -31,6 +31,7 @@ import { config } from './config.mjs';
 import { updateCallWithResponse } from './sessionManagement.mjs';
 
 const { dotConfig: { eventConfig } } = config;
+let eventErrorType;
 
 function logSuccess(onMethod, result, msg) {
   logger.info(
@@ -39,11 +40,12 @@ function logSuccess(onMethod, result, msg) {
 };
 
 function logErr(onMethod) {
-  logger.info(
-    `Could not send ${onMethod} event because no listener is active`
-  );
-};
-
+  if (eventErrorType == 'validationError') {
+    logger.info(`Event validation failed for ${onMethod}. Please ensure the event data meets the required format and try again`);
+  } else if (eventErrorType == 'registrationError') {
+    logger.info(`${onMethod} event not registered`);
+  }
+}
 function logFatalErr() {
   logger.info(`Internal error`);
 };
@@ -301,10 +303,12 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
   try {
     if (  ! isBroadcast && !isRegisteredEventListener(userId, method) ) {
       logger.info(`${method} event not registered`);
+      eventErrorType = 'registrationError'
       fErr.call(null, method);
 
     } else if ( isBroadcast && !isAnyRegisteredInGroup(userId, method) ){
       logger.info(`${method} event not registered`);
+      eventErrorType = 'registrationError'
       fErr.call(null, method);
 
     } else {
@@ -375,6 +379,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       if( config.validate.includes("events") ) {
         const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
         if ( resultErrors && resultErrors.length > 0 ) {
+          eventErrorType = 'validationError'
           fErr.call(null, method);
           return
         }
@@ -427,5 +432,5 @@ export {
   isEventListenerOnMessage, isEventListenerOffMessage,
   sendEventListenerAck, sendUnRegistrationAck,
   sendEvent, sendBroadcastEvent, logSuccess, logErr,
-  logFatalErr, extractEventData
+  logFatalErr, extractEventData, eventErrorType
 };

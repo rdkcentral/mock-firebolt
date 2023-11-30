@@ -38,7 +38,11 @@ function fSuccess(msg, onMethod, result) {
   logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
 }
 function fErr(onMethod) {
-  logger.info(`Could not send ${onMethod} event because no listener is active`)
+  if (events.eventErrorType == 'validationError') {
+    logger.info(`Event validation failed for ${onMethod}. Please ensure the event data meets the required format and try again`);
+  } else if (events.eventErrorType == 'registrationError') {
+    logger.info(`${onMethod} event not registered`);
+  }
 }
 function fFatalErr() {
   logger.info(`Internal error`)
