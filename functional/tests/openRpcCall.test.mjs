@@ -177,8 +177,6 @@ test(`Validate send event for default user`, async () => {
     `cd ../cli/src/ && node cli.mjs --event ../examples/accessibility-onVoiceGuidanceSettingsChanged1.event.json && cd ../../functional`,
     true
   );
-  console.log("check 456", result)
-
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
