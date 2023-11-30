@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-* Fixedbug related to event error message handling wherein all event errors were previously thrown as an improper generic error which was misleading to users. Implemented a mechanism to correctly distinguish different types of event errors and throw them appropriately
+* Fixed bug related to event error message handling wherein all event errors were previously thrown as an improper generic error which was misleading to users. Implemented a mechanism to correctly distinguish different types of event errors and throw them appropriately
 
 ## [1.0.2] - 2023-11-10
 
