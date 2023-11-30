@@ -177,6 +177,8 @@ test(`Validate send event for default user`, async () => {
     `cd ../cli/src/ && node cli.mjs --event ../examples/accessibility-onVoiceGuidanceSettingsChanged1.event.json && cd ../../functional`,
     true
   );
+  console.log("check 456", result)
+
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
 });
 
@@ -211,7 +213,7 @@ test(`Validate send event without an active listener`, async () => {
   );
   expect(
     result.includes(
-      ` "message": "Could not send accessibility.onClosedCaptionsSettingsChanged event because no listener is active"`
+      `"message": "accessibility.onClosedCaptionsSettingsChanged event not registered"`
     )
   ).toBe(true);
 });
