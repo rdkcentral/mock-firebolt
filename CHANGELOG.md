@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2023-11-30
+
+### Added
+
+* New unit test to validate updated error handling function and functional test update to capture updated error message
+
+### Changed
+
+* Refined `logErr()` and `fErr()` functions which handles event error messages to appropriately throw both event validation and event registration errors. 
+
+### Fixed
+
+* Fixedbug related to event error message handling wherein all event errors were previously thrown as an improper generic error which was misleading to users. Implemented a mechanism to correctly distinguish different types of event errors and throw them appropriately
+
 ## [1.0.2] - 2023-11-10
 
 ### Added
