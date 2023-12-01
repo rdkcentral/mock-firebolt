@@ -39,11 +39,16 @@ function logSuccess(onMethod, result, msg) {
   );
 };
 
-function logErr(onMethod) {
-  if (eventErrorType == 'validationError') {
-    logger.info(`Event validation failed for ${onMethod}. Please ensure the event data meets the required format and try again`);
-  } else if (eventErrorType == 'registrationError') {
-    logger.info(`${onMethod} event not registered`);
+function logErr(onMethod, eventErrorType) {
+  switch (eventErrorType) {
+    case 'validationError':
+      logger.info(`Event validation failed for ${onMethod}. Please ensure the event data meets the required format and try again`);
+      break;
+    case 'registrationError':
+      logger.info(`${onMethod} event not registered`);
+      break;
+    default:
+      break;
   }
 }
 function logFatalErr() {
@@ -303,13 +308,12 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
   try {
     if (  ! isBroadcast && !isRegisteredEventListener(userId, method) ) {
       logger.info(`${method} event not registered`);
-      eventErrorType = 'registrationError'
-      fErr.call(null, method);
+     
+      fErr.call(null, method, 'registrationError');
 
     } else if ( isBroadcast && !isAnyRegisteredInGroup(userId, method) ){
       logger.info(`${method} event not registered`);
-      eventErrorType = 'registrationError'
-      fErr.call(null, method);
+      fErr.call(null, method, 'registrationError');
 
     } else {
        // Fire pre trigger if there is one for this method
@@ -325,10 +329,10 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
               uuid: function cuuid() {return stateManagement.createUuid()},
               sendEvent: function(method, result, msg) {
-                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
+                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method, null), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
+                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod, null), logFatalErr.bind(this) );
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -355,10 +359,10 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
               uuid: function cuuid() {return stateManagement.createUuid()},
               sendEvent: function(method, result, msg) {
-                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
+                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method, null), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
+                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod, null), logFatalErr.bind(this) );
               },
               ...response
             };
@@ -379,8 +383,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       if( config.validate.includes("events") ) {
         const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
         if ( resultErrors && resultErrors.length > 0 ) {
-          eventErrorType = 'validationError'
-          fErr.call(null, method);
+          fErr.call(null, method, 'validationError');
           return
         }
       }

@@ -38,14 +38,15 @@ function sendEvent(req, res) {
     });
   }
 
-  function fErr(method) {
-    const errorCode = (events.eventErrorType === 'validationError') ? 'EVENT-VALIDATION-FAILED' : 'NO-EVENT-HANDLER-REGISTERED';
+  function fErr(method, eventErrorType) {
+    const errorCode = (eventErrorType === 'validationError') ? 'EVENT-VALIDATION-FAILED' : 'NO-EVENT-HANDLER-REGISTERED';
+    const message = (errorCode === 'EVENT-VALIDATION-FAILED') ?
+    `Event validation failed for ${method}. Please ensure the event data meets the required format and try again.` :
+    `${method} event not registered`
     res.status(400).send({
       status: 'ERROR',
       errorCode: errorCode,
-      message: (errorCode === 'EVENT-VALIDATION-FAILED') ?
-        `Event validation failed for ${method}. Please ensure the event data meets the required format and try again.` :
-        `${method} event not registered`
+      message: message
     });
   }
 
@@ -58,7 +59,7 @@ function sendEvent(req, res) {
     });
   }
 
-  events.sendEvent(ws, userId, method, result, `${method}`, fSuccess, fErr, fFatalErr);
+  events.sendEvent(ws, userId, method, result, `${method}`, fSuccess,  fErr.bind(this, method, null), fFatalErr);
 }
 
 // POST /api/v1/broadcastEvent
@@ -74,14 +75,15 @@ function sendBroadcastEvent(req, res) {
     });
   }
 
-  function fErr(method) {
-    const errorCode = (events.eventErrorType === 'validationError') ? 'EVENT-VALIDATION-FAILED' : 'NO-EVENT-HANDLER-REGISTERED';
+  function fErr(method, eventErrorType) {
+    const errorCode = (eventErrorType === 'validationError') ? 'EVENT-VALIDATION-FAILED' : 'NO-EVENT-HANDLER-REGISTERED';
+    const message = (errorCode === 'EVENT-VALIDATION-FAILED') ?
+    `Event validation failed for ${method}. Please ensure the event data meets the required format and try again.` :
+    `${method} event not registered`
     res.status(400).send({
       status: 'ERROR',
       errorCode: errorCode,
-      message: (errorCode === 'EVENT-VALIDATION-FAILED') ?
-        `Event validation failed for ${method}. Please ensure the event data meets the required format and try again.` :
-        `${method} event not registered`
+      message: message
     });
   }
 
@@ -94,7 +96,7 @@ function sendBroadcastEvent(req, res) {
     });
   }
 
-  events.sendBroadcastEvent(ws, userId, method, result, `${method}`, fSuccess, fErr, fFatalErr);
+  events.sendBroadcastEvent(ws, userId, method, result, `${method}`, fSuccess,  fErr.bind(this, method, null), fFatalErr);
 }
 
 // --- Exports ---
