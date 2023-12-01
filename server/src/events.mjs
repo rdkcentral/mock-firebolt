@@ -31,7 +31,6 @@ import { config } from './config.mjs';
 import { updateCallWithResponse } from './sessionManagement.mjs';
 
 const { dotConfig: { eventConfig } } = config;
-let eventErrorType;
 
 function logSuccess(onMethod, result, msg) {
   logger.info(
@@ -435,5 +434,5 @@ export {
   isEventListenerOnMessage, isEventListenerOffMessage,
   sendEventListenerAck, sendUnRegistrationAck,
   sendEvent, sendBroadcastEvent, logSuccess, logErr,
-  logFatalErr, extractEventData, eventErrorType
+  logFatalErr, extractEventData
 };
