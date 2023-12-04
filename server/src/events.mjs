@@ -309,11 +309,11 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
     if (  ! isBroadcast && !isRegisteredEventListener(userId, method) ) {
       logger.info(`${method} event not registered`);
      
-      fErr.call(null, method, 'registrationError');
+      fErr.call(null, 'registrationError', method);
 
     } else if ( isBroadcast && !isAnyRegisteredInGroup(userId, method) ){
       logger.info(`${method} event not registered`);
-      fErr.call(null, method, 'registrationError');
+      fErr.call(null, 'registrationError', method);
 
     } else {
        // Fire pre trigger if there is one for this method
@@ -383,7 +383,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       if( config.validate.includes("events") ) {
         const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
         if ( resultErrors && resultErrors.length > 0 ) {
-          fErr.call(null, method, 'validationError');
+          fErr.call(null, 'validationError', method);
           return
         }
       }
