@@ -47,6 +47,7 @@ function logErr(onMethod, eventErrorType) {
       logger.info(`${onMethod} event not registered`);
       break;
     default:
+      logger.info(`Error of unknown error type occurred for ${onMethod} event (type: ${eventErrorType})`);
       break;
   }
 }
