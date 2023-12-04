@@ -38,12 +38,19 @@ function logSuccess(onMethod, result, msg) {
   );
 };
 
-function logErr(onMethod) {
-  logger.info(
-    `Could not send ${onMethod} event because no listener is active`
-  );
-};
-
+function logErr(onMethod, eventErrorType) {
+  switch (eventErrorType) {
+    case 'validationError':
+      logger.info(`Event validation failed for ${onMethod}. Please ensure the event data meets the required format and try again`);
+      break;
+    case 'registrationError':
+      logger.info(`${onMethod} event not registered`);
+      break;
+    default:
+      logger.info(`Error of unknown error type occurred for ${onMethod} event (type: ${eventErrorType})`);
+      break;
+  }
+}
 function logFatalErr() {
   logger.info(`Internal error`);
 };
@@ -301,11 +308,12 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
   try {
     if (  ! isBroadcast && !isRegisteredEventListener(userId, method) ) {
       logger.info(`${method} event not registered`);
-      fErr.call(null, method);
+     
+      fErr.call(null, 'registrationError', method);
 
     } else if ( isBroadcast && !isAnyRegisteredInGroup(userId, method) ){
       logger.info(`${method} event not registered`);
-      fErr.call(null, method);
+      fErr.call(null, 'registrationError', method);
 
     } else {
        // Fire pre trigger if there is one for this method
@@ -321,10 +329,10 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
               uuid: function cuuid() {return stateManagement.createUuid()},
               sendEvent: function(method, result, msg) {
-                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
+                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method, null), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
+                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod, null), logFatalErr.bind(this) );
               }
             };
             logger.debug(`Calling pre trigger for event ${method}`);
@@ -351,10 +359,10 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
               uuid: function cuuid() {return stateManagement.createUuid()},
               sendEvent: function(method, result, msg) {
-                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method), logFatalErr.bind(this) );
+                sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method, null), logFatalErr.bind(this) );
               },
               sendBroadcastEvent: function(onMethod, result, msg) {
-                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod), logFatalErr.bind(this) );
+                sendBroadcastEvent( ws, userId, onMethod, result, msg, logSuccess.bind(this, onMethod, result, msg), logErr.bind(this, onMethod, null), logFatalErr.bind(this) );
               },
               ...response
             };
@@ -375,7 +383,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       if( config.validate.includes("events") ) {
         const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
         if ( resultErrors && resultErrors.length > 0 ) {
-          fErr.call(null, method);
+          fErr.call(null, 'validationError', method);
           return
         }
       }

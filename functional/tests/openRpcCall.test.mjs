@@ -211,7 +211,7 @@ test(`Validate send event without an active listener`, async () => {
   );
   expect(
     result.includes(
-      ` "message": "Could not send accessibility.onClosedCaptionsSettingsChanged event because no listener is active"`
+      `"message": "accessibility.onClosedCaptionsSettingsChanged event not registered"`
     )
   ).toBe(true);
 });
