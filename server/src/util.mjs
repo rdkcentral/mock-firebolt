@@ -156,15 +156,15 @@ function replaceKeyInObject(obj, oldKey, newKey) {
 /* 
 * @function:createCaseAgnosticMethod
 * @Description: Convert a provided full method (moduleName.methodName) to be case insensitive for the module name
-* @param {String} methodName - String containing module and method names delimited by '.'
+* @param {String} method - String containing module and method names delimited by '.'
 * @Return: Return string in the format (moduleName.methodName) with only the moduleName having been converted to lowercase
 */
-function createCaseAgnosticMethod(methodName){
-  let splitMethodArray = methodName.split('.');
-  let moduleName = splitMethodArray[0].toLowerCase();
-  methodName = splitMethodArray[1];
-  let fullMethodName = moduleName.concat(".", methodName);
-  return fullMethodName;
+function createCaseAgnosticMethod(method){
+  let splitArray = method.split('.');
+  let moduleName = splitArray[0].toLowerCase();
+  let methodName = splitArray[1];
+  method = moduleName.concat(".", methodName);
+  return method;
 }
 
 // --- Exports ---
