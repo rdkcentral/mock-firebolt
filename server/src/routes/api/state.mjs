@@ -21,7 +21,7 @@
 'use strict';
 
 import { logger } from '../../logger.mjs';
-import { getUserIdFromReq } from '../../util.mjs';
+import { getUserIdFromReq,createCaseAgnosticMethod } from '../../util.mjs';
 import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 import * as commonErrors from '../../commonErrors.mjs';
 import * as stateManagement from '../../stateManagement.mjs';
@@ -144,7 +144,7 @@ function setMethodResult(req, res) {
   const userId = getUserIdFromReq(req);
   let methodName = req.params.methodName;
   if (config.app.allowMixedCase){
-    methodName = methodName.toLowerCase();
+    methodName = createCaseAgnosticMethod(methodName);
   }
   if ( 'result' in req.body ) {
     const result = req.body.result;
@@ -186,7 +186,7 @@ function setMethodError(req, res) {
   const userId = getUserIdFromReq(req);
   let methodName = req.params.methodName;
   if (config.app.allowMixedCase){
-    methodName = methodName.toLowerCase();
+    methodName = createCaseAgnosticMethod(methodName);
   }
   if ( 'error' in req.body ) {
     const err = req.body.error;

@@ -153,6 +153,13 @@ function replaceKeyInObject(obj, oldKey, newKey) {
   return obj;
 }
 
+function createCaseAgnosticMethod(methodName){
+  let splitMethodArray = methodName.split('.');
+  let moduleName = splitMethodArray[0].toLowerCase();
+  methodName = splitMethodArray[1];
+  let fullMethodName = moduleName.concat(".", methodName);
+  return fullMethodName;
+}
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject, createCaseAgnosticMethod };

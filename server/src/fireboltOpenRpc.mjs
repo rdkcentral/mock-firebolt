@@ -29,7 +29,7 @@ import * as https from 'https';
 import Ajv from 'ajv';
 const ajv = new Ajv();
 
-import { createTmpFile } from './util.mjs';
+import { createTmpFile,createCaseAgnosticMethod } from './util.mjs';
 import { config } from './config.mjs';
 import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
@@ -44,7 +44,7 @@ function buildMethodMap(sdkOpenrpc) {
   var result = sdkOpenrpc.methods.reduce(function(map, obj) {
     //coverting module names to lowerCase
     if(config.app.allowMixedCase){
-      obj.name = (obj.name).toLowerCase();
+      obj.name = createCaseAgnosticMethod(obj.name);
     }
     map[obj.name] = obj;
     return map;
@@ -65,7 +65,7 @@ function getMethod(methodName) {
   for ( let ii = 0; ii < config.dotConfig.supportedOpenRPCs.length; ii += 1 ) {
     const sdkName = config.dotConfig.supportedOpenRPCs[ii].name;
     if (config.app.allowMixedCase){
-      methodName = methodName.toLowerCase();
+      methodName = createCaseAgnosticMethod(methodName);
     }
     if ( methodMaps[sdkName] ) {
       if ( methodName in methodMaps[sdkName] ) { return methodMaps[sdkName][methodName]; }
