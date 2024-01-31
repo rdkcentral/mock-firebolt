@@ -29,6 +29,8 @@ import { logger } from './logger.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import { config } from './config.mjs';
 import { updateCallWithResponse } from './sessionManagement.mjs';
+import { createCaseAgnosticMethod } from './util.mjs';
+
 
 const { dotConfig: { eventConfig } } = config;
 
@@ -305,6 +307,9 @@ function emitResponse(finalResult, msg, userId, method) {
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
 function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
+  if (config.app.allowMixedCase) {
+    method = createCaseAgnosticMethod(method);
+  }
   try {
     if (  ! isBroadcast && !isRegisteredEventListener(userId, method) ) {
       logger.info(`${method} event not registered`);
