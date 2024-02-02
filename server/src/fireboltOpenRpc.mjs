@@ -43,7 +43,7 @@ function buildMethodMap(sdkOpenrpc) {
 
   var result = sdkOpenrpc.methods.reduce(function(map, obj) {
     //coverting module names to lowerCase
-    if(config.app.allowMixedCase){
+    if(config.app.caseInsensitiveModules){
       obj.name = createCaseAgnosticMethod(obj.name);
     }
     map[obj.name] = obj;
@@ -64,7 +64,7 @@ function getMeta() {
 function getMethod(methodName) {
   for ( let ii = 0; ii < config.dotConfig.supportedOpenRPCs.length; ii += 1 ) {
     const sdkName = config.dotConfig.supportedOpenRPCs[ii].name;
-    if (config.app.allowMixedCase){
+    if (config.app.caseInsensitiveModules){
       methodName = createCaseAgnosticMethod(methodName);
     }
     if ( methodMaps[sdkName] ) {

@@ -143,7 +143,7 @@ function setMode(req, res) {
 function setMethodResult(req, res) {
   const userId = getUserIdFromReq(req);
   let methodName = req.params.methodName;
-  if (config.app.allowMixedCase){
+  if (config.app.caseInsensitiveModules){
     methodName = createCaseAgnosticMethod(methodName);
   }
   if ( 'result' in req.body ) {
@@ -185,7 +185,7 @@ function setMethodResult(req, res) {
 function setMethodError(req, res) {
   const userId = getUserIdFromReq(req);
   let methodName = req.params.methodName;
-  if (config.app.allowMixedCase){
+  if (config.app.caseInsensitiveModules){
     methodName = createCaseAgnosticMethod(methodName);
   }
   if ( 'error' in req.body ) {

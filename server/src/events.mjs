@@ -307,7 +307,7 @@ function emitResponse(finalResult, msg, userId, method) {
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
 function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
-  if (config.app.allowMixedCase) {
+  if (config.app.caseInsensitiveModules) {
     method = createCaseAgnosticMethod(method);
   }
   try {

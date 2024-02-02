@@ -27,7 +27,7 @@ test(`config works properly`, () => {
     validate: ["method", "params", "response", "events"],
     multiUserConnections: "warn",
     app: {
-      allowMixedCase: true,
+      caseInsensitiveModules: true,
       socketPort: 9998,
       httpPort: 3333,
       wsSessionServerPort: 9999,

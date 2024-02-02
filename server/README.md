@@ -542,3 +542,33 @@ curl --location --request GET 'http://localhost:3333/api/v1/status'
    status": "No WS connection found for user 12345"
 }
 ```
+
+# Server Configuration parameters (server/src/config.mjs):
+
+## app config object:
+```
+  app: {
+    caseInsensitiveModules: true,
+    socketPort: 9998,
+    httpPort: 3333,
+    wsSessionServerPort: 9999,
+    conduitSocketPort: 9997,
+    conduitKeySocketPort: 9996,         // Key forwarding from Conduit
+    developerToolPort: 9995,            // Port for Firebolt to connect to
+    developerToolName: 'Mock Firebolt', // Used when publishing with DNS-SD
+    defaultUserId: '12345',
+    magicDateTime: {
+      prefix: '{{',
+      suffix: '}}'
+    },
+    developerNotesTagName: 'developerNotes'
+  }
+```
+
+### caseInsensitiveModules:
+Firebolt calls are passed in the format <module>.<methodName>.
+Method names are always camelCase formated.
+However in early releases of the Firebolt SDK the module names were fully lowercase. (ex: closedcaptions). Starting with SDK v0.11.0 the module names were alteres to begin with an uppercase letter for each word instead (ex: ClosedCaptions).
+Setting the value for caseInsensitiveModules to true will internally convert the module names passed in method calls to a lowercase string for comparisons. Method names are left in camelCase format. This allows closedcaptions.setEnabled to be treated the same as ClosedCaption.setEnabled in the mock environment.
+
+This can be useful especially when certifying against different SDK releases.
