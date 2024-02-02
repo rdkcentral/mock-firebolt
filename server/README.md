@@ -567,8 +567,8 @@ curl --location --request GET 'http://localhost:3333/api/v1/status'
 
 ### caseInsensitiveModules:
 Firebolt calls are passed in the format <module>.<methodName>.
-Method names are always camelCase formated.
-However in early releases of the Firebolt SDK the module names were fully lowercase. (ex: closedcaptions). Starting with SDK v0.11.0 the module names were alteres to begin with an uppercase letter for each word instead (ex: ClosedCaptions).
+Method names are always formatted with camelCase. 
+However, in early releases of the Firebolt SDK, the module names were fully lowercase. (ex: closedcaptions). Starting with SDK v0.11.0, the module names were altered to begin with an uppercase letter for each word instead (ex: ClosedCaptions).
 Setting the value for caseInsensitiveModules to true will internally convert the module names passed in method calls to a lowercase string for comparisons. Method names are left in camelCase format. This allows closedcaptions.setEnabled to be treated the same as ClosedCaption.setEnabled in the mock environment.
 
-This can be useful especially when certifying against different SDK releases.
+This can be useful, especially when certifying against different SDK releases.
