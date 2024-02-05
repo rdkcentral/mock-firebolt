@@ -160,10 +160,12 @@ function replaceKeyInObject(obj, oldKey, newKey) {
 * @Return: Return string in the format (moduleName.methodName) with only the moduleName having been converted to lowercase
 */
 function createCaseAgnosticMethod(method){
-  let splitArray = method.split('.');
-  let moduleName = splitArray[0].toLowerCase();
-  let methodName = splitArray[1];
-  method = moduleName.concat(".", methodName);
+  if (method.includes(".")){
+    let splitArray = method.split('.');
+    let moduleName = splitArray[0].toLowerCase();
+    let methodName = splitArray[1];
+    method = moduleName.concat(".", methodName);
+  }
   return method;
 }
 
