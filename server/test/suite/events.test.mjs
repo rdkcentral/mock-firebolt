@@ -209,7 +209,7 @@ test(`events.sendUnRegistrationAck works properly`, () => {
 
 
 test(`events.sendEvent works properly`, () => {
-  const methodName = "test",
+  const methodName = "test.eventTest",
     result = {
       name: "OpenRPC Schema",
       schema: {

@@ -10,7 +10,7 @@ methods:
         }, 500)
 
         ctx.setTimeout(function() {
-        const result = {previous: 'inactive', state: 'foreground' }
+        const result = { previous: 'inactive', state: 'foreground' }
           const msg = 'Post trigger for lifecycle.ready sent foreground lifecycle event'
           ctx.sendEvent('lifecycle.onForeground', result, msg)
           }, 1000)

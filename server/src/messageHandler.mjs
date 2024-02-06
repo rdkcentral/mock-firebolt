@@ -60,8 +60,8 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Received message for user ${userId} : ${message}`);
 
   const oMsg = JSON.parse(message);
-  if (oMsg.method && config.app.allowMixedCase) {
-    oMsg.method = (oMsg.method).toLowerCase();
+  if (oMsg.method && config.app.caseInsensitiveModules) {
+    oMsg.method = util.createCaseAgnosticMethod(oMsg.method);
   } else if (!oMsg.method) {
     logger.error(`ERROR: Missing method field in message. Mock Firebolt expects incoming request to have a method field in the format <module.method>`);
     const oResponseMessage = {
