@@ -19,7 +19,7 @@
 // OpenRPC message handler function / logic
 
 'use strict';
-
+import * as userManagement from './userManagement.mjs';
 import * as commonErrors from './commonErrors.mjs';
 import { logger } from './logger.mjs';
 import * as util from './util.mjs';
@@ -178,6 +178,7 @@ async function handleMessage(message, userId, ws) {
           setTimeout: setTimeout,
           setInterval: setInterval,
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
+          getWebSocketConnectionForUser: function gw(userId) { return userManagement.getWsForUser(userId) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
           uuid: function cuuid() {return stateManagement.createUuid()},
@@ -283,6 +284,7 @@ async function handleMessage(message, userId, ws) {
           setTimeout: setTimeout,
           setInterval: setInterval,
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
+          getWebSocketConnectionForUser: function gw(userId) { return userManagement.getWsForUser(userId) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
           uuid: function cuuid() {return stateManagement.createUuid()},
