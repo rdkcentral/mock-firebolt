@@ -94,9 +94,11 @@ function getWssForUser(userId) {
 //get the ws for user,if user has ws already,it will return the latest ws connection
 function getWsForUser(userId) {
   if ( user2ws.has(''+userId) ) {
-    let wsArray=user2ws.get(''+userId);
-    let latestWsConnection=wsArray[(wsArray.length-1)]
-    return latestWsConnection;
+    let wsArray = user2ws.get("" + userId);
+    if (wsArray) {
+      let latestWsConnection = wsArray[wsArray.length - 1];
+      return latestWsConnection;
+    }
   }
   return undefined;
 }
@@ -196,6 +198,9 @@ function addUser(userId) {
     ws.isAlive = true;
     ws.on('pong', async hb => {
       heartbeat(ws)
+    });
+    ws.on('close', function close() {
+      removeUser(userId)
     });
     // If multiUserConnections configuration is set as deny and there is a ws object associated with userId, deny and log second ws connection and drop the attempt
     if (/deny/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
