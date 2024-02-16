@@ -6,8 +6,9 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-* Ability to check if an active userid is connected or not to mock-firebolt from yaml file
+* Added ability to check if an active userid is connected or not to mock-firebolt from yaml file
 * Added cross-env package to set environment variables across platforms
+* Added ability to remove websocket connection object associated with a user when close event is received via websocket
 
 
 ### Changed
