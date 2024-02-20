@@ -200,7 +200,7 @@ function addUser(userId) {
       heartbeat(ws)
     });
     ws.on('close', function close() {
-      removeUser(userId)
+      user2ws.delete(''+userId);
     });
     // If multiUserConnections configuration is set as deny and there is a ws object associated with userId, deny and log second ws connection and drop the attempt
     if (/deny/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
