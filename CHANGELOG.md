@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2024-02-13
+
+### Added
+
+* Added ability to check if an active userid is connected or not to mock-firebolt from yaml file
+* Added cross-env package to set environment variables across platforms
+* Added ability to remove websocket connection object associated with a user when close event is received via websocket
+
+
+### Changed
+
+* Updated definition of ctx in files to include new function `getWebSocketConnectionForUser` that will internally return `getWsForUser` to check if an active userid is connected or not to mock-firebolt 
+
+### Fixed
+
+* Fixed bug `NODE_OPTIONS' is not recognized as an internal or external command` using cross-env
+
 ## [1.0.3] - 2023-11-30
 
 ### Added

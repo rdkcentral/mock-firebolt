@@ -1,15 +1,15 @@
 {
   "name": "@firebolt-js/mock-firebolt",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Controllable mock Firebolt server",
   "main": "./build/index.mjs",
   "scripts": {
     "clean": "node ./scripts/clean.mjs",
     "build": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
-    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
     "start": "npm run build && node build/index.mjs",
     "dev": "echo 'WARNING: \"npm run dev\" is DEPRECATED and may be removed in a future release. Use \"npm start\" instead.' && npm start"
-  },  
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rdkcentral/mock-firebolt.git"
@@ -35,6 +35,7 @@
     "body-parser": "^1.19.0",
     "bonjour": "^3.5.0",
     "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
     "express": "^4.17.1",
     "express-handlebars": "^6.0.2",
     "handlebars": "^4.7.7",

@@ -29,7 +29,7 @@ import * as commonErrors from './commonErrors.mjs';
 import * as util from './util.mjs';
 import { sendBroadcastEvent, sendEvent, logSuccess, logErr, logFatalErr } from './events.mjs';
 import { v4 as uuidv4 } from 'uuid';
-import { parseUser } from './userManagement.mjs';
+import { parseUser, getWsForUser } from './userManagement.mjs';
 
 const Mode = {
   BOX: 'BOX',            // Log settrs, return default defaults for each gettr based on first example within OpenRPC specification
@@ -241,6 +241,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         setTimeout: setTimeout,
         setInterval: setInterval,
         set: function ss(key, val, scope) { return setScratch(userId, key, val, scope) },
+        getWebSocketConnectionForUser: function gw(userId) { return getWsForUser(userId) },
         get: function gs(key) { return getScratch(userId, key); },
         delete: function ds(key, scope) { return deleteScratch(userId, key, scope)},
         uuid: function cuuid() {return createUuid()},
@@ -313,6 +314,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
     try {
       const ctx = {
         set: function ss(key, val, scope) { return setScratch(userId, key, val, scope) },
+        getWebSocketConnectionForUser: function gw(userId) { return getWsForUser(userId) },
         get: function gs(key) { return getScratch(userId, key); },
         delete: function ds(key, scope) { return deleteScratch(userId, key, scope)},
         uuid: function cuuid() {return createUuid()},
