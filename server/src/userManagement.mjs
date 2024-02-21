@@ -95,7 +95,7 @@ function getWssForUser(userId) {
 function getWsForUser(userId) {
   if ( user2ws.has(''+userId) ) {
     let wsArray = user2ws.get("" + userId);
-    if (wsArray) {
+    if (wsArray && wsArray.length > 0) {
       let latestWsConnection = wsArray[wsArray.length - 1];
       return latestWsConnection;
     }
