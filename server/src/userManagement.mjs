@@ -86,6 +86,7 @@ function parseUser(userId) {
 
 function getWssForUser(userId) {
   if ( user2wss.has(''+userId) ) {
+    logger.info("+++++++WSS connection for that user:::"+JSON.stringify(userId)+"::::"+JSON.stringify(user2wss.get(''+userId)))
     return user2wss.get(''+userId);
   }
   return undefined;
@@ -96,6 +97,7 @@ function getWsForUser(userId) {
   if ( user2ws.has(''+userId) ) {
     let wsArray=user2ws.get(''+userId);
     let latestWsConnection=wsArray[(wsArray.length-1)]
+    logger.info("******Latest connection for the user:::"+JSON.stringify(latestWsConnection))
     return latestWsConnection;
   }
   return undefined;
@@ -131,6 +133,7 @@ function getWsListForUser(userId) {
 }
 
 function associateUserWithWss(userId, wss) {
+  logger.info("*****Associationg WSS for userId:::"+JSON.stringify(userId)+ "WSS:::"+JSON.stringify(wss))
   user2wss.set(''+userId, wss);
 }
 
@@ -144,10 +147,12 @@ function associateUserWithWs(userId, ws) {
     wsArray.push(ws)
     user2ws.set(''+userId, wsArray);
   }
+  logger.info("++++++Associationg WS connection for userId:::"+JSON.stringify(userId)+ "WSS:::"+JSON.stringify(wsArray))
 }
 
 // Delete websocket object associated with a userId when that websocket connection is closed by a close event
 function deleteWsOfUser(ws, userId) {
+  console.log("Deleting the ws associated iwth user::::"+ JSON.stringify(userId))
   let wsArray = [];
   if (user2ws.has('' + userId)) {
     wsArray = user2ws.get('' + userId)
@@ -155,6 +160,31 @@ function deleteWsOfUser(ws, userId) {
     user2ws.set('' + userId, wsArray);
   } else {
     logger.warning(`userId ${userId} does not have associated websocket mapping`)
+  }
+}
+
+// Helper function to close the latest WebSocket connection for the user and remove it from the user's WebSocket array
+function closeConnection(userId) {
+  console.log("Closing the latest ws connection")
+  const latestWsConnection = getWsForUser(userId);
+  if (latestWsConnection) {
+    // Close the latest WebSocket connection for the user
+    latestWsConnection.terminate();
+    // Delete the WebSocket object from the user's WebSocket array
+    deleteWsOfUser(latestWsConnection, userId);
+  }
+}
+
+// Helper function to close all WebSocket connections for the user and clear the user's WebSocket array
+function closeAllConnections(userId) {
+  const wsArray = user2ws.get('' + userId);
+  if (wsArray) {
+    // Close all WebSocket connections for the user
+    for (const ws of wsArray) {
+      ws.terminate();
+    }
+    // Clear the user's WebSocket array
+    user2ws.set('' + userId, []);
   }
 }
 
@@ -245,5 +275,5 @@ export const testExports={
 }
 
 export {
-  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser, deleteWsOfUser
+  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser, deleteWsOfUser, closeConnection, closeAllConnections
 };
