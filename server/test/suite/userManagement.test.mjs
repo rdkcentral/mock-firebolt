@@ -251,9 +251,13 @@ test(`userManagement.heartbeat returns with websocket isalive true`, () => {
   const result = userManagement.testExports.heartbeat(ws);
   expect(ws.isAlive).toBe(true);
 });
+
 test(`userManagement.closeConnection Works properly, closing the latest connection associated with userId `, () => {
   const userId = "12345"
-  userManagement.testExports.user2ws.set("12345", ["mockWs1","mockWs2"]);
+  // Mock WebSocket objects
+  const mockWs1 = { terminate: jest.fn() };
+  const mockWs2 = { terminate: jest.fn() };
+  userManagement.testExports.user2ws.set("12345", [mockWs1,mockWs2]);
   const result = userManagement.getWsForUser(userId);
   userManagement.closeConnection(userId);
   // Verify that ws.terminate() is called for the latest WebSocket connection (mockWs2)
