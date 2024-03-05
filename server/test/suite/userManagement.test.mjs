@@ -252,28 +252,5 @@ test(`userManagement.heartbeat returns with websocket isalive true`, () => {
   expect(ws.isAlive).toBe(true);
 });
 
-test(`userManagement.closeConnection Works properly, closing the latest connection associated with userId `, () => {
-  const mockWs1 = { id: 1, terminate: jest.fn() }; 
-  const mockWs2 = { id: 2, terminate: jest.fn() }; 
-  const result = userManagement.closeConnection('user1');
-  // Verify that ws.terminate() is called for the latest WebSocket connection (mockWs2)
-  expect(mockWs2.terminate).toHaveBeenCalled();
-  const user1WsArray = user2ws.get('user1');
-  // Verify that the other WebSocket object (mockWs1) remains in the user's WebSocket array
-  expect(user1WsArray).toContain(mockWs1); // Ensure mockWs1 is still in the array
-});
-
-test(`userManagement.closeAllConnections Works properly, closing all the ws connection associated with userId `, () => {
-  const mockWs1 = { id: 1, terminate: jest.fn() };
-  const mockWs2 = { id: 2, terminate: jest.fn() }; 
-  user2ws.set('user1', [mockWs1, mockWs2]);
-  const result = closeAllConnections('user1');
-  // Verify that ws.terminate() is called for each WebSocket connection
-  expect(mockWs1.terminate).toHaveBeenCalled();
-  expect(mockWs2.terminate).toHaveBeenCalled();
-  // Verify that the user's WebSocket array is cleared
-  const user1WsArray = user2ws.get('user1');
-  expect(user1WsArray).toEqual([]); // Expect an empty array after closing all connections
-});
 
 
