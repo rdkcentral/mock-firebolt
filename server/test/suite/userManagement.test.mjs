@@ -254,6 +254,7 @@ test(`userManagement.heartbeat returns with websocket isalive true`, () => {
 test(`userManagement.closeConnection Works properly, closing the latest connection associated with userId `, () => {
   const mockWs1 = { id: 1, terminate: jest.fn() }; 
   const mockWs2 = { id: 2, terminate: jest.fn() }; 
+  const user2ws = new Map();
   user2ws.set('user1', [mockWs1, mockWs2]);
   const result = userManagement.closeConnection('user1');
   // Verify that ws.terminate() is called for the latest WebSocket connection (mockWs2)
@@ -267,6 +268,7 @@ test(`userManagement.closeConnection Works properly, closing the latest connecti
 test(`userManagement.closeAllConnections Works properly, closing all the ws connection associated with userId `, () => {
   const mockWs1 = { id: 1, terminate: jest.fn() };
   const mockWs2 = { id: 2, terminate: jest.fn() }; 
+  const user2ws = new Map();
   user2ws.set('user1', [mockWs1, mockWs2]);
   const result = closeAllConnections('user1');
   // Verify that ws.terminate() is called for each WebSocket connection
