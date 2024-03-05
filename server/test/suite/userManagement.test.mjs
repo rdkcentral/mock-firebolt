@@ -254,7 +254,6 @@ test(`userManagement.heartbeat returns with websocket isalive true`, () => {
 
 test(`userManagement.closeConnection Works properly, closing the latest connection associated with userId `, () => {
   const userId = "12345"
-  // Mock WebSocket objects
   const mockWs1 = { terminate: jest.fn() };
   const mockWs2 = { terminate: jest.fn() };
   userManagement.testExports.user2ws.set(userId, [mockWs1,mockWs2]);
