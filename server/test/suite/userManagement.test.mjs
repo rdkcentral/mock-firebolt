@@ -252,21 +252,16 @@ test(`userManagement.heartbeat returns with websocket isalive true`, () => {
   expect(ws.isAlive).toBe(true);
 });
 test(`userManagement.closeConnection Works properly, closing the latest connection associated with userId `, () => {
-  const mockWs1 = { id: 1, terminate: jest.fn() }; 
-  const mockWs2 = { id: 2, terminate: jest.fn() }; 
-  const user2ws = new Map();
-   // Mock the getWsForUser function to return the latest WebSocket connection
-  const getWsForUserMock = jest.spyOn(userManagement, 'getWsForUser').mockReturnValue(mockWs2);
-  user2ws.set('user1', [mockWs1, mockWs2]);
-  const result = userManagement.closeConnection('user1');
+  const userId = "12345"
+  userManagement.testExports.user2ws.set("12345", ["mockWs1","mockWs2"]);
+  const result = userManagement.getWsForUser(userId);
+  userManagement.closeConnection(userId);
   // Verify that ws.terminate() is called for the latest WebSocket connection (mockWs2)
   expect(mockWs2.terminate).toHaveBeenCalled();
-  const user1WsArray = user2ws.get('user1');
+  const user1WsArray = userManagement.testExports.user2ws.get(userId);
   console.log("Array of user1WsArray"+user1WsArray)
   // Verify that the other WebSocket object (mockWs1) remains in the user's WebSocket array
   expect(user1WsArray).toContain(mockWs1); // Ensure mockWs1 is still in the array
-  // Restore the original implementation of getWsForUser function
-  getWsForUserSpy.mockRestore();
 });
 
 test(`userManagement.closeAllConnections Works properly, closing all the ws connection associated with userId `, () => {
