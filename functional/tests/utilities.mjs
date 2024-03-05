@@ -23,7 +23,7 @@ import WebSocket from "ws";
 import path from "path";
 
 let mfProcess;
-let startMf = "npm run dev";
+let startMf = "npm start";
 const mfStarted = "Listening on HTTP port";
 const mfHost = "localhost";
 const mfUserHeader = "x-mockfirebolt-userid";

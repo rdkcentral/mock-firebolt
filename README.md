@@ -25,7 +25,7 @@ Note, too, that since the SDK does not validate parameters on method calls, app 
 - Controllable Mock Firebolt server (NodeJS websocket + HTTP server)
 - Control mock method responses via control plane RESTful API, CLI, web admin UI (soon), browser extension (soon)
 - 100% OpenRPC-driven; no SDK-specific details within the implementation
-- Supports Firebolt SDKs: **core** (always),  **manage** (always), **discovery** (optional)
+- Supports Firebolt SDKs: **core** &  **manage**
 - Complete documentation
 - Docker support
 - Validation (based on OpenRPC specifications) of all parameters sent on method calls
@@ -87,10 +87,7 @@ The next two sections presume you are using the out-of-the-box `.mf.config.json`
 
 # Firebolt SDK Support
 
-Mock Firebolt supports these Firebolt SDKs: **core**, **manage**, **discovery**.
-
-For developers building "operator apps" / "search and discover apps" which need one or more of these SDKs, when running the Mock Firebolt server, you can pass flags like `--discovery` to enable the specific SDK desired. Note of course that ultimately, when running on a real device, your app will only have whatever permissions it has been given.
-
+Mock Firebolt supports these Firebolt SDKs: **core** & **manage**.
 
 # $badger Support
 
@@ -121,23 +118,18 @@ npm install
 
 # If you want support for Firebolt Core/Manage SDK
 # Run in a separate terminal window/tab, or use '&' to background
-npm run dev
-
-# If you want support for the Firebolt Discovery SDK
-# Include the flag(s) you require
-# Note the extra double dash!
-npm run dev -- --discovery
+npm start
 
 # If you need to use non-standard ports for any reason:
-npm run dev -- --httpPort 3456 --socketPort 9876 --wsSessionServerPort 1234
+npm start -- --httpPort 3456 --socketPort 9876 --wsSessionServerPort 1234
 
 #If you wish to enable conduit functionality*
-npm run dev -- --conduit
+npm start -- --conduit
 
 *Note*: Requires Conduit to be running. See the Conduit documentation (./conduit/README.md) for more information.
 
 # If you need to use proxy connection for any reason:
-npm run dev -- --proxy <ip>:<port>
+npm start -- --proxy <ip>:<port>
 Refer more about proxy mode in ./docs/ProxyMode.md
 
 # To use the control CLI (assuming you're in the top-level directory for this repo)
@@ -153,8 +145,7 @@ Click the "Load Unpacked" button (top left corner of browser window)
 Navigate to the directory under browser-extensions which contains a manifest.json file and click "Select"
 ```
 
-Now you can access core/manage OpenRPC from HTTP by adding `"url": "https://rdkcentral.github.io/firebolt/requirements/latest/specifications/firebolt-open-rpc.json"` in mf.config.SAMPLE.json and copying to mf.config.json and can add `@firebolt-js/discovery-sdk` in your app's `package.json` file, import `@firebolt-js/discovery-sdk` optionally in your code in case to make discovery calls
-
+Now you can access core/manage OpenRPC from HTTP by adding `"url": "https://rdkcentral.github.io/firebolt/requirements/latest/specifications/firebolt-open-rpc.json"` in `mf.config.SAMPLE.json` and copying to `mf.config.json`. 
 
 # Usage (via Docker, if you prefer)
 
@@ -181,14 +172,6 @@ docker run -d \
   -p 3333:3333 \
   -p 9998:9998 \
   $MF_DOCKER_USER/mock-firebolt
-
-# Run the image, enabling the discovery SDK (not typical)
-docker run -d \
-  --name mf \
-  --mount type=bind,source="$(pwd)",target=/usr/src/firebolt/host-files \
-  -p 3333:3333 \
-  -p 9998:9998 \
-  $MF_DOCKER_USER/mock-firebolt -- --discovery
 
 # Get container ID
 docker ps | grep mf

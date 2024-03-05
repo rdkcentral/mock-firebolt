@@ -9,5 +9,11 @@
         "oldName": "supportedSDKs",
         "newName": "supportedOpenRPCs",
         "readme": "README.md"
+    },
+    {
+        "type": "changed",
+        "oldName": "allowMixedCase",
+        "newName": "caseInsensitiveModules",
+        "readme": "README.md"
     }
 ]
