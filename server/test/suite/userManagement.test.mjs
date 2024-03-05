@@ -257,8 +257,8 @@ test(`userManagement.closeConnection Works properly, closing the latest connecti
   // Mock WebSocket objects
   const mockWs1 = { terminate: jest.fn() };
   const mockWs2 = { terminate: jest.fn() };
-  userManagement.testExports.user2ws.set("12345", [mockWs1,mockWs2]);
-  const result = userManagement.getWsForUser(userId);
+  userManagement.testExports.user2ws.set(userId, [mockWs1,mockWs2]);
+  //const result = userManagement.getWsForUser(userId);
   userManagement.closeConnection(userId);
   // Verify that ws.terminate() is called for the latest WebSocket connection (mockWs2)
   expect(mockWs2.terminate).toHaveBeenCalled();
@@ -271,14 +271,14 @@ test(`userManagement.closeConnection Works properly, closing the latest connecti
 test(`userManagement.closeAllConnections Works properly, closing all the ws connection associated with userId `, () => {
   const mockWs1 = { id: 1, terminate: jest.fn() };
   const mockWs2 = { id: 2, terminate: jest.fn() }; 
-  const user2ws = new Map();
-  user2ws.set('user1', [mockWs1, mockWs2]);
-  const result = userManagement.closeAllConnections('user1');
+  const userId = "12345"
+  userManagement.testExports.user2ws.set(userId, [mockWs1,mockWs2]);
+  const result = userManagement.closeAllConnections(userId);
   // Verify that ws.terminate() is called for each WebSocket connection
   expect(mockWs1.terminate).toHaveBeenCalled();
   expect(mockWs2.terminate).toHaveBeenCalled();
   // Verify that the user's WebSocket array is cleared
-  const user1WsArray = user2ws.get('user1');
+  const user1WsArray = user2ws.get(userId);
   expect(user1WsArray).toEqual([]); // Expect an empty array after closing all connections
 });
 
