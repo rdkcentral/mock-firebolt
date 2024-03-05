@@ -265,6 +265,8 @@ test(`userManagement.closeConnection Works properly, closing the latest connecti
   console.log("Array of user1WsArray"+user1WsArray)
   // Verify that the other WebSocket object (mockWs1) remains in the user's WebSocket array
   expect(user1WsArray).toContain(mockWs1); // Ensure mockWs1 is still in the array
+  // Restore the original implementation of getWsForUser function
+  getWsForUserSpy.mockRestore();
 });
 
 test(`userManagement.closeAllConnections Works properly, closing all the ws connection associated with userId `, () => {
