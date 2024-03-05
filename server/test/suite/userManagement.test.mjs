@@ -255,6 +255,8 @@ test(`userManagement.closeConnection Works properly, closing the latest connecti
   const mockWs1 = { id: 1, terminate: jest.fn() }; 
   const mockWs2 = { id: 2, terminate: jest.fn() }; 
   const user2ws = new Map();
+   // Mock the getWsForUser function to return the latest WebSocket connection
+  const getWsForUserMock = jest.spyOn(userManagement, 'getWsForUser').mockReturnValue(mockWs2);
   user2ws.set('user1', [mockWs1, mockWs2]);
   const result = userManagement.closeConnection('user1');
   // Verify that ws.terminate() is called for the latest WebSocket connection (mockWs2)
@@ -270,7 +272,7 @@ test(`userManagement.closeAllConnections Works properly, closing all the ws conn
   const mockWs2 = { id: 2, terminate: jest.fn() }; 
   const user2ws = new Map();
   user2ws.set('user1', [mockWs1, mockWs2]);
-  const result = closeAllConnections('user1');
+  const result = userManagement.closeAllConnections('user1');
   // Verify that ws.terminate() is called for each WebSocket connection
   expect(mockWs1.terminate).toHaveBeenCalled();
   expect(mockWs2.terminate).toHaveBeenCalled();
