@@ -239,10 +239,6 @@ function addUser(userId) {
       ws.on('message', async message => {
         messageHandler.handleMessage(message, '' + userId, ws);
       });
-      ws.on('close', function() {
-        console.log(`Connection closed for user ${userId}`);
-        closeConnection(userId)
-      });
     }
   });
 
