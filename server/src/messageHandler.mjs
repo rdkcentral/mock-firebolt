@@ -25,6 +25,7 @@ import { logger } from './logger.mjs';
 import * as util from './util.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import * as stateManagement from './stateManagement.mjs';
+import * as userManagement from './userManagement.mjs';
 import * as events from './events.mjs';
 import { methodTriggers } from './triggers.mjs';
 import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
@@ -180,6 +181,8 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
+          closeConnection: function cc(userId) {return userManagement.closeConnection(userId)},
+          closeAllConnections: function closeallconn(userId) {return userManagement.closeAllConnections(userId)},
           uuid: function cuuid() {return stateManagement.createUuid()},
           sendEvent: function (onMethod, result, msg) {
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod, null), fFatalErr.bind(this));
@@ -285,6 +288,8 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
+          closeConnection: function cc(userId) {return userManagement.closeConnection(userId)},
+          closeAllConnections: function closeallconn(userId) {return userManagement.closeAllConnections(userId)},
           uuid: function cuuid() {return stateManagement.createUuid()},
           sendEvent: function (onMethod, result, msg) {
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod, null), fFatalErr.bind(this));
