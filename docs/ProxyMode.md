@@ -18,7 +18,7 @@ When Mock Firebolt starts up, it will check for `--proxy` in command line argume
 # Usage
 If you need to use proxy connection for any reason:
 
-```npm run dev -- --proxy 192.168.0.100:9998```
+```npm start -- --proxy 192.168.0.100:9998```
 
 Default port will be 9998 if not passed expliclity.
 

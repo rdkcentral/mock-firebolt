@@ -36,8 +36,8 @@ test(`sdkManagement works properly`, () => {
 });
 
 test(`sdkManagement works properly with given name is enabled via a command-line flag`, () => {
-  commandLine.enabledSdkNames.push("discovery");
-  const result = sdkManagement.isSdkEnabled("discovery");
+  commandLine.enabledSdkNames.push("updatedSdk");
+  const result = sdkManagement.isSdkEnabled("updatedSdk");
   expect(result).toBe(true);
   commandLine.enabledSdkNames.pop();
 });

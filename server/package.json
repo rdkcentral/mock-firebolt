@@ -1,26 +1,15 @@
 {
   "name": "@firebolt-js/mock-firebolt",
-  "version": "2.0.1",
+  "version": "1.0.3",
   "description": "Controllable mock Firebolt server",
   "main": "./build/index.mjs",
   "scripts": {
     "clean": "node ./scripts/clean.mjs",
-    "prepare:setup": "npm run clean",
-    "build:discovery": "node ./scripts/copy.mjs ./node_modules/@firebolt-js/discovery-sdk/dist/firebolt-discovery-open-rpc.json ./build/firebolt-discovery-open-rpc.json",
-    "build:openrpc:NOTES": "Only use if you are using all three Firebolt SDKs",
-    "build:openrpc": "npm run build:discovery",
-    "build:mf": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
-    "build:NOTES": "Only use if you are using all three Firebolt SDKs",
-    "build": "npm run build:openrpc && npm run build:mf",
+    "build": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
-    "start:NOTES1": "Can do 'npm run start' (core/manage OpenRPC only) or 'npm run start -- --discovery'",
-    "start": "node build/index.mjs",
-    "dev:NOTES1": "Typical developer script once 'npm run build:openrpc' has been executed once",
-    "dev:NOTES2": "Can do 'npm run dev' (core/manage OpenRPC only) or 'npm run dev -- --discovery'",
-    "dev": "npm run build:mf && npm run start --",
-    "upgradeSDKAndBuildMF": "npm update @firebolt-js/discovery-sdk && npm run clean && npm run build:discovery && npm run build:mf",
-    "postinstall": "npm run upgradeSDKAndBuildMF"
-  },
+    "start": "npm run build && node build/index.mjs",
+    "dev": "echo 'WARNING: \"npm run dev\" is DEPRECATED and may be removed in a future release. Use \"npm start\" instead.' && npm start"
+  },  
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rdkcentral/mock-firebolt.git"
@@ -58,9 +47,6 @@
     "tmp": "^0.2.1",
     "uuid": "^8.3.2",
     "ws": "^8.2.3"
-  },
-  "optionalDependencies": {
-    "@firebolt-js/discovery-sdk": "git+https://github.com/rdkcentral/firebolt-discovery-sdk.git"
   },
   "keywords": [
     "firebolt",

@@ -1,7 +1,7 @@
 {
-  "name": "Conduit",
+  "name": "conduit",
   "description": "A TV app that works in concert with Mock Firebolt in Reverse Proxy mode",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "private": true,
   "license": "Apache 2.0",
   "author": "Mike Fine <mike_fine@cable.comcast.com>",
@@ -15,9 +15,6 @@
   "dependencies": {
     "@firebolt-js/sdk": "^0.6.0",
     "json": "^11.0.0"
-  },
-  "optionalDependencies": {
-    "@firebolt-js/discovery-sdk": "0.1.0-alpha.2"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",
