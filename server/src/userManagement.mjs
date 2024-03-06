@@ -263,7 +263,7 @@ function addUser(userId) {
    //   if (!closeEventListenerAdded) {
         ws.on('close', function() {
           console.log(`Connection closed for user ${userId}`);
-          closeConnection(userId)
+         // closeConnection(userId)
         });
         // Set flag to indicate event listener has been added
     //    closeEventListenerAdded = true;
