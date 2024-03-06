@@ -181,6 +181,7 @@ function heartbeat(ws) {
   ws.isAlive = true;
 }
 
+// Add user
 function addUser(userId) {
   userId = "" + userId;
   var users = getUsers();
