@@ -331,6 +331,8 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               setInterval: setInterval,
               set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
+              closeConnection: function cc(userId) {return userManagement.closeConnection(userId)},
+              closeAllConnections: function closeallconn(userId) {return userManagement.closeAllConnections(userId)},
               delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
               uuid: function cuuid() {return stateManagement.createUuid()},
               sendEvent: function(method, result, msg) {
@@ -362,6 +364,8 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
               set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
               get: function gs(key) { return stateManagement.getScratch(userId, key); },
               delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
+              closeConnection: function cc(userId) {return userManagement.closeConnection(userId)},
+              closeAllConnections: function closeallconn(userId) {return userManagement.closeAllConnections(userId)},
               uuid: function cuuid() {return stateManagement.createUuid()},
               sendEvent: function(method, result, msg) {
                 sendEvent( ws, userId, method, result, msg, logSuccess.bind(this, method, result, msg), logErr.bind(this, method, null), logFatalErr.bind(this) );

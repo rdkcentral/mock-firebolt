@@ -86,6 +86,7 @@ function parseUser(userId) {
 
 function getWssForUser(userId) {
   if ( user2wss.has(''+userId) ) {
+    logger.info("+++++++WSS connection for that user:::"+JSON.stringify(userId)+"::::"+JSON.stringify(user2wss.get(''+userId)))
     return user2wss.get(''+userId);
   }
   return undefined;
@@ -96,6 +97,7 @@ function getWsForUser(userId) {
   if ( user2ws.has(''+userId) ) {
     let wsArray=user2ws.get(''+userId);
     let latestWsConnection=wsArray[(wsArray.length-1)]
+    logger.info("******Latest connection for the user:::"+latestWsConnection)
     return latestWsConnection;
   }
   return undefined;
@@ -131,6 +133,7 @@ function getWsListForUser(userId) {
 }
 
 function associateUserWithWss(userId, wss) {
+  logger.info("*****Associationg WSS for userId:::"+JSON.stringify(userId)+ "WSS:::"+JSON.stringify(wss))
   user2wss.set(''+userId, wss);
 }
 
@@ -144,17 +147,59 @@ function associateUserWithWs(userId, ws) {
     wsArray.push(ws)
     user2ws.set(''+userId, wsArray);
   }
+  logger.info("++++++Associationg WS connection for userId:::"+JSON.stringify(userId)+ "WSS:::"+JSON.stringify(wsArray))
 }
 
 // Delete websocket object associated with a userId when that websocket connection is closed by a close event
 function deleteWsOfUser(ws, userId) {
+  console.log("Deleting the ws associated iwth user::::"+ JSON.stringify(userId))
   let wsArray = [];
   if (user2ws.has('' + userId)) {
+    console.log("Yes userId is in user2ws ")
     wsArray = user2ws.get('' + userId)
+    const cleanedWsArray = wsArray.map(ws => ({
+      // Extract relevant properties from the WebSocket object
+      // Avoid properties that may cause circular references
+      id: ws.id,
+      // Add more properties as needed
+    }));
+    console.log("Cleaned wsArray:", cleanedWsArray);
     wsArray = wsArray.filter((socketObject) => socketObject !== ws);
+    const WsArrayafterRemoval = wsArray.map(ws => ({
+      // Extract relevant properties from the WebSocket object
+      // Avoid properties that may cause circular references
+      id: ws.id,
+      // Add more properties as needed
+    }));
+    console.log("WsArrayafterRemoval:", WsArrayafterRemoval);
     user2ws.set('' + userId, wsArray);
   } else {
     logger.warning(`userId ${userId} does not have associated websocket mapping`)
+  }
+}
+
+// Helper function to close the latest WebSocket connection for the user and remove it from the user's WebSocket array
+function closeConnection(userId) {
+  console.log("Closing the latest ws connection")
+  const latestWsConnection = getWsForUser(userId);
+  if (latestWsConnection) {
+    // Close the latest WebSocket connection for the user
+    latestWsConnection.terminate();
+    // Delete the WebSocket object from the user's WebSocket array
+    deleteWsOfUser(latestWsConnection, userId);
+  }
+}
+
+// Helper function to close all WebSocket connections for the user and clear the user's WebSocket array
+function closeAllConnections(userId) {
+  const wsArray = user2ws.get('' + userId);
+  if (wsArray) {
+    // Close all WebSocket connections for the user
+    for (const ws of wsArray) {
+      ws.terminate();
+    }
+    // Clear the user's WebSocket array
+    user2ws.set('' + userId, []);
   }
 }
 
@@ -192,7 +237,10 @@ function addUser(userId) {
   }
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
+  // Ensure 'close' event listener is only added once
+  let closeEventListenerAdded = false;
   wss.on('connection', function connection(ws) {
+    console.log("******Establishing connection*************")
     ws.isAlive = true;
     ws.on('pong', async hb => {
       heartbeat(ws)
@@ -212,9 +260,16 @@ function addUser(userId) {
       ws.on('message', async message => {
         messageHandler.handleMessage(message, '' + userId, ws);
       });
+   //   if (!closeEventListenerAdded) {
+        ws.on('close', function() {
+          console.log(`Connection closed for user ${userId}`);
+         // closeConnection(userId)
+        });
+        // Set flag to indicate event listener has been added
+    //    closeEventListenerAdded = true;
+   //   }
     }
   });
-
   const interval = setInterval(function ping() {
     wss.clients.forEach(function each(ws) {
       if (ws.isAlive === false) return ws.terminate();
@@ -245,5 +300,5 @@ export const testExports={
 }
 
 export {
-  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser, deleteWsOfUser
+  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser, deleteWsOfUser, closeConnection, closeAllConnections
 };
