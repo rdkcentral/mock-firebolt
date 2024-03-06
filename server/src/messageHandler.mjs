@@ -181,8 +181,8 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
-          closeConnection: function cc(userId) {return userManagement.closeConnection(userId)},
-          closeAllConnections: function closeallconn(userId) {return userManagement.closeAllConnections(userId)},
+          closeConnection: function cc() {return userManagement.closeConnection(userId, ws)},
+          closeAllConnections: function closeallconn() {return userManagement.closeAllConnections(userId)},
           uuid: function cuuid() {return stateManagement.createUuid()},
           sendEvent: function (onMethod, result, msg) {
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod, null), fFatalErr.bind(this));
@@ -288,8 +288,8 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
-          closeConnection: function cc(userId) {return userManagement.closeConnection(userId)},
-          closeAllConnections: function closeallconn(userId) {return userManagement.closeAllConnections(userId)},
+          closeConnection: function cc() {return userManagement.closeConnection(userId,ws)},
+          closeAllConnections: function closeallconn() {return userManagement.closeAllConnections(userId)},
           uuid: function cuuid() {return stateManagement.createUuid()},
           sendEvent: function (onMethod, result, msg) {
             events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod, null), fFatalErr.bind(this));

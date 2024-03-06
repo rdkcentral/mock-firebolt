@@ -243,8 +243,8 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         set: function ss(key, val, scope) { return setScratch(userId, key, val, scope) },
         get: function gs(key) { return getScratch(userId, key); },
         delete: function ds(key, scope) { return deleteScratch(userId, key, scope)},
-        closeConnection: function cc(userId) {return closeConnection(userId)},
-        closeAllConnections: function closeallconn(userId) {return closeAllConnections(userId)},
+        closeConnection: function cc() {return closeConnection(userId, ws)},
+        closeAllConnections: function closeallconn() {return closeAllConnections(userId)},
         uuid: function cuuid() {return createUuid()},
         sendEvent: function(onMethod, result, msg) {
           sendEvent(
