@@ -230,13 +230,13 @@ test(`fireboltOpenRpc.getMethod works properly`, () => {
   ];
   const configArray = [false, false, true];
   expectedInput.forEach((methodName, index) => {
-    config.app.allowMixedCase = configArray[index];
+    config.app.caseInsensitiveModules = configArray[index];
     const result = fireboltOpenRpc.getMethod(methodName);
     if (configArray[index]) {
       expect(result).toBeUndefined();
     } else expect(result).toEqual(expectedOutput[index]);
   });
-  config.app.allowMixedCase = false;
+  config.app.caseInsensitiveModules = false;
 });
 
 test(`fireboltOpenRpc.isMethodKnown works properly`, () => {
@@ -753,7 +753,7 @@ test(`fireboltOpenRpc.buildMethodMapsForAllEnabledSdks works properly`, () => {
 test(`fireboltOpenRpc.buildMethodMap works properly`, () => {
   const inputs = [{}, { test: "test" }];
   const outputs = ["undefined", "undefined", "object"];
-  config.app.allowMixedCase = true;
+  config.app.caseInsensitiveModules = true;
   outputs.forEach((output, index) => {
     let result;
     if (index === 2) {
@@ -763,7 +763,7 @@ test(`fireboltOpenRpc.buildMethodMap works properly`, () => {
     }
     expect(typeof result).toBe(output);
   });
-  config.app.allowMixedCase = false;
+  config.app.caseInsensitiveModules = false;
 });
 
 test(`fireboltOpenRpc.downloadOpenRpcJsonFile works properly`, () => {

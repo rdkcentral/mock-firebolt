@@ -13,15 +13,6 @@
             "url": "https://rdkcentral.github.io/firebolt/requirements/latest/specifications/firebolt-open-rpc.json",
             "enabled": true
         },
-
-        {
-            "name": "discovery",
-            "cliFlag": "discovery",
-            "cliShortFlag": "d",
-            "fileName": "firebolt-discovery-open-rpc.json",
-            "enabled": false
-        },
-
         {
           "name": "mock",
           "cliFlag": "mock",

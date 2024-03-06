@@ -209,7 +209,7 @@ test(`events.sendUnRegistrationAck works properly`, () => {
 
 
 test(`events.sendEvent works properly`, () => {
-  const methodName = "test",
+  const methodName = "test.eventTest",
     result = {
       name: "OpenRPC Schema",
       schema: {
@@ -295,10 +295,16 @@ test(`events.logSuccess works properly`, () => {
   expect(spy).toHaveBeenCalled();
 });
 
-test(`events.logErr works properly`, () => {
-  const spy = jest.spyOn(logger, "info");
-  events.logErr("dummyMethod");
-  expect(spy).toHaveBeenCalled();
+describe('events.logErr works properly', () => {
+  it('should handle validation error', () => {
+    events.logErr('methodName', 'validationError');
+    expect(logger.info).toHaveBeenCalledWith('Event validation failed for methodName. Please ensure the event data meets the required format and try again');
+  });
+
+  it('should handle registration error', () => {
+    events.logErr('unregisteredMethod', 'registrationError');
+    expect(logger.info).toHaveBeenCalledWith('unregisteredMethod event not registered');
+});
 });
 
 test(`events.logFatalErr works properly`, () => {

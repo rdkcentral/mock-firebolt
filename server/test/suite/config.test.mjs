@@ -27,7 +27,7 @@ test(`config works properly`, () => {
     validate: ["method", "params", "response", "events"],
     multiUserConnections: "warn",
     app: {
-      allowMixedCase: true,
+      caseInsensitiveModules: true,
       socketPort: 9998,
       httpPort: 3333,
       wsSessionServerPort: 9999,
@@ -50,13 +50,6 @@ test(`config works properly`, () => {
           url_Note: "Can be changed to test different versions of the firebolt-open-rpc",
           url: "https://rdkcentral.github.io/firebolt/requirements/latest/specifications/firebolt-open-rpc.json",
           name: "core",
-        },
-        {
-          cliFlag: "discovery",
-          cliShortFlag: "d",
-          enabled: false,
-          fileName: "firebolt-discovery-open-rpc.json",
-          name: "discovery",
         },
         {
           name: "mock",

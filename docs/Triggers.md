@@ -42,7 +42,7 @@ To enable triggers, you must provide one or more directories which contain trigg
 Example:
 ```
 cd server
-npm run dev -- --triggers ./src/triggers --triggers /some/other/dir/with/triggers
+npm start -- --triggers ./src/triggers --triggers /some/other/dir/with/triggers
 ```
 
 As shown in the example above, you may load triggers from multiple directories. This allows you to organize your triggers as you see fit, and load subsets of them when you start Mock Firebolt.

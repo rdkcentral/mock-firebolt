@@ -37,8 +37,17 @@ const { dotConfig: { eventConfig } } = config;
 function fSuccess(msg, onMethod, result) {
   logger.info(`${msg}: Sent event ${onMethod} with result ${JSON.stringify(result)}`)
 }
-function fErr(onMethod) {
-  logger.info(`Could not send ${onMethod} event because no listener is active`)
+function fErr(onMethod, eventErrorType) {
+  switch (eventErrorType) {
+    case 'validationError':
+      logger.info(`Event validation failed for ${onMethod}. Please ensure the event data meets the required format and try again`);
+      break;
+    case 'registrationError':
+      logger.info(`${onMethod} event not registered`);
+      break;
+    default:
+      break;
+  }
 }
 function fFatalErr() {
   logger.info(`Internal error`)
@@ -51,8 +60,8 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Received message for user ${userId} : ${message}`);
 
   const oMsg = JSON.parse(message);
-  if (oMsg.method && config.app.allowMixedCase) {
-    oMsg.method = (oMsg.method).toLowerCase();
+  if (oMsg.method && config.app.caseInsensitiveModules) {
+    oMsg.method = util.createCaseAgnosticMethod(oMsg.method);
   } else if (!oMsg.method) {
     logger.error(`ERROR: Missing method field in message. Mock Firebolt expects incoming request to have a method field in the format <module.method>`);
     const oResponseMessage = {
@@ -173,10 +182,10 @@ async function handleMessage(message, userId, ws) {
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
           uuid: function cuuid() {return stateManagement.createUuid()},
           sendEvent: function (onMethod, result, msg) {
-            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod), fFatalErr.bind(this));
+            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod, null), fFatalErr.bind(this));
           },
           sendBroadcastEvent: function (onMethod, result, msg) {
-            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod), fFatalErr.bind(this));
+            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod, null), fFatalErr.bind(this));
           }
         };
         logger.debug(`Calling pre trigger for method ${oMsg.method}`);
@@ -278,10 +287,10 @@ async function handleMessage(message, userId, ws) {
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
           uuid: function cuuid() {return stateManagement.createUuid()},
           sendEvent: function (onMethod, result, msg) {
-            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod), fFatalErr.bind(this));
+            events.sendEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod, null), fFatalErr.bind(this));
           },
           sendBroadcastEvent: function (onMethod, result, msg) {
-            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod), fFatalErr.bind(this));
+            events.sendBroadcastEvent(ws, userId, onMethod, result, msg, fSuccess.bind(this, msg, onMethod, result), fErr.bind(this, onMethod, null), fFatalErr.bind(this));
           },
           ...response  // As returned either by the mock override or via Conduit from a real device
         };
