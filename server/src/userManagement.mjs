@@ -158,7 +158,7 @@ function deleteWsOfUser(ws, userId) {
   }
 }
 
-// Helper function to close the latest WebSocket connection for the user and remove it from the user's WebSocket array
+// Helper function to close the current WebSocket connection for the user and remove it from the user's WebSocket array
 function closeConnection(userId, ws) {
   logger.info(`Closing ws connection for the user: ${userId} `);
   if (ws) {
