@@ -158,6 +158,30 @@ function deleteWsOfUser(ws, userId) {
   }
 }
 
+// Helper function to close the current WebSocket connection for the user and remove it from the user's WebSocket array
+function closeConnection(userId, ws) {
+  logger.info(`Closing ws connection for the user: ${userId} `);
+  if (ws) {
+    ws.terminate();
+    // Delete the WebSocket object from the user's WebSocket array
+    deleteWsOfUser(ws, userId);
+  }
+}
+
+// Helper function to close all WebSocket connections for the user and clear the user's WebSocket array
+function closeAllConnections(userId) {
+  const wsArray = user2ws.get('' + userId);
+  if (wsArray) {
+    // Close all WebSocket connections for the user
+    for (const ws of wsArray) {
+      ws.terminate();
+    }
+    // Clear the user's WebSocket array
+    user2ws.set('' + userId, []);
+  }
+}
+
+
 function handleGroupMembership(userId) {
   const parts = (''+userId).split('~');
   if ( parts.length === 1 ) {
@@ -180,6 +204,7 @@ function handleGroupMembership(userId) {
 function heartbeat(ws) {
   ws.isAlive = true;
 }
+
 
 function addUser(userId) {
   userId = "" + userId;
@@ -245,5 +270,5 @@ export const testExports={
 }
 
 export {
-  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser, deleteWsOfUser
+  getUsers, isKnownUser, parseUser, getWssForUser, getWsForUser, addUser, removeUser, getWsListForUser, getUserListForUser, deleteWsOfUser, closeConnection, closeAllConnections
 };
