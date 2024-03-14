@@ -225,7 +225,7 @@ function addUser(userId) {
 
     // Remove ws connection of user
     ws.on('close', function close() {
-      deleteWsOfUser(ws, userId);
+      closeConnection(userId, ws);
     });
 
     // If multiUserConnections configuration is set as deny and there is a ws object associated with userId, deny and log second ws connection and drop the attempt

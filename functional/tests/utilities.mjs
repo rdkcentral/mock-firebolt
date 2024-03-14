@@ -53,32 +53,53 @@ function url(host, port, path) {
 }
 
 /**
- * To run MF ws commands
- *
- * @param {String} command the command which we need to execute
- * @param {Number} port ws port to connect
- * @param {String} user to pass the userID
- * @returns Promise yielding the response on resolve()
+ * Class representing a FireboltCommander.
  */
-async function fireboltCommand(command, port, user) {
-  //TODO - websocket need not to be init all the time, it needs to be handled to init once and close the connection once testing completed.
-  return new Promise((res) => {
-    //Establish a WS connection to MF living at port 9998
-    //Send the firebolt command given by "command"
-    //Return the response from MF
-    //TODO - wsClient is added for testing, it needs to be moved to differnt method to init WS client
-    const wsClientURL = `${wsClient}${port || 9998}${user ? `/${user}` : ""}`;
-    const ws = new WebSocket(wsClientURL);
-    ws.on("open", function open() {
-      ws.send(command);
-    });
-
-    ws.on("message", function message(data) {
+class FireboltCommander {
+  /**
+   * Create a FireboltCommander.
+   * @param {number} [port=9998] - The port to connect to.
+   * @param {string} user - The user ID to pass.
+   */
+  constructor(port = 9998, user) {
+    this.wsClientURL = `${wsClient}${port}${user ? `/${user}` : ""}`;
+    this.ws = new WebSocket(this.wsClientURL);
+    this.ws.on("message", function message(data) {
       console.log("received: %s", data);
-      res(data);
-      ws.close();
     });
-  });
+  }
+
+  /**
+   * Send a command to the WebSocket.
+   * @param {string} command - The command to send.
+   * @return {Promise} A promise that resolves with the response data.
+   */
+  sendCommand(command) {
+    return new Promise((res, rej) => {
+      if (this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(command);
+      } else {
+        this.ws.on("open", function open() {
+          this.ws.send(command);
+        }.bind(this));
+      }
+
+      this.ws.on("message", function message(data) {
+        res(data);
+      });
+
+      this.ws.on("error", function error(err) {
+        rej(err);
+      });
+    });
+  }
+
+  /**
+   * Close the WebSocket connection.
+   */
+  closeConnection() {
+    this.ws.close();
+  }
 }
 
 /**
@@ -223,4 +244,4 @@ async function mfState(on, extraConfig = "") {
   });
 }
 
-export { fireboltCommand, callApi, callMfCli, mfState, killPort };
+export { FireboltCommander, callApi, callMfCli, mfState, killPort };

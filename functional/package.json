@@ -6,7 +6,7 @@
     "test": "NODE_ENV=test npx jest --config=jest.config.js --silent -i",
     "test:openRpcCall": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/openRpcCall.test.mjs",
     "test:healthCheck": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/health-check.test.mjs",
-    "test:scope": "NODE_ENV=test npx jest --config=jest.config.js  --forceExit -- ./tests/scope.test.mjs"
+    "test:scope": "NODE_ENV=test npx jest --config=jest.config.js --forceExit -- ./tests/scope.test.mjs"
   },
   "repository": {
     "type": "git",

@@ -46,35 +46,41 @@ test(`MF Startup/Health Check`, async () => {
 
 // JsonRpc for CORE SDK
 test(`Validate OPENRPC Response for CORE SDK`, async () => {
-  const response = await utilities.fireboltCommand(
+  const commander = new utilities.FireboltCommander();
+  const response = await commander.sendCommand(
     JSON.stringify({
       method: "Accessibility.closedCaptionsSettings",
       params: {},
       id: 0,
-    })
-  );
+  }));
+  commander.closeConnection();
+
   expect(response.includes('"enabled":true')).toEqual(true);
 });
 
 test(`Validate OPENRPC Response for manage SDK`, async () => {
-  const response = await utilities.fireboltCommand(
+  const commander = new utilities.FireboltCommander();
+  const response = await commander.sendCommand(
     JSON.stringify({
       method: "UserGrants.device",
       params: {},
       id: 0,
-    })
-  );
+  }));
+  commander.closeConnection();
+
   expect(response.includes(`"state":"granted"`)).toEqual(true);
 });
 
 test(`Validate firebolt response for Discovery SDK`, async () => {
-  const response = await utilities.fireboltCommand(
+  const commander = new utilities.FireboltCommander();
+  const response = await commander.sendCommand(
     JSON.stringify({
       method: "content.providers",
       params: {},
       id: 0,
-    })
-  );
+  }));
+  commander.closeConnection();
+
   expect(response.includes(`"id":"NetflixApp"`)).toEqual(true);
 });
 
@@ -166,41 +172,45 @@ test(`Validate start and stop session`, async () => {
 
 // Send event for default user
 test(`Validate send event for default user`, async () => {
-  await utilities.fireboltCommand(
+  const commander = new utilities.FireboltCommander();
+  await commander.sendCommand(
     JSON.stringify({
       method: "Accessibility.onVoiceGuidanceSettingsChanged",
-      params: { listen: true },
+      params: { listen: true},
       id: 4,
-    })
-  );
+  }));
+  
   const result = await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --event ../examples/accessibility-onVoiceGuidanceSettingsChanged1.event.json && cd ../../functional`,
     true
   );
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+  commander.closeConnection();
 });
 
 // Broadcast event for a particular user
 test(`Validate broadcast event for a user in a group and Validate that other user in that group getting that`, async () => {
-  await utilities.fireboltCommand(
+  const commander = new utilities.FireboltCommander(9998, "567~B");
+  await commander.sendCommand(
     JSON.stringify({
-      method: "Device.onNameChanged",
-      params: { listen: true },
-      id: 11,
-    }),
-    9998,
-    "567~B"
-  );
+    method: "Device.onNameChanged",
+    params: { listen: true },
+    id: 11,
+  }));
+
   const result = await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 567~B && cd ../../functional`,
     true
   );
+
   expect(result.includes(`{ status: 'SUCCESS' }`)).toBe(true);
   const resultTwo = await utilities.callMfCli(
     `cd ../cli/src/ && node cli.mjs --broadcastEvent ../examples/device-onNameChanged1.event.json --user 978~B && cd ../../functional`,
     true
   );
   expect(resultTwo.includes(`{ status: 'SUCCESS' }`)).toBe(true);
+
+  commander.closeConnection();
 });
 
 // Send event without any active listener
