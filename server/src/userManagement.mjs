@@ -222,6 +222,12 @@ function addUser(userId) {
     ws.on('pong', async hb => {
       heartbeat(ws)
     });
+
+    // Remove ws connection of user
+    ws.on('close', function close() {
+      deleteWsOfUser(ws, userId);
+    });
+
     // If multiUserConnections configuration is set as deny and there is a ws object associated with userId, deny and log second ws connection and drop the attempt
     if (/deny/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
       logger.info(`Denying second websocket connection of user ${userId}`)
