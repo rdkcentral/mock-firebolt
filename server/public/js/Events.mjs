@@ -67,8 +67,8 @@ export default {
       <h1>Current Sequence</h1>
 
       <div class="sequence">
-        <div v-for="(event, index) in sequence" v-bind:key="index" class="sequence_event">
-          <p>{{ event.displayName || event.method }}</p>
+        <div v-for="(sequence_event, index) in sequence" v-bind:key="index" class="sequence_event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:drop="(event) => handleDragDrop(event, index)" v-on:dragover.prevent>
+          <p>{{ sequence_event.displayName || sequence_event.method }}</p>
           <span v-if="index !== sequence.length - 1"> -> </span>
         </div>
       </div>
@@ -85,7 +85,7 @@ export default {
           <h2>{{ eventType }}</h2>
           <div class="events_wrapper">
             <div v-for="(cliEvent, index) in cliEvents[eventType]" v-bind:key="index">
-              <input type="checkbox" :checked="sequence.includes(cliEvent)" v-on:change="updateSequence(cliEvent)">
+              <input type="checkbox" :checked="checkIfEventIsInSequence(cliEvent)" v-on:change="updateSequence(cliEvent)">
               <label>{{ cliEvent.displayName || cliEvent.method }}</label>
             </div>
           </div>
@@ -140,6 +140,24 @@ export default {
     this.getCliEvents();
   },
   methods: {
+    checkIfEventIsInSequence(cliEvent) {
+      return this.sequence.some(sequence => JSON.stringify(sequence) === JSON.stringify(cliEvent));
+    },
+    handleDragStart(event, index) {
+      event
+        .dataTransfer
+        .setData('dragged_item_index', index);
+    },
+    handleDragDrop(event, index) {
+      const droppedItemIndex = Number(event.dataTransfer.getData('dragged_item_index'));
+
+      let tempSequence = JSON.parse(JSON.stringify(this.sequence));
+      let temp = tempSequence[index];
+      tempSequence[index] = tempSequence[droppedItemIndex];
+      tempSequence[droppedItemIndex] = temp;
+
+      this.sequence = tempSequence;
+    },
     updateRest(value) {
       try {
         this.customEvent.rest = JSON.parse(value);
@@ -150,7 +168,7 @@ export default {
       this.updateRest(event.target.value);
     },
     updateSequence(cliEvent) {
-      if(this.sequence.includes(cliEvent)) {
+      if(this.checkIfEventIsInSequence(cliEvent)) {
         this.sequence = this.sequence.filter(sequence => JSON.stringify(sequence) !== JSON.stringify(cliEvent));
       } else {
         this.sequence.push(cliEvent);
