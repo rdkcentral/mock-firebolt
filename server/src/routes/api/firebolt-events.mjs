@@ -3,7 +3,7 @@ import path from "path";
 import { executeSequence } from "../../sequenceManagement.mjs";
 import { getUserIdFromReq } from "../../util.mjs";
 
-const events = {};
+let events = {};
 
 const createCustomEvent = async (req, res) => {
   const { displayName, result, type } = req.body;
@@ -69,6 +69,8 @@ async function getFireboltsEvents(req, res) {
   const response = {
     status: "OK",
   };
+
+  events = {};
 
   parseDbContent("./db");
 

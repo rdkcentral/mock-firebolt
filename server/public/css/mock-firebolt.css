@@ -136,6 +136,30 @@ h1 {
   align-items: flex-start;
 }
 
+#events .sequence {
+  display: flex;
+  flex-direction: row;
+}
+
+#events .events_list {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+}
+
+#events .events_list .events_wrapper {
+  height: 200px;
+  overflow-y: auto;
+}
+
+#events .sequence > .sequence_event {
+  display: flex;
+  align-items: center;
+}
+
+#events .sequence > .sequence_event span {
+  margin: 0 10px;
+}
+
 #events .form .form_block {
   display: flex;
   flex-direction: column;

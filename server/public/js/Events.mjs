@@ -28,6 +28,7 @@ export default {
             <div class="form_block">
               <label>Type</label>
               <select v-model="customEvent.type">
+              <option disabled value="">Select the type</option>
                 <option v-for="eventType in eventsTypes" v-bind:key="eventType" v-bind:value="eventType">{{ eventType }}</option>
               </select>
             </div>
@@ -42,8 +43,8 @@ export default {
 
           <div class="form_column">
             <div class="form_block">
-              <label>Result</label>
-              <textarea v-model="customEvent.result" cols=50 rows=10 ref="jsonText" ></textarea>
+              <label>Rest</label>
+              <textarea @change="(valye) => customEvent.rest = value" :value="JSON.stringify(customEvent.rest)" cols=50 rows=10 ref="jsonText" ></textarea>
             </div>
           </div>
 
@@ -63,13 +64,30 @@ export default {
       <br />
       <br />
       
-      <h1>Events</h1>
-      <button v-on:click="sendSequence" >Send sequence</button>
-      <div v-for="(eventType, index) in eventsTypes" v-bind:key="index">
-        <h2>{{ eventType }}</h2>
-        <div v-for="(cliEvent, index) in cliEvents[eventType]" v-bind:key="index">
-          <input type="checkbox" v-model="cliEvent.checked" v-on:change="updateSequence(cliEvent)">
-          <label>{{ cliEvent.displayName || cliEvent.method }}</label>
+      <h1>Current Sequence</h1>
+
+      <div class="sequence">
+        <div v-for="(event, index) in sequence" v-bind:key="index" class="sequence_event">
+          <p>{{ event.displayName || event.method }}</p>
+          <span v-if="index !== sequence.length - 1"> -> </span>
+        </div>
+      </div>
+      <button v-on:click="sendSequence">Send sequence</button>
+
+      <h1>Events list</h1>
+
+      <p>Select from the lists below which events you want to include in the sequence. The oreder of the selected events will reflect the order
+      in which the events will be sent</p>
+
+      <div class="events_list">
+        <div v-for="(eventType, index) in eventsTypes" v-bind:key="index">
+          <h2>{{ eventType }}</h2>
+          <div class="events_wrapper">
+            <div v-for="(cliEvent, index) in cliEvents[eventType]" v-bind:key="index">
+              <input type="checkbox" v-model="cliEvent.checked" v-on:change="updateSequence(cliEvent)">
+              <label>{{ cliEvent.displayName || cliEvent.method }}</label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -79,8 +97,34 @@ export default {
       ...mf.state,
       sequence: [],
       cliEvents: [],
-      customEvent: {},
+      customEvent: {
+        type: ""
+      },
     };
+  },
+  watch: {
+    "customEvent.type": {
+      handler: function (value) {
+        if(value === "accessibility" || value === "account" || value === "device" || value === "discovery") {
+          this.customEvent.rest = {
+            "methods": {
+              [`${value}.<method>`]: {
+                "result": {}
+              }
+            },
+            "method": `${value}.<method>`,
+            "result": {}
+          }
+        } else if (value === "lifecycle" || value === "localization") {
+          this.customEvent.rest = {
+            "result": {
+            },
+            "method": "lifecycle.<method>"
+          }
+        }
+      },
+      deep: true,
+    },
   },
   computed: {
     prettyFormat: function () {
@@ -112,7 +156,6 @@ export default {
 
       if (customEvent.status === 200) {
         this.customEvent = {};
-        this.cliEvents = [];
         this.getCliEvents();
       }
     },
@@ -128,6 +171,12 @@ export default {
       for (const event of sequenceClone) {
         event.checked = undefined;
         event.displayName = undefined;
+        event = {
+          ...event,
+          ...event.rest
+        }
+
+        event.rest = undefined
 
         payload.push({event: event});
       }
