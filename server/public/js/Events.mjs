@@ -73,6 +73,7 @@ export default {
         </div>
       </div>
       <button v-on:click="sendSequence">Send sequence</button>
+      <button v-on:click="sequence = []">Clear sequence</button>
 
       <h1>Events list</h1>
 
@@ -84,7 +85,7 @@ export default {
           <h2>{{ eventType }}</h2>
           <div class="events_wrapper">
             <div v-for="(cliEvent, index) in cliEvents[eventType]" v-bind:key="index">
-              <input type="checkbox" v-model="cliEvent.checked" v-on:change="updateSequence(cliEvent)">
+              <input type="checkbox" :checked="sequence.includes(cliEvent)" v-on:change="updateSequence(cliEvent)">
               <label>{{ cliEvent.displayName || cliEvent.method }}</label>
             </div>
           </div>
