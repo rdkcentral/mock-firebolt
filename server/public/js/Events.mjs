@@ -44,7 +44,7 @@ export default {
           <div class="form_column">
             <div class="form_block">
               <label>Rest</label>
-              <textarea @change="(valye) => customEvent.rest = value" :value="JSON.stringify(customEvent.rest)" cols=50 rows=10 ref="jsonText" ></textarea>
+              <textarea v-on:change="handleTextAreaUpdate" :value="JSON.stringify(this.customEvent.rest, null, 2)" cols=50 rows=10 ></textarea>
             </div>
           </div>
 
@@ -98,7 +98,8 @@ export default {
       sequence: [],
       cliEvents: [],
       customEvent: {
-        type: ""
+        type: "",
+        rest: {}
       },
     };
   },
@@ -138,6 +139,15 @@ export default {
     this.getCliEvents();
   },
   methods: {
+    updateRest(value) {
+      try {
+        this.customEvent.rest = JSON.parse(value);
+      } catch (error) {
+      }
+    },
+    handleTextAreaUpdate(event) {
+      this.updateRest(event.target.value);
+    },
     updateSequence(cliEvent) {
       if(this.sequence.includes(cliEvent)) {
         this.sequence = this.sequence.filter(sequence => JSON.stringify(sequence) !== JSON.stringify(cliEvent));
@@ -146,12 +156,21 @@ export default {
       }
     },
     createCustomEvent: async function () {
+      let requestPayload = JSON.parse(JSON.stringify(this.customEvent));
+
+      requestPayload = {
+        ...requestPayload,
+        ...requestPayload.rest
+      }
+
+      requestPayload.rest = undefined
+
       const customEvent = await fetch("/api/v1/create-event", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(this.customEvent),
+        body: JSON.stringify(requestPayload),
       });
 
       if (customEvent.status === 200) {
@@ -171,12 +190,6 @@ export default {
       for (const event of sequenceClone) {
         event.checked = undefined;
         event.displayName = undefined;
-        event = {
-          ...event,
-          ...event.rest
-        }
-
-        event.rest = undefined
 
         payload.push({event: event});
       }

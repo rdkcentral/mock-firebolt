@@ -6,18 +6,18 @@ import { getUserIdFromReq } from "../../util.mjs";
 let events = {};
 
 const createCustomEvent = async (req, res) => {
-  const { displayName, result, type } = req.body;
+  const { displayName, type, ...rest } = req.body;
 
-  if (displayName === undefined || result === undefined) {
+  if (displayName === undefined) {
     return res.status(400).send({
       status: "ERROR",
-      message: "Missing displayName or result",
+      message: "Missing displayName",
     });
   }
 
   const event = {
     displayName,
-    result: JSON.parse(result),
+    ...rest,
   };
 
   const filePath = `./db/${type}/${displayName}.json`;
