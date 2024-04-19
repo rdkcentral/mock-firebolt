@@ -67,9 +67,10 @@ export default {
       <h1>Current Sequence</h1>
 
       <div class="sequence">
-        <div v-for="(sequence_event, index) in sequence" v-bind:key="index" class="sequence_event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:drop="(event) => handleDragDrop(event, index)" v-on:dragover.prevent>
-          <p>{{ sequence_event.displayName || sequence_event.method }}</p>
-          <span v-if="index !== sequence.length - 1"> -> </span>
+        <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence_event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
+          <div data-type="prev" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
+          <p v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
+          <div data-type="next" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
         </div>
       </div>
       <button v-on:click="sendSequence">Send sequence</button>
@@ -140,6 +141,34 @@ export default {
     this.getCliEvents();
   },
   methods: {
+    handlePrevNextDrop(event, index) {
+      event.preventDefault();
+      event.target.style.backgroundColor = "transparent";
+      const isPrev = event.target.dataset.type === "prev";
+      const tempSequence = JSON.parse(JSON.stringify(this.sequence));
+      
+      const droppedItemIndex = Number(event.dataTransfer.getData('dragged_item_index'));
+      const droppedItem = tempSequence[droppedItemIndex];
+      const isNewIndexGreaterThanDroppedIndex = index > droppedItemIndex;
+      
+      if (isPrev) {
+        tempSequence.splice(index, 0, droppedItem);
+      } else {
+       tempSequence.splice(index + 1, 0, droppedItem);
+      }
+
+      tempSequence.splice(isNewIndexGreaterThanDroppedIndex ? droppedItemIndex : droppedItemIndex + 1, 1);
+
+      this.sequence = tempSequence;
+    },
+    handleDragOver(event, index) {
+      event.preventDefault();
+      event.target.style.backgroundColor = "green";
+    },
+    handleDragLeave(event, index) {
+      event.preventDefault();
+      event.target.style.backgroundColor = "transparent";
+    },
     checkIfEventIsInSequence(cliEvent) {
       return this.sequence.some(sequence => JSON.stringify(sequence) === JSON.stringify(cliEvent));
     },

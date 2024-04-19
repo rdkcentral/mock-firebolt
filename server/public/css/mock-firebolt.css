@@ -136,9 +136,14 @@ h1 {
   align-items: flex-start;
 }
 
+#events .dragged_over {
+  transform: translateX(100%);
+}
+
 #events .sequence {
   display: flex;
   flex-direction: row;
+  margin-bottom: 20px;
 }
 
 #events .events_list {
@@ -151,13 +156,24 @@ h1 {
   overflow-y: auto;
 }
 
+#events .sequence > .sequence_event > p {
+  background-color: rgb(178 229 178);
+  border: 2px solid green;
+  border-radius: 10px;
+  padding: 5px;
+}
+
 #events .sequence > .sequence_event {
   display: flex;
   align-items: center;
 }
 
-#events .sequence > .sequence_event span {
-  margin: 0 10px;
+#events .sequence > .sequence_event ~ .sequence_event {
+  margin-left: 5px;
+}
+
+#events .sequence > .sequence_event > p {
+  margin: 0;
 }
 
 #events .form .form_block {
