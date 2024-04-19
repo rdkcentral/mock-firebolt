@@ -1,0 +1,16 @@
+{
+  "displayName": "EntityIntent",
+  "method": "discovery.onNavigateTo",
+  "result": {
+    "action": "entity",
+     "data": {
+      "entityType": "program",
+      "programType": "movie",
+      "entityId": "the-fighter-2010-2009-1-1"
+    },
+     "context": {
+        "campaign": "unknown",
+        "source": "voice"
+     }
+  }
+}

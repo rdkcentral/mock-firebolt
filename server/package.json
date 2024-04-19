@@ -8,8 +8,8 @@
     "build": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
     "start": "npm run build && node build/index.mjs",
-    "dev": "echo 'WARNING: \"npm run dev\" is DEPRECATED and may be removed in a future release. Use \"npm start\" instead.' && npm start"
-  },  
+    "dev": "nodemon /src/index.mjs --watch src --watch scripts"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rdkcentral/mock-firebolt.git"
@@ -43,7 +43,9 @@
     "jsonpath": "^1.1.1",
     "lodash-es": "^4.17.21",
     "moment": "^2.29.1",
+    "nodemon": "^3.1.0",
     "nopt": "^5.0.0",
+    "path": "^0.12.7",
     "tmp": "^0.2.1",
     "uuid": "^8.3.2",
     "ws": "^8.2.3"

@@ -28,7 +28,14 @@ import * as eventApi from './routes/api/event.mjs';
 import * as sessionApi from './routes/api/session.mjs';
 import * as sequenceApi from './routes/api/sequence.mjs';
 import * as statusApi from './routes/api/status.mjs';
+import * as fireboltApi from './routes/api/firebolt-events.mjs';
 function configureAPI(app) {
+
+    app.get('/api/v1/firebolt-events', fireboltApi.getFireboltsEvents);
+    
+    app.post('/api/v1/send-sequence', fireboltApi.sendSequence);
+
+    app.post('/api/v1/create-event', fireboltApi.createCustomEvent);
 
 	// =========================== Health Check Route =========================
 

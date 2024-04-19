@@ -22,5 +22,6 @@ server/package.json
 .vscode/*
 output/*
 
+server/db/*
 server/coverage/*
 cli/coverage/*

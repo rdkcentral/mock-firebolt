@@ -42,24 +42,24 @@ h1 {
   padding: 1rem;
 }
 
-  #nav-bar {
-    overflow: hidden;
-  }
+#nav-bar {
+  overflow: hidden;
+}
 
-    #nav-bar a {
-      float: left;
-      text-align: center;
-      text-decoration: none;
-      background-color: #e98074;
-      color: white;
-      border: 1px solid white;
-      padding: 0.5rem 1.7rem;
-    }
+#nav-bar a {
+  float: left;
+  text-align: center;
+  text-decoration: none;
+  background-color: #e98074;
+  color: white;
+  border: 1px solid white;
+  padding: 0.5rem 1.7rem;
+}
 
-    #nav-bar a:hover {
-      background-color: #e85a4f;
-      color: black;
-    }
+#nav-bar a:hover {
+  background-color: #e85a4f;
+  color: black;
+}
 
 #content {
   min-height: 30rem;
@@ -74,9 +74,9 @@ h1 {
   padding: 1rem;
 }
 
-  #footer p {
-    vertical-align: middle;
-  }
+#footer p {
+  vertical-align: middle;
+}
 
 /* --- */
 
@@ -90,41 +90,74 @@ h1 {
 
 /* --- */
 
-    .label {
-      text-align: right;
-    }
-    .value {
-      text-align: left;
-    }
+.label {
+  text-align: right;
+}
+.value {
+  text-align: left;
+}
 
-    #methods {}
+#methods {
+}
 
-      #search {
-        margin-bottom: 1rem;
-      }
+#search {
+  margin-bottom: 1rem;
+}
 
-        #btnFilter {
-          background-color: #e97084;
-          border-radius: 3px;
-        }
+#btnFilter {
+  background-color: #e97084;
+  border-radius: 3px;
+}
 
-      .method {
-        border: 1px solid gainsboro;
-        width: 99%;
-        margin-bottom: 1.2rem;
-      }
+.method {
+  border: 1px solid gainsboro;
+  width: 99%;
+  margin-bottom: 1.2rem;
+}
 
-        .method-name {
-          font-weight: bold;
-        }
+.method-name {
+  font-weight: bold;
+}
 
-    #events {}
+#events {
+}
 
-    #global {}
+#global {
+}
 
-    #scratch {}
+#scratch {
+}
 
 /* --- */
+
+#events .form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#events .form .form_block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#events .form .form_column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#events .form .form_spacer {
+  display: flex;
+  width: 20px;
+}
+
+#events .form .form_row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
 
 .font-weight-bold {
   font-weight: bold;
