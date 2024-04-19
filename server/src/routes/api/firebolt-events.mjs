@@ -78,7 +78,7 @@ async function getFireboltsEvents(req, res) {
 }
 
 function sendSequence(req, res) {
-  executeSequence(undefined, getUserIdFromReq(req), [req.body]);
+  executeSequence(undefined, getUserIdFromReq(req), req.body);
 
   res.status(200).send({
     status: "SUCCESS",

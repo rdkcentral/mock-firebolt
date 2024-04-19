@@ -38,7 +38,7 @@ export default {
             </div>
           </div>
           
-         <div class="form_spacer" />
+          <div class="form_spacer" />
 
           <div class="form_column">
             <div class="form_block">
@@ -58,17 +58,26 @@ export default {
         <div class="form_row">
           <button type="submit">Create</button>
         </div>
-      </form> 
+      </form>
+
+      <br />
+      <br />
+      
       <h1>Events</h1>
+      <button v-on:click="sendSequence" >Send sequence</button>
       <div v-for="(eventType, index) in eventsTypes" v-bind:key="index">
         <h2>{{ eventType }}</h2>
-        <p v-for="(cliEvent, index) in cliEvents[eventType]" v-bind:key="index" v-on:click="sendSequence(cliEvent)">{{ cliEvent.displayName || cliEvent.method }}</p>
+        <div v-for="(cliEvent, index) in cliEvents[eventType]" v-bind:key="index">
+          <input type="checkbox" v-model="cliEvent.checked" v-on:change="updateSequence(cliEvent)">
+          <label>{{ cliEvent.displayName || cliEvent.method }}</label>
+        </div>
       </div>
     </div>
   `,
   data: function () {
     return {
       ...mf.state,
+      sequence: [],
       cliEvents: [],
       customEvent: {},
     };
@@ -85,6 +94,13 @@ export default {
     this.getCliEvents();
   },
   methods: {
+    updateSequence(cliEvent) {
+      if(this.sequence.includes(cliEvent)) {
+        this.sequence = this.sequence.filter(sequence => JSON.stringify(sequence) !== JSON.stringify(cliEvent));
+      } else {
+        this.sequence.push(cliEvent);
+      }
+    },
     createCustomEvent: async function () {
       const customEvent = await fetch("/api/v1/create-event", {
         method: "POST",
@@ -105,16 +121,23 @@ export default {
       const parsedResponse = await response.json();
       this.cliEvents = parsedResponse.data;
     },
-    sendSequence: async function (sequence) {
-      const sequenceClone = JSON.parse(JSON.stringify(sequence));
-      sequenceClone.displayName = undefined;
+    sendSequence: async function () {
+      const sequenceClone = JSON.parse(JSON.stringify(this.sequence));
+      const payload = [];
+
+      for (const event of sequenceClone) {
+        event.checked = undefined;
+        event.displayName = undefined;
+
+        payload.push({event: event});
+      }
 
       await fetch("/api/v1/send-sequence", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ event: sequenceClone }),
+        body: JSON.stringify(payload),
       });
     },
   },
