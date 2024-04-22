@@ -69,7 +69,7 @@ export default {
       <div class="sequence">
         <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence_event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
           <div data-type="prev" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
-          <p v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
+          <p class="sequence_item" v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
           <div data-type="next" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
         </div>
       </div>
@@ -101,29 +101,33 @@ export default {
       cliEvents: [],
       customEvent: {
         type: "",
-        rest: {}
+        rest: {},
       },
     };
   },
   watch: {
     "customEvent.type": {
       handler: function (value) {
-        if(value === "accessibility" || value === "account" || value === "device" || value === "discovery") {
+        if (
+          value === "accessibility" ||
+          value === "account" ||
+          value === "device" ||
+          value === "discovery"
+        ) {
           this.customEvent.rest = {
-            "methods": {
+            methods: {
               [`${value}.<method>`]: {
-                "result": {}
-              }
+                result: {},
+              },
             },
-            "method": `${value}.<method>`,
-            "result": {}
-          }
+            method: `${value}.<method>`,
+            result: {},
+          };
         } else if (value === "lifecycle" || value === "localization") {
           this.customEvent.rest = {
-            "result": {
-            },
-            "method": "lifecycle.<method>"
-          }
+            result: {},
+            method: "lifecycle.<method>",
+          };
         }
       },
       deep: true,
@@ -146,18 +150,25 @@ export default {
       event.target.style.backgroundColor = "transparent";
       const isPrev = event.target.dataset.type === "prev";
       const tempSequence = JSON.parse(JSON.stringify(this.sequence));
-      
-      const droppedItemIndex = Number(event.dataTransfer.getData('dragged_item_index'));
+
+      const droppedItemIndex = Number(
+        event.dataTransfer.getData("dragged_item_index")
+      );
       const droppedItem = tempSequence[droppedItemIndex];
       const isNewIndexGreaterThanDroppedIndex = index > droppedItemIndex;
-      
+
       if (isPrev) {
         tempSequence.splice(index, 0, droppedItem);
       } else {
-       tempSequence.splice(index + 1, 0, droppedItem);
+        tempSequence.splice(index + 1, 0, droppedItem);
       }
 
-      tempSequence.splice(isNewIndexGreaterThanDroppedIndex ? droppedItemIndex : droppedItemIndex + 1, 1);
+      tempSequence.splice(
+        isNewIndexGreaterThanDroppedIndex
+          ? droppedItemIndex
+          : droppedItemIndex + 1,
+        1
+      );
 
       this.sequence = tempSequence;
     },
@@ -170,15 +181,32 @@ export default {
       event.target.style.backgroundColor = "transparent";
     },
     checkIfEventIsInSequence(cliEvent) {
-      return this.sequence.some(sequence => JSON.stringify(sequence) === JSON.stringify(cliEvent));
+      return this.sequence.some(
+        (sequence) => JSON.stringify(sequence) === JSON.stringify(cliEvent)
+      );
     },
     handleDragStart(event, index) {
-      event
-        .dataTransfer
-        .setData('dragged_item_index', index);
+      event.dataTransfer.setData("dragged_item_index", index);
+
+      let dragImage = event.target.cloneNode(true);
+      dragImage.classList.add("sequence_item_ghost-image");
+    
+      // dragImage.style.transform = "scale(0.5)";
+      document.body.appendChild(dragImage);
+      event.dataTransfer.setDragImage(dragImage, 0, 0);
+
+    
+      // Remove the drag image from the DOM after a short delay
+      setTimeout(() => {
+        document.body.removeChild(dragImage);
+      }, 0);
+
     },
     handleDragDrop(event, index) {
-      const droppedItemIndex = Number(event.dataTransfer.getData('dragged_item_index'));
+      document.body.style.cursor = 'default';
+      const droppedItemIndex = Number(
+        event.dataTransfer.getData("dragged_item_index")
+      );
 
       let tempSequence = JSON.parse(JSON.stringify(this.sequence));
       let temp = tempSequence[index];
@@ -190,15 +218,16 @@ export default {
     updateRest(value) {
       try {
         this.customEvent.rest = JSON.parse(value);
-      } catch (error) {
-      }
+      } catch (error) {}
     },
     handleTextAreaUpdate(event) {
       this.updateRest(event.target.value);
     },
     updateSequence(cliEvent) {
-      if(this.checkIfEventIsInSequence(cliEvent)) {
-        this.sequence = this.sequence.filter(sequence => JSON.stringify(sequence) !== JSON.stringify(cliEvent));
+      if (this.checkIfEventIsInSequence(cliEvent)) {
+        this.sequence = this.sequence.filter(
+          (sequence) => JSON.stringify(sequence) !== JSON.stringify(cliEvent)
+        );
       } else {
         this.sequence.push(cliEvent);
       }
@@ -208,10 +237,10 @@ export default {
 
       requestPayload = {
         ...requestPayload,
-        ...requestPayload.rest
-      }
+        ...requestPayload.rest,
+      };
 
-      requestPayload.rest = undefined
+      requestPayload.rest = undefined;
 
       const customEvent = await fetch("/api/v1/create-event", {
         method: "POST",
@@ -239,7 +268,7 @@ export default {
         event.checked = undefined;
         event.displayName = undefined;
 
-        payload.push({event: event});
+        payload.push({ event: event });
       }
 
       await fetch("/api/v1/send-sequence", {

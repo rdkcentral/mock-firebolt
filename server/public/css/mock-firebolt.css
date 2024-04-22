@@ -156,11 +156,18 @@ h1 {
   overflow-y: auto;
 }
 
-#events .sequence > .sequence_event > p {
+.sequence_item {
   background-color: rgb(178 229 178);
   border: 2px solid green;
   border-radius: 10px;
+  cursor: grab;
   padding: 5px;
+  width: fit-content;
+}
+
+.sequence_item_ghost-image {
+  cursor: grabbing;
+  font-size: 0.5rem;
 }
 
 #events .sequence > .sequence_event {
