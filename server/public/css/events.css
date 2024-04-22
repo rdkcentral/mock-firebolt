@@ -1,0 +1,76 @@
+#events {
+    display: flex;
+    height: calc(100vh - 12rem);
+}
+
+#events .left-column, #events .right-column {
+    padding: 1rem;
+}
+
+#events .left-column {
+    width: 66%;
+}
+
+#events .right-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 33%;
+}
+
+#events .sequence-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 100%;
+    padding: 10px 0;
+    overflow-y: auto;
+}
+
+#events .sequence-section > .sequence-event {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#events .sequence-section > .sequence-event ~ .sequence-event{
+    margin-top: 5px;
+}
+
+#events .sequence-section > .sequence-event > div {
+    width: 100%;
+    height: 5px;
+    background-color: transparent;
+}
+
+#events .sequence-tag {
+    background-color: rgb(178 229 178);
+    border: 2px solid green;
+    border-radius: 10px;
+    cursor: grab;
+    padding: 5px;
+    min-width: 100px;
+    margin: 0;
+    justify-content: center;
+}
+  
+#events .sequence-tag_ghost-image {
+    cursor: grabbing;
+    font-size: 0.5rem;
+}
+
+#events .sequence_actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+#events .sequence_actions > button {
+    background-color: transparent;
+    border: unset;
+    cursor: pointer;
+}
+
+#events .sequence_actions > button > svg {
+    height: 20px;
+    width: 20px;
+}
