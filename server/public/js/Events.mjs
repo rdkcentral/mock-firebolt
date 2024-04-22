@@ -78,10 +78,7 @@ export default {
         </div>
 
         <div class="events-list">
-          <div v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index">
-            <input type="checkbox" :checked="checkIfEventIsInSequence(cliEvent)" v-on:change="updateSequence(cliEvent)">
-            <label>{{ cliEvent.displayName || cliEvent.method }}</label>
-          </div>
+          <p v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index" class="sequence-tag" draggable v-on:dragstart="(event) => handleDragStartFromList(event, cliEvent)" v-on:dragover.prevent v-on:click="updateSequence(cliEvent)" >{{ cliEvent.displayName || cliEvent.method }}</p>
         </div>
       </div>
       </div>
@@ -92,7 +89,7 @@ export default {
 
         <div class="sequence-section">
           <p v-if="sequence.length === 0">No events in the sequence. Start dragging events in</p>
-          <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence-event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
+          <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence-event" draggable v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
             <div data-type="prev" :data-id="index" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
             <p class="sequence-tag" v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
             <div data-type="next" :data-id="index" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
@@ -222,40 +219,48 @@ export default {
       event.target.style.backgroundColor = "transparent";
     },
     checkIfEventIsInSequence(cliEvent) {
-      console.log(
-        "🚀 ~ checkIfEventIsInSequence ~ this.sequence:",
-        this.sequence
-      );
       return this.sequence.some(
         (sequence) => JSON.stringify(sequence) === JSON.stringify(cliEvent)
       );
     },
+    handleDragStartFromList(event, cliEvent) {
+      event.dataTransfer.setData("dragged_item", JSON.stringify(cliEvent));
+      event.dataTransfer.setData("dragged_item_index", null);
+      this.setDragGhost(event);
+    },
     handleDragStart(event, index) {
       event.dataTransfer.setData("dragged_item_index", index);
 
-      let dragImage = event.target.cloneNode(true);
-      dragImage.classList.add("sequence_item_ghost-image");
-
-      // dragImage.style.transform = "scale(0.5)";
-      document.body.appendChild(dragImage);
-      event.dataTransfer.setDragImage(dragImage, 0, 0);
-
-      // Remove the drag image from the DOM after a short delay
-      setTimeout(() => {
-        document.body.removeChild(dragImage);
-      }, 0);
+      this.setDragGhost(event);
     },
+  setDragGhost(event) {
+    let dragImage = event.target.cloneNode(true);
+    dragImage.classList.add("sequence_item_ghost-image");
 
+    // dragImage.style.transform = "scale(0.5)";
+    document.body.appendChild(dragImage);
+    event.dataTransfer.setDragImage(dragImage, 0, 0);
+
+    // Remove the drag image from the DOM after a short delay
+    setTimeout(() => {
+      document.body.removeChild(dragImage);
+    }, 0);
+  },
     handleDragDrop(event, index) {
-      document.body.style.cursor = "default";
+      let tempSequence = JSON.parse(JSON.stringify(this.sequence));
+      let temp = tempSequence[index];
+
       const droppedItemIndex = Number(
         event.dataTransfer.getData("dragged_item_index")
       );
 
-      let tempSequence = JSON.parse(JSON.stringify(this.sequence));
-      let temp = tempSequence[index];
-      tempSequence[index] = tempSequence[droppedItemIndex];
-      tempSequence[droppedItemIndex] = temp;
+      
+      if (Number.isNaN(droppedItemIndex)) {
+        tempSequence[index] = JSON.parse(event.dataTransfer.getData("dragged_item"));
+      } else {
+        tempSequence[index] = tempSequence[droppedItemIndex];
+        tempSequence[droppedItemIndex] = temp;
+      }
 
       this.sequence = tempSequence;
     },
