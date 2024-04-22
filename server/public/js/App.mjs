@@ -27,7 +27,6 @@ export default {
   template: `
     <div id="app">
       <Header></Header>
-      <p style="color:red;font-weight:bold;font-size:1.5rem;font-style:italic;margin-left:1rem;">THIS APP IS NOT YET FUNCTIONAL</p>
       <Content v-bind:meta="meta"></Content>
       <Footer></Footer>
     </div>

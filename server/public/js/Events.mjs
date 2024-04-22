@@ -21,70 +21,47 @@ export default {
   props: {},
   template: `
     <div id="events">
-      <h1>Create Event</h1>
-      <form v-on:submit.prevent="createCustomEvent" class="form">
-        <div class="form_row">
-          <div class="form_column">
-            <div class="form_block">
-              <label>Type</label>
-              <select v-model="customEvent.type">
-              <option disabled value="">Select the type</option>
-                <option v-for="eventType in eventsTypes" v-bind:key="eventType" v-bind:value="eventType">{{ eventType }}</option>
-              </select>
+      <div class="left-column">
+        <h1>Create Event</h1>
+        <form v-on:submit.prevent="createCustomEvent" class="form">
+          <div class="form_row">
+            <div class="form_column">
+              <div class="form_block">
+                <label>Type</label>
+                <select v-model="customEvent.type">
+                <option disabled value="">Select the type</option>
+                  <option v-for="eventType in eventsTypes" v-bind:key="eventType" v-bind:value="eventType">{{ eventType }}</option>
+                </select>
+              </div>
+                
+              <div class="form_block">
+                <label>Display Name</label>
+                <input v-model="customEvent.displayName"></input>
+              </div>
             </div>
-              
-            <div class="form_block">
-              <label>Display Name</label>
-              <input v-model="customEvent.displayName"></input>
+            
+            <div class="form_spacer" />
+
+            <div class="form_column">
+              <div class="form_block">
+                <label>Rest</label>
+                <textarea v-on:change="handleTextAreaUpdate" :value="JSON.stringify(this.customEvent.rest, null, 2)" cols=50 rows=10 ></textarea>
+              </div>
+            </div>
+
+            <div class="form_spacer" />
+
+            <div class="form_column">
+                <label>Outcome</label>
+                <pre>{{ prettyFormat }}</pre>
             </div>
           </div>
-          
-          <div class="form_spacer" />
-
-          <div class="form_column">
-            <div class="form_block">
-              <label>Rest</label>
-              <textarea v-on:change="handleTextAreaUpdate" :value="JSON.stringify(this.customEvent.rest, null, 2)" cols=50 rows=10 ></textarea>
-            </div>
+        
+          <div class="form_row">
+            <button type="submit">Create</button>
           </div>
+        </form>
 
-          <div class="form_spacer" />
-
-          <div class="form_column">
-              <label>Outcome</label>
-              <pre>{{ prettyFormat }}</pre>
-          </div>
-        </div>
-      
-        <div class="form_row">
-          <button type="submit">Create</button>
-        </div>
-      </form>
-
-      <br />
-      <br />
-      
-      <input v-model="sequenceName" class="new_sequence"/>
-
-      <div class="sequence">
-        <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence_event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
-          <div data-type="prev" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
-          <p class="sequence_item" v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
-          <div data-type="next" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
-        </div>
-      </div>
-      <button v-on:click="sendSequence">Send sequence</button>
-      <button v-on:click="sequence = []">Clear sequence</button>
-
-      <button :disabled="sequence.length === 0" v-on:click="saveSequence">Save sequence</button>
-
-      <h1>Stored sequences</h1>
-      <div class="sequences">
-        <div v-for="(sequence, index) in sequences" v-bind:key="index">
-          <p v-on:click="(_) => handleSequenceClick(sequence)">{{ sequence.name }}</p>
-        </div>
-        <button v-on:click="sequence = sequence.sequence">Load sequence</button>
-      </div>
 
       <h1>Events list</h1>
 
@@ -100,6 +77,32 @@ export default {
               <label>{{ cliEvent.displayName || cliEvent.method }}</label>
             </div>
           </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- ******* right column ******* -->
+      <div class="right-column">
+        <input v-model="sequenceName" class="new_sequence"/>
+
+        <div class="sequence">
+          <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence_event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
+            <div data-type="prev" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
+            <p class="sequence_item" v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
+            <div data-type="next" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
+          </div>
+        </div>
+        <button v-on:click="sendSequence">Send sequence</button>
+        <button v-on:click="sequence = []">Clear sequence</button>
+
+        <button :disabled="sequence.length === 0" v-on:click="saveSequence">Save sequence</button>
+
+        <h1>Stored sequences</h1>
+        <div class="sequences">
+          <div v-for="(sequence, index) in sequences" v-bind:key="index">
+            <p v-on:click="(_) => handleSequenceClick(sequence)">{{ sequence.name }}</p>
+          </div>
+          <button v-on:click="sequence = sequence.sequence">Load sequence</button>
         </div>
       </div>
     </div>
@@ -194,7 +197,10 @@ export default {
       event.target.style.backgroundColor = "transparent";
     },
     checkIfEventIsInSequence(cliEvent) {
-      console.log("🚀 ~ checkIfEventIsInSequence ~ this.sequence:", this.sequence)
+      console.log(
+        "🚀 ~ checkIfEventIsInSequence ~ this.sequence:",
+        this.sequence
+      );
       return this.sequence.some(
         (sequence) => JSON.stringify(sequence) === JSON.stringify(cliEvent)
       );

@@ -1,0 +1,11 @@
+#events {
+    display: flex;
+}
+
+#events .left-column {
+    width: 66%;
+}
+
+#events .right-column {
+    width: 33%;
+}
