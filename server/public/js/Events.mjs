@@ -97,6 +97,12 @@ export default {
         </div>
 
         <div v-if="sequence.length > 0" class="sequence_actions">
+          <button v-on:click="exportSequence">
+            <svg v-html="icons.export" />
+          </button>
+          <button v-on:click="importSequence">
+            <svg v-html="icons.upload" />
+          </button>
           <button :disabled="sequence.length === 0" v-on:click="saveSequence">
             <svg v-html="icons.save" />
           </button>
@@ -335,6 +341,37 @@ export default {
         },
         body: JSON.stringify(payload),
       });
+    },
+    exportSequence: async function () {
+      const sequenceClone = JSON.parse(JSON.stringify(this.sequence));
+      const fileName = 'Exported sequence'
+      const blob = new Blob([JSON.stringify(sequenceClone, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      
+      a.href = url;
+      a.download =  fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+
+    importSequence: async function () {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = async (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const sequence = JSON.parse(event.target.result);
+          this.sequence = sequence;
+        };
+        reader.readAsText(file);
+      };
+      input.click();
     },
   },
 };
