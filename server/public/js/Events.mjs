@@ -78,6 +78,14 @@ export default {
 
       <button :disabled="sequence.length === 0" v-on:click="saveSequence">Save sequence</button>
 
+      <h1>Stored sequences</h1>
+      <div class="sequences">
+        <div v-for="(sequence, index) in sequences" v-bind:key="index">
+          <p v-on:click="(_) => handleSequenceClick(sequence)">{{ sequence.name }}</p>
+        </div>
+        <button v-on:click="sequence = sequence.sequence">Load sequence</button>
+      </div>
+
       <h1>Events list</h1>
 
       <p>Select from the lists below which events you want to include in the sequence. The oreder of the selected events will reflect the order
@@ -101,6 +109,7 @@ export default {
       ...mf.state,
       sequenceName: "Current sequence name",
       sequence: [],
+      sequences: [],
       cliEvents: [],
       customEvent: {
         type: "",
@@ -145,6 +154,7 @@ export default {
     },
   },
   created: function () {
+    this.getSequences();
     this.getCliEvents();
   },
   methods: {
@@ -184,6 +194,7 @@ export default {
       event.target.style.backgroundColor = "transparent";
     },
     checkIfEventIsInSequence(cliEvent) {
+      console.log("🚀 ~ checkIfEventIsInSequence ~ this.sequence:", this.sequence)
       return this.sequence.some(
         (sequence) => JSON.stringify(sequence) === JSON.stringify(cliEvent)
       );
@@ -193,21 +204,19 @@ export default {
 
       let dragImage = event.target.cloneNode(true);
       dragImage.classList.add("sequence_item_ghost-image");
-    
+
       // dragImage.style.transform = "scale(0.5)";
       document.body.appendChild(dragImage);
       event.dataTransfer.setDragImage(dragImage, 0, 0);
 
-    
       // Remove the drag image from the DOM after a short delay
       setTimeout(() => {
         document.body.removeChild(dragImage);
       }, 0);
-
     },
-    
+
     handleDragDrop(event, index) {
-      document.body.style.cursor = 'default';
+      document.body.style.cursor = "default";
       const droppedItemIndex = Number(
         event.dataTransfer.getData("dragged_item_index")
       );
@@ -218,6 +227,9 @@ export default {
       tempSequence[droppedItemIndex] = temp;
 
       this.sequence = tempSequence;
+    },
+    handleSequenceClick(sequence) {
+      this.sequence = JSON.parse(JSON.stringify(sequence.sequence));
     },
     updateRest(value) {
       try {
@@ -264,14 +276,26 @@ export default {
       const parsedResponse = await response.json();
       this.cliEvents = parsedResponse.data;
     },
+    getSequences: async function () {
+      const response = await fetch("/api/v1/sequences");
+      const parsedResponse = await response.json();
+      this.sequences = parsedResponse.data;
+    },
     saveSequence: async function () {
-      await fetch("/api/v1/save-sequence", {
+      const response = await fetch("/api/v1/save-sequence", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ sequenceName: this.sequenceName, sequence: JSON.stringify(this.sequence) }),
+        body: JSON.stringify({
+          sequenceName: this.sequenceName,
+          sequence: this.sequence,
+        }),
       });
+
+      if (response.status === 200) {
+        this.getSequences();
+      }
     },
     sendSequence: async function () {
       const sequenceClone = JSON.parse(JSON.stringify(this.sequence));

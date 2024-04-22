@@ -100,4 +100,24 @@ function saveSequence(req, res) {
   });
 }
 
-export { createCustomEvent, getFireboltsEvents, saveSequence, sendSequence };
+function getSequences(req, res) {
+  const sequences = [];
+
+  fs.readdirSync("./db/sequences").forEach((file) => {
+    const fileContent = fs.readFileSync(`./db/sequences/${file}`, "utf8");
+    const parsedFile = JSON.parse(fileContent);
+
+    sequences.push({
+      name: file.split(".")[0],
+      sequence: parsedFile,
+    });
+  });
+
+
+  res.status(200).send({
+    status: "OK",
+    data: sequences,
+  });
+}
+
+export { getSequences, createCustomEvent, getFireboltsEvents, saveSequence, sendSequence };

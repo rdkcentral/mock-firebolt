@@ -33,6 +33,8 @@ function configureAPI(app) {
 
     app.get('/api/v1/firebolt-events', fireboltApi.getFireboltsEvents);
     
+    app.get('/api/v1/sequences', fireboltApi.getSequences);
+
     app.post('/api/v1/save-sequence', fireboltApi.saveSequence);
 
     app.post('/api/v1/send-sequence', fireboltApi.sendSequence);
