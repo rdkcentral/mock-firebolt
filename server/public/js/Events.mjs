@@ -16,6 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import icons from './icons.mjs';
+
 export default {
   name: "Events",
   props: {},
@@ -95,9 +97,15 @@ export default {
         </div>
 
         <div v-if="sequence.length > 0" class="sequence_actions">
-          <button v-on:click="sendSequence">Send sequence</button>
-          <button v-on:click="sequence = []">Clear sequence</button>
-          <button :disabled="sequence.length === 0" v-on:click="saveSequence">Save sequence</button>
+          <button :disabled="sequence.length === 0" v-on:click="saveSequence">
+            <svg v-html="icons.save" />
+          </button>
+          <button v-on:click="sequence = []">
+            <svg v-html="icons.clear" />
+          </button>
+          <button v-on:click="sendSequence">
+            <svg v-html="icons.play" />
+          </button>
         </div>
         
 
@@ -115,6 +123,7 @@ export default {
   `,
   data: function () {
     return {
+      icons: icons,
       ...mf.state,
       sequenceName: "Current sequence name",
       sequence: [],
