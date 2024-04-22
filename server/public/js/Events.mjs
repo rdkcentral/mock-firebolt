@@ -16,13 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import icons from './icons.mjs';
+import icons from "./icons.mjs";
 
 export default {
   name: "Events",
   props: {},
   template: `
     <div id="events">
+
+      <!-- ******* left column ******* -->
       <div class="left-column">
         <h1>Create Event</h1>
         <form v-on:submit.prevent="createCustomEvent" class="form">
@@ -113,7 +115,6 @@ export default {
             <svg v-html="icons.play" />
           </button>
         </div>
-        
 
         <!--
           <h1>Stored sequences</h1>
@@ -186,14 +187,21 @@ export default {
     handlePrevNextDrop(event, index) {
       event.preventDefault();
       event.target.style.backgroundColor = "transparent";
+
       const isPrev = event.target.dataset.type === "prev";
       const tempSequence = JSON.parse(JSON.stringify(this.sequence));
 
       const droppedItemIndex = Number(
         event.dataTransfer.getData("dragged_item_index")
       );
-      const droppedItem = tempSequence[droppedItemIndex];
-      const isNewIndexGreaterThanDroppedIndex = index > droppedItemIndex;
+
+      let droppedItem;
+
+      if (Number.isNaN(droppedItemIndex)) {
+        droppedItem = JSON.parse(event.dataTransfer.getData("dragged_item"));
+      } else {
+        droppedItem = tempSequence[droppedItemIndex];
+      }
 
       if (isPrev) {
         tempSequence.splice(index, 0, droppedItem);
@@ -201,12 +209,15 @@ export default {
         tempSequence.splice(index + 1, 0, droppedItem);
       }
 
-      tempSequence.splice(
-        isNewIndexGreaterThanDroppedIndex
-          ? droppedItemIndex
-          : droppedItemIndex + 1,
-        1
-      );
+      if (!Number.isNaN(droppedItemIndex)) {
+        const isNewIndexGreaterThanDroppedIndex = index > droppedItemIndex;
+        tempSequence.splice(
+          isNewIndexGreaterThanDroppedIndex
+            ? droppedItemIndex
+            : droppedItemIndex + 1,
+          1
+        );
+      }
 
       this.sequence = tempSequence;
     },
@@ -233,19 +244,19 @@ export default {
 
       this.setDragGhost(event);
     },
-  setDragGhost(event) {
-    let dragImage = event.target.cloneNode(true);
-    dragImage.classList.add("sequence_item_ghost-image");
+    setDragGhost(event) {
+      let dragImage = event.target.cloneNode(true);
+      dragImage.classList.add("sequence_item_ghost-image");
 
-    // dragImage.style.transform = "scale(0.5)";
-    document.body.appendChild(dragImage);
-    event.dataTransfer.setDragImage(dragImage, 0, 0);
+      // dragImage.style.transform = "scale(0.5)";
+      document.body.appendChild(dragImage);
+      event.dataTransfer.setDragImage(dragImage, 0, 0);
 
-    // Remove the drag image from the DOM after a short delay
-    setTimeout(() => {
-      document.body.removeChild(dragImage);
-    }, 0);
-  },
+      // Remove the drag image from the DOM after a short delay
+      setTimeout(() => {
+        document.body.removeChild(dragImage);
+      }, 0);
+    },
     handleDragDrop(event, index) {
       let tempSequence = JSON.parse(JSON.stringify(this.sequence));
       let temp = tempSequence[index];
@@ -254,9 +265,10 @@ export default {
         event.dataTransfer.getData("dragged_item_index")
       );
 
-      
       if (Number.isNaN(droppedItemIndex)) {
-        tempSequence[index] = JSON.parse(event.dataTransfer.getData("dragged_item"));
+        tempSequence[index] = JSON.parse(
+          event.dataTransfer.getData("dragged_item")
+        );
       } else {
         tempSequence[index] = tempSequence[droppedItemIndex];
         tempSequence[droppedItemIndex] = temp;
@@ -355,24 +367,24 @@ export default {
     },
     exportSequence: async function () {
       const sequenceClone = JSON.parse(JSON.stringify(this.sequence));
-      const fileName = 'Exported sequence'
+      const fileName = "Exported sequence";
       const blob = new Blob([JSON.stringify(sequenceClone, null, 2)], {
         type: "application/json",
       });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
-      
+
       a.href = url;
-      a.download =  fileName;
+      a.download = fileName;
       a.click();
       URL.revokeObjectURL(url);
     },
 
     importSequence: async function () {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
       input.onchange = async (event) => {
         const file = event.target.files[0];
         const reader = new FileReader();
