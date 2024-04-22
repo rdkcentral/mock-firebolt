@@ -75,6 +75,8 @@ export default {
       </div>
       <button v-on:click="sendSequence">Send sequence</button>
       <button v-on:click="sequence = []">Clear sequence</button>
+      <button v-on:click="exportSequence">Export sequence</button>
+      <button v-on:click="importSequence">Import sequence</button>
 
       <h1>Events list</h1>
 
@@ -249,6 +251,37 @@ export default {
         },
         body: JSON.stringify(payload),
       });
+    },
+    exportSequence: async function () {
+      const sequenceClone = JSON.parse(JSON.stringify(this.sequence));
+      const fileName = 'Exported sequence'
+      const blob = new Blob([JSON.stringify(sequenceClone, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      
+      a.href = url;
+      a.download =  fileName;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+
+    importSequence: async function () {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json';
+      input.onchange = async (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const sequence = JSON.parse(event.target.result);
+          this.sequence = sequence;
+        };
+        reader.readAsText(file);
+      };
+      input.click();
     },
   },
 };
