@@ -152,16 +152,6 @@ h1 {
   outline: unset;
 }
 
-#events .events_list {
-  display: grid;
-  grid-template-columns: repeat(2, auto);
-}
-
-#events .events_list .events_wrapper {
-  height: 200px;
-  overflow-y: auto;
-}
-
 #events .form .form_block {
   display: flex;
   flex-direction: column;

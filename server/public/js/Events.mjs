@@ -70,14 +70,17 @@ export default {
       <p>Select from the lists below which events you want to include in the sequence. The oreder of the selected events will reflect the order
       in which the events will be sent</p>
 
-      <div class="events_list">
-        <div v-for="(eventType, index) in eventsTypes" v-bind:key="index">
-          <h2>{{ eventType }}</h2>
-          <div class="events_wrapper">
-            <div v-for="(cliEvent, index) in cliEvents[eventType]" v-bind:key="index">
-              <input type="checkbox" :checked="checkIfEventIsInSequence(cliEvent)" v-on:change="updateSequence(cliEvent)">
-              <label>{{ cliEvent.displayName || cliEvent.method }}</label>
-            </div>
+      <div class="events-section">
+        <div class="events-type-wrapper">
+          <div v-for="(eventType, index) in eventsTypes" v-bind:key="index" v-on:click="selectedType = eventType">
+            {{ eventType }}
+          </div>
+        </div>
+
+        <div class="events-list">
+          <div v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index">
+            <input type="checkbox" :checked="checkIfEventIsInSequence(cliEvent)" v-on:change="updateSequence(cliEvent)">
+            <label>{{ cliEvent.displayName || cliEvent.method }}</label>
           </div>
         </div>
       </div>
@@ -131,6 +134,7 @@ export default {
     return {
       icons: icons,
       ...mf.state,
+      selectedType: "",
       sequenceName: "Current sequence name",
       sequence: [],
       sequences: [],
@@ -302,6 +306,8 @@ export default {
       const response = await fetch("/api/v1/firebolt-events");
       const parsedResponse = await response.json();
       this.cliEvents = parsedResponse.data;
+
+      this.selectedType = this.eventsTypes[0];
     },
     getSequences: async function () {
       const response = await fetch("/api/v1/sequences");
