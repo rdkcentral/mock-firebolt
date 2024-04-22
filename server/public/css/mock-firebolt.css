@@ -140,12 +140,6 @@ h1 {
   transform: translateX(100%);
 }
 
-#events .sequence {
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 20px;
-}
-
 #events .new_sequence {
   border: unset;
   font-size: 1.2rem;
@@ -166,33 +160,6 @@ h1 {
 #events .events_list .events_wrapper {
   height: 200px;
   overflow-y: auto;
-}
-
-.sequence_item {
-  background-color: rgb(178 229 178);
-  border: 2px solid green;
-  border-radius: 10px;
-  cursor: grab;
-  padding: 5px;
-  width: fit-content;
-}
-
-.sequence_item_ghost-image {
-  cursor: grabbing;
-  font-size: 0.5rem;
-}
-
-#events .sequence > .sequence_event {
-  display: flex;
-  align-items: center;
-}
-
-#events .sequence > .sequence_event ~ .sequence_event {
-  margin-left: 5px;
-}
-
-#events .sequence > .sequence_event > p {
-  margin: 0;
 }
 
 #events .form .form_block {

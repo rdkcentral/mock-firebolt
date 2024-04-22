@@ -85,25 +85,31 @@ export default {
       <div class="right-column">
         <input v-model="sequenceName" class="new_sequence"/>
 
-        <div class="sequence">
-          <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence_event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
-            <div data-type="prev" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
-            <p class="sequence_item" v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
-            <div data-type="next" :data-id="index" style="width: 5px; height: 50%; background-color: transparent" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
+        <div class="sequence-section">
+          <p v-if="sequence.length === 0">No events in the sequence. Start dragging events in</p>
+          <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence-event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
+            <div data-type="prev" :data-id="index" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
+            <p class="sequence-tag" v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
+            <div data-type="next" :data-id="index" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
           </div>
         </div>
-        <button v-on:click="sendSequence">Send sequence</button>
-        <button v-on:click="sequence = []">Clear sequence</button>
 
-        <button :disabled="sequence.length === 0" v-on:click="saveSequence">Save sequence</button>
-
-        <h1>Stored sequences</h1>
-        <div class="sequences">
-          <div v-for="(sequence, index) in sequences" v-bind:key="index">
-            <p v-on:click="(_) => handleSequenceClick(sequence)">{{ sequence.name }}</p>
-          </div>
-          <button v-on:click="sequence = sequence.sequence">Load sequence</button>
+        <div v-if="sequence.length > 0" class="sequence_actions">
+          <button v-on:click="sendSequence">Send sequence</button>
+          <button v-on:click="sequence = []">Clear sequence</button>
+          <button :disabled="sequence.length === 0" v-on:click="saveSequence">Save sequence</button>
         </div>
+        
+
+        <!--
+          <h1>Stored sequences</h1>
+          <div class="sequences">
+            <div v-for="(sequence, index) in sequences" v-bind:key="index">
+              <p v-on:click="(_) => handleSequenceClick(sequence)">{{ sequence.name }}</p>
+            </div>
+            <button v-on:click="sequence = sequence.sequence">Load sequence</button>
+          </div>
+        -->
       </div>
     </div>
   `,
