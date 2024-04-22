@@ -64,7 +64,7 @@ export default {
       <br />
       <br />
       
-      <h1>Current Sequence</h1>
+      <input v-model="sequenceName" class="new_sequence"/>
 
       <div class="sequence">
         <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence_event" draggable="true" v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
@@ -75,6 +75,8 @@ export default {
       </div>
       <button v-on:click="sendSequence">Send sequence</button>
       <button v-on:click="sequence = []">Clear sequence</button>
+
+      <button :disabled="sequence.length === 0" v-on:click="saveSequence">Save sequence</button>
 
       <h1>Events list</h1>
 
@@ -97,6 +99,7 @@ export default {
   data: function () {
     return {
       ...mf.state,
+      sequenceName: "Current sequence name",
       sequence: [],
       cliEvents: [],
       customEvent: {
@@ -202,6 +205,7 @@ export default {
       }, 0);
 
     },
+    
     handleDragDrop(event, index) {
       document.body.style.cursor = 'default';
       const droppedItemIndex = Number(
@@ -260,12 +264,20 @@ export default {
       const parsedResponse = await response.json();
       this.cliEvents = parsedResponse.data;
     },
+    saveSequence: async function () {
+      await fetch("/api/v1/save-sequence", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sequenceName: this.sequenceName, sequence: JSON.stringify(this.sequence) }),
+      });
+    },
     sendSequence: async function () {
       const sequenceClone = JSON.parse(JSON.stringify(this.sequence));
       const payload = [];
 
       for (const event of sequenceClone) {
-        event.checked = undefined;
         event.displayName = undefined;
 
         payload.push({ event: event });

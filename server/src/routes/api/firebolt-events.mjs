@@ -20,7 +20,7 @@ const createCustomEvent = async (req, res) => {
     ...rest,
   };
 
-  const filePath = `./db/${type}/${displayName}.json`;
+  const filePath = `./db/events/${type}/${displayName}.json`;
 
   fs.writeFileSync(filePath, JSON.stringify(event, null, 2));
 
@@ -72,7 +72,7 @@ async function getFireboltsEvents(req, res) {
 
   events = {};
 
-  parseDbContent("./db");
+  parseDbContent("./db/events");
 
   response.data = events;
 
@@ -87,4 +87,17 @@ function sendSequence(req, res) {
   });
 }
 
-export { createCustomEvent, getFireboltsEvents, sendSequence };
+function saveSequence(req, res) {
+  const { sequence, sequenceName } = req.body;
+
+  const filePath = `./db/sequences/${sequenceName}.json`;
+
+  fs.writeFileSync(filePath, JSON.stringify(sequence, null, 2));
+
+  res.status(200).send({
+    status: "OK",
+    data: sequence,
+  });
+}
+
+export { createCustomEvent, getFireboltsEvents, saveSequence, sendSequence };

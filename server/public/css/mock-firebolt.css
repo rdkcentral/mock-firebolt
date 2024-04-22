@@ -146,6 +146,18 @@ h1 {
   margin-bottom: 20px;
 }
 
+#events .new_sequence {
+  border: unset;
+  font-size: 1.2rem;
+  font-weight: bold;
+  width: 100%;
+}
+
+#events .new_sequence:focus-visible, #events .new_sequence:focus {
+  border: unset;
+  outline: unset;
+}
+
 #events .events_list {
   display: grid;
   grid-template-columns: repeat(2, auto);
