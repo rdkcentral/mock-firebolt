@@ -82,7 +82,9 @@ export default {
             <div class="events-list">
               <div class="sequence-tag" v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index">
                 <p draggable v-on:dragstart="(event) => handleDragStartFromList(event, cliEvent)" v-on:dragover.prevent v-on:click="updateSequence(cliEvent)" >{{ cliEvent.displayName || cliEvent.method }}</p>
-                <svg v-html="icons.copy" v-on:click="handleCopyEvent(cliEvent)" />
+                <div class="event-actions">
+                  <svg v-html="icons.copy" v-on:click="handleCopyEvent(cliEvent)" />
+                </div>
               </div>
             </div>
           </div>
@@ -97,7 +99,12 @@ export default {
           <p v-if="sequence.length === 0">No events in the sequence. Start dragging events in</p>
           <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence-event" draggable v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
             <div data-type="prev" :data-id="index" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
-            <p class="sequence-tag" v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
+            <div class="sequence-tag" v-on:drop="(event) => handleDragDrop(event, index)">
+              <p>{{ sequence_event.displayName || sequence_event.method }}</p>
+              <div class="event-actions">
+                <svg v-html="icons.remove" v-on:click="sequence.splice(index, 1)" />
+              </div>
+            </div>
             <div data-type="next" :data-id="index" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
           </div>
         </div>
@@ -398,7 +405,6 @@ export default {
       a.click();
       URL.revokeObjectURL(url);
     },
-
     importSequence: async function () {
       const input = document.createElement("input");
       input.type = "file";
