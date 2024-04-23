@@ -29,7 +29,7 @@ export default {
         <h1>Create Event</h1>
         <form v-on:submit.prevent="createCustomEvent" class="form">
           <div class="form_row">
-            <div class="form_column">
+            <div class="form-column">
               <div class="form_block">
                 <label>Type</label>
                 <select v-model="customEvent.type">
@@ -46,16 +46,16 @@ export default {
             
             <div class="form_spacer" />
 
-            <div class="form_column">
+            <div class="form-column">
               <div class="form_block">
                 <label>Rest</label>
-                <textarea v-on:change="handleTextAreaUpdate" :value="JSON.stringify(this.customEvent.rest, null, 2)" cols=50 rows=10 ></textarea>
+                <textarea v-on:change="handleTextAreaUpdate" :value="JSON.stringify(this.customEvent.rest, null, 2)" cols=35 rows=10 ></textarea>
               </div>
             </div>
 
             <div class="form_spacer" />
 
-            <div class="form_column">
+            <div class="form-column">
                 <label>Outcome</label>
                 <pre>{{ prettyFormat }}</pre>
             </div>
@@ -66,26 +66,27 @@ export default {
           </div>
         </form>
 
+        <section class="events-list-section">
+          <h1>Events list</h1>
 
-      <h1>Events list</h1>
+          <p>Select from the lists below which events you want to include in the sequence. The oreder of the selected events will reflect the order
+          in which the events will be sent</p>
 
-      <p>Select from the lists below which events you want to include in the sequence. The oreder of the selected events will reflect the order
-      in which the events will be sent</p>
+          <div class="events-section">
+            <div class="events-type-wrapper">
+              <div v-for="(eventType, index) in eventsTypes" v-bind:key="index" v-on:click="selectedType = eventType">
+                {{ eventType }}
+              </div>
+            </div>
 
-      <div class="events-section">
-        <div class="events-type-wrapper">
-          <div v-for="(eventType, index) in eventsTypes" v-bind:key="index" v-on:click="selectedType = eventType">
-            {{ eventType }}
+            <div class="events-list">
+              <div class="sequence-tag" v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index">
+                <p draggable v-on:dragstart="(event) => handleDragStartFromList(event, cliEvent)" v-on:dragover.prevent v-on:click="updateSequence(cliEvent)" >{{ cliEvent.displayName || cliEvent.method }}</p>
+                <svg v-html="icons.copy" v-on:click="handleCopyEvent(cliEvent)" />
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div class="events-list">
-          <div class="sequence-tag" v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index">
-            <p draggable v-on:dragstart="(event) => handleDragStartFromList(event, cliEvent)" v-on:dragover.prevent v-on:click="updateSequence(cliEvent)" >{{ cliEvent.displayName || cliEvent.method }}</p>
-            <svg v-html="icons.copy" />
-          </div>
-        </div>
-      </div>
+        </section>
       </div>
 
       <!-- ******* right column ******* -->
@@ -151,6 +152,8 @@ export default {
   watch: {
     "customEvent.type": {
       handler: function (value) {
+        if (Object.keys(this.customEvent.rest).length !== 0) return;
+
         if (
           value === "accessibility" ||
           value === "account" ||
@@ -189,6 +192,16 @@ export default {
     this.getCliEvents();
   },
   methods: {
+    handleCopyEvent(cliEvent) {
+      this.customEvent = {
+        type: this.selectedType,
+        displayName: cliEvent.displayName,
+        rest: {
+          ...cliEvent,
+          displayName: undefined,
+        },
+      };
+    },
     handlePrevNextDrop(event, index) {
       event.preventDefault();
       event.target.style.backgroundColor = "transparent";

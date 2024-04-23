@@ -130,51 +130,6 @@ h1 {
 
 /* --- */
 
-#events .form {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-#events .dragged_over {
-  transform: translateX(100%);
-}
-
-#events .new_sequence {
-  border: unset;
-  font-size: 1.2rem;
-  font-weight: bold;
-  width: 100%;
-}
-
-#events .new_sequence:focus-visible, #events .new_sequence:focus {
-  border: unset;
-  outline: unset;
-}
-
-#events .form .form_block {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-#events .form .form_column {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-#events .form .form_spacer {
-  display: flex;
-  width: 20px;
-}
-
-#events .form .form_row {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-}
-
 .font-weight-bold {
   font-weight: bold;
 }
