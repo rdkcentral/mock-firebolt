@@ -118,6 +118,7 @@
 
 #events .events-list .sequence-tag p {
   margin: 0;
+  width: 100%;
 }
 
 #events .events-list .sequence-tag svg {
