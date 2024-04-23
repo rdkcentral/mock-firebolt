@@ -80,7 +80,10 @@ export default {
         </div>
 
         <div class="events-list">
-          <p v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index" class="sequence-tag" draggable v-on:dragstart="(event) => handleDragStartFromList(event, cliEvent)" v-on:dragover.prevent v-on:click="updateSequence(cliEvent)" >{{ cliEvent.displayName || cliEvent.method }}</p>
+          <div class="sequence-tag" v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index">
+            <p draggable v-on:dragstart="(event) => handleDragStartFromList(event, cliEvent)" v-on:dragover.prevent v-on:click="updateSequence(cliEvent)" >{{ cliEvent.displayName || cliEvent.method }}</p>
+            <svg v-html="icons.copy" />
+          </div>
         </div>
       </div>
       </div>
@@ -98,22 +101,24 @@ export default {
           </div>
         </div>
 
-        <div v-if="sequence.length > 0" class="sequence_actions">
-          <button v-on:click="exportSequence">
-            <svg v-html="icons.export" />
-          </button>
-          <button v-on:click="importSequence">
+        <div class="sequence_actions">
+          <button v-on:click="importSequence" title="Upload">
             <svg v-html="icons.upload" />
           </button>
-          <button :disabled="sequence.length === 0" v-on:click="saveSequence">
-            <svg v-html="icons.save" />
-          </button>
-          <button v-on:click="sequence = []">
-            <svg v-html="icons.clear" />
-          </button>
-          <button v-on:click="sendSequence">
-            <svg v-html="icons.play" />
-          </button>
+          <template v-if="sequence.length > 0">
+            <button v-on:click="exportSequence" title="Export">
+              <svg v-html="icons.export" />
+            </button>
+            <button :disabled="sequence.length === 0" v-on:click="saveSequence" title="Save">
+              <svg v-html="icons.save" />
+            </button>
+            <button v-on:click="sequence = []" title="Clear">
+              <svg v-html="icons.clear" />
+            </button>
+            <button v-on:click="sendSequence" title="Play">
+              <svg v-html="icons.play" />
+            </button>
+          </template>
         </div>
 
         <!--

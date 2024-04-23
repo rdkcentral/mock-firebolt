@@ -108,3 +108,19 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
+
+#events .events-list .sequence-tag {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+#events .events-list .sequence-tag p {
+    margin: 0;
+}
+
+#events .events-list .sequence-tag svg {
+    cursor: pointer;
+    height: 20px;
+    width: 20px;
+}
