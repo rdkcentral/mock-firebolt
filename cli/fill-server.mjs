@@ -1,6 +1,11 @@
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from 'url';
 
-const basePath = "./examples";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const basePath = path.join(__dirname, "examples");
+const serverPath = path.resolve(__dirname, '../server/db/events');
 
 const readDir = (path = '') => {
   return fs.readdirSync(`${basePath}/${path}`);
@@ -9,7 +14,7 @@ const readDir = (path = '') => {
 const copyFile = (filePath, filename) => {
   const fileExt = filename.split(".").reverse()[0];
   const pathWithoutBase = filePath.replace(`${basePath}`, "");
-  const destDir = `../server/db${pathWithoutBase}`;
+  const destDir = `${serverPath}/${pathWithoutBase}`;
 
   if (fileExt === "json") {
     if (!fs.existsSync(destDir)) {
@@ -34,9 +39,9 @@ const parseDirContent = (dirContent, dirPath = basePath) => {
   });
 };
 
-const main = () => {
+const filldb = () => {
   const files = readDir();
   parseDirContent(files);
 };
 
-main();
+export default filldb;
