@@ -27,7 +27,10 @@ export default {
     <div id="events">
       <Modal v-bind:show="showModal">
         <template v-slot:header>
-          <h1>Upload sequence</h1>
+          <div class="upload-modal-header">
+            <h1>Upload sequence</h1>
+            <svg v-html="icons.close" v-on:click="showModal = false" />
+          </div>
         </template>
         <template v-slot:body>
           <div class="upload-modal-body">            
@@ -37,8 +40,7 @@ export default {
                 <div v-for="(sequence, index) in sequences" v-bind:key="index" class="sequence-list-item">
                   <p>{{ sequence.name }}</p>
                   <div class="sequence-list-actions">
-                    <svg v-html="icons.view" v-on:click="sequenceToUpload = sequence" title="Preview" />
-                    <svg v-html="icons.copy" v-on:click="(_) => handleSequenceClick(sequence)" title="Load sequence" />
+                    <svg v-html="icons.view" v-on:click="sequenceToUpload = sequence.sequence" title="Preview" />
                   </div>
                 </div>
               </div>
@@ -55,7 +57,9 @@ export default {
           </div>
         </template>
         <template v-slot:footer>
-          <button v-on:click="showModal = false">Close</button>
+          <div class="upload-sequence-actions">
+            <svg v-if="Object.keys(sequenceToUpload).length > 0" v-html="icons.upload" v-on:click="handleSequenceClick(sequence)" title="Load sequence" />
+          </div>
         </template>
       </Modal>
 
@@ -184,6 +188,13 @@ export default {
     };
   },
   watch: {
+    showModal: {
+      handler: function (value) {
+        if (!value) {
+          this.sequenceToUpload = [];
+        }
+      }
+    },
     "customEvent.type": {
       handler: function (value) {
         if (Object.keys(this.customEvent.rest).length !== 0) return;
@@ -328,8 +339,8 @@ export default {
 
       this.sequence = tempSequence;
     },
-    handleSequenceClick(sequence) {
-      this.sequence = JSON.parse(JSON.stringify(sequence.sequence));
+    handleSequenceClick() {
+      this.sequence = JSON.parse(JSON.stringify(this.sequenceToUpload));
       this.showModal = false;
     },
     updateRest(value) {
@@ -438,13 +449,9 @@ export default {
       const reader = new FileReader();
 
       reader.onload = (event) => {
-        this.sequence = JSON.parse(event.target.result);
+        this.sequenceToUpload = JSON.parse(event.target.result);
         // Reset input file selected file
         event.target.value = "";
-
-
-        this.showModal = false;
-
       };
 
       reader.readAsText(file);

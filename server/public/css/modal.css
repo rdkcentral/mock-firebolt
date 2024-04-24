@@ -77,3 +77,27 @@
 .sequence-list-file-upload {
     margin-top: 20px;
 }
+
+.upload-modal-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;   
+}
+
+svg {
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+}
+
+.upload-sequence-actions {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.upload-sequence-actions svg {
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+}
