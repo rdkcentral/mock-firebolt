@@ -106,19 +106,18 @@ cd <the place you put your code repos>
 git clone https://github.com/rdkcentral/mock-firebolt.git            /* THIS REPO */
 cd mock-firebolt
 
-# To start the mock Firebolt server (if running locally)
-cd server
+# To install dependencies, clean/create build/ subdirectory, build and upgrade SDK, build source code within this project
+npm setup
+
 
 # One-time stuff
-
+cd server
 cp src/.mf.config.SAMPLE.json src/.mf.config.json
-
-# To install dependencies, clean/create build/ subdirectory, build and upgrade SDK, build source code within this project
-npm install
 
 # If you want support for Firebolt Core/Manage SDK
 # Run in a separate terminal window/tab, or use '&' to background
-npm start
+cd server
+npm start (or npm dev for nodemon usage)
 
 # If you need to use non-standard ports for any reason:
 npm start -- --httpPort 3456 --socketPort 9876 --wsSessionServerPort 1234

@@ -1,0 +1,10 @@
+{
+    "name": "mock-firebolt",
+    "version": "0.0.1",
+    "description": "A mock Firebolt fork for testing",
+    "scripts": {
+        "install-server": "cd server && yarn install && cd ..",
+        "init-db": "node init.mjs",
+        "setup": "yarn install-server && yarn init-db"
+    }
+}
