@@ -17,12 +17,47 @@
  */
 
 import icons from "./icons.mjs";
+import Modal from "./components/Modal.mjs";
 
 export default {
   name: "Events",
+  components: { Modal },
   props: {},
   template: `
     <div id="events">
+      <Modal v-bind:show="showModal">
+        <template v-slot:header>
+          <h1>Upload sequence</h1>
+        </template>
+        <template v-slot:body>
+          <div class="upload-modal-body">            
+            <div class="upload-sequences">
+              <h1>Stored sequences</h1>
+              <div class="sequences">
+                <div v-for="(sequence, index) in sequences" v-bind:key="index" class="sequence-list-item">
+                  <p>{{ sequence.name }}</p>
+                  <div class="sequence-list-actions">
+                    <svg v-html="icons.view" v-on:click="sequenceToUpload = sequence" title="Preview" />
+                    <svg v-html="icons.copy" v-on:click="(_) => handleSequenceClick(sequence)" title="Load sequence" />
+                  </div>
+                </div>
+              </div>
+              <div class="sequence-list-file-upload">
+                <p>Upload a sequence file to load it into the sequence editor</p>
+                <input type="file" v-on:change="importSequence" />
+              </div>
+            </div>
+
+            <div class="upload-sequence-preview">
+              <h1>Preview</h1>
+              <pre>{{ JSON.stringify(sequenceToUpload, null, 2) }}</pre>
+            </div>
+          </div>
+        </template>
+        <template v-slot:footer>
+          <button v-on:click="showModal = false">Close</button>
+        </template>
+      </Modal>
 
       <!-- ******* left column ******* -->
       <div class="left-column">
@@ -110,7 +145,7 @@ export default {
         </div>
 
         <div class="sequence_actions">
-          <button v-on:click="importSequence" title="Upload">
+          <button v-on:click="showModal = true" title="Upload">
             <svg v-html="icons.upload" />
           </button>
           <template v-if="sequence.length > 0">
@@ -128,26 +163,18 @@ export default {
             </button>
           </template>
         </div>
-
-        <!--
-          <h1>Stored sequences</h1>
-          <div class="sequences">
-            <div v-for="(sequence, index) in sequences" v-bind:key="index">
-              <p v-on:click="(_) => handleSequenceClick(sequence)">{{ sequence.name }}</p>
-            </div>
-            <button v-on:click="sequence = sequence.sequence">Load sequence</button>
-          </div>
-        -->
       </div>
     </div>
   `,
   data: function () {
     return {
+      showModal: false,
       icons: icons,
       ...mf.state,
       selectedType: "",
       sequenceName: "Current sequence name",
       sequence: [],
+      sequenceToUpload: [],
       sequences: [],
       cliEvents: [],
       customEvent: {
@@ -303,6 +330,7 @@ export default {
     },
     handleSequenceClick(sequence) {
       this.sequence = JSON.parse(JSON.stringify(sequence.sequence));
+      this.showModal = false;
     },
     updateRest(value) {
       try {
@@ -405,20 +433,21 @@ export default {
       a.click();
       URL.revokeObjectURL(url);
     },
-    importSequence: async function () {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = ".json";
-      input.onchange = async (event) => {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const sequence = JSON.parse(event.target.result);
-          this.sequence = sequence;
-        };
-        reader.readAsText(file);
+    importSequence: async function (event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        this.sequence = JSON.parse(event.target.result);
+        // Reset input file selected file
+        event.target.value = "";
+
+
+        this.showModal = false;
+
       };
-      input.click();
+
+      reader.readAsText(file);
     },
   },
 };
