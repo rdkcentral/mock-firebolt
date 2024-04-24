@@ -1,0 +1,103 @@
+.modal-mask {
+  border-radius: 5px;
+  position: fixed;
+  background-color: rgb(178 229 178);
+  border: 2px solid green;
+  width: 1000px;
+  height: 800px;
+  top: calc(50% - 400px);
+  left: calc(50% - 500px);
+}
+
+.modal-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 20px);
+  padding: 10px;
+}
+
+.modal-body {
+  height: 100%;
+  overflow: auto;
+}
+
+.modal-footer {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+  height: 100px;
+}
+
+.upload-modal-body {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.upload-sequence-preview {
+    min-width: 40%;
+    padding: 10px;
+}
+
+.upload-sequence-preview pre {
+    overflow: auto;
+}
+
+.upload-sequences {
+    min-width: 60%;
+    padding: 10px;
+}
+
+.sequence-list-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+}
+
+.sequence-list-item ~ .sequence-list-item {
+    margin-top: 5px;
+}
+
+.sequence-list-item > p {
+    margin: 0;
+    cursor: pointer;
+}
+
+.sequence-list-actions {
+    display: flex;
+    align-items: center;
+}
+
+.sequence-list-actions > svg {
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+}
+
+.sequence-list-file-upload {
+    margin-top: 20px;
+}
+
+.upload-modal-header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;   
+}
+
+svg {
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+}
+
+.upload-sequence-actions {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.upload-sequence-actions svg {
+    height: 20px;
+    width: 20px;
+    cursor: pointer;
+}

@@ -8,7 +8,7 @@
     "build": "node ./scripts/rcopy.mjs ./src ./build && node ./scripts/copy.mjs ./src/.mf.config.json ./build/.mf.config.json && node ./scripts/copy.mjs ./package.json ./build/package.json",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test npx jest --config=jest.config.js --detectOpenHandles --runInBand --forceExit",
     "start": "npm run build && node build/index.mjs",
-    "dev": "nodemon /src/index.mjs --watch src --watch scripts"
+    "dev": "nodemon --watch ./src --ext mjs --exec 'npm run start'"
   },
   "repository": {
     "type": "git",

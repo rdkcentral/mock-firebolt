@@ -17,12 +17,51 @@
  */
 
 import icons from "./icons.mjs";
+import Modal from "./components/Modal.mjs";
 
 export default {
   name: "Events",
+  components: { Modal },
   props: {},
   template: `
     <div id="events">
+      <Modal v-bind:show="showModal">
+        <template v-slot:header>
+          <div class="upload-modal-header">
+            <h1>Upload sequence</h1>
+            <svg v-html="icons.close" v-on:click="showModal = false" />
+          </div>
+        </template>
+        <template v-slot:body>
+          <div class="upload-modal-body">            
+            <div class="upload-sequences">
+              <h1>Stored sequences</h1>
+              <div class="sequences">
+                <div v-for="(sequence, index) in sequences" v-bind:key="index" class="sequence-list-item">
+                  <p>{{ sequence.name }}</p>
+                  <div class="sequence-list-actions">
+                    <svg v-html="icons.view" v-on:click="sequenceToUpload = sequence.sequence" title="Preview" />
+                  </div>
+                </div>
+              </div>
+              <div class="sequence-list-file-upload">
+                <p>Upload a sequence file to load it into the sequence editor</p>
+                <input type="file" v-on:change="importSequence" />
+              </div>
+            </div>
+
+            <div class="upload-sequence-preview">
+              <h1>Preview</h1>
+              <pre>{{ JSON.stringify(sequenceToUpload, null, 2) }}</pre>
+            </div>
+          </div>
+        </template>
+        <template v-slot:footer>
+          <div class="upload-sequence-actions">
+            <svg v-if="Object.keys(sequenceToUpload).length > 0" v-html="icons.upload" v-on:click="handleSequenceClick(sequence)" title="Load sequence" />
+          </div>
+        </template>
+      </Modal>
 
       <!-- ******* left column ******* -->
       <div class="left-column">
@@ -82,7 +121,9 @@ export default {
             <div class="events-list">
               <div class="sequence-tag" v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index">
                 <p draggable v-on:dragstart="(event) => handleDragStartFromList(event, cliEvent)" v-on:dragover.prevent v-on:click="updateSequence(cliEvent)" >{{ cliEvent.displayName || cliEvent.method }}</p>
-                <svg v-html="icons.copy" v-on:click="handleCopyEvent(cliEvent)" />
+                <div class="event-actions">
+                  <svg v-html="icons.copy" v-on:click="handleCopyEvent(cliEvent)" />
+                </div>
               </div>
             </div>
           </div>
@@ -97,13 +138,18 @@ export default {
           <p v-if="sequence.length === 0">No events in the sequence. Start dragging events in</p>
           <div v-for="(sequence_event, index) in sequence" :data-index="index" v-bind:key="index" class="sequence-event" draggable v-on:dragstart="(event) => handleDragStart(event, index)" v-on:dragover.prevent>
             <div data-type="prev" :data-id="index" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
-            <p class="sequence-tag" v-on:drop="(event) => handleDragDrop(event, index)">{{ sequence_event.displayName || sequence_event.method }}</p>
+            <div class="sequence-tag" v-on:drop="(event) => handleDragDrop(event, index)">
+              <p>{{ sequence_event.displayName || sequence_event.method }}</p>
+              <div class="event-actions">
+                <svg v-html="icons.remove" v-on:click="sequence.splice(index, 1)" />
+              </div>
+            </div>
             <div data-type="next" :data-id="index" v-on:dragover="(event) => handleDragOver(event, index)" v-on:dragleave="(event) => handleDragLeave(event, index)" v-on:drop="(event) => handlePrevNextDrop(event, index)"/>
           </div>
         </div>
 
         <div class="sequence_actions">
-          <button v-on:click="importSequence" title="Upload">
+          <button v-on:click="showModal = true" title="Upload">
             <svg v-html="icons.upload" />
           </button>
           <template v-if="sequence.length > 0">
@@ -121,26 +167,18 @@ export default {
             </button>
           </template>
         </div>
-
-        <!--
-          <h1>Stored sequences</h1>
-          <div class="sequences">
-            <div v-for="(sequence, index) in sequences" v-bind:key="index">
-              <p v-on:click="(_) => handleSequenceClick(sequence)">{{ sequence.name }}</p>
-            </div>
-            <button v-on:click="sequence = sequence.sequence">Load sequence</button>
-          </div>
-        -->
       </div>
     </div>
   `,
   data: function () {
     return {
+      showModal: false,
       icons: icons,
       ...mf.state,
       selectedType: "",
       sequenceName: "Current sequence name",
       sequence: [],
+      sequenceToUpload: [],
       sequences: [],
       cliEvents: [],
       customEvent: {
@@ -150,6 +188,13 @@ export default {
     };
   },
   watch: {
+    showModal: {
+      handler: function (value) {
+        if (!value) {
+          this.sequenceToUpload = [];
+        }
+      }
+    },
     "customEvent.type": {
       handler: function (value) {
         if (Object.keys(this.customEvent.rest).length !== 0) return;
@@ -294,8 +339,9 @@ export default {
 
       this.sequence = tempSequence;
     },
-    handleSequenceClick(sequence) {
-      this.sequence = JSON.parse(JSON.stringify(sequence.sequence));
+    handleSequenceClick() {
+      this.sequence = JSON.parse(JSON.stringify(this.sequenceToUpload));
+      this.showModal = false;
     },
     updateRest(value) {
       try {
@@ -398,21 +444,17 @@ export default {
       a.click();
       URL.revokeObjectURL(url);
     },
+    importSequence: async function (event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
 
-    importSequence: async function () {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = ".json";
-      input.onchange = async (event) => {
-        const file = event.target.files[0];
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-          const sequence = JSON.parse(event.target.result);
-          this.sequence = sequence;
-        };
-        reader.readAsText(file);
+      reader.onload = (event) => {
+        this.sequenceToUpload = JSON.parse(event.target.result);
+        // Reset input file selected file
+        event.target.value = "";
       };
-      input.click();
+
+      reader.readAsText(file);
     },
   },
 };
