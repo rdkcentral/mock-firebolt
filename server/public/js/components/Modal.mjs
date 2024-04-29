@@ -18,7 +18,7 @@ export default {
                             <p>default body</p>
                         </slot>
                     </div>
-                    <div class="modal-footer">
+                    <div v-if="$slots.footer" class="modal-footer">
                         <slot name="footer">
                             <p>default footer</p>
                         </slot>
