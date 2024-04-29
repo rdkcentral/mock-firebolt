@@ -18,14 +18,16 @@
 
 import icons from "./icons.mjs";
 import Modal from "./components/Modal.mjs";
+import PreviewEventModal from "./components/PreviewEventModal.mjs";
 
 export default {
   name: "Events",
-  components: { Modal },
-  props: {},
+  components: { Modal, PreviewEventModal },
   template: `
     <div id="events">
-      <Modal v-bind:show="showModal">
+      <PreviewEventModal :show="showPreviewModal" @close="showPreviewModal = false" :fireboltEvent="eventToPreview" />
+
+      <Modal v-bind:show="showModal" key="uploadSequenceModal">
         <template v-slot:header>
           <div class="upload-modal-header">
             <h1>Upload sequence</h1>
@@ -33,7 +35,7 @@ export default {
           </div>
         </template>
         <template v-slot:body>
-          <div class="upload-modal-body">            
+          <div class="upload-modal-body">
             <div class="upload-sequences">
               <h1>Stored sequences</h1>
               <div class="sequences">
@@ -122,6 +124,7 @@ export default {
               <div class="sequence-tag" v-for="(cliEvent, index) in cliEvents[selectedType]" v-bind:key="index">
                 <p draggable v-on:dragstart="(event) => handleDragStartFromList(event, cliEvent)" v-on:dragover.prevent v-on:click="updateSequence(cliEvent)" >{{ cliEvent.displayName || cliEvent.method }}</p>
                 <div class="event-actions">
+                  <svg v-html="icons.view" v-on:click="(_) => previewEvent(cliEvent)" />
                   <svg v-html="icons.copy" v-on:click="handleCopyEvent(cliEvent)" />
                 </div>
               </div>
@@ -141,6 +144,7 @@ export default {
             <div class="sequence-tag" v-on:drop="(event) => handleDragDrop(event, index)">
               <p>{{ sequence_event.displayName || sequence_event.method }}</p>
               <div class="event-actions">
+                <svg v-html="icons.view" v-on:click="(_) => previewEvent(sequence_event)" />
                 <svg v-html="icons.remove" v-on:click="sequence.splice(index, 1)" />
               </div>
             </div>
@@ -172,7 +176,9 @@ export default {
   `,
   data: function () {
     return {
+      eventToPreview: {},
       showModal: false,
+      showPreviewModal: false,
       icons: icons,
       ...mf.state,
       selectedType: "",
@@ -193,7 +199,7 @@ export default {
         if (!value) {
           this.sequenceToUpload = [];
         }
-      }
+      },
     },
     "customEvent.type": {
       handler: function (value) {
@@ -237,6 +243,10 @@ export default {
     this.getCliEvents();
   },
   methods: {
+    previewEvent(cliEvent) {
+      this.eventToPreview = cliEvent;
+      this.showPreviewModal = true;
+    },
     handleCopyEvent(cliEvent) {
       this.customEvent = {
         type: this.selectedType,

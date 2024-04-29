@@ -4,9 +4,9 @@
   background-color: rgb(178 229 178);
   border: 2px solid green;
   width: 1000px;
-  height: 800px;
-  top: calc(50% - 400px);
-  left: calc(50% - 500px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .modal-container {
