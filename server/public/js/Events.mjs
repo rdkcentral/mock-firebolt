@@ -83,6 +83,11 @@ export default {
                 <label>Display Name</label>
                 <input v-model="customEvent.displayName"></input>
               </div>
+             <hr />
+              <div>
+                <button type="submit">Create</button>
+                <button v-on:click="exportElement(customEvent, 'event')"><svg v-html="icons.export"  />Export</button>
+              </div>
             </div>
             
             <div class="form_spacer" />
@@ -101,12 +106,8 @@ export default {
                 <pre>{{ prettyFormat }}</pre>
             </div>
           </div>
-        
-          <div class="form_row">
-            <button type="submit">Create</button>
-          </div>
         </form>
-
+        <hr />
         <section class="events-list-section">
           <h1>Events list</h1>
 
@@ -157,7 +158,7 @@ export default {
             <svg v-html="icons.upload" />
           </button>
           <template v-if="sequence.length > 0">
-            <button v-on:click="exportSequence" title="Export">
+            <button v-on:click="exportElement(sequence, 'sequence')" title="Export">
               <svg v-html="icons.export" />
             </button>
             <button :disabled="sequence.length === 0" v-on:click="saveSequence" title="Save">
@@ -439,9 +440,9 @@ export default {
         body: JSON.stringify(payload),
       });
     },
-    exportSequence: async function () {
-      const sequenceClone = JSON.parse(JSON.stringify(this.sequence));
-      const fileName = "Exported sequence";
+    exportElement: async function (element, fileName) {
+      const parseElement = (JSON.parse(JSON.stringify(element)));
+      const sequenceClone = parseElement.length ? parseElement : [parseElement];
       const blob = new Blob([JSON.stringify(sequenceClone, null, 2)], {
         type: "application/json",
       });
