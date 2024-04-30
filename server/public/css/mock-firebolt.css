@@ -34,7 +34,6 @@ h1 {
 }
 
 #header {
-  height: 6rem;
   background-color: #8e8d8a;
   color: black;
   font-weight: bold;
@@ -54,7 +53,7 @@ h1 {
   background-color: #e98074;
   color: white;
   border: 1px solid white;
-  padding: 0.5rem 1.7rem;
+  padding: 0.35rem 1.7rem;
 }
 
 #nav-bar a:hover {
