@@ -5,6 +5,7 @@
     "scripts": {
         "install-server": "cd server && yarn install && cd ..",
         "init-db": "node init.mjs",
-        "setup": "yarn install-server && yarn init-db"
+        "setup": "yarn install-server && yarn init-db",
+        "start": "node init.mjs && cd server && yarn start && cd .."
     }
 }
