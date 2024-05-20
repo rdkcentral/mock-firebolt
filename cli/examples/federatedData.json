@@ -1,0 +1,11 @@
+{
+    "scratch": {
+        "federatedValue":  {
+            "correlationId": "xyz",
+            "parameters": {
+                "entityId": "129"
+            }
+        },
+        "federatedResponse": {}
+    }
+}

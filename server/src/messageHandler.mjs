@@ -59,7 +59,6 @@ async function handleMessage(message, userId, ws) {
   let response, newResponse;
 
   logger.debug(`Received message for user ${userId} : ${message}`);
-
   const oMsg = JSON.parse(message);
   if (oMsg.method && config.app.caseInsensitiveModules) {
     oMsg.method = util.createCaseAgnosticMethod(oMsg.method);
@@ -181,6 +180,7 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
+          delay: function delay(ms){ return  util.delay(ms) },
           closeConnection: function cc() {return userManagement.closeConnection(userId, ws)},
           closeAllConnections: function closeallconn() {return userManagement.closeAllConnections(userId)},
           uuid: function cuuid() {return stateManagement.createUuid()},
@@ -208,7 +208,8 @@ async function handleMessage(message, userId, ws) {
   if (stateManagement.hasOverride(userId, oMsg.method)) {
     // Handle Firebolt Method call using our in-memory mock values
     logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
-    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
+    response = await stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
+    console.log('Response inside:::', response)
   } else if (process.env.proxy) {
     //bypass JSON-RPC calls and hit proxy server endpoint
     //init websocket connection for proxy request to be sent and use receiver client to send events back to caller.
