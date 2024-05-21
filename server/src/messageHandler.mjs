@@ -59,6 +59,7 @@ async function handleMessage(message, userId, ws) {
   let response, newResponse;
 
   logger.debug(`Received message for user ${userId} : ${message}`);
+  
   const oMsg = JSON.parse(message);
   if (oMsg.method && config.app.caseInsensitiveModules) {
     oMsg.method = util.createCaseAgnosticMethod(oMsg.method);

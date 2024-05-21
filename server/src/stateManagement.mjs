@@ -273,13 +273,10 @@ async function handleDynamicResponseValues(userId, methodName, params, ws, resp)
         },
         FireboltError: commonErrors.FireboltError
       };
-        const sFcnBody = resp.response + ';' + 'return f(ctx, params);';
-        const fcn = new Function('ctx', 'params', sFcnBody);
-        const result = await fcn(ctx, params);
-        
-        const resultErrors = fireboltOpenRpc.validateMethodResult(result, methodName);
-        
-
+      const sFcnBody = resp.response + ';' + 'return f(ctx, params);';
+      const fcn = new Function('ctx', 'params', sFcnBody);
+      const result = await fcn(ctx, params);
+      const resultErrors = fireboltOpenRpc.validateMethodResult(result, methodName);
       if ( ! resultErrors || resultErrors.length === 0 ) {
         resp = {
           result: result
@@ -312,7 +309,6 @@ async function handleDynamicResponseValues(userId, methodName, params, ws, resp)
   
   return resp;
 }
-
 // Handle result values, which are either specified as static values or
 // as functions which return values
 function handleStaticAndDynamicResult(userId, methodName, params, resp){
@@ -335,7 +331,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
         resp = {
           result: result
         };  
-      } else {
+      } else {fireboltOpenRpc
         // After the result function was called, we're realizing what it returned isn't valid!
         logInvalidMethodError(methodName, resultErrors, resp);
       }
