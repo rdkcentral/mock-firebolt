@@ -331,7 +331,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
         resp = {
           result: result
         };  
-      } else {fireboltOpenRpc
+      } else {
         // After the result function was called, we're realizing what it returned isn't valid!
         logInvalidMethodError(methodName, resultErrors, resp);
       }
