@@ -23,6 +23,8 @@ import * as utilities from "./utilities.mjs";
 
 jest.setTimeout(20000);
 
+let commander;
+
 beforeAll(async () => {
     const response = await utilities.mfState(
         true,
@@ -30,6 +32,8 @@ beforeAll(async () => {
     );
     console.log(response)
     expect(response).toBe("MF started successfully");
+    
+    commander = new utilities.FireboltCommander(9998, "123~A");
 });
 
 afterAll(async () => {
@@ -41,18 +45,18 @@ afterAll(async () => {
 
 // Updating method for a particular user
 test(`Validate group scope updates`, async () => {
-
-    const userId = "123~A"
     const group = "~A"
     const fbCommand = "accessibility.closedCaptionsSettings"
 
     //Validate the OpenRPC response
-    let result = await utilities.fireboltCommand(
+    let result = await commander.sendCommand(
         JSON.stringify({
             method: fbCommand,
             params: {},
             id: 0,
-          }), null, userId)
+        })
+    );    
+    
     console.log(JSON.stringify(result))
     expect(result.includes('\"fontFamily\":\"Monospace sans-serif\"')).toBe(true)
 
@@ -63,12 +67,14 @@ test(`Validate group scope updates`, async () => {
     );
     
     //Validate the override took effect
-    result = await utilities.fireboltCommand(
+    result = await commander.sendCommand(
         JSON.stringify({
             method: fbCommand,
             params: {},
             id: 0,
-          }), null, userId)
+          })
+    );
+   
     console.log(JSON.stringify(result))
     expect(result.includes('\"fontFamily\":\"testValue1\"')).toBe(true)
 
@@ -79,12 +85,16 @@ test(`Validate group scope updates`, async () => {
     );
 
     //Validate the second override took effect
-    result = await utilities.fireboltCommand(
+    result = await commander.sendCommand(
         JSON.stringify({
             method: fbCommand,
             params: {},
             id: 0,
-          }), null, userId)
+        })
+    );
+
     console.log(JSON.stringify(result))
     expect(result.includes('\"fontFamily\":\"testValue2\"')).toBe(true)
+
+    commander.closeConnection();
  });
