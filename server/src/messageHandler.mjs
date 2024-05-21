@@ -209,7 +209,6 @@ async function handleMessage(message, userId, ws) {
     // Handle Firebolt Method call using our in-memory mock values
     logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
     response = await stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
-    console.log('Response inside:::', response)
   } else if (process.env.proxy) {
     //bypass JSON-RPC calls and hit proxy server endpoint
     //init websocket connection for proxy request to be sent and use receiver client to send events back to caller.

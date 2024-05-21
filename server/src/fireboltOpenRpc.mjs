@@ -176,21 +176,16 @@ function validateMethodResult(val, methodName) {
 
   try {
     const oMethod = getMethod(methodName);
-    //console.log("MethodName",methodName)
-    console.log("******oMethod",JSON.stringify(oMethod))
     const oResult = oMethod.result;
-    //console.log("*&&&&&&&oResult",JSON.stringify(oResult))
     let oSchema = oResult.schema;
     if ( '$ref' in oSchema  ) {
       const ref = oSchema['$ref'];
       const schemaName = ref.substring(ref.lastIndexOf('/') + 1);
       oSchema = getSchema(schemaName);
-     // console.log("0schemaName",JSON.stringify(oSchema))
     }
     //console.log("0schemaName outside",JSON.stringify(oSchema))
     const validate = ajv.compile(oSchema);
     const valid = validate(val);
-    console.log("valid ",JSON.stringify(valid))
     if ( !valid ) {
       errors = validate.errors;
     }

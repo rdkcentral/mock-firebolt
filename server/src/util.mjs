@@ -32,7 +32,6 @@ import fs from 'fs';
 
 // Use: await delay(2000);
 function delay(ms) {
-  console.log("Inside Delay,Delay for ",ms)
   return new Promise(res => setTimeout(res, ms));
 }
 
