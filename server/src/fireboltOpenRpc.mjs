@@ -183,7 +183,7 @@ function validateMethodResult(val, methodName) {
       const schemaName = ref.substring(ref.lastIndexOf('/') + 1);
       oSchema = getSchema(schemaName);
     }
-    //console.log("0schemaName outside",JSON.stringify(oSchema))
+   
     const validate = ajv.compile(oSchema);
     const valid = validate(val);
     if ( !valid ) {
