@@ -181,6 +181,7 @@ async function handleMessage(message, userId, ws) {
           set: function ss(key, val, scope) { return stateManagement.setScratch(userId, key, val, scope) },
           get: function gs(key) { return stateManagement.getScratch(userId, key); },
           delete: function ds(key, scope) { return stateManagement.deleteScratch(userId, key, scope)},
+          delay: function delay(ms){ return  util.delay(ms) },
           closeConnection: function cc() {return userManagement.closeConnection(userId, ws)},
           closeAllConnections: function closeallconn() {return userManagement.closeAllConnections(userId)},
           uuid: function cuuid() {return stateManagement.createUuid()},
@@ -208,7 +209,7 @@ async function handleMessage(message, userId, ws) {
   if (stateManagement.hasOverride(userId, oMsg.method)) {
     // Handle Firebolt Method call using our in-memory mock values
     logger.debug(`Retrieving override mock value for method ${oMsg.method}`);
-    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
+    response = await stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want an override response
   } else if (process.env.proxy) {
     //bypass JSON-RPC calls and hit proxy server endpoint
     //init websocket connection for proxy request to be sent and use receiver client to send events back to caller.
@@ -259,7 +260,7 @@ async function handleMessage(message, userId, ws) {
   } else {
     // Handle Firebolt Method call using default defaults (from the examples in the Open RPC specification)
     logger.debug(`Returning default mock value for method ${oMsg.method}`);
-    response = stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want a static response
+    response = await stateManagement.getMethodResponse(userId, oMsg.method, oMsg.params, ws); // Could be optimized cuz we know we want a static response
   }
 
   // Emit developerNotes for the method, if any

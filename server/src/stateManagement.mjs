@@ -232,7 +232,7 @@ function logInvalidMethodError(methodName, resultErrors, resp) {
 }
 
 // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
-function handleDynamicResponseValues(userId, methodName, params, ws, resp){
+async function handleDynamicResponseValues(userId, methodName, params, ws, resp){
   if ( typeof resp.response === 'string' && resp.response.trimStart().startsWith('function') ) {
     // Looks like resp.response is specified as a function; evaluate it
     try {
@@ -243,6 +243,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
         set: function ss(key, val, scope) { return setScratch(userId, key, val, scope) },
         get: function gs(key) { return getScratch(userId, key); },
         delete: function ds(key, scope) { return deleteScratch(userId, key, scope)},
+        delay: function delay(ms){ return  util.delay(ms) },
         closeConnection: function cc() {return closeConnection(userId, ws)},
         closeAllConnections: function closeallconn() {return closeAllConnections(userId)},
         uuid: function cuuid() {return createUuid()},
@@ -274,7 +275,7 @@ function handleDynamicResponseValues(userId, methodName, params, ws, resp){
       };
       const sFcnBody = resp.response + ';' + 'return f(ctx, params);'
       const fcn = new Function('ctx', 'params', sFcnBody);
-      const result = fcn(ctx, params);
+      const result = await fcn(ctx, params);
       const resultErrors = fireboltOpenRpc.validateMethodResult(result, methodName);
       if ( ! resultErrors || resultErrors.length === 0 ) {
         resp = {
@@ -361,7 +362,7 @@ function handleStaticAndDynamicError(userId, methodName, params, resp){
 // Returns either { result: xxx } or { error: { code: xxx, message: 'xxx' } }
 // The params parameter isn't used for static mock responses, but is useful when
 // specifying result or error by function (see examples/discovery-watched-1.json for an example)
-function getMethodResponse(userId, methodName, params, ws) {
+async function getMethodResponse(userId, methodName, params, ws) {
   let resp;
   const userState = getState(userId);
 
@@ -379,7 +380,7 @@ function getMethodResponse(userId, methodName, params, ws) {
 
     // Handle response values, which are always functions which either return a result or throw a FireboltError w/ code & message
     if ( resp && resp.response ) {
-      resp = handleDynamicResponseValues(userId, methodName, params, ws, resp);
+      resp = await handleDynamicResponseValues(userId, methodName, params, ws, resp);
     }
 
     // Handle result values, which are either specified as static values or
