@@ -310,7 +310,7 @@ async function handleDynamicResponseValues(userId, methodName, params, ws, resp)
 
 // Handle result values, which are either specified as static values or
 // as functions which return values
-function handleStaticAndDynamicResult(userId, methodName, params, resp){
+async function handleStaticAndDynamicResult(userId, methodName, params, resp){
   if ( typeof resp.result === 'string' && resp.result.trimStart().startsWith('function') ) {
     // Looks like resp.result is specified as a function; evaluate it
     try {
@@ -322,7 +322,7 @@ function handleStaticAndDynamicResult(userId, methodName, params, resp){
       };
       const sFcnBody = resp.result + ';' + 'return f(ctx, params);'
       const fcn = new Function('ctx', 'params', sFcnBody);
-      const result = fcn(ctx, params);
+      const result = await fcn(ctx, params);
       const resultErrors = fireboltOpenRpc.validateMethodResult(result, methodName);
       if ( ! resultErrors || resultErrors.length === 0 ) {
         resp = {
@@ -386,7 +386,7 @@ async function getMethodResponse(userId, methodName, params, ws) {
     // Handle result values, which are either specified as static values or
     // as functions which return values
     else if ( resp && resp.result ) {
-      resp = handleStaticAndDynamicResult(userId, methodName, params, resp);
+      resp = await handleStaticAndDynamicResult(userId, methodName, params, resp);
     }
 
     // Handle error values, which are either specified as static objects with code & message props or
