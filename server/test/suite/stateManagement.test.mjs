@@ -186,10 +186,10 @@ test(`stateManagement.getAppropriateDelay works properly`, async () => {
   expect(result).toBe(0);
 });
 
-test(`getMethodResponse works properly`, () => {
+test(`getMethodResponse works properly`, async () => {
   const dummyParams = [];
   const expectedResult = {};
-  const result = stateManagement.getMethodResponse(
+  const result = await stateManagement.getMethodResponse(
     "12345",
     "accessibility.closedCaptions",
     dummyParams
@@ -488,7 +488,7 @@ test(`stateManagement.validateMethodOverride works properly`, () => {
   });
 });
 
-test(`stateManagement.getMethodResponse works properly`, () => {
+test(`stateManagement.getMethodResponse works properly`, async () => {
   //testing for resp=handleSequenceOfResponseValues(userId, methodName, params, resp,userState);
   const userIdArray = ["12345", "23456", "34567"],
     methodName = "rpc.discover",
@@ -561,9 +561,9 @@ test(`stateManagement.getMethodResponse works properly`, () => {
   }, {
     name: "test"
   }, {}];
-  userIdArray.forEach((userId, index) => {
+  userIdArray.forEach(async (userId, index) => {
     stateManagement.testExports.state[userId] = obj[userId];
-    const result = stateManagement.getMethodResponse(
+    const result = await stateManagement.getMethodResponse(
       userId,
       methodName,
       params
@@ -589,7 +589,7 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     },
     sequenceState: {},
   };
-  const result = stateManagement.getMethodResponse("12345", methodName, params);
+  const result = await stateManagement.getMethodResponse("12345", methodName, params);
   expect(result).toEqual({});
 
   //testing for  resp = handleStaticAndDynamicResult(userId, methodName, params, resp);
@@ -610,7 +610,7 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     },
     sequenceState: {},
   };
-  const result1 = stateManagement.getMethodResponse(
+  const result1 = await stateManagement.getMethodResponse(
     "12345",
     methodName,
     params
@@ -637,7 +637,7 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     },
     sequenceState: {},
   };
-  const result2 = stateManagement.getMethodResponse(
+  const result2 = await stateManagement.getMethodResponse(
     "12345",
     methodName,
     params
@@ -667,7 +667,7 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     },
     sequenceState: {},
   };
-  const result3 = stateManagement.getMethodResponse(
+  const result3 = await stateManagement.getMethodResponse(
     "12345",
     methodName,
     params
@@ -698,7 +698,7 @@ test(`stateManagement.getMethodResponse works properly`, () => {
     },
     sequenceState: {},
   };
-  const result4 = stateManagement.getMethodResponse(
+  const result4 = await stateManagement.getMethodResponse(
     "12345",
     methodName,
     params
