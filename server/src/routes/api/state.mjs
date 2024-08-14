@@ -289,11 +289,44 @@ function revertState(req, res) {
   });
 }
 
+// POST /api/v1/state/interactionService
+// Expected body: { enabled: true|false, user: 'xxx' }
+// where user is the user ID the interaction logs to be sent
+//  E.g., { enabled: true, user: '456~A' }
+function interactionService(req, res) {
+  let message;
+  if (req.body.enabled && req.body.user) {
+    config.dotConfig.interactionService = req.body;
+    if (config.dotConfig?.interactionService?.enabled == true) {
+      message = "Successfully started interactionService";
+    } else if (req.body?.interactionService == false) {
+      message = "Successfully stopped interactionService";
+    } else {
+      return res.status(400).send({
+        status: "ERROR",
+        errorCode: "INVALID-ENABLED-VALUE",
+        message:
+          "Enabled value must be true or false",
+      });
+    }
+    return res.status(200).send({
+      status: message,
+    });
+  } else {
+    return res.status(400).send({
+      status: "ERROR",
+      errorCode: "MISSING-STATE",
+      message:
+        "Did not find expected 'enabled' and 'user' key within post body",
+    });
+  }
+}
+
 // --- Exports ---
 
 export {
   getState,
   setLatency, setMode,
   setMethodResult, setMethodError,
-  updateState, revertState
+  updateState, revertState, interactionService
 };
