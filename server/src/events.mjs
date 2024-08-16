@@ -300,7 +300,6 @@ function emitResponse(finalResult, msg, userId, method) {
   const userWSData = userManagement.getWsForUser(config.interactionService?.user);
   createAndSendInteractionLog(eventMessage, method, null, userWSData); // creating interaction log and send it to the client
   wsArr.forEach((ws) => {
-
     ws.send(eventMessage);
     // Check if eventType is included in config
     if (eventConfig.eventType) {
