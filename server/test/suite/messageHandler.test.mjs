@@ -212,7 +212,7 @@ test(`messageHandler.handleMessage works properly, for logger.debug`, async () =
   delete config.interactionService;
 });
 
-test.only(`messageHandler.handleMessage works properly for error scenarios`, async () => {
+test(`messageHandler.handleMessage works properly for error scenarios`, async () => {
   config.interactionService = {enabled: true, user: "12345"};
   fireboltOpenRpc.testExports.methodMaps["core"] = {
     "lifecycle.onInactive": {
