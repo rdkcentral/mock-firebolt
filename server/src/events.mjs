@@ -297,9 +297,9 @@ function emitResponse(finalResult, msg, userId, method) {
   }
   //Update the call with event response
   updateCallWithResponse(method, eventMessage, "events", userId);
+  const userWSData = userManagement.getWsForUser(config.interactionService?.user);
+  createAndSendInteractionLog(eventMessage, method, null, userWSData); // creating interaction log and send it to the client
   wsArr.forEach((ws) => {
-    const userWSData = userManagement.getWsForUser(config.interactionService?.user);
-    createAndSendInteractionLog(eventMessage, method, null, userWSData); // creating interaction log and send it to the client
 
     ws.send(eventMessage);
     // Check if eventType is included in config
