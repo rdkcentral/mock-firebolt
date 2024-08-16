@@ -23,6 +23,8 @@
 import {jest} from '@jest/globals';
 import * as fs from 'fs';
 import * as util from '../../src/util.mjs';
+import { logger } from "../../src/logger.mjs";
+import { config } from "../../src/config.mjs";
 
 test(`util.delay works properly`, () => {
     jest.useFakeTimers();
@@ -97,4 +99,28 @@ test(`util.mergeArrayOfStrings works properly`, () => {
         dummyDenyFlags
     );
     expect(result).toEqual(["test"]);
+});
+
+test(`util.createAndSendInteractionLog works properly when disabled`, () => {
+    config.interactionService = {enabled: false, user: "12345"};
+    const debugSpy = jest.spyOn(logger, "debug");
+    util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, {send: () => {}} );
+    expect(debugSpy).toHaveBeenCalledTimes(0);
+    delete config.interactionService;
+});
+
+test(`util.createAndSendInteractionLog works properly when enabled`, () => {
+    config.interactionService = {enabled: true, user: "12345"};
+    const debugSpy = jest.spyOn(logger, "debug");
+    util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, {send: () => {}} );
+    expect(debugSpy).toHaveBeenCalled();
+    delete config.interactionService;
+});
+
+test(`util.createAndSendInteractionLog works properly without ws object`, () => {
+    config.interactionService = {enabled: true, user: "12345"};
+    const errorSpy = jest.spyOn(logger, "error");
+    util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, undefined );
+    expect(errorSpy).toHaveBeenCalled();
+    delete config.interactionService;
 });

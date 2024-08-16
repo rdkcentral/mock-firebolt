@@ -188,12 +188,16 @@ function createAndSendInteractionLog(response, method, params, ws) {
         success: true,
         response: "",
       };
-  
+
       interactionLog.params = params;
       interactionLog.method = method;
       interactionLog.response = response;
-      ws && ws.send(JSON.stringify({ FireboltInteraction: interactionLog }));
-      logger.debug(`Sent interaction log for user ${config.interactionService.user}: ${JSON.stringify({ FireboltInteraction: interactionLog })}`);
+      if (ws) {
+        ws.send(JSON.stringify({ FireboltInteraction: interactionLog }));
+        logger.debug(`Sent interaction log for user ${config.interactionService.user}: ${JSON.stringify({ FireboltInteraction: interactionLog })}`);
+      } else {
+        logger.error(`Error in createAndSendInteractionLog: ws object is not provided`);
+      }
     }
   } catch (error) {
     logger.error(`Error in createAndSendInteractionLog: ${error}`);
