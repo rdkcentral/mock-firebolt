@@ -171,16 +171,16 @@ function createCaseAgnosticMethod(method){
 }
 
 /* 
-* @function: createInteractionLog
+* @function: createAndSendInteractionLog
 * @Description: Create interaction log and send it to the client
 * @param {String} response - Response of the method call
 * @param {String} method - Name of the method
 * @param {String} params - Params of the method call
 * @param {Object} ws - WS object to send the interaction log
 */
-function createInteractionLog(response, method, params, ws) {
+function createAndSendInteractionLog(response, method, params, ws) {
   try {
-    if (config?.dotConfig?.interactionService?.enabled == true) {
+    if (config.interactionService?.enabled == true) {
       const interactionLog = {
         app_id: "mock-firebolt",
         method: "",
@@ -193,13 +193,13 @@ function createInteractionLog(response, method, params, ws) {
       interactionLog.method = method;
       interactionLog.response = response;
       ws && ws.send(JSON.stringify({ FireboltInteraction: interactionLog }));
-      logger.debug(`Sent interaction log for user ${config.dotConfig.interactionService.user}: ${JSON.stringify({ FireboltInteraction: interactionLog })}`);
+      logger.debug(`Sent interaction log for user ${config.interactionService.user}: ${JSON.stringify({ FireboltInteraction: interactionLog })}`);
     }
   } catch (error) {
-    logger.error(`Error in createInteractionLog: ${error}`);
+    logger.error(`Error in createAndSendInteractionLog: ${error}`);
   }
 }
 
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject, createCaseAgnosticMethod, createInteractionLog };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject, createCaseAgnosticMethod, createAndSendInteractionLog };

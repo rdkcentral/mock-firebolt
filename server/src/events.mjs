@@ -29,7 +29,7 @@ import { logger } from './logger.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import { config } from './config.mjs';
 import { updateCallWithResponse } from './sessionManagement.mjs';
-import { createCaseAgnosticMethod, createInteractionLog } from './util.mjs';
+import { createCaseAgnosticMethod, createAndSendInteractionLog } from './util.mjs';
 
 
 const { dotConfig: { eventConfig } } = config;
@@ -226,8 +226,8 @@ function sendEventListenerAck(userId, ws, metadata) {
   const ackMessage = template(metadata);
   const parsedAckMessage = JSON.parse(ackMessage);
 
-  const userData = userManagement.getWsForUser(config?.dotConfig?.interactionService?.user);
-  createInteractionLog(ackMessage, metadata.method, metadata.registration.params, userData); // creating interaction log and send it to the client
+  const userWSData = userManagement.getWsForUser(config.interactionService?.user);
+  createAndSendInteractionLog(ackMessage, metadata.method, metadata.registration.params, userWSData); // creating interaction log and send it to the client
 
   ws.send(ackMessage);
   logger.debug(`Sent registration event ack message for user ${userId}: ${ackMessage}`);
@@ -298,8 +298,8 @@ function emitResponse(finalResult, msg, userId, method) {
   //Update the call with event response
   updateCallWithResponse(method, eventMessage, "events", userId);
   wsArr.forEach((ws) => {
-    const userData = userManagement.getWsForUser(config?.dotConfig?.interactionService?.user);
-    createInteractionLog(eventMessage, method, null, userData); // creating interaction log and send it to the client
+    const userWSData = userManagement.getWsForUser(config.interactionService?.user);
+    createAndSendInteractionLog(eventMessage, method, null, userWSData); // creating interaction log and send it to the client
 
     ws.send(eventMessage);
     // Check if eventType is included in config

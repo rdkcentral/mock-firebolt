@@ -63,8 +63,11 @@ function configureAPI(app) {
 	// Revert to the way things were when server started up
     app.post('/api/v1/state/revert',                    stateApi.revertState);
 
-	// Start or Stop the interaction log service
-    app.post('/api/v1/state/interactionService',        stateApi.interactionService);
+	// Start the interaction log service
+    app.post('/api/v1/user/enableInteractionLogs',      userApi.enableInteractionLogs);
+
+	// Stop the interaction log service
+    app.post('/api/v1/user/disableInteractionLogs',     userApi.disableInteractionLogs);
 
     // ======================= State-Related API Routes =======================
 

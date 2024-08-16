@@ -23,6 +23,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import * as userManagement from '../../userManagement.mjs';
 import * as stateManagement from '../../stateManagement.mjs';
+import { config } from '../../config.mjs';
 import { logger } from '../../logger.mjs';
 
 
@@ -84,9 +85,69 @@ function getUsers(req, res) {
   });
 }
 
+// POST /api/v1/state/enableInteractionLogs
+// Expected body: { enabled: true }
+// Expected headers: x-mockfirebolt-userid - The user id of the user making the request
+//  E.g., { enabled: true }
+function enableInteractionLogs(req, res) {
+  if (req.body.hasOwnProperty("enabled")) {
+    const user = req.get("x-mockfirebolt-userid");
+    config.interactionService = req.body;
+    config.interactionService.user = user;
+    if (config.interactionService?.enabled == true) {
+      return res.status(200).send({
+        status: "SUCCESS",
+        message: "Successfully started interactionService",
+      });
+    } else {
+      return res.status(400).send({
+        status: "ERROR",
+        errorCode: "INVALID-ENABLED-VALUE",
+        message: "Enabled value must be true",
+      });
+    }
+  } else {
+    return res.status(400).send({
+      status: "ERROR",
+      errorCode: "MISSING-STATE",
+      message: "Did not find expected 'enabled' key within post body",
+    });
+  }
+}
+
+// POST /api/v1/state/disableInteractionLogs
+// Expected body: { enabled: false }
+// Expected headers: x-mockfirebolt-userid - The user id of the user making the request
+//  E.g., { enabled: false }
+function disableInteractionLogs(req, res) {
+  if (req.body.hasOwnProperty("enabled")) {
+    const user = req.get("x-mockfirebolt-userid");
+    config.interactionService = req.body;
+    config.interactionService.user = user;
+    if (config.interactionService?.enabled == false) {
+      return res.status(200).send({
+        status: "SUCCESS",
+        message: "Successfully stopped interactionService",
+      });
+    } else {
+      return res.status(400).send({
+        status: "ERROR",
+        errorCode: "INVALID-ENABLED-VALUE",
+        message: "Enabled value must be false",
+      });
+    }
+  } else {
+    return res.status(400).send({
+      status: "ERROR",
+      errorCode: "MISSING-STATE",
+      message: "Did not find expected 'enabled' key within post body",
+    });
+  }
+}
+
 
 // --- Exports ---
 
 export {
-  addUser,getUsers
+  addUser,getUsers,enableInteractionLogs,disableInteractionLogs
 };

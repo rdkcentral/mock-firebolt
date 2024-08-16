@@ -346,8 +346,8 @@ async function handleMessage(message, userId, ws) {
   const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
   await util.delay(dly);
 
-  const userData = userManagement.getWsForUser(config?.dotConfig?.interactionService?.user);
-  util.createInteractionLog(finalResponse, JSON.parse(message).method, JSON.parse(message).params, userData); // creating interaction log and send it to the client
+  const userWSData = userManagement.getWsForUser(config?.interactionService?.user);
+  util.createAndSendInteractionLog(finalResponse, JSON.parse(message).method, JSON.parse(message).params, userWSData); // creating interaction log and send it to the client
 
   ws.send(finalResponse);
   logger.debug(`Sent message for user ${userId}: ${finalResponse}`);
