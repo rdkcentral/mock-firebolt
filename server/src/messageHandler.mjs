@@ -350,7 +350,7 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Sent message for user ${userId}: ${finalResponse}`);
   updateCallWithResponse(oMsg.method, JSON.parse(finalResponse).result, "result", userId)
 
-  config.interactionService.forEach((_, userId) => {
+  config.interactionService && config.interactionService.forEach((_, userId) => {
     const userWSData = userManagement.getWsForUser(userId);
     util.createAndSendInteractionLog(finalResponse, JSON.parse(message).method, JSON.parse(message).params, userWSData, userId); // creating interaction log and send it to the client
   });

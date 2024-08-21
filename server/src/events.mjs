@@ -226,7 +226,7 @@ function sendEventListenerAck(userId, ws, metadata) {
   const ackMessage = template(metadata);
   const parsedAckMessage = JSON.parse(ackMessage);
 
-  config.interactionService.forEach((_, userId) => {
+  config.interactionService && config.interactionService.forEach((_, userId) => {
     const userWSData = userManagement.getWsForUser(userId);
     createAndSendInteractionLog(ackMessage, metadata.method, metadata.registration.params, userWSData, userId); // creating interaction log and send it to the client
   });
@@ -299,7 +299,7 @@ function emitResponse(finalResult, msg, userId, method) {
   }
   //Update the call with event response
   updateCallWithResponse(method, eventMessage, "events", userId);
-  config.interactionService.forEach((_, userId) => {
+  config.interactionService && config.interactionService.forEach((_, userId) => {
     const userWSData = userManagement.getWsForUser(userId);
     createAndSendInteractionLog(eventMessage, method, null, userWSData, userId); // creating interaction log and send it to the client
   });
