@@ -226,8 +226,10 @@ function sendEventListenerAck(userId, ws, metadata) {
   const ackMessage = template(metadata);
   const parsedAckMessage = JSON.parse(ackMessage);
 
-  const userWSData = userManagement.getWsForUser(config.interactionService?.user);
-  createAndSendInteractionLog(ackMessage, metadata.method, metadata.registration.params, userWSData); // creating interaction log and send it to the client
+  config.interactionService.forEach((_, userId) => {
+    const userWSData = userManagement.getWsForUser(userId);
+    createAndSendInteractionLog(ackMessage, metadata.method, metadata.registration.params, userWSData, userId); // creating interaction log and send it to the client
+  });
 
   ws.send(ackMessage);
   logger.debug(`Sent registration event ack message for user ${userId}: ${ackMessage}`);
@@ -297,8 +299,10 @@ function emitResponse(finalResult, msg, userId, method) {
   }
   //Update the call with event response
   updateCallWithResponse(method, eventMessage, "events", userId);
-  const userWSData = userManagement.getWsForUser(config.interactionService?.user);
-  createAndSendInteractionLog(eventMessage, method, null, userWSData); // creating interaction log and send it to the client
+  config.interactionService.forEach((_, userId) => {
+    const userWSData = userManagement.getWsForUser(userId);
+    createAndSendInteractionLog(eventMessage, method, null, userWSData, userId); // creating interaction log and send it to the client
+  });
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
     // Check if eventType is included in config

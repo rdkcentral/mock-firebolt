@@ -167,7 +167,8 @@ test(`messageHandler.handleMessage works properly, message param is false`, asyn
 });
 
 test(`messageHandler.handleMessage works properly, for logger.debug`, async () => {
-  config.interactionService = {enabled: true, user: "12345"};
+  config.interactionService = new Map();
+  config.interactionService.set("12345", { enabled: true });
   fireboltOpenRpc.testExports.methodMaps["core"] = {
     "lifecycle.onInactive": {
       name: "lifecycle.onInactive",
@@ -213,7 +214,6 @@ test(`messageHandler.handleMessage works properly, for logger.debug`, async () =
 });
 
 test(`messageHandler.handleMessage works properly for error scenarios`, async () => {
-  config.interactionService = {enabled: true, user: "12345"};
   fireboltOpenRpc.testExports.methodMaps["core"] = {
     "lifecycle.onInactive": {
       name: "lifecycle.onInactive",
@@ -248,7 +248,6 @@ test(`messageHandler.handleMessage works properly for error scenarios`, async ()
     '{"jsonrpc":"2.0","method":"rpc.discover","params":{"listen":true},"id":1}';
   await messageHandler.handleMessage(dummyMsgFive, "12345", { send: () => {} });
   expect(errorSpy).toHaveBeenCalled();
-  delete config.interactionService;
 });
 
 test(`messageHandler.handleMessage works properly for developerNotes`, async () => {

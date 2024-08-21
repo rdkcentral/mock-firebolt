@@ -91,21 +91,20 @@ function getUsers(req, res) {
 //  E.g., { enabled: true }
 function enableInteractionLogs(req, res) {
   if (req.body.hasOwnProperty("enabled")) {
-    const user = req.get("x-mockfirebolt-userid");
-    config.interactionService = req.body;
-    config.interactionService.user = user;
-    if (config.interactionService?.enabled == true) {
-      return res.status(200).send({
-        status: "SUCCESS",
-        message: "Successfully started interactionService",
-      });
-    } else {
+    if (req.body.enabled !== true) {
       return res.status(400).send({
         status: "ERROR",
         errorCode: "INVALID-ENABLED-VALUE",
         message: "Enabled value must be true",
       });
     }
+    const user = req.get("x-mockfirebolt-userid");
+    config.interactionService == undefined && (config.interactionService = new Map());
+    config.interactionService.set(user, req.body);
+    return res.status(200).send({
+      status: "SUCCESS",
+      message: "Successfully started interactionService",
+    });
   } else {
     return res.status(400).send({
       status: "ERROR",
@@ -121,22 +120,30 @@ function enableInteractionLogs(req, res) {
 //  E.g., { enabled: false }
 function disableInteractionLogs(req, res) {
   if (req.body.hasOwnProperty("enabled")) {
-    const user = req.get("x-mockfirebolt-userid");
-    config.interactionService = req.body;
-    config.interactionService.user = user;
-    if (config.interactionService?.enabled == false) {
-      return res.status(200).send({
-        status: "SUCCESS",
-        message: "Successfully stopped interactionService",
-      });
-    } else {
+    if (req.body.enabled !== false) {
+      // If the incoming request enabled value is not `false`, return an error
       return res.status(400).send({
         status: "ERROR",
         errorCode: "INVALID-ENABLED-VALUE",
         message: "Enabled value must be false",
       });
     }
+    const user = req.get("x-mockfirebolt-userid");
+    // If the user is not found in the interactionService, return an error
+    if (!config.interactionService.has(user)) {
+      return res.status(400).send({
+        status: "ERROR",
+        errorCode: "USER-NOT-FOUND",
+        message: "User not found in interactionService",
+      });
+    }
+    config.interactionService.delete(user);
+    return res.status(200).send({
+      status: "SUCCESS",
+      message: "Successfully stopped interactionService",
+    });
   } else {
+    // If the incoming request does not have an enabled key, return an error
     return res.status(400).send({
       status: "ERROR",
       errorCode: "MISSING-STATE",

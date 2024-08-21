@@ -101,26 +101,14 @@ test(`util.mergeArrayOfStrings works properly`, () => {
     expect(result).toEqual(["test"]);
 });
 
-test(`util.createAndSendInteractionLog works properly when disabled`, () => {
-    config.interactionService = {enabled: false, user: "12345"};
+test(`util.createAndSendInteractionLog works properly`, () => {
     const debugSpy = jest.spyOn(logger, "debug");
-    util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, {send: () => {}} );
-    expect(debugSpy).toHaveBeenCalledTimes(0);
-    delete config.interactionService;
-});
-
-test(`util.createAndSendInteractionLog works properly when enabled`, () => {
-    config.interactionService = {enabled: true, user: "12345"};
-    const debugSpy = jest.spyOn(logger, "debug");
-    util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, {send: () => {}} );
+    util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, {send: () => {}}, '12345' );
     expect(debugSpy).toHaveBeenCalled();
-    delete config.interactionService;
 });
 
 test(`util.createAndSendInteractionLog works properly without ws object`, () => {
-    config.interactionService = {enabled: true, user: "12345"};
     const errorSpy = jest.spyOn(logger, "error");
     util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, undefined );
     expect(errorSpy).toHaveBeenCalled();
-    delete config.interactionService;
 });
