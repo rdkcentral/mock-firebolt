@@ -29,7 +29,6 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 import fs from 'fs';
-import { logger } from './logger.mjs';
 
 // Use: await delay(2000);
 function delay(ms) {
@@ -170,39 +169,6 @@ function createCaseAgnosticMethod(method){
   return method;
 }
 
-/** 
-* @function: createAndSendInteractionLog
-* @Description: Create interaction log and send it to the client
-* @param {String} response - Response of the method call
-* @param {String} method - Name of the method
-* @param {String} params - Params of the method call
-* @param {Object} ws - WS object to send the interaction log
-* @param {String} ws - UserId value
-*/
-function createAndSendInteractionLog(response, method, params, ws, userId) {
-  try {
-      const interactionLog = {
-        app_id: "mock-firebolt",
-        method: "",
-        params: "",
-        success: true,
-        response: "",
-      };
-
-      interactionLog.params = params;
-      interactionLog.method = method;
-      interactionLog.response = response;
-      if (ws) {
-        ws.send(JSON.stringify({ FireboltInteraction: interactionLog }));
-        logger.debug(`Sent interaction log for user ${userId}: ${JSON.stringify({ FireboltInteraction: interactionLog })}`);
-      } else {
-        logger.error(`Error in createAndSendInteractionLog: ws object is not provided`);
-      }
-  } catch (error) {
-    logger.error(`Error in createAndSendInteractionLog: ${error}`);
-  }
-}
-
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject, createCaseAgnosticMethod, createAndSendInteractionLog };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject, createCaseAgnosticMethod };

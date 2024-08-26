@@ -23,8 +23,6 @@
 import {jest} from '@jest/globals';
 import * as fs from 'fs';
 import * as util from '../../src/util.mjs';
-import { logger } from "../../src/logger.mjs";
-import { config } from "../../src/config.mjs";
 
 test(`util.delay works properly`, () => {
     jest.useFakeTimers();
@@ -99,16 +97,4 @@ test(`util.mergeArrayOfStrings works properly`, () => {
         dummyDenyFlags
     );
     expect(result).toEqual(["test"]);
-});
-
-test(`util.createAndSendInteractionLog works properly`, () => {
-    const debugSpy = jest.spyOn(logger, "debug");
-    util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, {send: () => {}}, '12345' );
-    expect(debugSpy).toHaveBeenCalled();
-});
-
-test(`util.createAndSendInteractionLog works properly without ws object`, () => {
-    const errorSpy = jest.spyOn(logger, "error");
-    util.createAndSendInteractionLog('{name: "id"}', "account.id", {}, undefined );
-    expect(errorSpy).toHaveBeenCalled();
 });
