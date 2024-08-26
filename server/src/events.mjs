@@ -29,8 +29,8 @@ import { logger } from './logger.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import { config } from './config.mjs';
 import { updateCallWithResponse } from './sessionManagement.mjs';
+import { createAndSendInteractionLog } from './interactionLog.mjs';
 import { createCaseAgnosticMethod } from './util.mjs';
-import { createAndSendInteractionLog } from './interactionService.mjs';
 
 
 const { dotConfig: { eventConfig } } = config;
