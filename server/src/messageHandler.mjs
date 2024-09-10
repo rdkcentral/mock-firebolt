@@ -32,6 +32,7 @@ import { addCall, updateCallWithResponse } from './sessionManagement.mjs';
 import * as proxyManagement from './proxyManagement.mjs';
 import * as conduit from './conduit.mjs';
 import { config } from './config.mjs';
+import { createAndSendInteractionLog } from './interactionLog.mjs';
 
 const { dotConfig: { eventConfig } } = config;
 
@@ -345,9 +346,15 @@ async function handleMessage(message, userId, ws) {
   }
   const dly = stateManagement.getAppropriateDelay(userId, oMsg.method);
   await util.delay(dly);
+
   ws.send(finalResponse);
   logger.debug(`Sent message for user ${userId}: ${finalResponse}`);
   updateCallWithResponse(oMsg.method, JSON.parse(finalResponse).result, "result", userId)
+
+  config.interactionService && config.interactionService.forEach((_, userId) => {
+    const userWSData = userManagement.getWsForUser(userId);
+    createAndSendInteractionLog(finalResponse, JSON.parse(message).method, JSON.parse(message).params, userWSData, userId); // creating interaction log and send it to the client
+  });
 }
 
 // --- Exports ---

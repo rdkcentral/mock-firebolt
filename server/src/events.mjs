@@ -29,6 +29,7 @@ import { logger } from './logger.mjs';
 import * as fireboltOpenRpc from './fireboltOpenRpc.mjs';
 import { config } from './config.mjs';
 import { updateCallWithResponse } from './sessionManagement.mjs';
+import { createAndSendInteractionLog } from './interactionLog.mjs';
 import { createCaseAgnosticMethod } from './util.mjs';
 
 
@@ -226,6 +227,11 @@ function sendEventListenerAck(userId, ws, metadata) {
   const ackMessage = template(metadata);
   const parsedAckMessage = JSON.parse(ackMessage);
 
+  config.interactionService && config.interactionService.forEach((_, userId) => {
+    const userWSData = userManagement.getWsForUser(userId);
+    createAndSendInteractionLog(ackMessage, metadata.method, metadata.registration.params, userWSData, userId); // creating interaction log and send it to the client
+  });
+
   ws.send(ackMessage);
   logger.debug(`Sent registration event ack message for user ${userId}: ${ackMessage}`);
   updateCallWithResponse(metadata.method, parsedAckMessage.result, "result", userId)
@@ -294,6 +300,10 @@ function emitResponse(finalResult, msg, userId, method) {
   }
   //Update the call with event response
   updateCallWithResponse(method, eventMessage, "events", userId);
+  config.interactionService && config.interactionService.forEach((_, userId) => {
+    const userWSData = userManagement.getWsForUser(userId);
+    createAndSendInteractionLog(eventMessage, method, null, userWSData, userId); // creating interaction log and send it to the client
+  });
   wsArr.forEach((ws) => {
     ws.send(eventMessage);
     // Check if eventType is included in config

@@ -289,11 +289,48 @@ function revertState(req, res) {
   });
 }
 
+// POST /api/v1/state/enableInteractionLogs
+// Expected body: None
+// Expected headers: x-mockfirebolt-userid - The user id of the user making the request
+function enableInteractionLogs(req, res) {
+  const user = getUserIdFromReq(req);
+  logger.info(`Enabling interaction logs for user ${user}`);
+  config.interactionService == undefined &&
+    (config.interactionService = new Map());
+  config.interactionService.set(user, { enabled: true });
+  return res.status(200).send({
+    status: "SUCCESS",
+    message: "Successfully started interactionService",
+  });
+}
+
+// POST /api/v1/state/disableInteractionLogs
+// Expected body: None
+// Expected headers: x-mockfirebolt-userid - The user id of the user making the request
+function disableInteractionLogs(req, res) {
+  const user = getUserIdFromReq(req);
+  logger.info(`Disabling interaction logs for user ${user}`);
+  // If the user is not found in the interactionService, return an error
+  if (!config.interactionService.has(user)) {
+    return res.status(400).send({
+      status: "ERROR",
+      errorCode: "USER-NOT-FOUND",
+      message: "User not found",
+    });
+  }
+  config.interactionService.delete(user);
+  return res.status(200).send({
+    status: "SUCCESS",
+    message: "Successfully stopped interactionService",
+  });
+}
+
 // --- Exports ---
 
 export {
   getState,
   setLatency, setMode,
   setMethodResult, setMethodError,
-  updateState, revertState
+  updateState, revertState,
+  enableInteractionLogs, disableInteractionLogs
 };

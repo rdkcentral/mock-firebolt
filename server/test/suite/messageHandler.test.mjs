@@ -25,6 +25,8 @@ import * as messageHandler from "../../src/messageHandler.mjs";
 import { logger } from "../../src/logger.mjs";
 import * as fireboltOpenRpc from "../../src/fireboltOpenRpc.mjs";
 import { methodTriggers } from "../../src/triggers.mjs";
+import { config } from "../../src/config.mjs";
+import * as userManagement from "../../src/userManagement.mjs";
 
 test(`messageHandler.handleMessage works properly and return when message doesn't have any id`, async () => {
   const spy = jest.spyOn(logger, "info");
@@ -165,6 +167,8 @@ test(`messageHandler.handleMessage works properly, message param is false`, asyn
 });
 
 test(`messageHandler.handleMessage works properly, for logger.debug`, async () => {
+  config.interactionService = new Map();
+  config.interactionService.set("12345", { enabled: true });
   fireboltOpenRpc.testExports.methodMaps["core"] = {
     "lifecycle.onInactive": {
       name: "lifecycle.onInactive",
@@ -199,11 +203,14 @@ test(`messageHandler.handleMessage works properly, for logger.debug`, async () =
     },
   };
 
+  userManagement.testExports.associateUserWithWs("12345", { send: () => {} });
   const debugSpy = jest.spyOn(logger, "debug");
   const dummyMsgFour =
     '{"jsonrpc":"2.0","method":"rpc.discover","params":{"listen":true},"id":1}';
   await messageHandler.handleMessage(dummyMsgFour, "12345", { send: () => {} });
   expect(debugSpy).toHaveBeenCalled();
+  userManagement.testExports.user2ws.delete("12345");
+  delete config.interactionService;
 });
 
 test(`messageHandler.handleMessage works properly for error scenarios`, async () => {
