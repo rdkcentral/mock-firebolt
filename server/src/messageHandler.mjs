@@ -168,7 +168,8 @@ async function handleMessage(message, userId, ws) {
     // No delay
     ws.send(responseMessage);
     logger.info(`Sent "invalid params" message: ${responseMessage}`);
-    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error", userId)
+    updateCallWithResponse(oMsg.method, oResponseMessage.error, "error", userId);
+    return;
   }
 
   // Fire pre trigger if there is one for this method  
