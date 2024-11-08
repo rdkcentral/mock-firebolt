@@ -1,6 +1,15 @@
 # Change Log
 
 All notable changes to this project will be documented in this file.
+## [1.0.4] - 2024-02-13
+
+### Added
+
+* Added ability to check if an active userid is connected or not to mock-firebolt from yaml file
+
+### Changed
+
+* Updated definition of ctx in files to include new function `getWebSocketConnectionForUser` that will internally return `getWsForUser` to check if an active userid is connected or not to mock-firebolt 
 
 ## [1.0.3] - 2023-11-30
 
