@@ -20,6 +20,7 @@
 
 'use strict';
 
+import * as bidirectionalApi from './routes/api/bidirectional.mjs'
 import * as healthApi from './routes/api/health.mjs';
 import * as metaApi from './routes/api/meta.mjs';
 import * as stateApi from './routes/api/state.mjs';
@@ -39,6 +40,11 @@ function configureAPI(app) {
 
     // Get all OpenRPC metadata
     app.get('/api/v1/meta',                             metaApi.getMeta);
+
+    // =========================== Bidirectional Test Routes =========================
+
+	// Health check endpoint
+	app.post('/api/v1/bidirectionalPayload',             bidirectionalApi.bidirectionalPayload);
 
     // ======================= State-Related API Routes =======================
     
