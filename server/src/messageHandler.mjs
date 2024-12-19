@@ -62,21 +62,27 @@ async function handleMessage(message, userId, ws) {
   logger.debug(`Received message for user ${userId} : ${message}`);
 
   const oMsg = JSON.parse(message);
+
   if (oMsg.method && config.app.caseInsensitiveModules) {
     oMsg.method = util.createCaseAgnosticMethod(oMsg.method);
   } else if (!oMsg.method) {
-    logger.error(`ERROR: Missing method field in message. Mock Firebolt expects incoming request to have a method field in the format <module.method>`);
-    const oResponseMessage = {
-      jsonrpc: '2.0',
-      id: oMsg.id,
-      error: {
-        message: 'ERROR: Missing method field in message. Mock Firebolt expects incoming request to have a method field in the format <module.method>'
-      }
-    };
-    const responseMessage = JSON.stringify(oResponseMessage);
-    ws.send(responseMessage);
-    logger.debug(`Sent message for user ${userId}: ${responseMessage}`);
-    return;
+    if (config.dotConfig.bidirectional) {
+      logger.debug(`Bidirectional: Ignoring above incoming message as provider response`)
+      return;
+    } else {
+      logger.error(`ERROR: Missing method field in message. Mock Firebolt expects incoming request to have a method field in the format <module.method>`);
+      const oResponseMessage = {
+        jsonrpc: '2.0',
+        id: oMsg.id,
+        error: {
+          message: 'ERROR: Missing method field in message. Mock Firebolt expects incoming request to have a method field in the format <module.method>'
+        }
+      };
+      const responseMessage = JSON.stringify(oResponseMessage);
+      ws.send(responseMessage);
+      logger.debug(`Sent message for user ${userId}: ${responseMessage}`);
+      return;
+    }
   }
   
   // record the message if we are recording

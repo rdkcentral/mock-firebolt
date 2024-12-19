@@ -3,6 +3,8 @@
 
     "multiUserConnections": "warn",
 
+    "bidirectional": true,
+
     "supportedOpenRPCs": [
 
         {
