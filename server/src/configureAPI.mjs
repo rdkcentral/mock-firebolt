@@ -43,8 +43,9 @@ function configureAPI(app) {
 
     // =========================== Bidirectional Test Routes =========================
 
-	// Health check endpoint
-	app.post('/api/v1/bidirectionalPayload',             bidirectionalApi.bidirectionalPayload);
+    // Health check endpoint
+    app.post('/api/v1/bidirectionalPayload',            bidirectionalApi.bidirectionalPayload);
+    app.post('/api/v1/bidirectionalEventPayload',       bidirectionalApi.bidirectionalEventPayload);
 
     // ======================= State-Related API Routes =======================
     
