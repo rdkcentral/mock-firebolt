@@ -39,6 +39,14 @@ function createPayload(method, params) {
     }
 }
 
+function createEventPayload(method, params) {
+    return {
+        jsonrpc: "2.0",
+        method,
+        params
+    }
+}
+
 function unidirectionalEventToBiDirectional(method) {
     if (method.includes(".")){
         let splitArray = method.split('.');
@@ -68,8 +76,8 @@ function bidirectionalPayload(req, res) {
 
         let payload = createPayload(unidirectionalEventToBiDirectional(method), params);
 
-        ws.send(JSON.stringify(payload));
         console.log(`Sending bidirectional payload: ${JSON.stringify(payload)}`);
+        ws.send(JSON.stringify(payload));
 
         res.status(200).send({
             status: "Sent payload"
@@ -83,8 +91,34 @@ function bidirectionalPayload(req, res) {
     }
 }
 
+// POST /api/v1/bidirectionalEventPayload
+// Expected body: { method: 'device.onDeviceNameChanged' params: {} }
+// In sending payload id is NOT set, per JSON-RPC spec
+function bidirectionalEventPayload(req, res) {
+    try {
+        const userId = getUserIdFromReq(req);
+        const ws = userManagement.getWsForUser(userId)
+        const { method, params } = req.body;
+
+        let payload = createEventPayload(unidirectionalEventToBiDirectional(method), params);
+
+        console.log(`Sending bidirectional-event payload: ${JSON.stringify(payload)}`);
+        ws.send(JSON.stringify(payload));
+
+        res.status(200).send({
+            status: "Sent payload"
+        })
+    } catch (error) {
+        console.error(error)
+        res.status(500).send({
+            status: "Cannot send payload",
+            error
+        })
+    }
+}
 // --- Exports ---
 
 export {
-  bidirectionalPayload
+  bidirectionalPayload,
+  bidirectionalEventPayload,
 };
