@@ -23,7 +23,7 @@
 import { getUserIdFromReq } from '../../util.mjs';
 import * as userManagement from '../../userManagement.mjs'
 
-let id = 1
+let id = 1001
 
 function getIdAndIncrement() {
     id++;
