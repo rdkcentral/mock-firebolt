@@ -113,7 +113,7 @@ test(`userManagement.isKnownUser works properly`, () => {
 test(`userManagement.getWssForUser works properly`, () => {
   const dummyArray = ["12345", "67895"];
   const expectedResult = [
-    '{"_events":{},"_eventsCount":2,"clients":{},"_shouldEmitClose":false,"options":{"maxPayload":104857600,"skipUTF8Validation":false,"perMessageDeflate":false,"handleProtocols":null,"clientTracking":true,"verifyClient":null,"noServer":true,"backlog":null,"server":null,"host":null,"path":null,"port":null},"_state":0}',
+    '{"_events":{},"_eventsCount":2,"clients":{},"_shouldEmitClose":false,"options":{"allowSynchronousEvents":true,"autoPong":true,"maxPayload":104857600,"skipUTF8Validation":false,"perMessageDeflate":false,"handleProtocols":null,"clientTracking":true,"verifyClient":null,"noServer":true,"backlog":null,"server":null,"host":null,"path":null,"port":null},"_state":0}',
     undefined,
   ];
   dummyArray.forEach((userId, index) => {
