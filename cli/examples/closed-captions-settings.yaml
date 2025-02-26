@@ -30,6 +30,391 @@ methods:
 
         return null;
       }
+  closedcaptions.fontFamily:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontFamily method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontFamily = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontFamily;
+        }
+      }
+  closedcaptions.fontSize:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontSize method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontSize = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontSize;
+        }
+      }
+  closedcaptions.fontColor:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontColor method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontColor = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontColor;
+        }
+      }
+  closedcaptions.fontEdge:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontEdge method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontEdge = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontEdge;
+        }
+      }
+  closedcaptions.fontEdgeColor:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontEdgeColor method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontEdgeColor = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontEdgeColor;
+        }
+      }
+  closedcaptions.fontOpacity:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontOpacity method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontOpacity = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontOpacity;
+        }
+      }
+  closedcaptions.backgroundColor:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.backgroundColor method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.backgroundColor = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.backgroundColor;
+        }
+      }
+  closedcaptions.backgroundOpacity:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.backgroundOpacity method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.backgroundOpacity = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.backgroundOpacity;
+        }
+      }
+  closedcaptions.textAlign:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.textAlign method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.textAlign = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.textAlign;
+        }
+      }
+  closedcaptions.textAlignVertical:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.textAlignVertical method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.textAlignVertical = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.textAlignVertical;
+        }
+      }
+  closedcaptions.setEnabled:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.enabled method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.enabled = params.value;
+          console.log("CCsvalue12345:",ccs)
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.enabled;
+        }
+      }
+  closedcaptions.setFontFamily:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontFamily method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          const fontFamilies = ["serif","sans-serif","monospace","cursive","fantasy"]
+          if ( fontFamilies.includes(params.value) ){
+            ccs.styles.fontFamily = params.value;
+          }
+          else{
+            ccs.styles.fontFamily = "sans-serif"
+          }
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontFamily;
+        }
+      }
+  closedcaptions.setFontSize:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontSize method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontSize = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontSize;
+        }
+      }
+  closedcaptions.setFontColor:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontColor method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontColor = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontColor;
+        }
+      }
+  closedcaptions.setFontEdge:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontEdge method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontEdge = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontEdge;
+        }
+      }
+  closedcaptions.setFontEdgeColor:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontEdgeColor method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontEdgeColor = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontEdgeColor;
+        }
+      }
+  closedcaptions.setFontOpacity:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.fontOpacity method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.fontOpacity = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.fontOpacity;
+        }
+      }
+  closedcaptions.setBackgroundColor:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.backgroundColor method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.backgroundColor = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.backgroundColor;
+        }
+      }
+  closedcaptions.setBackgroundOpacity:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.backgroundOpacity method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.backgroundOpacity = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.backgroundOpacity;
+        }
+      }
+  closedcaptions.setTextAlign:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.textAlign method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.textAlign = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.textAlign;
+        }
+      }
+  closedcaptions.setTextAlignVertical:
+    response: |
+      function f(ctx, params) {
+        const ccs = ctx.get('closedCaptionsSettings');
+        if ( params && params.hasOwnProperty('value') ) {
+          // Setter called:
+          // Cause an accessibility.onClosedCaptionsSettingsChanged event
+          // (done via post-method trigger on closedcaptions.textAlignVertical method)
+          // Save for when accessibility.closedCaptionsSettings is called
+          ccs.styles.textAlignVertical = params.value;
+          ctx.set('closedCaptionsSettings', ccs);
+          return true;
+        } else {
+          // Getter called:
+          // Return what we last saved when this func was called as a setter
+          return ccs.styles.textAlignVertical;
+        }
+      }
   accessibility.closedCaptionsSettings:
     response: |
       function f(ctx, params) {
