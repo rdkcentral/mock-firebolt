@@ -30,6 +30,12 @@ function isSdkEnabled(sdkName) {
     return true;
   }
 
+  // Check if SDK is enabled in supportedToAppOpenRPCs
+  const oSdkToApp = config.dotConfig.supportedToAppOpenRPCs.find((oSdk) => oSdk.name === sdkName);
+  if (oSdkToApp && oSdkToApp.enabled) {
+    return true;
+  }
+
   // Check if sdk with given name is enabled via a command-line flag
   if ( commandLine.enabledSdkNames.includes(sdkName) ) {
     return true;
