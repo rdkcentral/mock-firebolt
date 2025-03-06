@@ -78,6 +78,10 @@ function registerEventListener(userId, metadata, ws) {
 
   if (!eventListenerMap[userId][method]) {
     eventListenerMap[userId][method] = { wsArr: [], metadata };
+  } else {
+    // Update the metadata if the method is already registered
+    // If the same event is subscribed to twice, the response will be sent back to the second subscription
+    eventListenerMap[userId][method].metadata = metadata;
   }
 
   // Check if ws is already in the wsArr before pushing
