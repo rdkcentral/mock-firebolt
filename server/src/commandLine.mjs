@@ -61,11 +61,32 @@ for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) 
   }
 }
 
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedToAppOpenRPCs || {}) ) {
+  if ( oSdk.cliFlag ) {
+    if ( ! knownOpts.hasOwnProperty(oSdk.cliFlag) ) {
+      knownOpts[oSdk.cliFlag] = Boolean;
+    } else {
+      logger.error(`ERROR: ${oSdk.cliFlag} is already used as a command-line flag`);
+      process.exit(1);
+    }
+  }
+}
+
 const shortHands = {
   't'     : [ '--triggers' ],
   'noval' : [ '--novalidate' ]
 };
 for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) {
+  if ( oSdk.cliShortFlag ) {
+    if ( ! shortHands.hasOwnProperty(oSdk.cliShortFlag) ) {
+      shortHands[oSdk.cliShortFlag] = [ `--${oSdk.cliFlag}` ];
+    } else {
+      logger.error(`ERROR: ${oSdk.cliShortFlag} is already used as a command-line shorthand flag`);
+      process.exit(1);
+    }
+  }
+}
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedToAppOpenRPCs || {}) ) {
   if ( oSdk.cliShortFlag ) {
     if ( ! shortHands.hasOwnProperty(oSdk.cliShortFlag) ) {
       shortHands[oSdk.cliShortFlag] = [ `--${oSdk.cliFlag}` ];
@@ -110,13 +131,24 @@ for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) 
   }
 }
 
+const toAppSdks = {};
+for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedToAppOpenRPCs || {}) ) {
+  if ( parsed[oSdk.name] || oSdk.enabled ) {
+    toAppSdks[oSdk.name] = true;
+  }
+}
+
 // Create array of enabled SDK names
 const sdkNames = Object.keys(sdks);
 const enabledSdkNames = sdkNames.filter(function(sdkName) {
   return sdks[sdkName];
 });
 
+const toAppSdkNames = Object.keys(toAppSdks);
+const enabledToAppSdkNames = toAppSdkNames.filter((sdkName) => toAppSdks[sdkName]);
+
 logger.info(`Enabled Firebolt SDKs: ${enabledSdkNames.join(', ')}`);
+logger.info(`Enabled Firebolt ToApp SDKs: ${enabledToAppSdkNames.join(', ')}`);
 
 // --- Trigger paths specified via --triggers/-t
 

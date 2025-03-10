@@ -155,6 +155,19 @@ function dereferenceMeta(_meta) {
     }
   });
 
+  // Process supportedToAppOpenRPCs
+  config.dotConfig.supportedToAppOpenRPCs.forEach((oSdk) => {
+    const sdkName = oSdk.name;
+    if (sdkName in meta) {
+      const metaForSdk = meta[sdkName];
+      const methods = metaForSdk.methods;
+      for (let mm = 0; mm < methods.length; mm += 1) {
+        dereferenceSchemas(metaForSdk, methods[mm].name);
+      }
+      delete metaForSdk.components; // No longer needed
+    }
+  });
+
   return meta;
 }
 

@@ -61,6 +61,18 @@ function healthcheck(req, res) {
     }
   });
 
+  // Process supportedToAppOpenRPCs
+  config.dotConfig.supportedToAppOpenRPCs.forEach(function(oSdk) {
+    const sdkName = oSdk.name;
+    if (sdkManagement.isSdkEnabled(sdkName)) {
+      if (meta[sdkName] && meta[sdkName].info) {
+        response.versionInfo.sdk[sdkName] = meta[sdkName].info.version;
+      } else {
+        response.versionInfo.sdk[sdkName] = '**UNAVAILABLE**';
+      }
+    }
+  });
+
   res.status(200).send(response);
 }
 
