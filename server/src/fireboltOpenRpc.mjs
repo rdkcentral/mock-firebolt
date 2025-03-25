@@ -62,13 +62,18 @@ function getMeta() {
 }
 
 function getMethod(methodName) {
-  for ( let ii = 0; ii < config.dotConfig.supportedOpenRPCs.length; ii += 1 ) {
-    const sdkName = config.dotConfig.supportedOpenRPCs[ii].name;
-    if (config.app.caseInsensitiveModules){
-      methodName = createCaseAgnosticMethod(methodName);
-    }
-    if ( methodMaps[sdkName] ) {
-      if ( methodName in methodMaps[sdkName] ) { return methodMaps[sdkName][methodName]; }
+  if (config.app.caseInsensitiveModules) {
+    methodName = createCaseAgnosticMethod(methodName);
+  }
+
+  const sources = [
+    ...config.dotConfig.supportedOpenRPCs,
+    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
+  ];
+
+  for (const { name: sdkName } of sources) {
+    if (methodMaps[sdkName]?.[methodName]) {
+      return methodMaps[sdkName][methodName];
     }
   }
   return undefined;
@@ -84,9 +89,15 @@ function isMethodKnown(methodName) {
 }
 
 function getSchema(schemaName) {
-  for ( const ii = 0; ii < config.dotConfig.supportedOpenRPCs.length; ii += 1 ) {
-    const sdkName = config.dotConfig.supportedOpenRPCs[ii].name;
-    if ( schemaName in meta[sdkName].components.schemas ) { return meta[sdkName].components.schemas[schemaName]; }
+  const sources = [
+    ...config.dotConfig.supportedOpenRPCs,
+    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
+  ];
+
+  for (const { name: sdkName } of sources) {
+    if (meta[sdkName]?.components?.schemas?.[schemaName]) {
+      return meta[sdkName].components.schemas[schemaName];
+    }
   }
   return undefined;
 }
@@ -255,10 +266,20 @@ async function downloadOpenRpcJsonFile(url) {
 // Load the firebolt-xxx-sdk.json file for the given SDK, if that SDK is enabled
 async function readSdkJsonFileIfEnabled(sdkName) {
   let url, fileUrl;
+  
   if ( isSdkEnabled(sdkName) ) {
     try {
-      const oSdk = config.dotConfig.supportedOpenRPCs.find((oSdk) => { return ( oSdk.name === sdkName ); });
-      if ( oSdk.fileName ) {
+      const oSdk = [
+        ...config.dotConfig.supportedOpenRPCs,
+        ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
+      ].find((oSdk) => oSdk.name === sdkName);
+      
+      if (!oSdk) {
+        logger.error(`ERROR: SDK ${sdkName} not found in supportedOpenRPCs or supportedToAppOpenRPCs; Skipping`);
+        return;
+      }      
+
+      if (oSdk.fileName) {
         const openRpcFileName = oSdk.fileName;
         if ( path.isAbsolute(openRpcFileName) || openRpcFileName.startsWith('~') ) {
           // Absolute file path given -- read from that file path exactly as-is
@@ -295,26 +316,38 @@ async function readSdkJsonFileIfEnabled(sdkName) {
 // NOTE: Assumes the build process has put the firebolt-xxx-sdk.json files in the same directory
 //       as the source code from the src/ directory
 async function readAllEnabledSdkJsonFiles() {
-  if (isSdkEnabled('mock')) {
-    await readSdkJsonFileIfEnabled('mock');
+  if (isSdkEnabled("mock")) {
+    return readSdkJsonFileIfEnabled("mock");
   }
-  else {
-    await Promise.all(config.dotConfig.supportedOpenRPCs.map(async (oSdk) => {
-      const sdkName = oSdk.name;
-      await readSdkJsonFileIfEnabled(sdkName);
-    }));
-  }
+
+  const sdkList = [
+    ...config.dotConfig.supportedOpenRPCs,
+    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
+  ].map((oSdk) => readSdkJsonFileIfEnabled(oSdk.name));
+
+  await Promise.all(sdkList);
 }
 
+
 function buildMethodMapsForAllEnabledSdks() {
-  // Build faster-performing maps for methods (vs. openrpc.methods array)
-  config.dotConfig.supportedOpenRPCs.forEach(function(oSdk) {
-    const sdkName = oSdk.name;
-    if ( isSdkEnabled(sdkName) ) {
-      methodMaps[sdkName] = buildMethodMap(meta[sdkName]);
+  // Combine OpenRPCs and ToAppOpenRPCs if bidirectional is enabled
+  const allSdks = [
+    ...config.dotConfig.supportedOpenRPCs,
+    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : []),
+  ];
+
+  allSdks.forEach(({ name: sdkName }) => {
+    if (isSdkEnabled(sdkName)) {
+      const methodMap = buildMethodMap(meta[sdkName]);
+
+      // Assign to appropriate map
+      if ((config.dotConfig.supportedOpenRPCs.some((sdk) => sdk.name === sdkName)) || (config.dotConfig.supportedToAppOpenRPCs.some((sdk) => sdk.name === sdkName)) ) {
+        methodMaps[sdkName] = methodMap;
+      }
     }
   });
 }
+
 
 // --- Module-level Code ---
 

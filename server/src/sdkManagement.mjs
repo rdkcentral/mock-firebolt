@@ -24,19 +24,15 @@ import { config } from './config.mjs';
 import * as commandLine from './commandLine.mjs';
 
 function isSdkEnabled(sdkName) {
-  // Check if sdk with given name is enabled in the .mf.config.json file
-  const oSdk = config.dotConfig.supportedOpenRPCs.find((oSdk) => { return ( oSdk.name === sdkName ); });
-  if ( oSdk && oSdk.enabled ) {
-    return true;
-  }
+  // Merge SDKs if bidirectional is enabled
+  const allSdks = [
+    ...config.dotConfig.supportedOpenRPCs,
+    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs || [] : []),
+  ];
 
-  // Check if sdk with given name is enabled via a command-line flag
-  if ( commandLine.enabledSdkNames.includes(sdkName) ) {
-    return true;
-  }
-
-  // Must not be enabled
-  return false;
+  // Check if SDK is enabled in config or via command-line flags
+  return allSdks.some(({ name, enabled }) => name === sdkName && enabled) || 
+         commandLine.enabledSdkNames.includes(sdkName);
 }
 
 // --- Exports ---

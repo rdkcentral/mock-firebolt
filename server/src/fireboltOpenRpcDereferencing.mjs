@@ -143,15 +143,20 @@ function dereferenceSchemas(metaForSdk, methodName) {
 
 function dereferenceMeta(_meta) {
   const meta = JSON.parse(JSON.stringify(_meta)); // Deep copy
-  config.dotConfig.supportedOpenRPCs.forEach((oSdk) => {
-    const sdkName = oSdk.name;
-    if ( sdkName in meta ) {
+
+  // Merge supportedOpenRPCs and supportedToAppOpenRPCs if bidirectional is enabled
+  const allSdks = [
+    ...config.dotConfig.supportedOpenRPCs,
+    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs || [] : [])
+  ];
+
+  allSdks.forEach(({ name: sdkName }) => {
+    if (sdkName in meta) {
       const metaForSdk = meta[sdkName];
-      const methods = metaForSdk.methods;
-      for ( let mm = 0; mm < methods.length; mm += 1 ) {
-        dereferenceSchemas(metaForSdk, methods[mm].name);
-      }
-      delete metaForSdk.components; // No longer needed
+      metaForSdk.methods.forEach(({ name }) => {
+        dereferenceSchemas(metaForSdk, name);
+      });
+      delete metaForSdk.components;
     }
   });
 
