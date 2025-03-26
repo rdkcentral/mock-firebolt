@@ -29,7 +29,7 @@ import * as https from 'https';
 import Ajv from 'ajv';
 const ajv = new Ajv();
 
-import { createTmpFile,createCaseAgnosticMethod } from './util.mjs';
+import { createTmpFile,createCaseAgnosticMethod, getOpenRPCSources } from './util.mjs';
 import { config } from './config.mjs';
 import { logger } from './logger.mjs';
 import { dereferenceMeta } from './fireboltOpenRpcDereferencing.mjs';
@@ -66,10 +66,7 @@ function getMethod(methodName) {
     methodName = createCaseAgnosticMethod(methodName);
   }
 
-  const sources = [
-    ...config.dotConfig.supportedOpenRPCs,
-    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
-  ];
+  const sources = getOpenRPCSources();
 
   for (const { name: sdkName } of sources) {
     if (methodMaps[sdkName]?.[methodName]) {
@@ -89,10 +86,7 @@ function isMethodKnown(methodName) {
 }
 
 function getSchema(schemaName) {
-  const sources = [
-    ...config.dotConfig.supportedOpenRPCs,
-    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
-  ];
+  const sources = getOpenRPCSources();
 
   for (const { name: sdkName } of sources) {
     if (meta[sdkName]?.components?.schemas?.[schemaName]) {
@@ -269,10 +263,7 @@ async function readSdkJsonFileIfEnabled(sdkName) {
   
   if ( isSdkEnabled(sdkName) ) {
     try {
-      const oSdk = [
-        ...config.dotConfig.supportedOpenRPCs,
-        ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
-      ].find((oSdk) => oSdk.name === sdkName);
+      const oSdk = getOpenRPCSources().find((oSdk) => oSdk.name === sdkName);
       
       if (!oSdk) {
         logger.error(`ERROR: SDK ${sdkName} not found in supportedOpenRPCs or supportedToAppOpenRPCs; Skipping`);
@@ -320,10 +311,7 @@ async function readAllEnabledSdkJsonFiles() {
     return readSdkJsonFileIfEnabled("mock");
   }
 
-  const sdkList = [
-    ...config.dotConfig.supportedOpenRPCs,
-    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
-  ].map((oSdk) => readSdkJsonFileIfEnabled(oSdk.name));
+  const sdkList = getOpenRPCSources().map((oSdk) => readSdkJsonFileIfEnabled(oSdk.name));
 
   await Promise.all(sdkList);
 }
@@ -331,10 +319,7 @@ async function readAllEnabledSdkJsonFiles() {
 
 function buildMethodMapsForAllEnabledSdks() {
   // Combine OpenRPCs and ToAppOpenRPCs if bidirectional is enabled
-  const allSdks = [
-    ...config.dotConfig.supportedOpenRPCs,
-    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : []),
-  ];
+  const allSdks = getOpenRPCSources();
 
   allSdks.forEach(({ name: sdkName }) => {
     if (isSdkEnabled(sdkName)) {

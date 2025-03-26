@@ -21,6 +21,7 @@
 'use strict';
 
 import { config } from './config.mjs';
+import { getOpenRPCSources } from './util.mjs'
 
 function isObject(thing) { return ( thing === Object(thing) ); }
 function isArray(thing)  { return ( Array.isArray(thing) );    }
@@ -145,10 +146,7 @@ function dereferenceMeta(_meta) {
   const meta = JSON.parse(JSON.stringify(_meta)); // Deep copy
 
   // Merge supportedOpenRPCs and supportedToAppOpenRPCs if bidirectional is enabled
-  const allSdks = [
-    ...config.dotConfig.supportedOpenRPCs,
-    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs || [] : [])
-  ];
+  const allSdks = getOpenRPCSources();
 
   allSdks.forEach(({ name: sdkName }) => {
     if (sdkName in meta) {

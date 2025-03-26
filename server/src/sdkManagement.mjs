@@ -22,13 +22,11 @@
 
 import { config } from './config.mjs';
 import * as commandLine from './commandLine.mjs';
+import { getOpenRPCSources } from './util.mjs'
 
 function isSdkEnabled(sdkName) {
   // Merge SDKs if bidirectional is enabled
-  const allSdks = [
-    ...config.dotConfig.supportedOpenRPCs,
-    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs || [] : []),
-  ];
+  const allSdks = getOpenRPCSources();
 
   // Check if SDK is enabled in config or via command-line flags
   return allSdks.some(({ name, enabled }) => name === sdkName && enabled) || 

@@ -24,6 +24,7 @@ import { readFile } from 'fs/promises';
 import { config } from '../../config.mjs';
 import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 import * as sdkManagement from '../../sdkManagement.mjs';
+import { getOpenRPCSources } from '../../util.mjs'
 
 // Load the package.json file
 const packageJson = JSON.parse(
@@ -51,10 +52,7 @@ function healthcheck(req, res) {
   }
 
   // Merge supportedOpenRPCs and supportedToAppOpenRPCs if bidirectional is enabled
-  const allSdks = [
-    ...config.dotConfig.supportedOpenRPCs,
-    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs || [] : []),
-  ];
+  const allSdks = getOpenRPCSources();
 
   allSdks.forEach(({ name: sdkName }) => {
     response.versionInfo.sdk[sdkName] = sdkManagement.isSdkEnabled(sdkName)

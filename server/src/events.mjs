@@ -32,7 +32,7 @@ import { updateCallWithResponse } from './sessionManagement.mjs';
 import { createAndSendInteractionLog } from './interactionLog.mjs';
 import { createCaseAgnosticMethod } from './util.mjs';
 
-
+let id = 1;
 const { dotConfig: { eventConfig } } = config;
 
 function logSuccess(onMethod, result, msg) {
@@ -270,13 +270,62 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
 }
 
 /**
+ * Creates a JSON-RPC 2.0-compliant payload for bidirectional communication.
+ * 
+ * - Assigns a unique `id` to each request by incrementing a global `id` counter.
+ * - Structures the payload according to the JSON-RPC 2.0 specification.
+ * 
+ * @param {string} method - The method name for the request.
+ * @param {any} params - The parameters to be sent with the request.
+ * @returns {Object} - The formatted JSON-RPC 2.0 payload.
+ */
+
+function createBidirectionalPayload(method, params) {
+    return {
+        id: id++,  // Increment and return `id` in one step
+        jsonrpc: "2.0",
+        method,
+        params
+    };
+}
+
+
+/**
+ * Converts a unidirectional event method name to its bidirectional equivalent.
+ * 
+ * - If the method follows the "module.onEvent" pattern (FB 1.0), it removes the "on" prefix 
+ *   and converts the first letter of the event name to lowercase.
+ * - If the method does not contain a dot (`.`), it is returned as is.
+ * 
+ * @param {string} method - The original unidirectional event method (e.g., "module.onEvent").
+ * @returns {string} - The bidirectional-compatible method name (e.g., "module.event").
+ */
+function unidirectionalEventToBiDirectional(method) {
+  if (!method.includes(".")) return method;
+
+  const [moduleName, methodName] = method.split(".", 2);
+  
+  // Remove "on" prefix if present (FB 1.0 Events)
+  const cleanedMethod = methodName.startsWith("on")
+      ? methodName.charAt(2).toLowerCase() + methodName.slice(3)
+      : methodName;
+
+  return `${moduleName}.${cleanedMethod}`;
+}
+
+
+/**
  * Emits a response to the registered event listener.
- * @param {any} finalResult - The final result to be included in the response.
- * @param {string} msg - The message associated with the response.
- * @param {string} userId - The ID of the user.
- * @param {string} method - The method associated with the event.
+ * 
+ * If bidirectional mode is enabled, it transforms the method to its bidirectional equivalent 
+ * and sends a structured payload. Otherwise, it sends a unidirectional event message.
+ * 
+ * @param {any} finalResult - The result to be included in the response, formatted accordingly.
+ * @param {string} msg - The log message associated with the event.
+ * @param {string} userId - The ID of the user receiving the event.
+ * @param {string} method - The original event method name.
  * @returns {void}
-*/
+ */
 function emitResponse(finalResult, msg, userId, method) {
   const listener = getRegisteredEventListener(userId, method);
   if (!listener) {
@@ -285,6 +334,7 @@ function emitResponse(finalResult, msg, userId, method) {
   }
 
   const { metadata, wsArr } = listener;
+
   // Defines the data object that will be inputted into handlebars
   const templateData = {
     ...metadata,
@@ -302,22 +352,32 @@ function emitResponse(finalResult, msg, userId, method) {
     // If event template config does not exist, just send the raw finalResult
     eventMessage = finalResult;
   }
-  //Update the call with event response
-  updateCallWithResponse(method, eventMessage, "events", userId);
-  config.interactionService && config.interactionService.forEach((_, userId) => {
-    const userWSData = userManagement.getWsForUser(userId);
-    createAndSendInteractionLog(eventMessage, method, null, userWSData, userId); // creating interaction log and send it to the client
-  });
-  wsArr.forEach((ws) => {
-    ws.send(eventMessage);
-    // Check if eventType is included in config
-    if (eventConfig.eventType) {
-      logger.info(`${msg}: Sent ${eventConfig.eventType} message to user ${userId}: ${eventMessage}`);
-    } else {
-      logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
-    }
-  });
-}
+
+  // Check if bidirectional mode is enabled
+  if (config.dotConfig.bidirectional) {
+    const bidirectionalMethod = unidirectionalEventToBiDirectional(method);
+    let payload = createBidirectionalPayload(bidirectionalMethod, finalResult);
+
+    wsArr.forEach((ws) => {
+      ws.send(JSON.stringify(payload)); // Send bidirectional event
+      logger.info(`${msg}: Sent bidirectional event to user ${userId}: ${JSON.stringify(payload)}`);
+    });
+  } else {
+    // Unidirectional mode (Default behavior)
+    updateCallWithResponse(method, eventMessage, "events", userId);
+    config.interactionService && config.interactionService.forEach((_, userId) => {
+      const userWSData = userManagement.getWsForUser(userId);
+      createAndSendInteractionLog(eventMessage, method, null, userWSData, userId); // creating interaction log and send it to the client
+    });
+    wsArr.forEach((ws) => {
+      ws.send(eventMessage);
+      if (eventConfig.eventType) {
+        logger.info(`${msg}: Sent ${eventConfig.eventType} message to user ${userId}: ${eventMessage}`);
+      } else {
+        logger.info(`${msg}: Sent event message to user ${userId}: ${eventMessage}`);
+      }
+    });
+  }}
 
 // sendEvent to handle post API event calls, including pre- and post- event trigger processing
 function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, fErr, fFatalErr) {
