@@ -64,7 +64,7 @@ test(`config works properly`, () => {
           cliFlag: null,
           cliShortFlag: null,
           enabled: true,
-          url_Note: "ToApp OpenRPC version",
+          url_Note: "URL for toApp OpenRPC (Firebolt 2.0 event/provider spec)",
           fileName: "../firebolt-app-open-rpc.json",
           name: "coreToApp",
         },
@@ -76,6 +76,7 @@ test(`config works properly`, () => {
           enabled: false
         }
       ],
+      bidirectional: true,
       eventConfig: {
         registrationMessage: {
           searchRegex: "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":true.*).*\\.on\\S*",
