@@ -84,7 +84,6 @@ function getUsers(req, res) {
   });
 }
 
-
 // --- Exports ---
 
 export {
