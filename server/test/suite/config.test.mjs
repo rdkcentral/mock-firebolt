@@ -59,6 +59,24 @@ test(`config works properly`, () => {
           enabled: false
         }
       ],
+      supportedToAppOpenRPCs: [
+        {
+          cliFlag: null,
+          cliShortFlag: null,
+          enabled: true,
+          url_Note: "URL for toApp OpenRPC (Firebolt 2.0 event/provider spec)",
+          fileName: "../firebolt-app-open-rpc.json",
+          name: "coreToApp",
+        },
+        {
+          name: "mockToApp",
+          cliFlag: "mockToApp",
+          cliShortFlag: "mt",
+          fileName: "../../functional/mockToAppOpenRpc.json",
+          enabled: false
+        }
+      ],
+      bidirectional: true,
       eventConfig: {
         registrationMessage: {
           searchRegex: "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":true.*).*\\.on\\S*",

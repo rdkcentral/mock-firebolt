@@ -50,30 +50,37 @@ const knownOpts = {
   'proxy'                : String,
   'multiUserConnections': String
 };
-for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) {
-  if ( oSdk.cliFlag ) {
-    if ( ! knownOpts.hasOwnProperty(oSdk.cliFlag) ) {
-      knownOpts[oSdk.cliFlag] = Boolean;
-    } else {
-      logger.error(`ERROR: ${oSdk.cliFlag} is already used as a command-line flag`);
-      process.exit(1);
-    }
+
+const allSdks = [
+  ...Object.values(config.dotConfig.supportedOpenRPCs),
+  ...(config.dotConfig.bidirectional ? Object.values(config.dotConfig.supportedToAppOpenRPCs || {}) : []),
+];
+
+for (const { cliFlag } of allSdks) {
+  if (!cliFlag) continue;
+
+  if (knownOpts.hasOwnProperty(cliFlag)) {
+    logger.error(`ERROR: ${cliFlag} is already used as a command-line flag`);
+    process.exit(1);
   }
+
+  knownOpts[cliFlag] = Boolean;
 }
 
 const shortHands = {
   't'     : [ '--triggers' ],
   'noval' : [ '--novalidate' ]
 };
-for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) {
-  if ( oSdk.cliShortFlag ) {
-    if ( ! shortHands.hasOwnProperty(oSdk.cliShortFlag) ) {
-      shortHands[oSdk.cliShortFlag] = [ `--${oSdk.cliFlag}` ];
-    } else {
-      logger.error(`ERROR: ${oSdk.cliShortFlag} is already used as a command-line shorthand flag`);
-      process.exit(1);
-    }
+
+for (const { cliShortFlag, cliFlag } of allSdks) {
+  if (!cliShortFlag) continue;
+
+  if (shortHands.hasOwnProperty(cliShortFlag)) {
+    logger.error(`ERROR: ${cliShortFlag} is already used as a command-line shorthand flag`);
+    process.exit(1);
   }
+
+  shortHands[cliShortFlag] = [`--${cliFlag}`];
 }
 
 const parsed = nopt(knownOpts, shortHands, process.argv, 2);
@@ -104,11 +111,12 @@ config.validate = mergeArrayOfStrings(config.validate, config.dotConfig.validate
 
 // Convert boolean flags for any SDKs into a simple map/dict/obj
 const sdks = {};
-for ( const [sdk, oSdk] of Object.entries(config.dotConfig.supportedOpenRPCs) ) {
-  if ( parsed[oSdk.name] || oSdk.enabled ) {
-    sdks[oSdk.name] = true;
+for (const { name, enabled } of allSdks) {
+  if (parsed[name] || enabled) {
+    sdks[name] = true;
   }
 }
+
 
 // Create array of enabled SDK names
 const sdkNames = Object.keys(sdks);

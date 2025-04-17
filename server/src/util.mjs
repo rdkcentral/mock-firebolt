@@ -169,6 +169,19 @@ function createCaseAgnosticMethod(method){
   return method;
 }
 
+/**
+ * @function: getOpenRPCSources
+ * @description: Combines supportedOpenRPCs and (if bidirectional is enabled) supportedToAppOpenRPCs 
+ *               from the dotConfig to produce a complete list of OpenRPC sources.
+ * @returns {Array} Array of OpenRPC source definitions.
+ */
+function getOpenRPCSources() {
+  return [
+    ...config.dotConfig.supportedOpenRPCs,
+    ...(config.dotConfig.bidirectional ? config.dotConfig.supportedToAppOpenRPCs : [])
+  ];
+}
+
 // --- Exports ---
 
-export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject, createCaseAgnosticMethod };
+export { delay, randomIntFromInterval, getUserIdFromReq, createTmpFile, mergeArrayOfStrings, createAbsoluteFilePath, getCreationDate, getModificationDate, searchObjectForKey, replaceKeyInObject, createCaseAgnosticMethod, getOpenRPCSources };

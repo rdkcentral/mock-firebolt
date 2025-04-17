@@ -24,6 +24,7 @@ import { readFile } from 'fs/promises';
 import { config } from '../../config.mjs';
 import * as fireboltOpenRpc from '../../fireboltOpenRpc.mjs';
 import * as sdkManagement from '../../sdkManagement.mjs';
+import { getOpenRPCSources } from '../../util.mjs'
 
 // Load the package.json file
 const packageJson = JSON.parse(
@@ -39,26 +40,24 @@ let meta;
 // GET /api/v1/healthcheck
 function healthcheck(req, res) {
   const response = {
-    status: 'OK',
+    status: "OK",
     versionInfo: {
       mockFirebolt: packageJson.version,
-      sdk: {}
-    }
+      sdk: {},
+    },
   };
 
-  if ( ! meta ) {
+  if (!meta) {
     meta = fireboltOpenRpc.getMeta();
   }
 
-  config.dotConfig.supportedOpenRPCs.forEach(function(oSdk) {
-    const sdkName = oSdk.name;
-    if ( sdkManagement.isSdkEnabled(sdkName) ) {
-      if ( meta[sdkName] && meta[sdkName].info ) {
-        response.versionInfo.sdk[sdkName] = meta[sdkName].info.version;
-      } else {
-        response.versionInfo.sdk[sdkName] = '**UNAVAILABLE**';
-      }
-    }
+  // Merge supportedOpenRPCs and supportedToAppOpenRPCs if bidirectional is enabled
+  const allSdks = getOpenRPCSources();
+
+  allSdks.forEach(({ name: sdkName }) => {
+    response.versionInfo.sdk[sdkName] = sdkManagement.isSdkEnabled(sdkName)
+      ? meta[sdkName]?.info?.version || "**UNAVAILABLE**"
+      : undefined;
   });
 
   res.status(200).send(response);
