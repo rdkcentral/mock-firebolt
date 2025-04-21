@@ -153,9 +153,9 @@ class Session {
             }
 
             return returnStmt;
-        } catch (error) {
-            logger.error("Error exporting session: " + error);
-            console.log(error.stack);
+        } catch (e) {
+            logger.err("Error exporting session: " + e);
+            console.log(e.stack);
             return null;
         }
         
