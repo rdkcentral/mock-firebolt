@@ -285,9 +285,9 @@ async function handleDynamicResponseValues(userId, methodName, params, ws, resp)
         // After the result function was called, we're realizing what it returned isn't valid!
         logInvalidMethodError(methodName, resultErrors, resp);
       }
-      if (typeof result === "object" && result.hasOwnProperty("error")) {
+      if (result && typeof result === "object" && result.hasOwnProperty("error")) {
         resp = result;
-      } else if (typeof result === "object" && result.hasOwnProperty("code")) {
+      } else if (result && typeof result === "object" && result.hasOwnProperty("code")) {
         resp = {
           error: result,
         };
