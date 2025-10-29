@@ -76,7 +76,7 @@ test(`config works properly`, () => {
           enabled: false
         }
       ],
-      bidirectional: false,
+      bidirectional: true,
       eventConfig: {
         registrationMessage: {
           searchRegex: "(?=.*\\\"method\\\".*)(?=.*\\\"listen\\\":true.*).*\\.on\\S*",
