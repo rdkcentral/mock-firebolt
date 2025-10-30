@@ -329,7 +329,7 @@ function unidirectionalEventToBiDirectional(method) {
 function emitResponse(finalResult, msg, userId, method) {
   const listener = getRegisteredEventListener(userId, method);
   if (!listener) {
-    logger.debug('Event message could not be sent because a listener was not found');
+    logger.debug(`Event message could not be sent because ${userId} has not registered for the event ${method}`);
     return;
   }
 
