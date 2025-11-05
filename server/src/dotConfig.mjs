@@ -48,6 +48,7 @@ function loadDotConfig() {
       fs.readFileSync(fileName, 'UTF-8')
     );
     logger.info(`Read Mock Firebolt configuration from ${fileName}`);
+    logger.importantWarning(`Bidirectional is set to: ${dotConfig.bidirectional}. In order to enable/disable this feature, modify the .mf.config.SAMPLE.json.`);
   } catch ( ex ) {
     handleError(fileName, __dirname);
 
