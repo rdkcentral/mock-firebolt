@@ -29,7 +29,7 @@
       "cliFlag": null,
       "cliShortFlag": null,
       "url_Note": "URL for toApp OpenRPC (Firebolt 2.0 event/provider spec)",
-       "url": "https://rdkcentral.github.io/firebolt/requirements/latest/specifications/firebolt-open-rpc.json",
+      "fileName": "../firebolt-app-open-rpc.json",
       "enabled": true
     },
     {
