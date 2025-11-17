@@ -302,7 +302,6 @@ function createBidirectionalPayload(method, params) {
  * @returns {void}
  */
 function emitResponse(finalResult, msg, userId, method) {
-  console.log("msg-----:", msg);
   const listener = getRegisteredEventListener(userId, method);
   if (!listener) {
     logger.debug(`Event message could not be sent because ${userId} has not registered for the event ${method}`);
