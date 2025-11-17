@@ -217,8 +217,12 @@ function addUser(userId) {
   }
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
-  wss.on('connection', function connection(ws) {
+  wss.on('connection', function connection(ws, req) {
     ws.isAlive = true;
+
+    // Checking if request url has rpcv2 flag and set bidirectional config to true, else set it to false
+    config.dotConfig.bidirectional = req?.url?.toLowerCase().includes('rpcv2=true') || false;
+
     ws.on('pong', async hb => {
       heartbeat(ws)
     });

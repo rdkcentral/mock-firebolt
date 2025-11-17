@@ -6,7 +6,6 @@
     "events"
   ],
   "multiUserConnections": "warn",
-  "bidirectional": false,
   "supportedOpenRPCs": [
     {
       "name": "core",
@@ -30,7 +29,7 @@
       "cliFlag": null,
       "cliShortFlag": null,
       "url_Note": "URL for toApp OpenRPC (Firebolt 2.0 event/provider spec)",
-      "fileName": "../firebolt-app-open-rpc.json",
+       "url": "https://rdkcentral.github.io/firebolt/requirements/latest/specifications/firebolt-open-rpc.json",
       "enabled": true
     },
     {
