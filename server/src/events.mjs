@@ -288,6 +288,15 @@ function createBidirectionalPayload(method, params) {
     };
 }
 
+/**
+ * Check whether the current user is registered under bidirectional or not.
+ * @param {string} userId - The ID of the user receiving the event.
+ * @returns {Boolean} - Flag to decide bidirectional call or not.
+ */
+function checkForBidirectionalUser(userId) {
+  return config.dotConfig.bidirectional && config.dotConfig.bidirectionalUser === userId;
+}
+
 
 /**
  * Emits a response to the registered event listener.
@@ -329,7 +338,7 @@ function emitResponse(finalResult, msg, userId, method) {
   }
 
   // Check if bidirectional mode is enabled
-  if (config.dotConfig.bidirectional) {
+  if (checkForBidirectionalUser(userId)) {
     let payload = createBidirectionalPayload(method, finalResult);
 
     wsArr.forEach((ws) => {
