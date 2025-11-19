@@ -225,7 +225,7 @@ function addUser(userId) {
     user = user.includes("/") ? user.split("/")[1] : user;
 
     // Check if request url has rpcv2 flag and set bidirectional config to true, else set it to false
-    // Check if any active bidirectional user, so the flag won't get toggled for new non-bidirectional requests
+    // Check for any active bidirectional user, so the flag won't get toggled for new non-bidirectional requests
     const isBidirectional = rpcv2Flag?.toLowerCase().includes("rpcv2=true") || false;
     if (!config.dotConfig.bidirectionalUser || isBidirectional) {
       // config.dotConfig.bidirectionalUser === user
