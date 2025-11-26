@@ -23,7 +23,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as messageHandler from './messageHandler.mjs';
-import {doesUserExist, state} from './stateManagement.mjs';
+import {doesUserExist, setUserBidirectionalState} from './stateManagement.mjs';
 import { logger } from './logger.mjs';
 import * as util from './util.mjs'
 
@@ -225,25 +225,13 @@ function addUser(userId) {
     user = user.includes("/") ? user.split("/")[1] : user;
 
     // Check if request url has rpcv2 flag and set bidirectional config to true, else set it to false
-    // Check for any active bidirectional user, so the flag won't get toggled for new non-bidirectional requests
     const isBidirectional = rpcv2Flag?.toLowerCase().includes("rpcv2=true") || false;
-    if (!config.dotConfig.bidirectionalUser || isBidirectional) {
-      config.dotConfig.bidirectional = isBidirectional;
-      if (isBidirectional) {
-        config.dotConfig.bidirectionalUser = user;
-      }
-    } else {
-      if (config.dotConfig.bidirectionalUser === user) {
-        config.dotConfig.bidirectional = false;
-      }
-    }
+    
+    // Set bidirectional state per user
+    setUserBidirectionalState(user, isBidirectional);
 
     logger.importantWarning(
-      `Bidirectional is set to: ${config.dotConfig.bidirectional}${
-        config.dotConfig.bidirectional
-          ? `, for user ${config.dotConfig.bidirectionalUser}`
-          : ""
-      }.`
+      `Bidirectional is set to: ${isBidirectional} for user ${user}.`
     );
 
     ws.on('pong', async hb => {

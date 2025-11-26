@@ -294,7 +294,7 @@ function createBidirectionalPayload(method, params) {
  * @returns {Boolean} - Flag to decide bidirectional call or not.
  */
 function checkForBidirectionalUser(userId) {
-  return config.dotConfig.bidirectional && config.dotConfig.bidirectionalUser === userId;
+  return stateManagement.getUserBidirectionalState(userId);
 }
 
 
