@@ -46,9 +46,6 @@ let perUserStartState = {
     }
   },
 
-  // User-specific bidirectional configuration
-  bidirectional: false,
-
   // A place where result, response, preResult, postResult, preResponse, postResponse functions can share state
   // NOTE: There is no namespacing by method, so care should be taken
   scratch: {
