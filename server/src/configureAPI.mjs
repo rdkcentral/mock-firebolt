@@ -20,6 +20,7 @@
 
 'use strict';
 
+import * as rawApi from './routes/api/raw.mjs'
 import * as healthApi from './routes/api/health.mjs';
 import * as metaApi from './routes/api/meta.mjs';
 import * as stateApi from './routes/api/state.mjs';
@@ -39,6 +40,10 @@ function configureAPI(app) {
 
     // Get all OpenRPC metadata
     app.get('/api/v1/meta',                             metaApi.getMeta);
+
+    // ============================ Raw Test Routes ===========================
+
+    app.post('/api/v1/raw',  rawApi.rawPayload);
 
     // ======================= State-Related API Routes =======================
     

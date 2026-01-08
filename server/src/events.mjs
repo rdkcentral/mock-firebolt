@@ -280,9 +280,8 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
  * @returns {Object} - The formatted JSON-RPC 2.0 payload.
  */
 
-function createBidirectionalPayload(method, params) {
+function createBidirectionalEventPayload(method, params) {
     return {
-        id: id++,  // Increment and return `id` in one step
         jsonrpc: "2.0",
         method,
         params
@@ -356,7 +355,7 @@ function emitResponse(finalResult, msg, userId, method) {
   // Check if bidirectional mode is enabled
   if (config.dotConfig.bidirectional) {
     const bidirectionalMethod = unidirectionalEventToBiDirectional(method);
-    let payload = createBidirectionalPayload(bidirectionalMethod, finalResult);
+    let payload = createBidirectionalEventPayload(bidirectionalMethod, finalResult);
 
     wsArr.forEach((ws) => {
       ws.send(JSON.stringify(payload)); // Send bidirectional event
