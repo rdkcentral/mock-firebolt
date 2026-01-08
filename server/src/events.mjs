@@ -354,8 +354,7 @@ function emitResponse(finalResult, msg, userId, method) {
 
   // Check if bidirectional mode is enabled
   if (config.dotConfig.bidirectional) {
-    const bidirectionalMethod = unidirectionalEventToBiDirectional(method);
-    let payload = createBidirectionalEventPayload(bidirectionalMethod, finalResult);
+    let payload = createBidirectionalEventPayload(method, finalResult);
 
     wsArr.forEach((ws) => {
       ws.send(JSON.stringify(payload)); // Send bidirectional event

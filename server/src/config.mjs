@@ -37,7 +37,7 @@ const config = {
   multiUserConnections: "warn",
   
   app: {
-    caseInsensitiveModules: true,
+    caseInsensitiveModules: false,
     socketPort: 9998,
     httpPort: 3333,
     wsSessionServerPort: 9999,
