@@ -462,9 +462,13 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       const finalResult = ( postResult ? postResult : result );
       // Error to be logged in "novalidate mode" if result validation failed
       if( config.validate.includes("events") ) {
-        const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
+        let resultToValidate = finalResult;
+        if ( typeof finalResult === 'object' && finalResult !== null && Object.keys(finalResult).length === 1 && ('value' in finalResult) ) {
+          resultToValidate = finalResult.value;
+        }
+        const resultErrors = fireboltOpenRpc.validateMethodResult(resultToValidate, method);
         if ( resultErrors && resultErrors.length > 0 ) {
-          logger.error(`${method} validation error for ${method} with ${JSON.stringify(finalResult)}, err: ${JSON.stringify(resultErrors)}`);
+          logger.error(`${method} validation error for ${method} with ${JSON.stringify(resultToValidate)}, err: ${JSON.stringify(resultErrors)}`);
           fErr.call(null, 'validationError', method);
           return
         }
