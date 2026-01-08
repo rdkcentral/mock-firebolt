@@ -188,19 +188,16 @@ function validateMethodResult(val, methodName) {
   try {
     let oMethod = undefined;
     let oResult = undefined;
-    if (config.dotConfig.bidirectional && methodName.includes('.on') && methodName.endsWith('Changed')) {
-      let [module, method] = methodName.split('.');
-      if (method.startsWith('on') && method.endsWith('Changed')) {
-        let oMethod = getMethod(methodName, "coreToApp");
-        if (oMethod && oMethod.tags) {
-          const notifierTag = oMethod.tags.find(oTag => oTag['x-notifier-for']);
-          if (notifierTag && notifierTag['x-notifier-for']) {
-            methodName = notifierTag['x-notifier-for'];
-            oMethod = getMethod(methodName);
-            oResult = oMethod.result;
-          } else {
-            oResult = oMethod.params[0];
-          }
+    if (config.dotConfig.bidirectional && methodName.includes('.on')) {
+      let oMethod = getMethod(methodName, "coreToApp");
+      if (oMethod && oMethod.tags) {
+        const notifierTag = oMethod.tags.find(oTag => oTag['x-notifier-for']);
+        if (notifierTag && notifierTag['x-notifier-for']) {
+          methodName = notifierTag['x-notifier-for'];
+          oMethod = getMethod(methodName);
+          oResult = oMethod.result;
+        } else {
+          oResult = oMethod.params[0];
         }
       }
     }
