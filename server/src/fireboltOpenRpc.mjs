@@ -180,8 +180,31 @@ function validateMethodResult(val, methodName) {
   if ( typeof val === 'string' && val.trimStart().startsWith('function') ) { return errors; }
 
   try {
-    const oMethod = getMethod(methodName);
-    const oResult = oMethod.result;
+    let oMethod = undefined;
+    let oResult = undefined;
+    if (config.dotConfig.bidirectional && methodName.includes('.on') && methodName.endsWith('Changed')) {
+      let [module, method] = methodName.split('.');
+      if (method.startsWith('on') && method.endsWith('Changed')) {
+        methodName = `${module}.${method.charAt(2).toLowerCase() + method.slice(3)}`;
+        let oMethod = getMethod(methodName);
+        if (oMethod && oMethod.tags) {
+          const notifierTag = oMethod.tags.find(oTag => oTag['x-notifier-for']);
+          if (notifierTag && notifierTag['x-notifier-for']) {
+            methodName = notifierTag['x-notifier-for'];
+            oMethod = getMethod(methodName);
+            oResult = oMethod.result;
+          } else {
+            oResult = oMethod.params[0];
+          }
+        }
+      }
+    }
+    if (!oMethod) {
+      oMethod = getMethod(methodName);
+    }
+    if (!oResult) {
+      oResult = oMethod.result;
+    }
     let oSchema = oResult.schema;
     if ( '$ref' in oSchema  ) {
       const ref = oSchema['$ref'];
@@ -199,7 +222,7 @@ function validateMethodResult(val, methodName) {
   } catch ( ex ) {
     logger.error('ERROR: Could not validate value:');
     logger.error('Value:');
-    logger.error(val);
+    logger.error(JSON.stringify(val));
     logger.error('Method:');
     logger.error(methodName);
     logger.error('Exception:');

@@ -465,6 +465,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
       if( config.validate.includes("events") ) {
         const resultErrors = fireboltOpenRpc.validateMethodResult(finalResult, method);
         if ( resultErrors && resultErrors.length > 0 ) {
+          logger.error(`${method} validation error for ${method} with ${JSON.stringify(finalResult)}, err: ${JSON.stringify(resultErrors)}`);
           fErr.call(null, 'validationError', method);
           return
         }
