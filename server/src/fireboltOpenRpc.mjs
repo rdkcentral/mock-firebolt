@@ -61,16 +61,22 @@ function getMeta() {
   return meta;
 }
 
-function getMethod(methodName) {
+function getMethod(methodName, sdk = undefined) {
   if (config.app.caseInsensitiveModules) {
     methodName = createCaseAgnosticMethod(methodName);
   }
 
   const sources = getOpenRPCSources();
 
-  for (const { name: sdkName } of sources) {
-    if (methodMaps[sdkName]?.[methodName]) {
-      return methodMaps[sdkName][methodName];
+  if (sdk === undefined) {
+    for (const { name: sdkName } of sources) {
+      if (methodMaps[sdkName]?.[methodName]) {
+        return methodMaps[sdkName][methodName];
+      }
+    }
+  } else {
+    if (methodMaps[sdk]?.[methodName]) {
+      return methodMaps[sdk][methodName];
     }
   }
   return undefined;
@@ -185,8 +191,7 @@ function validateMethodResult(val, methodName) {
     if (config.dotConfig.bidirectional && methodName.includes('.on') && methodName.endsWith('Changed')) {
       let [module, method] = methodName.split('.');
       if (method.startsWith('on') && method.endsWith('Changed')) {
-        methodName = `${module}.${method.charAt(2).toLowerCase() + method.slice(3)}`;
-        let oMethod = getMethod(methodName);
+        let oMethod = getMethod(methodName, "coreToApp");
         if (oMethod && oMethod.tags) {
           const notifierTag = oMethod.tags.find(oTag => oTag['x-notifier-for']);
           if (notifierTag && notifierTag['x-notifier-for']) {
