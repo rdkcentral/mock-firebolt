@@ -37,7 +37,7 @@ const config = {
   multiUserConnections: "warn",
   
   app: {
-    caseInsensitiveModules: false,
+    caseInsensitiveModules: true,
     socketPort: 9998,
     httpPort: 3333,
     wsSessionServerPort: 9999,
@@ -56,6 +56,7 @@ const config = {
 
 // Layer in configuration specified via .mf.config.json file
 config.dotConfig = dotConfig;
+config.app.caseInsensitiveModules = dotConfig.caseInsensitiveModules ?? config.app.caseInsensitiveModules;
 
 /* 
 * @function:compareConfigs
