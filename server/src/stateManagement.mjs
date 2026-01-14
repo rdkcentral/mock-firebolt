@@ -746,7 +746,30 @@ function doesUserExist(users,userId){
     }
   }
   return {isSuccess: true, msg : `Success`}
-}	
+}
+
+/**
+ * Get bidirectional state for a user
+ * @param {string} userId - The user ID
+ * @returns {boolean} - Whether the user is in bidirectional mode
+ */
+function getUserBidirectionalState(userId) {
+  const userState = getState(userId, false);
+  return userState ? userState.bidirectional : false;
+}
+
+/**
+ * Set bidirectional state for a user
+ * @param {string} userId - The user ID
+ * @param {boolean} isBidirectional - Whether to enable bidirectional mode
+ */
+function setUserBidirectionalState(userId, isBidirectional) {
+  const userState = getState(userId, false);
+  if (userState) {
+    userState.bidirectional = isBidirectional;
+  }
+}
+
 // --- Exports ---
 
 export const testExports={
@@ -763,5 +786,6 @@ export {
   setLatency, setLatencies,
   isLegalMode, setMode,
   setMethodResult, setMethodError,doesUserExist,
-  setScratch, getScratch, deleteScratch, createUuid
+  setScratch, getScratch, deleteScratch, createUuid,
+  getUserBidirectionalState, setUserBidirectionalState
 };

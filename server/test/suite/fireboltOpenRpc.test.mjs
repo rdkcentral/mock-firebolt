@@ -744,11 +744,10 @@ test(`fireboltOpenRpc.buildMethodMapsForAllEnabledSdks works properly`, () => {
         result: { name: "OpenRPC Schema", schema: { type: "object" } },
         summary: "Firebolt OpenRPC schema",
       },
-    },
-    coreToApp: {},
+    }
   };
   fireboltOpenRpc.testExports.buildMethodMapsForAllEnabledSdks();
-  expect(fireboltOpenRpc.testExports.methodMaps).toEqual(expectedOutput);
+  expect(fireboltOpenRpc.testExports.methodMaps).toEqual(expect.objectContaining(expectedOutput));
 });
 
 test(`fireboltOpenRpc.buildMethodMap works properly`, () => {

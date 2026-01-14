@@ -53,7 +53,7 @@ const knownOpts = {
 
 const allSdks = [
   ...Object.values(config.dotConfig.supportedOpenRPCs),
-  ...(config.dotConfig.bidirectional ? Object.values(config.dotConfig.supportedToAppOpenRPCs || {}) : []),
+  ...Object.values(config.dotConfig.supportedToAppOpenRPCs || {}),
 ];
 
 for (const { cliFlag } of allSdks) {

@@ -280,7 +280,7 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
  * @returns {Object} - The formatted JSON-RPC 2.0 payload.
  */
 
-function createBidirectionalEventPayload(method, params) {
+function createBidirectionalPayload(method, params) {
     return {
         jsonrpc: "2.0",
         method,
@@ -288,28 +288,13 @@ function createBidirectionalEventPayload(method, params) {
     };
 }
 
-
 /**
- * Converts a unidirectional event method name to its bidirectional equivalent.
- * 
- * - If the method follows the "module.onEvent" pattern (FB 1.0), it removes the "on" prefix 
- *   and converts the first letter of the event name to lowercase.
- * - If the method does not contain a dot (`.`), it is returned as is.
- * 
- * @param {string} method - The original unidirectional event method (e.g., "module.onEvent").
- * @returns {string} - The bidirectional-compatible method name (e.g., "module.event").
+ * Check whether the current user is registered under bidirectional or not.
+ * @param {string} userId - The ID of the user receiving the event.
+ * @returns {Boolean} - Flag to decide bidirectional call or not.
  */
-function unidirectionalEventToBiDirectional(method) {
-  if (!method.includes(".")) return method;
-
-  const [moduleName, methodName] = method.split(".", 2);
-  
-  // Remove "on" prefix if present (FB 1.0 Events)
-  const cleanedMethod = methodName.startsWith("on")
-      ? methodName.charAt(2).toLowerCase() + methodName.slice(3)
-      : methodName;
-
-  return `${moduleName}.${cleanedMethod}`;
+function checkForBidirectionalUser(userId) {
+  return stateManagement.getUserBidirectionalState(userId);
 }
 
 
@@ -353,8 +338,8 @@ function emitResponse(finalResult, msg, userId, method) {
   }
 
   // Check if bidirectional mode is enabled
-  if (config.dotConfig.bidirectional) {
-    let payload = createBidirectionalEventPayload(method, finalResult);
+  if (checkForBidirectionalUser(userId)) {
+    let payload = createBidirectionalPayload(method, finalResult);
 
     wsArr.forEach((ws) => {
       ws.send(JSON.stringify(payload)); // Send bidirectional event
