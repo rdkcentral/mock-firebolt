@@ -23,7 +23,7 @@
 import WebSocket, { WebSocketServer } from 'ws';
 import { config } from './config.mjs';
 import * as messageHandler from './messageHandler.mjs';
-import {doesUserExist, state} from './stateManagement.mjs';
+import {doesUserExist, setUserBidirectionalState} from './stateManagement.mjs';
 import { logger } from './logger.mjs';
 import * as util from './util.mjs'
 
@@ -217,8 +217,23 @@ function addUser(userId) {
   }
   const wss = new WebSocketServer({ noServer: true });
   associateUserWithWss(''+userId, wss);
-  wss.on('connection', function connection(ws) {
+  wss.on('connection', function connection(ws, req) {
     ws.isAlive = true;
+
+    // Split the user and rpcv2 flag from request url
+    let [user, rpcv2Flag] = req.url.split("?");
+    user = user.includes("/") ? user.split("/")[1] : user;
+
+    // Check if request url has rpcv2 flag and set bidirectional config to true, else set it to false
+    const isBidirectional = rpcv2Flag?.toLowerCase().includes("rpcv2=true") || false;
+    
+    // Set bidirectional state per user
+    setUserBidirectionalState(user, isBidirectional);
+
+    logger.importantWarning(
+      `Bidirectional is set to: ${isBidirectional} for user ${user}.`
+    );
+
     ws.on('pong', async hb => {
       heartbeat(ws)
     });
@@ -230,17 +245,16 @@ function addUser(userId) {
 
     // If multiUserConnections configuration is set as deny and there is a ws object associated with userId, deny and log second ws connection and drop the attempt
     if (/deny/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
-      logger.info(`Denying second websocket connection of user ${userId}`)
+      logger.info(`Denying second websocket connection of user ${userId}`);
       ws.close();
-    }
-    else {
+    } else {
       // Else, If multiUserConnections configuration is set as warn, and there is a ws object associated with userId, warn and allow connection
       if (/warn/i.test(config.multiUserConnections) == true && getWsForUser(userId) !== undefined) {
-        logger.importantWarning(`WARNING: Mock Firebolt was not written to support multiple connections for a single user. Some advanced use cases may result in unexpected behaviors.`)
+        logger.importantWarning(`WARNING: Mock Firebolt was not written to support multiple connections for a single user. Some advanced use cases may result in unexpected behaviors.`);
       }
       associateUserWithWs('' + userId, ws);
-      handleGroupMembership('' + userId)
-      ws.on('message', async message => {
+      handleGroupMembership('' + userId);
+      ws.on('message', async (message) => {
         messageHandler.handleMessage(message, '' + userId, ws);
       });
     }

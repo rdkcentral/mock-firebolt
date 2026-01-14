@@ -6,7 +6,6 @@
     "events"
   ],
   "multiUserConnections": "warn",
-  "bidirectional": false,
   "supportedOpenRPCs": [
     {
       "name": "core",
