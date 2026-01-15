@@ -223,6 +223,7 @@ function addUser(userId) {
     // Split the user and rpcv2 flag from request url
     let [user, rpcv2Flag] = req.url.split("?");
     user = user.includes("/") ? user.split("/")[1] : user;
+    if (!user) user = userId;
 
     // Check if request url has rpcv2 flag and set bidirectional config to true, else set it to false
     const isBidirectional = rpcv2Flag?.toLowerCase().includes("rpcv2=true") || false;
