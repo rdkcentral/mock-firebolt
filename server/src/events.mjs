@@ -451,7 +451,7 @@ function coreSendEvent(isBroadcast, ws, userId, method, result, msg, fSuccess, f
         if ( typeof finalResult === 'object' && finalResult !== null && Object.keys(finalResult).length === 1 && ('value' in finalResult) ) {
           resultToValidate = finalResult.value;
         }
-        const resultErrors = fireboltOpenRpc.validateMethodResult(resultToValidate, method);
+        const resultErrors = fireboltOpenRpc.validateMethodResult(resultToValidate, method, checkForBidirectionalUser(userId));
         if ( resultErrors && resultErrors.length > 0 ) {
           logger.error(`${method} validation error for ${method} with ${JSON.stringify(resultToValidate)}, err: ${JSON.stringify(resultErrors)}`);
           fErr.call(null, 'validationError', method);

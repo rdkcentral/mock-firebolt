@@ -175,7 +175,7 @@ function validateMethodCall(methodName, params) {
 
 // Is the given value a valid result for the given method, based on the OpenRPC metadata?
 // Returns an array of errors; Returns an empty array if no errors are found
-function validateMethodResult(val, methodName) {
+function validateMethodResult(val, methodName, bidirectional = false) {
   // Returns an empty array in "novalidate mode"
   if( ! config.validate.includes("response") ){
     return [];
@@ -188,7 +188,7 @@ function validateMethodResult(val, methodName) {
   try {
     let oMethod = undefined;
     let oResult = undefined;
-    if (config.dotConfig.bidirectional && methodName.includes('.on')) {
+    if (bidirectional && methodName.includes('.on')) {
       let oMethod = getMethod(methodName, "coreToApp");
       if (oMethod && oMethod.tags) {
         const notifierTag = oMethod.tags.find(oTag => oTag['x-notifier-for']);
