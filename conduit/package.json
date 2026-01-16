@@ -1,7 +1,7 @@
 {
   "name": "conduit",
   "description": "A TV app that works in concert with Mock Firebolt in Reverse Proxy mode",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "license": "Apache 2.0",
   "author": "Mike Fine <mike_fine@cable.comcast.com>",

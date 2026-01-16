@@ -1,6 +1,6 @@
 {
   "name": "@firebolt-js/mock-firebolt",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Controllable mock Firebolt server",
   "main": "./build/index.mjs",
   "scripts": {
