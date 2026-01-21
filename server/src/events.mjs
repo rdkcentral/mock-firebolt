@@ -284,7 +284,9 @@ function createBidirectionalPayload(method, params) {
     return {
         jsonrpc: "2.0",
         method,
-        params
+        params:{
+          value: params
+        }
     };
 }
 

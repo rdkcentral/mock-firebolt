@@ -61,6 +61,41 @@ function getMeta() {
   return meta;
 }
 
+function getOverrideMethod(method, sdk) {
+  let methodFound = null;
+  const sources = getOpenRPCSources();
+  if (sdk) {
+    const sdkMethods = methodMaps[sdk];
+    if (sdkMethods) {
+      const methodKey = Object.keys(sdkMethods).find(
+        (key) => key.toLowerCase() === method.toLowerCase()
+      );
+      if (methodKey) {
+        methodFound = sdkMethods[methodKey];
+      }
+    }
+  } else {
+    for (const { name: sdkName } of sources) {
+      const sdkMethods = methodMaps[sdkName];
+      if (sdkMethods) {
+        const methodKey = Object.keys(sdkMethods).find(
+          (key) => key.toLowerCase() === method.toLowerCase()
+        );
+        if (methodKey) {
+          methodFound = sdkMethods[methodKey];
+          break; 
+        }
+      }
+    }
+  }
+
+  if (methodFound) {
+    method = methodFound.name;
+  }
+
+  return method;
+}
+
 function getMethod(methodName, sdk = undefined) {
   if (config.app.caseInsensitiveModules) {
     methodName = createCaseAgnosticMethod(methodName);
@@ -387,5 +422,6 @@ export {
   getRawMeta, getMeta,
   getMethod, isMethodKnown, getSchema,
   getFirstExampleValueForMethod, getDeveloperNotesForMethod,
-  validateMethodCall, validateMethodResult, validateMethodError
+  validateMethodCall, validateMethodResult, validateMethodError,
+  getOverrideMethod
 };
