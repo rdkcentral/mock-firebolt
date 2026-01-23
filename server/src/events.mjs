@@ -508,5 +508,5 @@ export {
   isEventListenerOnMessage, isEventListenerOffMessage,
   sendEventListenerAck, sendUnRegistrationAck,
   sendEvent, sendBroadcastEvent, logSuccess, logErr,
-  logFatalErr, extractEventData
+  logFatalErr, extractEventData, checkForBidirectionalUser
 };
