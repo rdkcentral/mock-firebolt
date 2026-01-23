@@ -61,6 +61,7 @@ function getMeta() {
   return meta;
 }
 
+// Returns method name as per openRpc definition
 function getOverrideMethod(method, sdk) {
   let methodFound = null;
   const sources = getOpenRPCSources();
@@ -83,7 +84,7 @@ function getOverrideMethod(method, sdk) {
         );
         if (methodKey) {
           methodFound = sdkMethods[methodKey];
-          break; 
+          break;
         }
       }
     }
