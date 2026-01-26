@@ -281,12 +281,13 @@ function sendBroadcastEvent(ws, userId, method, result, msg, fSuccess, fErr, fFa
  */
 
 function createBidirectionalPayload(method, params) {
+    if (typeof params !== "object" && !Array.isArray(params)) {
+      params = { value: params };
+    }
     return {
         jsonrpc: "2.0",
         method,
-        params:{
-          value: params
-        }
+        params
     };
 }
 
