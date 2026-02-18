@@ -242,6 +242,10 @@ function validateMethodResult(val, methodName, bidirectional = false) {
     }
     if (!oResult) {
       oResult = oMethod.result;
+      if (!oResult && oMethod.params && oMethod.params.length > 0) {
+        logger.warning(`Method ${methodName} does not have a 'result' field; attempting to validate against first param schema instead`);
+        oResult = oMethod.params[0];
+      }
     }
     let oSchema = oResult.schema;
     if ( '$ref' in oSchema  ) {
@@ -258,13 +262,10 @@ function validateMethodResult(val, methodName, bidirectional = false) {
 
     return errors || [];
   } catch ( ex ) {
-    logger.error('ERROR: Could not validate value:');
-    logger.error('Value:');
-    logger.error(JSON.stringify(val));
-    logger.error('Method:');
-    logger.error(methodName);
-    logger.error('Exception:');
-    logger.error(ex);
+    logger.error(`ERROR: Could not validate value:`);
+    logger.error(`Value: ${JSON.stringify(val)}`);
+    logger.error(`Method: ${methodName}`);
+    logger.error(`Exception: ${ex}`);
     errors.push(`ERROR: Could not validate value ${JSON.stringify(val)} for method ${methodName}`);
 
     return errors; // Treat as invalid
