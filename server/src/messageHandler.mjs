@@ -77,6 +77,8 @@ async function handleMessage(message, userId, ws) {
     ws.send(responseMessage);
     logger.debug(`Sent message for user ${userId}: ${responseMessage}`);
     return;
+  } else if(events.checkForBidirectionalUser(userId)) {
+    oMsg.method = fireboltOpenRpc.getOverrideMethod(oMsg.method);
   }
   
   // record the message if we are recording
